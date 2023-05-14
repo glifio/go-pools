@@ -39,6 +39,7 @@ type FEVMQueries interface {
 	// policing methods
 	CredentialUsed(ctx context.Context, v uint8, r [32]byte, s [32]byte) (bool, error)
 	CredentialValidityPeriod(ctx context.Context) (*big.Int, *big.Int, error)
+	DefaultEpoch(ctx context.Context) (*big.Int, error)
 	// chain methods
 	ChainHeight(ctx context.Context) (*big.Int, error)
 	ChainID() *big.Int
@@ -67,8 +68,16 @@ type FEVMActions interface {
 	AgentPullFunds(ctx context.Context, agentAddr common.Address, amount *big.Int, miner address.Address, pk *ecdsa.PrivateKey) (*types.Transaction, error)
 	AgentPushFunds(ctx context.Context, agentAddr common.Address, amount *big.Int, miner address.Address, pk *ecdsa.PrivateKey) (*types.Transaction, error)
 	AgentWithdraw(ctx context.Context, agentAddr common.Address, receiver common.Address, amount *big.Int, pk *ecdsa.PrivateKey) (*types.Transaction, error)
+
+	// infinity pool actions
+	InfPoolDepositFIL(ctx context.Context, agentAddr common.Address, amount *big.Int, pk *ecdsa.PrivateKey) (*types.Transaction, error)
+
+	// iFIL actions
+	IFILTransfer(ctx context.Context, receiver common.Address, amount *big.Int, pk *ecdsa.PrivateKey) (*types.Transaction, error)
+	IFILApprove(ctx context.Context, spender common.Address, allowance *big.Int, pk *ecdsa.PrivateKey) (*types.Transaction, error)
 }
 
+// serve connections to external services
 type FEVMExtern interface {
 	ConnectEthClient() (*ethclient.Client, error)
 	ConnectLotusClient() (*api.FullNodeStruct, jsonrpc.ClientCloser, error)
