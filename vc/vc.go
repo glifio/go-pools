@@ -1,6 +1,7 @@
 package vc
 
 import (
+	"errors"
 	"math/big"
 	"reflect"
 
@@ -11,6 +12,10 @@ import (
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/signer/core/apitypes"
 	"github.com/glifio/go-pools/abigen"
+)
+
+var (
+	ErrZeroSubject = errors.New("subject cannot be 0")
 )
 
 type AgentData struct {
@@ -117,6 +122,10 @@ func NewVerifiableCredential(
 	target uint64,
 	claim AgentData,
 ) (*abigen.VerifiableCredential, error) {
+	// no 0 subjects allowed (this is protect against on the contracts, but easier to throw a more helpful error here)
+	if subject.Cmp(common.Big0) == 0 {
+		return &abigen.VerifiableCredential{}, ErrZeroSubject
+	}
 	claimBytes, err := abiEncodeClaim(claim)
 	if err != nil {
 		return &abigen.VerifiableCredential{}, err
