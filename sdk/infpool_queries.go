@@ -1,4 +1,4 @@
-package fevm
+package sdk
 
 import (
 	"context"
@@ -75,4 +75,24 @@ func (q *fevmQueries) InfPoolGetRate(ctx context.Context, cred abigen.Verifiable
 	}
 
 	return infCaller.GetRate(&bind.CallOpts{Context: ctx}, cred)
+}
+
+func (q *fevmQueries) InfPoolBorrowableLiquidity(ctx context.Context) (*big.Float, error) {
+	client, err := q.extern.ConnectEthClient()
+	if err != nil {
+		return nil, err
+	}
+	defer client.Close()
+
+	poolCaller, err := abigen.NewInfinityPoolCaller(q.infinityPool, client)
+	if err != nil {
+		return nil, err
+	}
+
+	assets, err := poolCaller.TotalBorrowableAssets(nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return util.ToFIL(assets), nil
 }

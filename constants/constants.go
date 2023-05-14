@@ -24,6 +24,7 @@ var (
 )
 
 var MAX_UINT256 = new(big.Int).Exp(big.NewInt(2), big.NewInt(256), nil)
+var WAD = big.NewInt(1e18)
 
 // the infinity pool is the first pool created, and has a 0 id
 // cache this here to not fetch it from the contracts every time we need it

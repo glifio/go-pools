@@ -1,4 +1,4 @@
-package fevm
+package sdk
 
 import (
 	"context"
@@ -243,4 +243,19 @@ func (q *fevmQueries) AgentOwes(ctx context.Context, agentAddr common.Address) (
 	}
 
 	return agentOwed.AmountOwed, agentOwed.Gcred, nil
+}
+
+func (q *fevmQueries) AgentVersion(ctx context.Context, agentAddr common.Address) (uint8, error) {
+	client, err := q.extern.ConnectEthClient()
+	if err != nil {
+		return 0, err
+	}
+	defer client.Close()
+
+	agentCaller, err := abigen.NewAgentCaller(agentAddr, client)
+	if err != nil {
+		return 0, err
+	}
+
+	return agentCaller.Version(&bind.CallOpts{Context: ctx})
 }

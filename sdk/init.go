@@ -1,4 +1,4 @@
-package fevm
+package sdk
 
 import (
 	"context"
@@ -8,8 +8,9 @@ import (
 	"github.com/glifio/go-pools/types"
 )
 
-func InitFEVMConnection(
+func Init(
 	ctx context.Context,
+	sdk *types.PoolsSDK,
 	agentPolice common.Address,
 	minerRegistry common.Address,
 	router common.Address,
@@ -21,16 +22,16 @@ func InitFEVMConnection(
 	adoNamespace string,
 	dialAddr string,
 	token string,
-) (types.FEVMConnection, error) {
+) error {
 	client, err := ethclient.Dial(dialAddr)
 	if err != nil {
-		return nil, err
+		return err
 	}
 	defer client.Close()
 
 	chainID, err := client.ChainID(ctx)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	extern := &fevmExtern{
@@ -54,11 +55,13 @@ func InitFEVMConnection(
 
 	fevmActions := &fevmActions{extern: extern, queries: fevmQueries}
 
-	return &fevmConnection{
+	*sdk = &fevmConnection{
 		query:  fevmQueries,
 		act:    fevmActions,
 		extern: extern,
-	}, nil
+	}
+
+	return nil
 }
 
 // Implement the FEVMConnection interface

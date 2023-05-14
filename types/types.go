@@ -19,17 +19,22 @@ type FEVMQueries interface {
 	AgentAccount(ctx context.Context, agentAddr common.Address, poolID *big.Int) (abigen.Account, error)
 	AgentAddrIDFromRcpt(ctx context.Context, rcpt *types.Receipt) (common.Address, *big.Int, error)
 	AgentOwner(ctx context.Context, agentAddr common.Address) (common.Address, error)
+	AgentVersion(ctx context.Context, agentAddr common.Address) (uint8, error)
 	AgentIsValid(ctx context.Context, agentAddr common.Address) (bool, error)
 	AgentMiners(ctx context.Context, agentAddr common.Address) ([]address.Address, error)
 	AgentLiquidAssets(ctx context.Context, agentAddr common.Address) (*big.Int, error)
 	AgentPrincipal(ctx context.Context, agentAddr common.Address) (*big.Int, error)
+	AgentOwes(ctx context.Context, agentAddr common.Address) (*big.Int, *big.Int, error)
 	// infinity pool methods
 	InfPoolGetRate(ctx context.Context, cred abigen.VerifiableCredential) (*big.Int, error)
 	InfPoolGetAgentLvl(ctx context.Context, agentID *big.Int) (*big.Int, float64, error)
-	InfPoolAgentAccount(ctx context.Context, agentAddr common.Address) (abigen.Account, error)
+	InfPoolGetAccount(ctx context.Context, agentAddr common.Address) (abigen.Account, error)
+	InfPoolBorrowableLiquidity(ctx context.Context) (*big.Float, error)
+	// pool registry methods
+	ListPools(ctx context.Context) ([]common.Address, error)
 	// ifil methods
 	IFILBalanceOf(ctx context.Context, hodler common.Address) (*big.Float, error)
-	IFILPrice(ctx context.Context) (*big.Int, error)
+	IFILPrice(ctx context.Context) (*big.Float, error)
 	// policing methods
 	CredentialUsed(ctx context.Context, v uint8, r [32]byte, s [32]byte) (bool, error)
 	CredentialValidityPeriod(ctx context.Context) (*big.Int, *big.Int, error)
@@ -60,7 +65,7 @@ type FEVMExtern interface {
 	ConnectAdoClient(ctx context.Context) (jsonrpc.ClientCloser, error)
 }
 
-type FEVMConnection interface {
+type PoolsSDK interface {
 	Query() FEVMQueries
 	Act() FEVMActions
 	Extern() FEVMExtern

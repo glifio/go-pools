@@ -1,4 +1,4 @@
-package fevm
+package sdk
 
 import (
 	"math/big"
@@ -11,7 +11,7 @@ type fevmConnection struct {
 	query  types.FEVMQueries
 	act    types.FEVMActions
 	extern types.FEVMExtern
-	types.FEVMConnection
+	types.PoolsSDK
 }
 
 type fevmExtern struct {
