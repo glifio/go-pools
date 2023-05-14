@@ -2,6 +2,7 @@ package types
 
 import (
 	"context"
+	"crypto/ecdsa"
 	"math/big"
 
 	"github.com/ethereum/go-ethereum/common"
@@ -41,6 +42,7 @@ type FEVMQueries interface {
 	// chain methods
 	ChainHeight(ctx context.Context) (*big.Int, error)
 	ChainID() *big.Int
+	ChainGetNonce(ctx context.Context, fromAddr common.Address) (*big.Int, error)
 	// state methods
 	StateWaitTx(ctx context.Context, txHash common.Hash, ch chan *types.Receipt)
 	StateWaitReceipt(ctx context.Context, txHash common.Hash) (*types.Receipt, error)
@@ -56,7 +58,15 @@ type FEVMQueries interface {
 
 type FEVMActions interface {
 	// agent actions
-	// AgentCreate(ctx context.Context, owner common.Address, principal *big.Int, miners []address.Address) (common.Address, error)
+	AgentCreate(ctx context.Context, owner common.Address, operator common.Address, request common.Address, pk *ecdsa.PrivateKey) (*types.Transaction, error)
+	AgentBorrow(ctx context.Context, agentAddr common.Address, poolID *big.Int, amount *big.Int, pk *ecdsa.PrivateKey) (*types.Transaction, error)
+	AgentPay(ctx context.Context, agentAddr common.Address, poolID *big.Int, amount *big.Int, pk *ecdsa.PrivateKey) (*types.Transaction, error)
+	AgentAddMiner(ctx context.Context, agentAddr common.Address, minerAddr address.Address, pk *ecdsa.PrivateKey) (*types.Transaction, error)
+	AgentRemoveMiner(ctx context.Context, agentAddr common.Address, minerAddr address.Address, newOwnerAddr address.Address, pk *ecdsa.PrivateKey) (*types.Transaction, error)
+	AgentChangeMinerWorker(ctx context.Context, agentAddr common.Address, minerAddr address.Address, workerAddr address.Address, controlAddrs []address.Address, pk *ecdsa.PrivateKey) (*types.Transaction, error)
+	AgentPullFunds(ctx context.Context, agentAddr common.Address, amount *big.Int, miner address.Address, pk *ecdsa.PrivateKey) (*types.Transaction, error)
+	AgentPushFunds(ctx context.Context, agentAddr common.Address, amount *big.Int, miner address.Address, pk *ecdsa.PrivateKey) (*types.Transaction, error)
+	AgentWithdraw(ctx context.Context, agentAddr common.Address, receiver common.Address, amount *big.Int, pk *ecdsa.PrivateKey) (*types.Transaction, error)
 }
 
 type FEVMExtern interface {

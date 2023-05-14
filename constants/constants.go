@@ -13,6 +13,7 @@ const EpochsInMinute = SecondsInMinute / builtin.EpochDurationSeconds
 const CredentialMinutesValid = 30
 const CredentialEpochsValid = CredentialMinutesValid * EpochsInMinute
 
+// these method names must match the names in the Agent contract in order to get the right function signature
 var (
 	MethodBorrow      = "borrow"
 	MethodPay         = "pay"

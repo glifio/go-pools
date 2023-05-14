@@ -1,266 +1,420 @@
 package sdk
 
-// import (
-// 	"context"
-// 	"crypto/ecdsa"
-// 	"errors"
-// 	"log"
-// 	"math/big"
+import (
+	"context"
+	"crypto/ecdsa"
+	"errors"
+	"log"
+	"math/big"
 
-// 	"github.com/ethereum/go-ethereum/common"
-// 	"github.com/ethereum/go-ethereum/core/types"
-// 	"github.com/filecoin-project/go-address"
-// 	"github.com/glif-confidential/cli/rpc"
-// 	"github.com/glif-confidential/cli/util"
-// 	"github.com/glifio/go-pools/abigen"
-// 	"github.com/spf13/viper"
-// )
+	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/core/types"
+	"github.com/filecoin-project/go-address"
+	"github.com/glifio/go-pools/abigen"
+	"github.com/glifio/go-pools/rpc"
+	"github.com/glifio/go-pools/util"
+)
 
-// func (a *fevmActions) AgentCreate(ctx context.Context, deployerPk *ecdsa.PrivateKey, owner common.Address, operator common.Address, request common.Address) (*types.Transaction, error) {
-// 	client, err := a.nodes.ConnectEthClient()
-// 	if err != nil {
-// 		return nil, err
-// 	}
-// 	defer client.Close()
+func (a *fevmActions) AgentCreate(ctx context.Context, owner common.Address, operator common.Address, request common.Address, pk *ecdsa.PrivateKey) (*types.Transaction, error) {
+	client, err := a.extern.ConnectEthClient()
+	if err != nil {
+		return nil, err
+	}
+	defer client.Close()
 
-// 	agentFactoryTransactor, err := abigen.NewAgentFactoryTransactor(a.queries.AgentFactory(), client)
-// 	if err != nil {
-// 		return nil, err
-// 	}
+	agentFactoryTransactor, err := abigen.NewAgentFactoryTransactor(a.queries.AgentFactory(), client)
+	if err != nil {
+		return nil, err
+	}
 
-// 	args := []interface{}{owner, operator, request}
+	fromAddr, _, err := util.DeriveAddrFromPk(pk)
+	if err != nil {
+		return nil, err
+	}
 
-// 	return WriteTx(ctx, deployerPk, client, common.Big0, args, agentFactoryTransactor.Create, "Agent Create")
-// }
+	nonce, err := a.queries.ChainGetNonce(ctx, fromAddr)
+	if err != nil {
+		return nil, err
+	}
 
-// // AgentPullFunds pulls funds from the agent to a miner
-// func (q *fevmQueries) AgentPullFunds(
-// 	ctx context.Context,
-// 	agentAddr common.Address,
-// 	amount *big.Int,
-// 	miner address.Address,
-// 	pk *ecdsa.PrivateKey,
-// ) (*types.Transaction, error) {
-// 	client, err := q.nodes.ConnectEthClient()
-// 	if err != nil {
-// 		return nil, err
-// 	}
-// 	defer client.Close()
+	args := []interface{}{owner, operator, request}
 
-// 	as := util.AgentStore()
-// 	agentIDStr, err := as.Get("id")
-// 	if err != nil {
-// 		return nil, err
-// 	}
+	return util.WriteTx(ctx, pk, a.queries.ChainID(), common.Big0, nonce, args, agentFactoryTransactor.Create, "Agent Create")
+}
 
-// 	agentID, ok := new(big.Int).SetString(agentIDStr, 10)
-// 	if !ok {
-// 		return nil, errors.New("could not convert agent id to big.Int")
-// 	}
+func (a *fevmActions) AgentBorrow(ctx context.Context, agentAddr common.Address, poolID *big.Int, amount *big.Int, pk *ecdsa.PrivateKey) (*types.Transaction, error) {
+	client, err := a.extern.ConnectEthClient()
+	if err != nil {
+		return nil, err
+	}
+	defer client.Close()
 
-// 	minerRegistryCaller, err := abigen.NewMinerRegistryCaller(c.MinerRegistryAddr, client)
-// 	if err != nil {
-// 		return nil, err
-// 	}
+	agentTransactor, err := abigen.NewAgentTransactor(agentAddr, client)
+	if err != nil {
+		return nil, err
+	}
 
-// 	minerU64, err := address.IDFromAddress(miner)
-// 	if err != nil {
-// 		return nil, err
-// 	}
+	closer, err := a.extern.ConnectAdoClient(ctx)
+	if err != nil {
+		return nil, err
+	}
+	defer closer()
 
-// 	registered, err := minerRegistryCaller.MinerRegistered(nil, agentID, minerU64)
-// 	if err != nil {
-// 		return nil, err
-// 	}
+	sc, err := rpc.ADOClient.Borrow(ctx, agentAddr, amount)
+	if err != nil {
+		log.Fatal(err)
+	}
 
-// 	if !registered {
-// 		return nil, errors.New("Miner not registered with agent. Be sure to call `agent add-miner` first before pulling funds.")
-// 	}
+	fromAddr, _, err := util.DeriveAddrFromPk(pk)
+	if err != nil {
+		return nil, err
+	}
 
-// 	closer, err := rpc.NewADOClient(ctx, viper.GetString("ado.address"))
-// 	if err != nil {
-// 		return nil, err
-// 	}
-// 	defer closer()
+	nonce, err := a.queries.ChainGetNonce(ctx, fromAddr)
+	if err != nil {
+		return nil, err
+	}
 
-// 	sc, err := rpc.ADOClient.PullFunds(ctx, agentAddr, amount, miner)
-// 	if err != nil {
-// 		return nil, err
-// 	}
+	args := []interface{}{poolID, sc}
 
-// 	agentTransactor, err := abigen.NewAgentTransactor(agentAddr, client)
-// 	if err != nil {
-// 		return nil, err
-// 	}
+	return util.WriteTx(ctx, pk, a.queries.ChainID(), common.Big0, nonce, args, agentTransactor.Borrow, "Agent Borrow")
+}
 
-// 	args := []interface{}{sc}
+func (a *fevmActions) AgentPay(ctx context.Context, agentAddr common.Address, poolID *big.Int, amount *big.Int, pk *ecdsa.PrivateKey) (*types.Transaction, error) {
+	client, err := a.extern.ConnectEthClient()
+	if err != nil {
+		return nil, err
+	}
+	defer client.Close()
 
-// 	return WriteTx(ctx, pk, client, common.Big0, args, agentTransactor.PullFunds, "Agent Pull Funds")
-// }
+	agentTransactor, err := abigen.NewAgentTransactor(agentAddr, client)
+	if err != nil {
+		return nil, err
+	}
 
-// // AgentPushFunds pushes funds from the agent to a miner
-// func (q *fevmQueries) AgentPushFunds(
-// 	ctx context.Context,
-// 	agentAddr common.Address,
-// 	amount *big.Int,
-// 	miner address.Address,
-// 	pk *ecdsa.PrivateKey,
-// ) (*types.Transaction, error) {
-// 	client, err := q.nodes.ConnectEthClient()
-// 	if err != nil {
-// 		return nil, err
-// 	}
-// 	defer client.Close()
+	closer, err := a.extern.ConnectAdoClient(ctx)
+	if err != nil {
+		return nil, err
+	}
+	defer closer()
 
-// 	as := util.AgentStore()
-// 	agentIDStr, err := as.Get("id")
-// 	if err != nil {
-// 		return nil, err
-// 	}
+	fromAddr, _, err := util.DeriveAddrFromPk(pk)
+	if err != nil {
+		return nil, err
+	}
 
-// 	agentID, ok := new(big.Int).SetString(agentIDStr, 10)
-// 	if !ok {
-// 		return nil, errors.New("could not convert agent id to big.Int")
-// 	}
+	nonce, err := a.queries.ChainGetNonce(ctx, fromAddr)
+	if err != nil {
+		return nil, err
+	}
 
-// 	minerRegistryCaller, err := abigen.NewMinerRegistryCaller(c.MinerRegistryAddr, client)
-// 	if err != nil {
-// 		return nil, err
-// 	}
+	sc, err := rpc.ADOClient.Pay(ctx, agentAddr, amount)
+	if err != nil {
+		log.Fatal(err)
+	}
 
-// 	minerU64, err := address.IDFromAddress(miner)
-// 	if err != nil {
-// 		return nil, err
-// 	}
+	args := []interface{}{poolID, sc}
 
-// 	registered, err := minerRegistryCaller.MinerRegistered(nil, agentID, minerU64)
-// 	if err != nil {
-// 		return nil, err
-// 	}
+	return util.WriteTx(ctx, pk, a.queries.ChainID(), common.Big0, nonce, args, agentTransactor.Pay, "Agent Pay")
+}
 
-// 	if !registered {
-// 		return nil, errors.New("Miner not registered with agent. Be sure to call `agent add-miner` first before pushing funds.")
-// 	}
+func (a *fevmActions) AgentAddMiner(ctx context.Context, agentAddr common.Address, minerAddr address.Address, pk *ecdsa.PrivateKey) (*types.Transaction, error) {
+	client, err := a.extern.ConnectEthClient()
+	if err != nil {
+		return nil, err
+	}
+	defer client.Close()
 
-// 	closer, err := rpc.NewADOClient(ctx, viper.GetString("ado.address"))
-// 	if err != nil {
-// 		return nil, err
-// 	}
-// 	defer closer()
+	closer, err := a.extern.ConnectAdoClient(ctx)
+	if err != nil {
+		return nil, err
+	}
+	defer closer()
 
-// 	sc, err := rpc.ADOClient.PushFunds(ctx, agentAddr, amount, miner)
-// 	if err != nil {
-// 		return nil, err
-// 	}
+	agentTransactor, err := abigen.NewAgentTransactor(agentAddr, client)
+	if err != nil {
+		return nil, err
+	}
 
-// 	agentTransactor, err := abigen.NewAgentTransactor(agentAddr, client)
-// 	if err != nil {
-// 		return nil, err
-// 	}
+	sc, err := rpc.ADOClient.AddMiner(ctx, agentAddr, minerAddr)
+	if err != nil {
+		return nil, err
+	}
 
-// 	args := []interface{}{sc}
+	fromAddr, _, err := util.DeriveAddrFromPk(pk)
+	if err != nil {
+		return nil, err
+	}
 
-// 	return WriteTx(ctx, pk, client, common.Big0, args, agentTransactor.PushFunds, "Agent Push Funds")
-// }
+	nonce, err := a.queries.ChainGetNonce(ctx, fromAddr)
+	if err != nil {
+		return nil, err
+	}
 
-// func (q *fevmQueries) AgentBorrow(
-// 	ctx context.Context,
-// 	agentAddr common.Address,
-// 	poolID *big.Int,
-// 	amount *big.Int,
-// 	pk *ecdsa.PrivateKey,
-// ) (*types.Transaction, error) {
-// 	client, err := q.nodes.ConnectEthClient()
-// 	if err != nil {
-// 		return nil, err
-// 	}
-// 	defer client.Close()
+	args := []interface{}{sc}
 
-// 	agentTransactor, err := abigen.NewAgentTransactor(agentAddr, client)
-// 	if err != nil {
-// 		return nil, err
-// 	}
+	tx, err := util.WriteTx(ctx, pk, a.queries.ChainID(), common.Big0, nonce, args, agentTransactor.AddMiner, "Agent Add Miner")
+	if err != nil {
+		return nil, err
+	}
 
-// 	closer, err := rpc.NewADOClient(ctx, viper.GetString("ado.address"))
-// 	if err != nil {
-// 		return nil, err
-// 	}
-// 	defer closer()
+	return tx, nil
+}
 
-// 	sc, err := rpc.ADOClient.Borrow(ctx, agentAddr, amount)
-// 	if err != nil {
-// 		log.Fatal(err)
-// 	}
+func (a *fevmActions) AgentRemoveMiner(ctx context.Context, agentAddr common.Address, minerAddr address.Address, newOwnerAddr address.Address, pk *ecdsa.PrivateKey) (*types.Transaction, error) {
+	client, err := a.extern.ConnectEthClient()
+	if err != nil {
+		return nil, err
+	}
+	defer client.Close()
 
-// 	args := []interface{}{poolID, sc}
+	closer, err := a.extern.ConnectAdoClient(ctx)
+	if err != nil {
+		return nil, err
+	}
+	defer closer()
 
-// 	return WriteTx(ctx, pk, client, common.Big0, args, agentTransactor.Borrow, "Agent Borrow")
-// }
+	agentTransactor, err := abigen.NewAgentTransactor(agentAddr, client)
 
-// func (q *fevmQueries) AgentPay(
-// 	ctx context.Context,
-// 	agentAddr common.Address,
-// 	poolID *big.Int,
-// 	amount *big.Int,
-// 	pk *ecdsa.PrivateKey,
-// ) (*types.Transaction, error) {
-// 	client, err := q.nodes.ConnectEthClient()
-// 	if err != nil {
-// 		return nil, err
-// 	}
-// 	defer client.Close()
+	fromAddr, _, err := util.DeriveAddrFromPk(pk)
+	if err != nil {
+		return nil, err
+	}
 
-// 	agentTransactor, err := abigen.NewAgentTransactor(agentAddr, client)
-// 	if err != nil {
-// 		return nil, err
-// 	}
+	nonce, err := a.queries.ChainGetNonce(ctx, fromAddr)
+	if err != nil {
+		return nil, err
+	}
 
-// 	closer, err := rpc.NewADOClient(ctx, viper.GetString("ado.address"))
-// 	if err != nil {
-// 		return nil, err
-// 	}
-// 	defer closer()
+	sc, err := rpc.ADOClient.RemoveMiner(ctx, agentAddr, minerAddr)
+	if err != nil {
+		return nil, err
+	}
 
-// 	sc, err := rpc.ADOClient.Pay(ctx, agentAddr, amount)
-// 	if err != nil {
-// 		log.Fatal(err)
-// 	}
+	args := []interface{}{newOwnerAddr, sc}
 
-// 	args := []interface{}{poolID, sc}
+	tx, err := util.WriteTx(ctx, pk, a.queries.ChainID(), common.Big0, nonce, args, agentTransactor.RemoveMiner, "Agent Remove Miner")
+	if err != nil {
+		return nil, err
+	}
 
-// 	return WriteTx(ctx, pk, client, common.Big0, args, agentTransactor.Pay, "Agent Pay")
-// }
+	return tx, nil
+}
 
-// func (q *fevmQueries) AgentWithdraw(
-// 	ctx context.Context,
-// 	agentAddr common.Address,
-// 	receiver common.Address,
-// 	amount *big.Int,
-// 	pk *ecdsa.PrivateKey,
-// ) (*types.Transaction, error) {
-// 	client, err := q.nodes.ConnectEthClient()
-// 	if err != nil {
-// 		return nil, err
-// 	}
-// 	defer client.Close()
+func (a *fevmActions) AgentChangeMinerWorker(ctx context.Context, agentAddr common.Address, minerAddr address.Address, workerAddr address.Address, controlAddrs []address.Address, pk *ecdsa.PrivateKey) (*types.Transaction, error) {
+	client, err := a.extern.ConnectEthClient()
+	if err != nil {
+		return nil, err
+	}
+	defer client.Close()
 
-// 	agentTransactor, err := abigen.NewAgentTransactor(agentAddr, client)
-// 	if err != nil {
-// 		return nil, err
-// 	}
+	agentTransactor, err := abigen.NewAgentTransactor(agentAddr, client)
+	if err != nil {
+		return nil, err
+	}
 
-// 	closer, err := rpc.NewADOClient(ctx, viper.GetString("ado.address"))
-// 	if err != nil {
-// 		return nil, err
-// 	}
-// 	defer closer()
+	// convert miner address to ID address
+	minerID, err := address.IDFromAddress(minerAddr)
+	if err != nil {
+		return nil, err
+	}
 
-// 	sc, err := rpc.ADOClient.Withdraw(ctx, agentAddr, amount)
-// 	if err != nil {
-// 		log.Fatal(err)
-// 	}
+	// convert worker address to ID address
+	workerID, err := address.IDFromAddress(workerAddr)
+	if err != nil {
+		return nil, err
+	}
 
-// 	args := []interface{}{receiver, sc}
+	// convert control addresses to ID addresses
+	var controlIDs []uint64
+	for _, controlAddr := range controlAddrs {
+		controlID, err := address.IDFromAddress(controlAddr)
+		if err != nil {
+			return nil, err
+		}
+		controlIDs = append(controlIDs, controlID)
+	}
 
-// 	return WriteTx(ctx, pk, client, common.Big0, args, agentTransactor.Withdraw, "Agent Withdraw")
-// }
+	fromAddr, _, err := util.DeriveAddrFromPk(pk)
+	if err != nil {
+		return nil, err
+	}
+
+	nonce, err := a.queries.ChainGetNonce(ctx, fromAddr)
+	if err != nil {
+		return nil, err
+	}
+
+	args := []interface{}{minerID, workerID, controlIDs}
+
+	tx, err := util.WriteTx(ctx, pk, a.queries.ChainID(), common.Big0, nonce, args, agentTransactor.ChangeMinerWorker, "Agent Change Miner Worker")
+	if err != nil {
+		return nil, err
+	}
+
+	return tx, nil
+}
+
+// AgentPullFunds pulls funds from the agent to a miner
+func (a *fevmActions) AgentPullFunds(ctx context.Context, agentAddr common.Address, amount *big.Int, miner address.Address, pk *ecdsa.PrivateKey) (*types.Transaction, error) {
+	client, err := a.extern.ConnectEthClient()
+	if err != nil {
+		return nil, err
+	}
+	defer client.Close()
+
+	agentID, err := a.queries.AgentID(ctx, agentAddr)
+	if err != nil {
+		return nil, err
+	}
+
+	minerRegistryCaller, err := abigen.NewMinerRegistryCaller(a.queries.MinerRegistry(), client)
+	if err != nil {
+		return nil, err
+	}
+
+	minerU64, err := address.IDFromAddress(miner)
+	if err != nil {
+		return nil, err
+	}
+
+	registered, err := minerRegistryCaller.MinerRegistered(nil, agentID, minerU64)
+	if err != nil {
+		return nil, err
+	}
+
+	if !registered {
+		return nil, errors.New("Miner not registered with agent. Be sure to call `agent add-miner` first before pulling funds.")
+	}
+
+	closer, err := a.extern.ConnectAdoClient(ctx)
+	if err != nil {
+		return nil, err
+	}
+	defer closer()
+
+	sc, err := rpc.ADOClient.PullFunds(ctx, agentAddr, amount, miner)
+	if err != nil {
+		return nil, err
+	}
+
+	agentTransactor, err := abigen.NewAgentTransactor(agentAddr, client)
+	if err != nil {
+		return nil, err
+	}
+
+	fromAddr, _, err := util.DeriveAddrFromPk(pk)
+	if err != nil {
+		return nil, err
+	}
+
+	nonce, err := a.queries.ChainGetNonce(ctx, fromAddr)
+	if err != nil {
+		return nil, err
+	}
+
+	args := []interface{}{sc}
+
+	return util.WriteTx(ctx, pk, a.queries.ChainID(), common.Big0, nonce, args, agentTransactor.PullFunds, "Agent Pull Funds")
+}
+
+// AgentPushFunds pushes funds from the agent to a miner
+func (a *fevmActions) AgentPushFunds(ctx context.Context, agentAddr common.Address, amount *big.Int, miner address.Address, pk *ecdsa.PrivateKey) (*types.Transaction, error) {
+	client, err := a.extern.ConnectEthClient()
+	if err != nil {
+		return nil, err
+	}
+	defer client.Close()
+
+	agentID, err := a.queries.AgentID(ctx, agentAddr)
+	if err != nil {
+		return nil, err
+	}
+
+	minerRegistryCaller, err := abigen.NewMinerRegistryCaller(a.queries.MinerRegistry(), client)
+	if err != nil {
+		return nil, err
+	}
+
+	minerU64, err := address.IDFromAddress(miner)
+	if err != nil {
+		return nil, err
+	}
+
+	registered, err := minerRegistryCaller.MinerRegistered(nil, agentID, minerU64)
+	if err != nil {
+		return nil, err
+	}
+
+	if !registered {
+		return nil, errors.New("Miner not registered with agent. Be sure to call `agent add-miner` first before pushing funds.")
+	}
+
+	closer, err := a.extern.ConnectAdoClient(ctx)
+	if err != nil {
+		return nil, err
+	}
+	defer closer()
+
+	sc, err := rpc.ADOClient.PushFunds(ctx, agentAddr, amount, miner)
+	if err != nil {
+		return nil, err
+	}
+
+	agentTransactor, err := abigen.NewAgentTransactor(agentAddr, client)
+	if err != nil {
+		return nil, err
+	}
+
+	fromAddr, _, err := util.DeriveAddrFromPk(pk)
+	if err != nil {
+		return nil, err
+	}
+
+	nonce, err := a.queries.ChainGetNonce(ctx, fromAddr)
+	if err != nil {
+		return nil, err
+	}
+
+	args := []interface{}{sc}
+
+	return util.WriteTx(ctx, pk, a.queries.ChainID(), common.Big0, nonce, args, agentTransactor.PushFunds, "Agent Push Funds")
+}
+
+func (a *fevmActions) AgentWithdraw(ctx context.Context, agentAddr common.Address, receiver common.Address, amount *big.Int, pk *ecdsa.PrivateKey) (*types.Transaction, error) {
+	client, err := a.extern.ConnectEthClient()
+	if err != nil {
+		return nil, err
+	}
+	defer client.Close()
+
+	agentTransactor, err := abigen.NewAgentTransactor(agentAddr, client)
+	if err != nil {
+		return nil, err
+	}
+
+	closer, err := a.extern.ConnectAdoClient(ctx)
+	if err != nil {
+		return nil, err
+	}
+	defer closer()
+
+	fromAddr, _, err := util.DeriveAddrFromPk(pk)
+	if err != nil {
+		return nil, err
+	}
+
+	nonce, err := a.queries.ChainGetNonce(ctx, fromAddr)
+	if err != nil {
+		return nil, err
+	}
+
+	sc, err := rpc.ADOClient.Withdraw(ctx, agentAddr, amount)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	args := []interface{}{receiver, sc}
+
+	return util.WriteTx(ctx, pk, a.queries.ChainID(), common.Big0, nonce, args, agentTransactor.Withdraw, "Agent Withdraw")
+}

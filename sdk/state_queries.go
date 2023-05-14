@@ -51,5 +51,13 @@ func (q *fevmQueries) StateWaitReceipt(ctx context.Context, hash common.Hash) (*
 		s.Suffix = msg
 	}
 
+	if receipt == nil {
+		return nil, fmt.Errorf("transaction receipt not found")
+	}
+
+	if receipt.Status != 0 {
+		return nil, fmt.Errorf("transaction failed: %v", receipt.Status)
+	}
+
 	return receipt, nil
 }
