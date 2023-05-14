@@ -25,7 +25,11 @@ type FEVMQueries interface {
 	AgentPrincipal(ctx context.Context, agentAddr common.Address) (*big.Int, error)
 	// infinity pool methods
 	InfPoolGetRate(ctx context.Context, cred abigen.VerifiableCredential) (*big.Int, error)
+	InfPoolGetAgentLvl(ctx context.Context, agentID *big.Int) (*big.Int, float64, error)
 	InfPoolAgentAccount(ctx context.Context, agentAddr common.Address) (abigen.Account, error)
+	// ifil methods
+	IFILBalanceOf(ctx context.Context, hodler common.Address) (*big.Float, error)
+	IFILPrice(ctx context.Context) (*big.Int, error)
 	// policing methods
 	CredentialUsed(ctx context.Context, v uint8, r [32]byte, s [32]byte) (bool, error)
 	CredentialValidityPeriod(ctx context.Context) (*big.Int, *big.Int, error)
