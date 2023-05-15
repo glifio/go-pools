@@ -36,6 +36,9 @@ type FEVMQueries interface {
 	// ifil methods
 	IFILBalanceOf(ctx context.Context, hodler common.Address) (*big.Float, error)
 	IFILPrice(ctx context.Context) (*big.Float, error)
+	// wfil methods
+	WFILBalanceOf(ctx context.Context, hodler common.Address) (*big.Float, error)
+	WFILAllowance(ctx context.Context, hodler common.Address, spender common.Address) (*big.Float, error)
 	// policing methods
 	CredentialUsed(ctx context.Context, v uint8, r [32]byte, s [32]byte) (bool, error)
 	CredentialValidityPeriod(ctx context.Context) (*big.Int, *big.Int, error)
@@ -55,6 +58,7 @@ type FEVMQueries interface {
 	PoolRegistry() common.Address
 	AgentFactory() common.Address
 	IFIL() common.Address
+	WFIL() common.Address
 	InfinityPool() common.Address
 }
 

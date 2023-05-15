@@ -17,6 +17,7 @@ func Init(
 	poolRegistry common.Address,
 	agentFactory common.Address,
 	iFIL common.Address,
+	wFIL common.Address,
 	infinityPool common.Address,
 	adoAddr string,
 	adoNamespace string,
@@ -44,6 +45,7 @@ func Init(
 	fevmQueries := &fevmQueries{
 		router:        router,
 		iFIL:          iFIL,
+		wFIL:          wFIL,
 		infinityPool:  infinityPool,
 		agentFactory:  agentFactory,
 		poolRegistry:  poolRegistry,

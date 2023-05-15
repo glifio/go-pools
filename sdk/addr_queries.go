@@ -26,6 +26,10 @@ func (q *fevmQueries) IFIL() common.Address {
 	return q.iFIL
 }
 
+func (q *fevmQueries) WFIL() common.Address {
+	return q.wFIL
+}
+
 func (q *fevmQueries) InfinityPool() common.Address {
 	return q.infinityPool
 }
