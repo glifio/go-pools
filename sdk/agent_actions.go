@@ -255,6 +255,43 @@ func (a *fevmActions) AgentChangeMinerWorker(ctx context.Context, agentAddr comm
 	return tx, nil
 }
 
+func (a *fevmActions) AgentConfirmMinerWorkerChange(ctx context.Context, agentAddr common.Address, minerAddr address.Address, pk *ecdsa.PrivateKey) (*types.Transaction, error) {
+	client, err := a.extern.ConnectEthClient()
+	if err != nil {
+		return nil, err
+	}
+	defer client.Close()
+
+	minerU64, err := address.IDFromAddress(minerAddr)
+	if err != nil {
+		return nil, err
+	}
+
+	agentTransactor, err := abigen.NewAgentTransactor(agentAddr, client)
+	if err != nil {
+		return nil, err
+	}
+
+	fromAddr, _, err := util.DeriveAddrFromPk(pk)
+	if err != nil {
+		return nil, err
+	}
+
+	nonce, err := a.queries.ChainGetNonce(ctx, fromAddr)
+	if err != nil {
+		return nil, err
+	}
+
+	args := []interface{}{minerU64}
+
+	tx, err := util.WriteTx(ctx, pk, a.queries.ChainID(), common.Big0, nonce, args, agentTransactor.ConfirmChangeMinerWorker, "Agent Confirm Miner Worker Change")
+	if err != nil {
+		return nil, err
+	}
+
+	return tx, nil
+}
+
 // AgentPullFunds pulls funds from the agent to a miner
 func (a *fevmActions) AgentPullFunds(ctx context.Context, agentAddr common.Address, amount *big.Int, miner address.Address, pk *ecdsa.PrivateKey) (*types.Transaction, error) {
 	client, err := a.extern.ConnectEthClient()
