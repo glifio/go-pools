@@ -3,6 +3,7 @@ package sdk
 import (
 	"context"
 	"fmt"
+	"math/big"
 	"time"
 
 	"github.com/briandowns/spinner"
@@ -55,9 +56,31 @@ func (q *fevmQueries) StateWaitReceipt(ctx context.Context, hash common.Hash) (*
 		return nil, fmt.Errorf("transaction receipt not found")
 	}
 
-	if receipt.Status != 0 {
+	if receipt.Status != 1 {
 		return nil, fmt.Errorf("transaction failed: %v", receipt.Status)
 	}
 
 	return receipt, nil
+}
+
+func (q *fevmQueries) StateWaitNextTick(ctx context.Context, currentHeight *big.Int) error {
+	eapi, err := q.extern.ConnectEthClient()
+	if err != nil {
+		return err
+	}
+	defer eapi.Close()
+
+	target := currentHeight.Uint64() + 1
+	for {
+		time.Sleep(time.Millisecond * 5000)
+
+		b, err := eapi.BlockNumber(ctx)
+		if err != nil {
+			return err
+		}
+
+		if b >= target {
+			return nil
+		}
+	}
 }

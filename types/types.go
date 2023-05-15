@@ -47,6 +47,7 @@ type FEVMQueries interface {
 	// state methods
 	StateWaitTx(ctx context.Context, txHash common.Hash, ch chan *types.Receipt)
 	StateWaitReceipt(ctx context.Context, txHash common.Hash) (*types.Receipt, error)
+	StateWaitNextTick(ctx context.Context, currentEpochHeight *big.Int) error
 	// deployment addresses
 	AgentPolice() common.Address
 	MinerRegistry() common.Address

@@ -192,7 +192,7 @@ func (q *fevmQueries) AgentAccount(ctx context.Context, agentAddr common.Address
 	return routerCaller.GetAccount(&bind.CallOpts{Context: ctx}, agentID, poolID)
 }
 
-func (q *fevmQueries) AgentAddrID(ctx context.Context, receipt *types.Receipt) (common.Address, *big.Int, error) {
+func (q *fevmQueries) AgentAddrIDFromRcpt(ctx context.Context, receipt *types.Receipt) (common.Address, *big.Int, error) {
 	client, err := q.extern.ConnectEthClient()
 	if err != nil {
 		return common.Address{}, nil, err
