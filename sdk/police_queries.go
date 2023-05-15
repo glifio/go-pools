@@ -30,5 +30,5 @@ func (q *fevmQueries) DefaultEpoch(ctx context.Context) (*big.Int, error) {
 		return nil, err
 	}
 
-	return chainHeadHeight.Add(chainHeadHeight, defaultWindow), nil
+	return chainHeadHeight.Sub(chainHeadHeight, defaultWindow), nil
 }
