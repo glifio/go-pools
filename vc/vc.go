@@ -28,7 +28,7 @@ type AgentData struct {
 	Principal                   *big.Int
 	FaultySectors               *big.Int
 	LiveSectors                 *big.Int
-	GreenScore                  *uint32
+	GreenScore                  *big.Int
 }
 
 func TypedEIP712(
@@ -90,17 +90,12 @@ func abiEncodeClaim(claim AgentData) ([]byte, error) {
 	var params []interface{}
 	// the uint256 abi type to encode the AgentData with
 	uint256Ty, _ := abi.NewType("uint256", "", nil)
-	uint32Ty, _ := abi.NewType("uint32", "", nil)
 
 	values := reflect.ValueOf(claim)
 	types := values.Type()
 
 	for i := 0; i < values.NumField(); i++ {
 		fieldType := uint256Ty
-		if types.Field(i).Name == "GreenScore" {
-			fieldType = uint32Ty
-		}
-
 		// add the uint256 type and the key name to the AgentData abi
 		arguments = append(arguments, abi.Argument{
 			Type: fieldType,
