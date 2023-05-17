@@ -10,6 +10,7 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/filecoin-project/go-address"
+	ltypes "github.com/filecoin-project/lotus/chain/types"
 	"github.com/glifio/go-pools/abigen"
 	"github.com/glifio/go-pools/rpc"
 	"github.com/glifio/go-pools/util"
@@ -162,6 +163,25 @@ func (a *fevmActions) AgentAddMiner(ctx context.Context, agentAddr common.Addres
 }
 
 func (a *fevmActions) AgentRemoveMiner(ctx context.Context, agentAddr common.Address, minerAddr address.Address, newOwnerAddr address.Address, pk *ecdsa.PrivateKey) (*types.Transaction, error) {
+	if newOwnerAddr.Protocol() != address.ID {
+		lapi, closer, err := a.extern.ConnectLotusClient()
+		if err != nil {
+			return nil, err
+		}
+		defer closer()
+
+		idAddr, err := lapi.StateLookupID(context.Background(), newOwnerAddr, ltypes.EmptyTSK)
+		if err != nil {
+			return nil, err
+		}
+		newOwnerAddr = idAddr
+	}
+
+	newOwner64, err := address.IDFromAddress(newOwnerAddr)
+	if err != nil {
+		return nil, err
+	}
+
 	client, err := a.extern.ConnectEthClient()
 	if err != nil {
 		return nil, err
@@ -191,7 +211,7 @@ func (a *fevmActions) AgentRemoveMiner(ctx context.Context, agentAddr common.Add
 		return nil, err
 	}
 
-	args := []interface{}{newOwnerAddr, sc}
+	args := []interface{}{newOwner64, sc}
 
 	tx, err := util.WriteTx(ctx, pk, a.queries.ChainID(), common.Big0, nonce, args, agentTransactor.RemoveMiner, "Agent Remove Miner")
 	if err != nil {
