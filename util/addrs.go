@@ -2,6 +2,7 @@ package util
 
 import (
 	"crypto/ecdsa"
+	"encoding/base64"
 	"fmt"
 	"log"
 	"reflect"
@@ -9,8 +10,19 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/filecoin-project/go-address"
+	filcrypto "github.com/filecoin-project/go-crypto"
 	"github.com/filecoin-project/lotus/chain/types/ethtypes"
 )
+
+// derives a native filecoin f1 addr from a private key string
+func DeriveNativeFromSECP256K1KeyString(pk string) (address.Address, error) {
+	data, err := base64.StdEncoding.DecodeString(pk)
+	if err != nil {
+		return address.Undef, err
+	}
+
+	return address.NewSecp256k1Address(filcrypto.PublicKey(data))
+}
 
 func DeriveAddrFromPkString(pk string) (common.Address, address.Address, error) {
 	pkECDSA, err := crypto.HexToECDSA(pk)
