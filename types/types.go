@@ -62,6 +62,8 @@ type FEVMQueries interface {
 	IFIL() common.Address
 	WFIL() common.Address
 	InfinityPool() common.Address
+	// RateModule gets fetched from InfinityPool
+	RateModule() (common.Address, error)
 }
 
 type FEVMActions interface {
