@@ -13,15 +13,17 @@ const EpochsInMinute = SecondsInMinute / builtin.EpochDurationSeconds
 const CredentialMinutesValid = 30
 const CredentialEpochsValid = CredentialMinutesValid * EpochsInMinute
 
+type Method string
+
 // these method names must match the names in the Agent contract in order to get the right function signature
 var (
-	MethodBorrow      = "borrow"
-	MethodPay         = "pay"
-	MethodAddMiner    = "addMiner"
-	MethodRemoveMiner = "removeMiner"
-	MethodWithdraw    = "withdraw"
-	MethodPushFunds   = "pushFunds"
-	MethodPullFunds   = "pullFunds"
+	MethodBorrow      Method = "borrow"
+	MethodPay         Method = "pay"
+	MethodAddMiner    Method = "addMiner"
+	MethodRemoveMiner Method = "removeMiner"
+	MethodWithdraw    Method = "withdraw"
+	MethodPushFunds   Method = "pushFunds"
+	MethodPullFunds   Method = "pullFunds"
 )
 
 var MAX_UINT256 = new(big.Int).Exp(big.NewInt(2), big.NewInt(256), nil)

@@ -20,6 +20,8 @@ type FEVMQueries interface {
 	AgentAccount(ctx context.Context, agentAddr common.Address, poolID *big.Int) (abigen.Account, error)
 	AgentAddrIDFromRcpt(ctx context.Context, rcpt *types.Receipt) (common.Address, *big.Int, error)
 	AgentOwner(ctx context.Context, agentAddr common.Address) (common.Address, error)
+	AgentOperator(ctx context.Context, agentAddr common.Address) (common.Address, error)
+	AgentRequester(ctx context.Context, agentAddr common.Address) (common.Address, error)
 	AgentVersion(ctx context.Context, agentAddr common.Address) (uint8, error)
 	AgentIsValid(ctx context.Context, agentAddr common.Address) (bool, error)
 	AgentMiners(ctx context.Context, agentAddr common.Address) ([]address.Address, error)
