@@ -26,6 +26,13 @@ type RequestClaims struct {
 	EpochHeight     *big.Int
 }
 
+var (
+	InvalidAgentAddrErr = errors.New("invalid agent address")
+	InvalidRequesterErr = errors.New("invalid requester")
+	InvalidTokenErr     = errors.New("invalid token")
+	TokenExpiredErr     = errors.New("token expired")
+)
+
 func SignJWS(ctx context.Context, agentAddr common.Address, target address.Address, value *big.Int, method constants.Method, key *ecdsa.PrivateKey, poolsSDK types.PoolsSDK) (string, error) {
 	epochHeight, err := poolsSDK.Query().ChainHeight(ctx)
 	if err != nil {
@@ -80,11 +87,11 @@ func VerifyJWS(ctx context.Context, jws string, poolsSDK types.PoolsSDK) (*Reque
 	}
 
 	if !token.Valid {
-		return &RequestClaims{}, errors.New("invalid token")
+		return &RequestClaims{}, InvalidTokenErr
 	}
 
 	if claims.AgentAddr.String() == "" {
-		return &RequestClaims{}, errors.New("invalid agent address")
+		return &RequestClaims{}, InvalidAgentAddrErr
 	}
 
 	requesterFromClaims := crypto.PubkeyToAddress(*jwsIssuerPubkey)
@@ -95,7 +102,7 @@ func VerifyJWS(ctx context.Context, jws string, poolsSDK types.PoolsSDK) (*Reque
 	}
 
 	if requester != requesterFromClaims {
-		return &RequestClaims{}, errors.New("invalid requester")
+		return &RequestClaims{}, InvalidRequesterErr
 	}
 
 	chainHeight, err := poolsSDK.Query().ChainHeight(ctx)
@@ -107,7 +114,7 @@ func VerifyJWS(ctx context.Context, jws string, poolsSDK types.PoolsSDK) (*Reque
 
 	// make sure that the EpochHeight in the claims with the expiration buffer is gte than the current chain height
 	if chainHeight.Cmp(validEpoch) > -1 {
-		return &RequestClaims{}, errors.New("invalid epoch height")
+		return &RequestClaims{}, TokenExpiredErr
 	}
 
 	return claims, nil
