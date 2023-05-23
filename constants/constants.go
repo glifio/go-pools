@@ -26,6 +26,19 @@ var (
 	MethodPullFunds   Method = "pullFunds"
 )
 
+type Route string
+
+var (
+	RouteAgentPolice   Route = "ROUTER_AGENT_POLICE"
+	RouteAgentFactory  Route = "ROUTER_AGENT_FACTORY"
+	RoutePoolRegistry  Route = "ROUTER_POOL_REGISTRY"
+	RouteMinerRegistry Route = "ROUTER_MINER_REGISTRY"
+	RouteWFIL          Route = "ROUTER_WFIL_TOKEN"
+	RouteVCIssuer      Route = "ROUTER_VC_ISSUER"
+	RouteCredParser    Route = "ROUTER_CRED_PARSER"
+	RouteAgentDeployer Route = "ROUTER_AGENT_DEPLOYER"
+)
+
 var MAX_UINT256 = new(big.Int).Exp(big.NewInt(2), big.NewInt(256), nil)
 var WAD = big.NewInt(1e18)
 

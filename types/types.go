@@ -12,6 +12,7 @@ import (
 	"github.com/filecoin-project/go-jsonrpc"
 	"github.com/filecoin-project/lotus/api"
 	"github.com/glifio/go-pools/abigen"
+	"github.com/glifio/go-pools/constants"
 )
 
 type FEVMQueries interface {
@@ -55,6 +56,7 @@ type FEVMQueries interface {
 	StateWaitNextTick(ctx context.Context, currentEpochHeight *big.Int) error
 	// router methods
 	RouterOwner(ctx context.Context) (common.Address, error)
+	RouterGetRoute(ctx context.Context, route constants.Route) (common.Address, error)
 	// deployment addresses
 	AgentPolice() common.Address
 	MinerRegistry() common.Address
