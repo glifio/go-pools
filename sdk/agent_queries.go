@@ -45,12 +45,37 @@ func (q *fevmQueries) AgentOwner(ctx context.Context, address common.Address) (c
 		return common.Address{}, err
 	}
 
-	owner, err := agentCaller.Owner(nil)
+	return agentCaller.Owner(&bind.CallOpts{Context: ctx})
+}
+
+func (q *fevmQueries) AgentOperator(ctx context.Context, address common.Address) (common.Address, error) {
+	client, err := q.extern.ConnectEthClient()
+	if err != nil {
+		return common.Address{}, err
+	}
+	defer client.Close()
+
+	agentCaller, err := abigen.NewAgentCaller(address, client)
 	if err != nil {
 		return common.Address{}, err
 	}
 
-	return owner, nil
+	return agentCaller.Operator(&bind.CallOpts{Context: ctx})
+}
+
+func (q *fevmQueries) AgentRequester(ctx context.Context, address common.Address) (common.Address, error) {
+	client, err := q.extern.ConnectEthClient()
+	if err != nil {
+		return common.Address{}, err
+	}
+	defer client.Close()
+
+	agentCaller, err := abigen.NewAgentCaller(address, client)
+	if err != nil {
+		return common.Address{}, err
+	}
+
+	return agentCaller.AdoRequestKey(&bind.CallOpts{Context: ctx})
 }
 
 func (q *fevmQueries) AgentIsValid(ctx context.Context, address common.Address) (bool, error) {
