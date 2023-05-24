@@ -32,8 +32,8 @@ var (
 	TokenExpiredErr     = errors.New("token expired")
 )
 
-func SignJWS(ctx context.Context, agentAddr common.Address, target address.Address, value *big.Int, method constants.Method, key *ecdsa.PrivateKey, poolsSDK types.PoolsSDK) (string, error) {
-	epochHeight, err := poolsSDK.Query().ChainHeight(ctx)
+func SignJWS(ctx context.Context, agentAddr common.Address, target address.Address, value *big.Int, method constants.Method, key *ecdsa.PrivateKey, query types.FEVMQueries) (string, error) {
+	epochHeight, err := query.ChainHeight(ctx)
 	if err != nil {
 		return "", err
 	}
@@ -59,7 +59,7 @@ type ecdsaSignature struct {
 // signatures last approx 60 seconds
 var EXPIRATION_EPOCH_BUFFER = big.NewInt(2)
 
-func VerifyJWS(ctx context.Context, jws string, poolsSDK types.PoolsSDK) (*RequestClaims, error) {
+func VerifyJWS(ctx context.Context, jws string, query types.FEVMQueries) (*RequestClaims, error) {
 	var jwsIssuerPubkey *ecdsa.PublicKey
 	claims := &RequestClaims{}
 
@@ -90,7 +90,7 @@ func VerifyJWS(ctx context.Context, jws string, poolsSDK types.PoolsSDK) (*Reque
 
 	requesterFromClaims := crypto.PubkeyToAddress(*jwsIssuerPubkey)
 
-	requester, err := poolsSDK.Query().AgentRequester(ctx, claims.AgentAddr)
+	requester, err := query.AgentRequester(ctx, claims.AgentAddr)
 	if err != nil {
 		return &RequestClaims{}, err
 	}
@@ -99,7 +99,7 @@ func VerifyJWS(ctx context.Context, jws string, poolsSDK types.PoolsSDK) (*Reque
 		return &RequestClaims{}, InvalidRequesterErr
 	}
 
-	chainHeight, err := poolsSDK.Query().ChainHeight(ctx)
+	chainHeight, err := query.ChainHeight(ctx)
 	if err != nil {
 		return &RequestClaims{}, err
 	}
