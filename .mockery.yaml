@@ -1,0 +1,6 @@
+keeptree: True
+testonly: False
+with-expecter: True
+outpkg: mock
+output: ../mock
+
