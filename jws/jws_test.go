@@ -25,10 +25,7 @@ func TestSignVerifyJWS(t *testing.T) {
 	mockFEVMQueries.On("ChainHeight", ctx).Return(big.NewInt(100), nil)
 	mockFEVMQueries.On("AgentRequester", ctx, agentAddr).Return(signerAddr, nil)
 
-	mockSDK := mock.NewPoolsSDK(t)
-	mockSDK.On("Query").Return(mockFEVMQueries)
-
-	jws, err := SignJWS(ctx, agentAddr, target, value, constants.MethodBorrow, signerPrivateKey, mockSDK)
+	jws, err := SignJWS(ctx, agentAddr, target, value, constants.MethodBorrow, signerPrivateKey, mockFEVMQueries)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -37,7 +34,7 @@ func TestSignVerifyJWS(t *testing.T) {
 		t.Fatal("jws is empty")
 	}
 
-	claims, err := VerifyJWS(ctx, jws, mockSDK)
+	claims, err := VerifyJWS(ctx, jws, mockFEVMQueries)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -60,7 +57,7 @@ func TestBadJWSPubkey(t *testing.T) {
 
 	agentAddr, target, value, signerPrivateKey, _ := setup()
 
-	mockSDK := mock.NewPoolsSDK(t)
+	mockQuery := mock.NewFEVMQueries(t)
 
 	privateKey, _ := crypto.GenerateKey()
 
@@ -79,7 +76,7 @@ func TestBadJWSPubkey(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	_, err = VerifyJWS(ctx, tokenStr, mockSDK)
+	_, err = VerifyJWS(ctx, tokenStr, mockQuery)
 	if err == nil {
 		t.Fatal("expected crypto/ecdsa verification error")
 	}
@@ -104,10 +101,6 @@ func TestStaleJWS(t *testing.T) {
 	mockQueries.On("ChainHeight", ctx).Return(chainHeight, nil)
 	mockQueries.On("AgentRequester", ctx, agentAddr).Return(signerAddr, nil)
 
-	// create a mock PoolsSDK and set the expected return value for Query to be the mock
-	mockSDK := mock.NewPoolsSDK(t)
-	mockSDK.On("Query").Return(mockQueries)
-
 	token := jwt.NewWithClaims(jwt.SigningMethodES256, RequestClaims{
 		AgentAddr:       agentAddr,
 		RequesterPubKey: crypto.FromECDSAPub(&signerPrivateKey.PublicKey),
@@ -124,7 +117,7 @@ func TestStaleJWS(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	_, err = VerifyJWS(ctx, tokenStr, mockSDK)
+	_, err = VerifyJWS(ctx, tokenStr, mockQueries)
 	if err != TokenExpiredErr {
 		t.Fatal("expected stale JWS error")
 	}
