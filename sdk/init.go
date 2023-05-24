@@ -3,9 +3,13 @@ package sdk
 import (
 	"context"
 	"math/big"
+	"sync"
 
+	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/ethclient"
+	"github.com/glifio/go-pools/abigen"
+	"github.com/glifio/go-pools/constants"
 	"github.com/glifio/go-pools/types"
 )
 
@@ -51,6 +55,132 @@ func InitFEVMConnection(
 		act:    fevmActions,
 		extern: extern,
 	}
+}
+
+func getRoutes(ctx context.Context, routes []constants.Route, routerCaller *abigen.RouterCaller) (map[constants.Route]common.Address, error) {
+	type routeResult struct {
+		Route   constants.Route
+		Address common.Address
+	}
+
+	var wg sync.WaitGroup
+	results := make([]routeResult, len(routes))
+	errc := make(chan error, 1)
+
+	for i, route := range routes {
+		wg.Add(1)
+		go func(i int, route constants.Route) {
+			defer wg.Done()
+
+			address, err := routerCaller.GetRoute0(&bind.CallOpts{Context: ctx}, string(route))
+			if err != nil {
+				select {
+				case errc <- err:
+				default:
+					// Don't block if an error has already been sent.
+				}
+				return
+			}
+
+			results[i] = routeResult{
+				Route:   route,
+				Address: address,
+			}
+		}(i, route)
+	}
+
+	wg.Wait()
+
+	select {
+	case err := <-errc:
+		// Return any error that was sent on the channel.
+		return nil, err
+	default:
+		// If no error was sent on the channel, return the results.
+		routeMap := make(map[constants.Route]common.Address)
+		for _, result := range results {
+			routeMap[result.Route] = result.Address
+		}
+		return routeMap, nil
+	}
+}
+
+func LazyInit(
+	ctx context.Context,
+	sdk *types.PoolsSDK,
+	router common.Address,
+	adoAddr string,
+	adoNamespace string,
+	dialAddr string,
+	token string,
+) error {
+	client, err := ethclient.Dial(dialAddr)
+	if err != nil {
+		return err
+	}
+	defer client.Close()
+
+	chainID, err := client.ChainID(ctx)
+	if err != nil {
+		return err
+	}
+
+	routerCaller, err := abigen.NewRouterCaller(router, client)
+	if err != nil {
+		return err
+	}
+
+	fetchRoutes := []constants.Route{
+		constants.RouteAgentPolice,
+		constants.RouteAgentFactory,
+		constants.RoutePoolRegistry,
+		constants.RouteMinerRegistry,
+		constants.RouteWFIL,
+	}
+
+	routes, err := getRoutes(ctx, fetchRoutes, routerCaller)
+	if err != nil {
+		return err
+	}
+
+	poolRegCaller, err := abigen.NewPoolRegistryCaller(routes[constants.RoutePoolRegistry], client)
+	if err != nil {
+		return err
+	}
+
+	// infpool is poolID 0
+	infpool, err := poolRegCaller.AllPools(&bind.CallOpts{Context: ctx}, big.NewInt(0))
+	if err != nil {
+		return err
+	}
+
+	infpoolCaller, err := abigen.NewInfinityPoolCaller(infpool, client)
+	if err != nil {
+		return err
+	}
+
+	iFIL, err := infpoolCaller.LiquidStakingToken(&bind.CallOpts{Context: ctx})
+	if err != nil {
+		return err
+	}
+
+	*sdk = InitFEVMConnection(
+		routes[constants.RouteAgentPolice],
+		routes[constants.RouteMinerRegistry],
+		router,
+		routes[constants.RoutePoolRegistry],
+		routes[constants.RouteAgentFactory],
+		iFIL,
+		routes[constants.RouteWFIL],
+		infpool,
+		adoAddr,
+		adoNamespace,
+		dialAddr,
+		token,
+		chainID,
+	)
+
+	return nil
 }
 
 func Init(

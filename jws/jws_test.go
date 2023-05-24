@@ -14,7 +14,6 @@ import (
 	"github.com/glifio/go-pools/constants"
 	"github.com/glifio/go-pools/sdk"
 	"github.com/glifio/go-pools/types"
-	"github.com/glifio/go-pools/util"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/stretchr/testify/mock"
 )
@@ -105,14 +104,12 @@ func TestBadJWSPubkey(t *testing.T) {
 
 	privateKey, _ := crypto.GenerateKey()
 
-	actionSelector, _ := util.MethodStrToBytes(constants.MethodBorrow)
-
 	token := jwt.NewWithClaims(jwt.SigningMethodES256, RequestClaims{
 		AgentAddr:       agentAddr,
 		RequesterPubKey: crypto.FromECDSAPub(&privateKey.PublicKey),
 		Target:          target,
 		Value:           value,
-		ActionSelector:  actionSelector,
+		Method:          constants.MethodBorrow,
 		EpochHeight:     big.NewInt(100),
 	})
 
@@ -149,14 +146,12 @@ func TestStaleJWS(t *testing.T) {
 	mockSDK := new(MockPoolsSDK)
 	mockSDK.On("Query").Return(mockQueries)
 
-	actionSelector, _ := util.MethodStrToBytes(constants.MethodBorrow)
-
 	token := jwt.NewWithClaims(jwt.SigningMethodES256, RequestClaims{
 		AgentAddr:       agentAddr,
 		RequesterPubKey: crypto.FromECDSAPub(&signerPrivateKey.PublicKey),
 		Target:          target,
 		Value:           value,
-		ActionSelector:  actionSelector,
+		Method:          constants.MethodBorrow,
 		// encode the chain height to be
 		EpochHeight: new(big.Int).Sub(chainHeight, EXPIRATION_EPOCH_BUFFER),
 	})

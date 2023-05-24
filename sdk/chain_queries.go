@@ -5,7 +5,18 @@ import (
 	"math/big"
 
 	"github.com/ethereum/go-ethereum/common"
+	filtypes "github.com/filecoin-project/lotus/chain/types"
 )
+
+func (q *fevmQueries) ChainHead(ctx context.Context) (*filtypes.TipSet, error) {
+	lClient, closer, err := q.extern.ConnectLotusClient()
+	if err != nil {
+		return nil, err
+	}
+	defer closer()
+
+	return lClient.ChainHead(ctx)
+}
 
 func (q *fevmQueries) ChainHeight(ctx context.Context) (*big.Int, error) {
 	ethClient, err := q.extern.ConnectEthClient()

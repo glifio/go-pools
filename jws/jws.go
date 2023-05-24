@@ -12,7 +12,6 @@ import (
 	"github.com/filecoin-project/go-address"
 	"github.com/glifio/go-pools/constants"
 	"github.com/glifio/go-pools/types"
-	"github.com/glifio/go-pools/util"
 	"github.com/golang-jwt/jwt/v5"
 )
 
@@ -22,7 +21,7 @@ type RequestClaims struct {
 	RequesterPubKey []byte
 	Target          address.Address
 	Value           *big.Int
-	ActionSelector  [4]byte
+	Method          constants.Method
 	EpochHeight     *big.Int
 }
 
@@ -41,17 +40,12 @@ func SignJWS(ctx context.Context, agentAddr common.Address, target address.Addre
 
 	pubKeyBytes := crypto.FromECDSAPub(&key.PublicKey)
 
-	actionSelector, err := util.MethodStrToBytes(method)
-	if err != nil {
-		return "", err
-	}
-
 	token := jwt.NewWithClaims(jwt.SigningMethodES256, RequestClaims{
 		AgentAddr:       agentAddr,
 		RequesterPubKey: pubKeyBytes,
 		Target:          target,
 		Value:           value,
-		ActionSelector:  actionSelector,
+		Method:          method,
 		EpochHeight:     epochHeight,
 	})
 

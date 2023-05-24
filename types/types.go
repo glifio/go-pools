@@ -11,7 +11,9 @@ import (
 	"github.com/filecoin-project/go-address"
 	"github.com/filecoin-project/go-jsonrpc"
 	"github.com/filecoin-project/lotus/api"
+	filtypes "github.com/filecoin-project/lotus/chain/types"
 	"github.com/glifio/go-pools/abigen"
+	"github.com/glifio/go-pools/constants"
 )
 
 type FEVMQueries interface {
@@ -47,6 +49,7 @@ type FEVMQueries interface {
 	DefaultEpoch(ctx context.Context) (*big.Int, error)
 	// chain methods
 	ChainHeight(ctx context.Context) (*big.Int, error)
+	ChainHead(ctx context.Context) (*filtypes.TipSet, error)
 	ChainID() *big.Int
 	ChainGetNonce(ctx context.Context, fromAddr common.Address) (*big.Int, error)
 	// state methods
@@ -55,6 +58,7 @@ type FEVMQueries interface {
 	StateWaitNextTick(ctx context.Context, currentEpochHeight *big.Int) error
 	// router methods
 	RouterOwner(ctx context.Context) (common.Address, error)
+	RouterGetRoute(ctx context.Context, route constants.Route) (common.Address, error)
 	// deployment addresses
 	AgentPolice() common.Address
 	MinerRegistry() common.Address
