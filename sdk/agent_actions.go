@@ -4,7 +4,6 @@ import (
 	"context"
 	"crypto/ecdsa"
 	"errors"
-	"log"
 	"math/big"
 
 	"github.com/ethereum/go-ethereum/common"
@@ -70,7 +69,7 @@ func (a *fevmActions) AgentBorrow(ctx context.Context, agentAddr common.Address,
 
 	sc, err := rpc.ADOClient.SignCredential(ctx, jws)
 	if err != nil {
-		log.Fatal(err)
+		return nil, err
 	}
 
 	fromAddr, _, err := util.DeriveAddrFromPk(senderKey)
@@ -123,7 +122,7 @@ func (a *fevmActions) AgentPay(ctx context.Context, agentAddr common.Address, po
 
 	sc, err := rpc.ADOClient.SignCredential(ctx, jws)
 	if err != nil {
-		log.Fatal(err)
+		return nil, err
 	}
 
 	args := []interface{}{poolID, sc}
@@ -505,7 +504,7 @@ func (a *fevmActions) AgentWithdraw(ctx context.Context, agentAddr common.Addres
 
 	sc, err := rpc.ADOClient.SignCredential(ctx, jws)
 	if err != nil {
-		log.Fatal(err)
+		return nil, err
 	}
 
 	args := []interface{}{receiver, sc}

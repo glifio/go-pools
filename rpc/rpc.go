@@ -12,7 +12,7 @@ import (
 )
 
 var ADOClient struct {
-	SignCredential func(ctx context.Context, jws string) (*abigen.SignedCredential, error)
+	SignCredential func(ctx context.Context, jws string) (abigen.SignedCredential, error)
 	AgentData      func(ctx context.Context, agentAddr common.Address) (*vc.AgentData, error)
 	AmountOwed     func(ctx context.Context, agentAddr common.Address, poolID *big.Int) (types.AgentOwed, error)
 }
