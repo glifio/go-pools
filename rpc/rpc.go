@@ -5,21 +5,16 @@ import (
 	"math/big"
 
 	"github.com/ethereum/go-ethereum/common"
-	"github.com/filecoin-project/go-address"
 	"github.com/filecoin-project/go-jsonrpc"
 	"github.com/glifio/go-pools/abigen"
 	"github.com/glifio/go-pools/types"
+	"github.com/glifio/go-pools/vc"
 )
 
 var ADOClient struct {
-	Borrow      func(context.Context, common.Address, *big.Int) (abigen.SignedCredential, error)
-	Pay         func(context.Context, common.Address, *big.Int) (abigen.SignedCredential, error)
-	Withdraw    func(context.Context, common.Address, *big.Int) (abigen.SignedCredential, error)
-	PushFunds   func(context.Context, common.Address, *big.Int, address.Address) (abigen.SignedCredential, error)
-	PullFunds   func(context.Context, common.Address, *big.Int, address.Address) (abigen.SignedCredential, error)
-	AddMiner    func(context.Context, common.Address, address.Address) (abigen.SignedCredential, error)
-	RemoveMiner func(context.Context, common.Address, address.Address) (abigen.SignedCredential, error)
-	AmountOwed  func(context.Context, common.Address, *big.Int) (types.AgentOwed, error)
+	SignCredential func(ctx context.Context, jws string) (*abigen.SignedCredential, error)
+	AgentData      func(ctx context.Context, agentAddr common.Address) (*vc.AgentData, error)
+	AmountOwed     func(ctx context.Context, agentAddr common.Address, poolID *big.Int) (types.AgentOwed, error)
 }
 
 func NewADOClient(ctx context.Context, rpcurl string, namespace string) (jsonrpc.ClientCloser, error) {

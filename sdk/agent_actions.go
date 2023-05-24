@@ -12,6 +12,8 @@ import (
 	"github.com/filecoin-project/go-address"
 	ltypes "github.com/filecoin-project/lotus/chain/types"
 	"github.com/glifio/go-pools/abigen"
+	"github.com/glifio/go-pools/constants"
+	token "github.com/glifio/go-pools/jws"
 	"github.com/glifio/go-pools/rpc"
 	"github.com/glifio/go-pools/util"
 )
@@ -43,7 +45,7 @@ func (a *fevmActions) AgentCreate(ctx context.Context, owner common.Address, ope
 	return util.WriteTx(ctx, pk, a.queries.ChainID(), common.Big0, nonce, args, agentFactoryTransactor.Create, "Agent Create")
 }
 
-func (a *fevmActions) AgentBorrow(ctx context.Context, agentAddr common.Address, poolID *big.Int, amount *big.Int, pk *ecdsa.PrivateKey) (*types.Transaction, error) {
+func (a *fevmActions) AgentBorrow(ctx context.Context, agentAddr common.Address, poolID *big.Int, amount *big.Int, senderKey *ecdsa.PrivateKey, requesterKey *ecdsa.PrivateKey) (*types.Transaction, error) {
 	client, err := a.extern.ConnectEthClient()
 	if err != nil {
 		return nil, err
@@ -61,12 +63,17 @@ func (a *fevmActions) AgentBorrow(ctx context.Context, agentAddr common.Address,
 	}
 	defer closer()
 
-	sc, err := rpc.ADOClient.Borrow(ctx, agentAddr, amount)
+	jws, err := token.SignJWS(ctx, agentAddr, address.Undef, amount, constants.MethodBorrow, requesterKey, a.queries)
+	if err != nil {
+		return nil, err
+	}
+
+	sc, err := rpc.ADOClient.SignCredential(ctx, jws)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	fromAddr, _, err := util.DeriveAddrFromPk(pk)
+	fromAddr, _, err := util.DeriveAddrFromPk(senderKey)
 	if err != nil {
 		return nil, err
 	}
@@ -78,10 +85,10 @@ func (a *fevmActions) AgentBorrow(ctx context.Context, agentAddr common.Address,
 
 	args := []interface{}{poolID, sc}
 
-	return util.WriteTx(ctx, pk, a.queries.ChainID(), common.Big0, nonce, args, agentTransactor.Borrow, "Agent Borrow")
+	return util.WriteTx(ctx, senderKey, a.queries.ChainID(), common.Big0, nonce, args, agentTransactor.Borrow, "Agent Borrow")
 }
 
-func (a *fevmActions) AgentPay(ctx context.Context, agentAddr common.Address, poolID *big.Int, amount *big.Int, pk *ecdsa.PrivateKey) (*types.Transaction, error) {
+func (a *fevmActions) AgentPay(ctx context.Context, agentAddr common.Address, poolID *big.Int, amount *big.Int, senderKey *ecdsa.PrivateKey, requesterKey *ecdsa.PrivateKey) (*types.Transaction, error) {
 	client, err := a.extern.ConnectEthClient()
 	if err != nil {
 		return nil, err
@@ -99,7 +106,7 @@ func (a *fevmActions) AgentPay(ctx context.Context, agentAddr common.Address, po
 	}
 	defer closer()
 
-	fromAddr, _, err := util.DeriveAddrFromPk(pk)
+	fromAddr, _, err := util.DeriveAddrFromPk(senderKey)
 	if err != nil {
 		return nil, err
 	}
@@ -109,17 +116,22 @@ func (a *fevmActions) AgentPay(ctx context.Context, agentAddr common.Address, po
 		return nil, err
 	}
 
-	sc, err := rpc.ADOClient.Pay(ctx, agentAddr, amount)
+	jws, err := token.SignJWS(ctx, agentAddr, address.Undef, amount, constants.MethodPay, requesterKey, a.queries)
+	if err != nil {
+		return nil, err
+	}
+
+	sc, err := rpc.ADOClient.SignCredential(ctx, jws)
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	args := []interface{}{poolID, sc}
 
-	return util.WriteTx(ctx, pk, a.queries.ChainID(), common.Big0, nonce, args, agentTransactor.Pay, "Agent Pay")
+	return util.WriteTx(ctx, senderKey, a.queries.ChainID(), common.Big0, nonce, args, agentTransactor.Pay, "Agent Pay")
 }
 
-func (a *fevmActions) AgentAddMiner(ctx context.Context, agentAddr common.Address, minerAddr address.Address, pk *ecdsa.PrivateKey) (*types.Transaction, error) {
+func (a *fevmActions) AgentAddMiner(ctx context.Context, agentAddr common.Address, minerAddr address.Address, senderKey *ecdsa.PrivateKey, requesterKey *ecdsa.PrivateKey) (*types.Transaction, error) {
 	client, err := a.extern.ConnectEthClient()
 	if err != nil {
 		return nil, err
@@ -137,12 +149,17 @@ func (a *fevmActions) AgentAddMiner(ctx context.Context, agentAddr common.Addres
 		return nil, err
 	}
 
-	sc, err := rpc.ADOClient.AddMiner(ctx, agentAddr, minerAddr)
+	jws, err := token.SignJWS(ctx, agentAddr, minerAddr, common.Big0, constants.MethodAddMiner, requesterKey, a.queries)
 	if err != nil {
 		return nil, err
 	}
 
-	fromAddr, _, err := util.DeriveAddrFromPk(pk)
+	sc, err := rpc.ADOClient.SignCredential(ctx, jws)
+	if err != nil {
+		return nil, err
+	}
+
+	fromAddr, _, err := util.DeriveAddrFromPk(senderKey)
 	if err != nil {
 		return nil, err
 	}
@@ -154,7 +171,7 @@ func (a *fevmActions) AgentAddMiner(ctx context.Context, agentAddr common.Addres
 
 	args := []interface{}{sc}
 
-	tx, err := util.WriteTx(ctx, pk, a.queries.ChainID(), common.Big0, nonce, args, agentTransactor.AddMiner, "Agent Add Miner")
+	tx, err := util.WriteTx(ctx, senderKey, a.queries.ChainID(), common.Big0, nonce, args, agentTransactor.AddMiner, "Agent Add Miner")
 	if err != nil {
 		return nil, err
 	}
@@ -162,7 +179,7 @@ func (a *fevmActions) AgentAddMiner(ctx context.Context, agentAddr common.Addres
 	return tx, nil
 }
 
-func (a *fevmActions) AgentRemoveMiner(ctx context.Context, agentAddr common.Address, minerAddr address.Address, newOwnerAddr address.Address, pk *ecdsa.PrivateKey) (*types.Transaction, error) {
+func (a *fevmActions) AgentRemoveMiner(ctx context.Context, agentAddr common.Address, minerAddr address.Address, newOwnerAddr address.Address, senderKey *ecdsa.PrivateKey, requesterKey *ecdsa.PrivateKey) (*types.Transaction, error) {
 	if newOwnerAddr.Protocol() != address.ID {
 		lapi, closer, err := a.extern.ConnectLotusClient()
 		if err != nil {
@@ -196,7 +213,7 @@ func (a *fevmActions) AgentRemoveMiner(ctx context.Context, agentAddr common.Add
 
 	agentTransactor, err := abigen.NewAgentTransactor(agentAddr, client)
 
-	fromAddr, _, err := util.DeriveAddrFromPk(pk)
+	fromAddr, _, err := util.DeriveAddrFromPk(senderKey)
 	if err != nil {
 		return nil, err
 	}
@@ -206,14 +223,19 @@ func (a *fevmActions) AgentRemoveMiner(ctx context.Context, agentAddr common.Add
 		return nil, err
 	}
 
-	sc, err := rpc.ADOClient.RemoveMiner(ctx, agentAddr, minerAddr)
+	jws, err := token.SignJWS(ctx, agentAddr, minerAddr, common.Big0, constants.MethodRemoveMiner, requesterKey, a.queries)
+	if err != nil {
+		return nil, err
+	}
+
+	sc, err := rpc.ADOClient.SignCredential(ctx, jws)
 	if err != nil {
 		return nil, err
 	}
 
 	args := []interface{}{newOwner64, sc}
 
-	tx, err := util.WriteTx(ctx, pk, a.queries.ChainID(), common.Big0, nonce, args, agentTransactor.RemoveMiner, "Agent Remove Miner")
+	tx, err := util.WriteTx(ctx, senderKey, a.queries.ChainID(), common.Big0, nonce, args, agentTransactor.RemoveMiner, "Agent Remove Miner")
 	if err != nil {
 		return nil, err
 	}
@@ -313,7 +335,7 @@ func (a *fevmActions) AgentConfirmMinerWorkerChange(ctx context.Context, agentAd
 }
 
 // AgentPullFunds pulls funds from the agent to a miner
-func (a *fevmActions) AgentPullFunds(ctx context.Context, agentAddr common.Address, amount *big.Int, miner address.Address, pk *ecdsa.PrivateKey) (*types.Transaction, error) {
+func (a *fevmActions) AgentPullFunds(ctx context.Context, agentAddr common.Address, amount *big.Int, minerAddr address.Address, senderKey *ecdsa.PrivateKey, requesterKey *ecdsa.PrivateKey) (*types.Transaction, error) {
 	client, err := a.extern.ConnectEthClient()
 	if err != nil {
 		return nil, err
@@ -330,7 +352,7 @@ func (a *fevmActions) AgentPullFunds(ctx context.Context, agentAddr common.Addre
 		return nil, err
 	}
 
-	minerU64, err := address.IDFromAddress(miner)
+	minerU64, err := address.IDFromAddress(minerAddr)
 	if err != nil {
 		return nil, err
 	}
@@ -350,7 +372,12 @@ func (a *fevmActions) AgentPullFunds(ctx context.Context, agentAddr common.Addre
 	}
 	defer closer()
 
-	sc, err := rpc.ADOClient.PullFunds(ctx, agentAddr, amount, miner)
+	jws, err := token.SignJWS(ctx, agentAddr, minerAddr, amount, constants.MethodPullFunds, requesterKey, a.queries)
+	if err != nil {
+		return nil, err
+	}
+
+	sc, err := rpc.ADOClient.SignCredential(ctx, jws)
 	if err != nil {
 		return nil, err
 	}
@@ -360,7 +387,7 @@ func (a *fevmActions) AgentPullFunds(ctx context.Context, agentAddr common.Addre
 		return nil, err
 	}
 
-	fromAddr, _, err := util.DeriveAddrFromPk(pk)
+	fromAddr, _, err := util.DeriveAddrFromPk(senderKey)
 	if err != nil {
 		return nil, err
 	}
@@ -372,11 +399,11 @@ func (a *fevmActions) AgentPullFunds(ctx context.Context, agentAddr common.Addre
 
 	args := []interface{}{sc}
 
-	return util.WriteTx(ctx, pk, a.queries.ChainID(), common.Big0, nonce, args, agentTransactor.PullFunds, "Agent Pull Funds")
+	return util.WriteTx(ctx, senderKey, a.queries.ChainID(), common.Big0, nonce, args, agentTransactor.PullFunds, "Agent Pull Funds")
 }
 
 // AgentPushFunds pushes funds from the agent to a miner
-func (a *fevmActions) AgentPushFunds(ctx context.Context, agentAddr common.Address, amount *big.Int, miner address.Address, pk *ecdsa.PrivateKey) (*types.Transaction, error) {
+func (a *fevmActions) AgentPushFunds(ctx context.Context, agentAddr common.Address, amount *big.Int, minerAddr address.Address, senderKey *ecdsa.PrivateKey, requesterKey *ecdsa.PrivateKey) (*types.Transaction, error) {
 	client, err := a.extern.ConnectEthClient()
 	if err != nil {
 		return nil, err
@@ -393,7 +420,7 @@ func (a *fevmActions) AgentPushFunds(ctx context.Context, agentAddr common.Addre
 		return nil, err
 	}
 
-	minerU64, err := address.IDFromAddress(miner)
+	minerU64, err := address.IDFromAddress(minerAddr)
 	if err != nil {
 		return nil, err
 	}
@@ -413,7 +440,12 @@ func (a *fevmActions) AgentPushFunds(ctx context.Context, agentAddr common.Addre
 	}
 	defer closer()
 
-	sc, err := rpc.ADOClient.PushFunds(ctx, agentAddr, amount, miner)
+	jws, err := token.SignJWS(ctx, agentAddr, minerAddr, amount, constants.MethodPushFunds, requesterKey, a.queries)
+	if err != nil {
+		return nil, err
+	}
+
+	sc, err := rpc.ADOClient.SignCredential(ctx, jws)
 	if err != nil {
 		return nil, err
 	}
@@ -423,7 +455,7 @@ func (a *fevmActions) AgentPushFunds(ctx context.Context, agentAddr common.Addre
 		return nil, err
 	}
 
-	fromAddr, _, err := util.DeriveAddrFromPk(pk)
+	fromAddr, _, err := util.DeriveAddrFromPk(senderKey)
 	if err != nil {
 		return nil, err
 	}
@@ -435,10 +467,10 @@ func (a *fevmActions) AgentPushFunds(ctx context.Context, agentAddr common.Addre
 
 	args := []interface{}{sc}
 
-	return util.WriteTx(ctx, pk, a.queries.ChainID(), common.Big0, nonce, args, agentTransactor.PushFunds, "Agent Push Funds")
+	return util.WriteTx(ctx, senderKey, a.queries.ChainID(), common.Big0, nonce, args, agentTransactor.PushFunds, "Agent Push Funds")
 }
 
-func (a *fevmActions) AgentWithdraw(ctx context.Context, agentAddr common.Address, receiver common.Address, amount *big.Int, pk *ecdsa.PrivateKey) (*types.Transaction, error) {
+func (a *fevmActions) AgentWithdraw(ctx context.Context, agentAddr common.Address, receiver common.Address, amount *big.Int, senderKey *ecdsa.PrivateKey, requesterKey *ecdsa.PrivateKey) (*types.Transaction, error) {
 	client, err := a.extern.ConnectEthClient()
 	if err != nil {
 		return nil, err
@@ -456,7 +488,7 @@ func (a *fevmActions) AgentWithdraw(ctx context.Context, agentAddr common.Addres
 	}
 	defer closer()
 
-	fromAddr, _, err := util.DeriveAddrFromPk(pk)
+	fromAddr, _, err := util.DeriveAddrFromPk(senderKey)
 	if err != nil {
 		return nil, err
 	}
@@ -466,12 +498,17 @@ func (a *fevmActions) AgentWithdraw(ctx context.Context, agentAddr common.Addres
 		return nil, err
 	}
 
-	sc, err := rpc.ADOClient.Withdraw(ctx, agentAddr, amount)
+	jws, err := token.SignJWS(ctx, agentAddr, address.Undef, amount, constants.MethodWithdraw, requesterKey, a.queries)
+	if err != nil {
+		return nil, err
+	}
+
+	sc, err := rpc.ADOClient.SignCredential(ctx, jws)
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	args := []interface{}{receiver, sc}
 
-	return util.WriteTx(ctx, pk, a.queries.ChainID(), common.Big0, nonce, args, agentTransactor.Withdraw, "Agent Withdraw")
+	return util.WriteTx(ctx, senderKey, a.queries.ChainID(), common.Big0, nonce, args, agentTransactor.Withdraw, "Agent Withdraw")
 }
