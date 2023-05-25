@@ -195,6 +195,61 @@ func (_c *FEVMQueries_AgentFactory_Call) RunAndReturn(run func() common.Address)
 	return _c
 }
 
+// AgentFaultyEpochStart provides a mock function with given fields: ctx, agentAddr
+func (_m *FEVMQueries) AgentFaultyEpochStart(ctx context.Context, agentAddr common.Address) (*big.Int, error) {
+	ret := _m.Called(ctx, agentAddr)
+
+	var r0 *big.Int
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, common.Address) (*big.Int, error)); ok {
+		return rf(ctx, agentAddr)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, common.Address) *big.Int); ok {
+		r0 = rf(ctx, agentAddr)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*big.Int)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, common.Address) error); ok {
+		r1 = rf(ctx, agentAddr)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// FEVMQueries_AgentFaultyEpochStart_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'AgentFaultyEpochStart'
+type FEVMQueries_AgentFaultyEpochStart_Call struct {
+	*mock.Call
+}
+
+// AgentFaultyEpochStart is a helper method to define mock.On call
+//   - ctx context.Context
+//   - agentAddr common.Address
+func (_e *FEVMQueries_Expecter) AgentFaultyEpochStart(ctx interface{}, agentAddr interface{}) *FEVMQueries_AgentFaultyEpochStart_Call {
+	return &FEVMQueries_AgentFaultyEpochStart_Call{Call: _e.mock.On("AgentFaultyEpochStart", ctx, agentAddr)}
+}
+
+func (_c *FEVMQueries_AgentFaultyEpochStart_Call) Run(run func(ctx context.Context, agentAddr common.Address)) *FEVMQueries_AgentFaultyEpochStart_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(common.Address))
+	})
+	return _c
+}
+
+func (_c *FEVMQueries_AgentFaultyEpochStart_Call) Return(_a0 *big.Int, _a1 error) *FEVMQueries_AgentFaultyEpochStart_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *FEVMQueries_AgentFaultyEpochStart_Call) RunAndReturn(run func(context.Context, common.Address) (*big.Int, error)) *FEVMQueries_AgentFaultyEpochStart_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // AgentID provides a mock function with given fields: ctx, agentAddr
 func (_m *FEVMQueries) AgentID(ctx context.Context, agentAddr common.Address) (*big.Int, error) {
 	ret := _m.Called(ctx, agentAddr)

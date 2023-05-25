@@ -31,6 +31,7 @@ type FEVMQueries interface {
 	AgentLiquidAssets(ctx context.Context, agentAddr common.Address) (*big.Int, error)
 	AgentPrincipal(ctx context.Context, agentAddr common.Address) (*big.Int, error)
 	AgentOwes(ctx context.Context, agentAddr common.Address) (*big.Int, *big.Int, error)
+	AgentFaultyEpochStart(ctx context.Context, agentAddr common.Address) (*big.Int, error)
 	// infinity pool methods
 	InfPoolGetRate(ctx context.Context, cred abigen.VerifiableCredential) (*big.Int, error)
 	InfPoolGetAgentLvl(ctx context.Context, agentID *big.Int) (*big.Int, float64, error)

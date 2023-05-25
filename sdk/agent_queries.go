@@ -270,6 +270,21 @@ func (q *fevmQueries) AgentOwes(ctx context.Context, agentAddr common.Address) (
 	return agentOwed.AmountOwed, agentOwed.Gcred, nil
 }
 
+func (q *fevmQueries) AgentFaultyEpochStart(ctx context.Context, agentAddr common.Address) (*big.Int, error) {
+	client, err := q.extern.ConnectEthClient()
+	if err != nil {
+		return nil, err
+	}
+	defer client.Close()
+
+	agentCaller, err := abigen.NewAgentCaller(agentAddr, client)
+	if err != nil {
+		return nil, err
+	}
+
+	return agentCaller.FaultySectorStartEpoch(&bind.CallOpts{Context: ctx})
+}
+
 func (q *fevmQueries) AgentVersion(ctx context.Context, agentAddr common.Address) (uint8, uint8, error) {
 	client, err := q.extern.ConnectEthClient()
 	if err != nil {
