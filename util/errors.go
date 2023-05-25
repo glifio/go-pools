@@ -55,7 +55,7 @@ func humanReadableRevert(errMsg error) error {
 		return fmt.Errorf("failed to decode error selector: %v", err)
 	}
 
-	matched, err := matchSelector([4]byte(errorSelector))
+	matched, err := matchSelector(ToByte4Selector(errorSelector))
 
 	if matched {
 		return err
