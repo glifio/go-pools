@@ -511,3 +511,28 @@ func (a *fevmActions) AgentWithdraw(ctx context.Context, agentAddr common.Addres
 
 	return util.WriteTx(ctx, senderKey, a.queries.ChainID(), common.Big0, nonce, args, agentTransactor.Withdraw, "Agent Withdraw")
 }
+
+func (a *fevmActions) AgentRefreshRoutes(ctx context.Context, agentAddr common.Address, senderKey *ecdsa.PrivateKey) (*types.Transaction, error) {
+	client, err := a.extern.ConnectEthClient()
+	if err != nil {
+		return nil, err
+	}
+	defer client.Close()
+
+	agentTransactor, err := abigen.NewAgentTransactor(agentAddr, client)
+	if err != nil {
+		return nil, err
+	}
+
+	fromAddr, _, err := util.DeriveAddrFromPk(senderKey)
+	if err != nil {
+		return nil, err
+	}
+
+	nonce, err := a.queries.ChainGetNonce(ctx, fromAddr)
+	if err != nil {
+		return nil, err
+	}
+
+	return util.WriteTx(ctx, senderKey, a.queries.ChainID(), common.Big0, nonce, []interface{}{}, agentTransactor.RefreshRoutes, "Agent RefreshRoutes")
+}

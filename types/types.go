@@ -25,7 +25,7 @@ type FEVMQueries interface {
 	AgentOwner(ctx context.Context, agentAddr common.Address) (common.Address, error)
 	AgentOperator(ctx context.Context, agentAddr common.Address) (common.Address, error)
 	AgentRequester(ctx context.Context, agentAddr common.Address) (common.Address, error)
-	AgentVersion(ctx context.Context, agentAddr common.Address) (uint8, error)
+	AgentVersion(ctx context.Context, agentAddr common.Address) (uint8, uint8, error)
 	AgentIsValid(ctx context.Context, agentAddr common.Address) (bool, error)
 	AgentMiners(ctx context.Context, agentAddr common.Address) ([]address.Address, error)
 	AgentLiquidAssets(ctx context.Context, agentAddr common.Address) (*big.Int, error)
@@ -86,6 +86,7 @@ type FEVMActions interface {
 	AgentPullFunds(ctx context.Context, agentAddr common.Address, amount *big.Int, miner address.Address, senderKey *ecdsa.PrivateKey, requesterKey *ecdsa.PrivateKey) (*types.Transaction, error)
 	AgentPushFunds(ctx context.Context, agentAddr common.Address, amount *big.Int, miner address.Address, senderKey *ecdsa.PrivateKey, requesterKey *ecdsa.PrivateKey) (*types.Transaction, error)
 	AgentWithdraw(ctx context.Context, agentAddr common.Address, receiver common.Address, amount *big.Int, senderKey *ecdsa.PrivateKey, requesterKey *ecdsa.PrivateKey) (*types.Transaction, error)
+	AgentRefreshRoutes(ctx context.Context, agentAddr common.Address, senderKey *ecdsa.PrivateKey) (*types.Transaction, error)
 
 	// infinity pool actions
 	InfPoolDepositFIL(ctx context.Context, agentAddr common.Address, amount *big.Int, pk *ecdsa.PrivateKey) (*types.Transaction, error)

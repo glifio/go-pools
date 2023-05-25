@@ -741,12 +741,13 @@ func (_c *FEVMQueries_AgentRequester_Call) RunAndReturn(run func(context.Context
 }
 
 // AgentVersion provides a mock function with given fields: ctx, agentAddr
-func (_m *FEVMQueries) AgentVersion(ctx context.Context, agentAddr common.Address) (uint8, error) {
+func (_m *FEVMQueries) AgentVersion(ctx context.Context, agentAddr common.Address) (uint8, uint8, error) {
 	ret := _m.Called(ctx, agentAddr)
 
 	var r0 uint8
-	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context, common.Address) (uint8, error)); ok {
+	var r1 uint8
+	var r2 error
+	if rf, ok := ret.Get(0).(func(context.Context, common.Address) (uint8, uint8, error)); ok {
 		return rf(ctx, agentAddr)
 	}
 	if rf, ok := ret.Get(0).(func(context.Context, common.Address) uint8); ok {
@@ -755,13 +756,19 @@ func (_m *FEVMQueries) AgentVersion(ctx context.Context, agentAddr common.Addres
 		r0 = ret.Get(0).(uint8)
 	}
 
-	if rf, ok := ret.Get(1).(func(context.Context, common.Address) error); ok {
+	if rf, ok := ret.Get(1).(func(context.Context, common.Address) uint8); ok {
 		r1 = rf(ctx, agentAddr)
 	} else {
-		r1 = ret.Error(1)
+		r1 = ret.Get(1).(uint8)
 	}
 
-	return r0, r1
+	if rf, ok := ret.Get(2).(func(context.Context, common.Address) error); ok {
+		r2 = rf(ctx, agentAddr)
+	} else {
+		r2 = ret.Error(2)
+	}
+
+	return r0, r1, r2
 }
 
 // FEVMQueries_AgentVersion_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'AgentVersion'
@@ -783,12 +790,12 @@ func (_c *FEVMQueries_AgentVersion_Call) Run(run func(ctx context.Context, agent
 	return _c
 }
 
-func (_c *FEVMQueries_AgentVersion_Call) Return(_a0 uint8, _a1 error) *FEVMQueries_AgentVersion_Call {
-	_c.Call.Return(_a0, _a1)
+func (_c *FEVMQueries_AgentVersion_Call) Return(_a0 uint8, _a1 uint8, _a2 error) *FEVMQueries_AgentVersion_Call {
+	_c.Call.Return(_a0, _a1, _a2)
 	return _c
 }
 
-func (_c *FEVMQueries_AgentVersion_Call) RunAndReturn(run func(context.Context, common.Address) (uint8, error)) *FEVMQueries_AgentVersion_Call {
+func (_c *FEVMQueries_AgentVersion_Call) RunAndReturn(run func(context.Context, common.Address) (uint8, uint8, error)) *FEVMQueries_AgentVersion_Call {
 	_c.Call.Return(run)
 	return _c
 }

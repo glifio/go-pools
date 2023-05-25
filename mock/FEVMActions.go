@@ -31,25 +31,25 @@ func (_m *FEVMActions) EXPECT() *FEVMActions_Expecter {
 	return &FEVMActions_Expecter{mock: &_m.Mock}
 }
 
-// AgentAddMiner provides a mock function with given fields: ctx, agentAddr, minerAddr, pk
-func (_m *FEVMActions) AgentAddMiner(ctx context.Context, agentAddr common.Address, minerAddr address.Address, pk *ecdsa.PrivateKey) (*types.Transaction, error) {
-	ret := _m.Called(ctx, agentAddr, minerAddr, pk)
+// AgentAddMiner provides a mock function with given fields: ctx, agentAddr, minerAddr, senderKey, requesterKey
+func (_m *FEVMActions) AgentAddMiner(ctx context.Context, agentAddr common.Address, minerAddr address.Address, senderKey *ecdsa.PrivateKey, requesterKey *ecdsa.PrivateKey) (*types.Transaction, error) {
+	ret := _m.Called(ctx, agentAddr, minerAddr, senderKey, requesterKey)
 
 	var r0 *types.Transaction
 	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context, common.Address, address.Address, *ecdsa.PrivateKey) (*types.Transaction, error)); ok {
-		return rf(ctx, agentAddr, minerAddr, pk)
+	if rf, ok := ret.Get(0).(func(context.Context, common.Address, address.Address, *ecdsa.PrivateKey, *ecdsa.PrivateKey) (*types.Transaction, error)); ok {
+		return rf(ctx, agentAddr, minerAddr, senderKey, requesterKey)
 	}
-	if rf, ok := ret.Get(0).(func(context.Context, common.Address, address.Address, *ecdsa.PrivateKey) *types.Transaction); ok {
-		r0 = rf(ctx, agentAddr, minerAddr, pk)
+	if rf, ok := ret.Get(0).(func(context.Context, common.Address, address.Address, *ecdsa.PrivateKey, *ecdsa.PrivateKey) *types.Transaction); ok {
+		r0 = rf(ctx, agentAddr, minerAddr, senderKey, requesterKey)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*types.Transaction)
 		}
 	}
 
-	if rf, ok := ret.Get(1).(func(context.Context, common.Address, address.Address, *ecdsa.PrivateKey) error); ok {
-		r1 = rf(ctx, agentAddr, minerAddr, pk)
+	if rf, ok := ret.Get(1).(func(context.Context, common.Address, address.Address, *ecdsa.PrivateKey, *ecdsa.PrivateKey) error); ok {
+		r1 = rf(ctx, agentAddr, minerAddr, senderKey, requesterKey)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -66,14 +66,15 @@ type FEVMActions_AgentAddMiner_Call struct {
 //   - ctx context.Context
 //   - agentAddr common.Address
 //   - minerAddr address.Address
-//   - pk *ecdsa.PrivateKey
-func (_e *FEVMActions_Expecter) AgentAddMiner(ctx interface{}, agentAddr interface{}, minerAddr interface{}, pk interface{}) *FEVMActions_AgentAddMiner_Call {
-	return &FEVMActions_AgentAddMiner_Call{Call: _e.mock.On("AgentAddMiner", ctx, agentAddr, minerAddr, pk)}
+//   - senderKey *ecdsa.PrivateKey
+//   - requesterKey *ecdsa.PrivateKey
+func (_e *FEVMActions_Expecter) AgentAddMiner(ctx interface{}, agentAddr interface{}, minerAddr interface{}, senderKey interface{}, requesterKey interface{}) *FEVMActions_AgentAddMiner_Call {
+	return &FEVMActions_AgentAddMiner_Call{Call: _e.mock.On("AgentAddMiner", ctx, agentAddr, minerAddr, senderKey, requesterKey)}
 }
 
-func (_c *FEVMActions_AgentAddMiner_Call) Run(run func(ctx context.Context, agentAddr common.Address, minerAddr address.Address, pk *ecdsa.PrivateKey)) *FEVMActions_AgentAddMiner_Call {
+func (_c *FEVMActions_AgentAddMiner_Call) Run(run func(ctx context.Context, agentAddr common.Address, minerAddr address.Address, senderKey *ecdsa.PrivateKey, requesterKey *ecdsa.PrivateKey)) *FEVMActions_AgentAddMiner_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(common.Address), args[2].(address.Address), args[3].(*ecdsa.PrivateKey))
+		run(args[0].(context.Context), args[1].(common.Address), args[2].(address.Address), args[3].(*ecdsa.PrivateKey), args[4].(*ecdsa.PrivateKey))
 	})
 	return _c
 }
@@ -83,30 +84,30 @@ func (_c *FEVMActions_AgentAddMiner_Call) Return(_a0 *types.Transaction, _a1 err
 	return _c
 }
 
-func (_c *FEVMActions_AgentAddMiner_Call) RunAndReturn(run func(context.Context, common.Address, address.Address, *ecdsa.PrivateKey) (*types.Transaction, error)) *FEVMActions_AgentAddMiner_Call {
+func (_c *FEVMActions_AgentAddMiner_Call) RunAndReturn(run func(context.Context, common.Address, address.Address, *ecdsa.PrivateKey, *ecdsa.PrivateKey) (*types.Transaction, error)) *FEVMActions_AgentAddMiner_Call {
 	_c.Call.Return(run)
 	return _c
 }
 
-// AgentBorrow provides a mock function with given fields: ctx, agentAddr, poolID, amount, pk
-func (_m *FEVMActions) AgentBorrow(ctx context.Context, agentAddr common.Address, poolID *big.Int, amount *big.Int, pk *ecdsa.PrivateKey) (*types.Transaction, error) {
-	ret := _m.Called(ctx, agentAddr, poolID, amount, pk)
+// AgentBorrow provides a mock function with given fields: ctx, agentAddr, poolID, amount, senderKey, requesterKey
+func (_m *FEVMActions) AgentBorrow(ctx context.Context, agentAddr common.Address, poolID *big.Int, amount *big.Int, senderKey *ecdsa.PrivateKey, requesterKey *ecdsa.PrivateKey) (*types.Transaction, error) {
+	ret := _m.Called(ctx, agentAddr, poolID, amount, senderKey, requesterKey)
 
 	var r0 *types.Transaction
 	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context, common.Address, *big.Int, *big.Int, *ecdsa.PrivateKey) (*types.Transaction, error)); ok {
-		return rf(ctx, agentAddr, poolID, amount, pk)
+	if rf, ok := ret.Get(0).(func(context.Context, common.Address, *big.Int, *big.Int, *ecdsa.PrivateKey, *ecdsa.PrivateKey) (*types.Transaction, error)); ok {
+		return rf(ctx, agentAddr, poolID, amount, senderKey, requesterKey)
 	}
-	if rf, ok := ret.Get(0).(func(context.Context, common.Address, *big.Int, *big.Int, *ecdsa.PrivateKey) *types.Transaction); ok {
-		r0 = rf(ctx, agentAddr, poolID, amount, pk)
+	if rf, ok := ret.Get(0).(func(context.Context, common.Address, *big.Int, *big.Int, *ecdsa.PrivateKey, *ecdsa.PrivateKey) *types.Transaction); ok {
+		r0 = rf(ctx, agentAddr, poolID, amount, senderKey, requesterKey)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*types.Transaction)
 		}
 	}
 
-	if rf, ok := ret.Get(1).(func(context.Context, common.Address, *big.Int, *big.Int, *ecdsa.PrivateKey) error); ok {
-		r1 = rf(ctx, agentAddr, poolID, amount, pk)
+	if rf, ok := ret.Get(1).(func(context.Context, common.Address, *big.Int, *big.Int, *ecdsa.PrivateKey, *ecdsa.PrivateKey) error); ok {
+		r1 = rf(ctx, agentAddr, poolID, amount, senderKey, requesterKey)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -124,14 +125,15 @@ type FEVMActions_AgentBorrow_Call struct {
 //   - agentAddr common.Address
 //   - poolID *big.Int
 //   - amount *big.Int
-//   - pk *ecdsa.PrivateKey
-func (_e *FEVMActions_Expecter) AgentBorrow(ctx interface{}, agentAddr interface{}, poolID interface{}, amount interface{}, pk interface{}) *FEVMActions_AgentBorrow_Call {
-	return &FEVMActions_AgentBorrow_Call{Call: _e.mock.On("AgentBorrow", ctx, agentAddr, poolID, amount, pk)}
+//   - senderKey *ecdsa.PrivateKey
+//   - requesterKey *ecdsa.PrivateKey
+func (_e *FEVMActions_Expecter) AgentBorrow(ctx interface{}, agentAddr interface{}, poolID interface{}, amount interface{}, senderKey interface{}, requesterKey interface{}) *FEVMActions_AgentBorrow_Call {
+	return &FEVMActions_AgentBorrow_Call{Call: _e.mock.On("AgentBorrow", ctx, agentAddr, poolID, amount, senderKey, requesterKey)}
 }
 
-func (_c *FEVMActions_AgentBorrow_Call) Run(run func(ctx context.Context, agentAddr common.Address, poolID *big.Int, amount *big.Int, pk *ecdsa.PrivateKey)) *FEVMActions_AgentBorrow_Call {
+func (_c *FEVMActions_AgentBorrow_Call) Run(run func(ctx context.Context, agentAddr common.Address, poolID *big.Int, amount *big.Int, senderKey *ecdsa.PrivateKey, requesterKey *ecdsa.PrivateKey)) *FEVMActions_AgentBorrow_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(common.Address), args[2].(*big.Int), args[3].(*big.Int), args[4].(*ecdsa.PrivateKey))
+		run(args[0].(context.Context), args[1].(common.Address), args[2].(*big.Int), args[3].(*big.Int), args[4].(*ecdsa.PrivateKey), args[5].(*ecdsa.PrivateKey))
 	})
 	return _c
 }
@@ -141,7 +143,7 @@ func (_c *FEVMActions_AgentBorrow_Call) Return(_a0 *types.Transaction, _a1 error
 	return _c
 }
 
-func (_c *FEVMActions_AgentBorrow_Call) RunAndReturn(run func(context.Context, common.Address, *big.Int, *big.Int, *ecdsa.PrivateKey) (*types.Transaction, error)) *FEVMActions_AgentBorrow_Call {
+func (_c *FEVMActions_AgentBorrow_Call) RunAndReturn(run func(context.Context, common.Address, *big.Int, *big.Int, *ecdsa.PrivateKey, *ecdsa.PrivateKey) (*types.Transaction, error)) *FEVMActions_AgentBorrow_Call {
 	_c.Call.Return(run)
 	return _c
 }
@@ -320,25 +322,25 @@ func (_c *FEVMActions_AgentCreate_Call) RunAndReturn(run func(context.Context, c
 	return _c
 }
 
-// AgentPay provides a mock function with given fields: ctx, agentAddr, poolID, amount, pk
-func (_m *FEVMActions) AgentPay(ctx context.Context, agentAddr common.Address, poolID *big.Int, amount *big.Int, pk *ecdsa.PrivateKey) (*types.Transaction, error) {
-	ret := _m.Called(ctx, agentAddr, poolID, amount, pk)
+// AgentPay provides a mock function with given fields: ctx, agentAddr, poolID, amount, senderKey, requesterKey
+func (_m *FEVMActions) AgentPay(ctx context.Context, agentAddr common.Address, poolID *big.Int, amount *big.Int, senderKey *ecdsa.PrivateKey, requesterKey *ecdsa.PrivateKey) (*types.Transaction, error) {
+	ret := _m.Called(ctx, agentAddr, poolID, amount, senderKey, requesterKey)
 
 	var r0 *types.Transaction
 	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context, common.Address, *big.Int, *big.Int, *ecdsa.PrivateKey) (*types.Transaction, error)); ok {
-		return rf(ctx, agentAddr, poolID, amount, pk)
+	if rf, ok := ret.Get(0).(func(context.Context, common.Address, *big.Int, *big.Int, *ecdsa.PrivateKey, *ecdsa.PrivateKey) (*types.Transaction, error)); ok {
+		return rf(ctx, agentAddr, poolID, amount, senderKey, requesterKey)
 	}
-	if rf, ok := ret.Get(0).(func(context.Context, common.Address, *big.Int, *big.Int, *ecdsa.PrivateKey) *types.Transaction); ok {
-		r0 = rf(ctx, agentAddr, poolID, amount, pk)
+	if rf, ok := ret.Get(0).(func(context.Context, common.Address, *big.Int, *big.Int, *ecdsa.PrivateKey, *ecdsa.PrivateKey) *types.Transaction); ok {
+		r0 = rf(ctx, agentAddr, poolID, amount, senderKey, requesterKey)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*types.Transaction)
 		}
 	}
 
-	if rf, ok := ret.Get(1).(func(context.Context, common.Address, *big.Int, *big.Int, *ecdsa.PrivateKey) error); ok {
-		r1 = rf(ctx, agentAddr, poolID, amount, pk)
+	if rf, ok := ret.Get(1).(func(context.Context, common.Address, *big.Int, *big.Int, *ecdsa.PrivateKey, *ecdsa.PrivateKey) error); ok {
+		r1 = rf(ctx, agentAddr, poolID, amount, senderKey, requesterKey)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -356,14 +358,15 @@ type FEVMActions_AgentPay_Call struct {
 //   - agentAddr common.Address
 //   - poolID *big.Int
 //   - amount *big.Int
-//   - pk *ecdsa.PrivateKey
-func (_e *FEVMActions_Expecter) AgentPay(ctx interface{}, agentAddr interface{}, poolID interface{}, amount interface{}, pk interface{}) *FEVMActions_AgentPay_Call {
-	return &FEVMActions_AgentPay_Call{Call: _e.mock.On("AgentPay", ctx, agentAddr, poolID, amount, pk)}
+//   - senderKey *ecdsa.PrivateKey
+//   - requesterKey *ecdsa.PrivateKey
+func (_e *FEVMActions_Expecter) AgentPay(ctx interface{}, agentAddr interface{}, poolID interface{}, amount interface{}, senderKey interface{}, requesterKey interface{}) *FEVMActions_AgentPay_Call {
+	return &FEVMActions_AgentPay_Call{Call: _e.mock.On("AgentPay", ctx, agentAddr, poolID, amount, senderKey, requesterKey)}
 }
 
-func (_c *FEVMActions_AgentPay_Call) Run(run func(ctx context.Context, agentAddr common.Address, poolID *big.Int, amount *big.Int, pk *ecdsa.PrivateKey)) *FEVMActions_AgentPay_Call {
+func (_c *FEVMActions_AgentPay_Call) Run(run func(ctx context.Context, agentAddr common.Address, poolID *big.Int, amount *big.Int, senderKey *ecdsa.PrivateKey, requesterKey *ecdsa.PrivateKey)) *FEVMActions_AgentPay_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(common.Address), args[2].(*big.Int), args[3].(*big.Int), args[4].(*ecdsa.PrivateKey))
+		run(args[0].(context.Context), args[1].(common.Address), args[2].(*big.Int), args[3].(*big.Int), args[4].(*ecdsa.PrivateKey), args[5].(*ecdsa.PrivateKey))
 	})
 	return _c
 }
@@ -373,30 +376,30 @@ func (_c *FEVMActions_AgentPay_Call) Return(_a0 *types.Transaction, _a1 error) *
 	return _c
 }
 
-func (_c *FEVMActions_AgentPay_Call) RunAndReturn(run func(context.Context, common.Address, *big.Int, *big.Int, *ecdsa.PrivateKey) (*types.Transaction, error)) *FEVMActions_AgentPay_Call {
+func (_c *FEVMActions_AgentPay_Call) RunAndReturn(run func(context.Context, common.Address, *big.Int, *big.Int, *ecdsa.PrivateKey, *ecdsa.PrivateKey) (*types.Transaction, error)) *FEVMActions_AgentPay_Call {
 	_c.Call.Return(run)
 	return _c
 }
 
-// AgentPullFunds provides a mock function with given fields: ctx, agentAddr, amount, miner, pk
-func (_m *FEVMActions) AgentPullFunds(ctx context.Context, agentAddr common.Address, amount *big.Int, miner address.Address, pk *ecdsa.PrivateKey) (*types.Transaction, error) {
-	ret := _m.Called(ctx, agentAddr, amount, miner, pk)
+// AgentPullFunds provides a mock function with given fields: ctx, agentAddr, amount, miner, senderKey, requesterKey
+func (_m *FEVMActions) AgentPullFunds(ctx context.Context, agentAddr common.Address, amount *big.Int, miner address.Address, senderKey *ecdsa.PrivateKey, requesterKey *ecdsa.PrivateKey) (*types.Transaction, error) {
+	ret := _m.Called(ctx, agentAddr, amount, miner, senderKey, requesterKey)
 
 	var r0 *types.Transaction
 	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context, common.Address, *big.Int, address.Address, *ecdsa.PrivateKey) (*types.Transaction, error)); ok {
-		return rf(ctx, agentAddr, amount, miner, pk)
+	if rf, ok := ret.Get(0).(func(context.Context, common.Address, *big.Int, address.Address, *ecdsa.PrivateKey, *ecdsa.PrivateKey) (*types.Transaction, error)); ok {
+		return rf(ctx, agentAddr, amount, miner, senderKey, requesterKey)
 	}
-	if rf, ok := ret.Get(0).(func(context.Context, common.Address, *big.Int, address.Address, *ecdsa.PrivateKey) *types.Transaction); ok {
-		r0 = rf(ctx, agentAddr, amount, miner, pk)
+	if rf, ok := ret.Get(0).(func(context.Context, common.Address, *big.Int, address.Address, *ecdsa.PrivateKey, *ecdsa.PrivateKey) *types.Transaction); ok {
+		r0 = rf(ctx, agentAddr, amount, miner, senderKey, requesterKey)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*types.Transaction)
 		}
 	}
 
-	if rf, ok := ret.Get(1).(func(context.Context, common.Address, *big.Int, address.Address, *ecdsa.PrivateKey) error); ok {
-		r1 = rf(ctx, agentAddr, amount, miner, pk)
+	if rf, ok := ret.Get(1).(func(context.Context, common.Address, *big.Int, address.Address, *ecdsa.PrivateKey, *ecdsa.PrivateKey) error); ok {
+		r1 = rf(ctx, agentAddr, amount, miner, senderKey, requesterKey)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -414,14 +417,15 @@ type FEVMActions_AgentPullFunds_Call struct {
 //   - agentAddr common.Address
 //   - amount *big.Int
 //   - miner address.Address
-//   - pk *ecdsa.PrivateKey
-func (_e *FEVMActions_Expecter) AgentPullFunds(ctx interface{}, agentAddr interface{}, amount interface{}, miner interface{}, pk interface{}) *FEVMActions_AgentPullFunds_Call {
-	return &FEVMActions_AgentPullFunds_Call{Call: _e.mock.On("AgentPullFunds", ctx, agentAddr, amount, miner, pk)}
+//   - senderKey *ecdsa.PrivateKey
+//   - requesterKey *ecdsa.PrivateKey
+func (_e *FEVMActions_Expecter) AgentPullFunds(ctx interface{}, agentAddr interface{}, amount interface{}, miner interface{}, senderKey interface{}, requesterKey interface{}) *FEVMActions_AgentPullFunds_Call {
+	return &FEVMActions_AgentPullFunds_Call{Call: _e.mock.On("AgentPullFunds", ctx, agentAddr, amount, miner, senderKey, requesterKey)}
 }
 
-func (_c *FEVMActions_AgentPullFunds_Call) Run(run func(ctx context.Context, agentAddr common.Address, amount *big.Int, miner address.Address, pk *ecdsa.PrivateKey)) *FEVMActions_AgentPullFunds_Call {
+func (_c *FEVMActions_AgentPullFunds_Call) Run(run func(ctx context.Context, agentAddr common.Address, amount *big.Int, miner address.Address, senderKey *ecdsa.PrivateKey, requesterKey *ecdsa.PrivateKey)) *FEVMActions_AgentPullFunds_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(common.Address), args[2].(*big.Int), args[3].(address.Address), args[4].(*ecdsa.PrivateKey))
+		run(args[0].(context.Context), args[1].(common.Address), args[2].(*big.Int), args[3].(address.Address), args[4].(*ecdsa.PrivateKey), args[5].(*ecdsa.PrivateKey))
 	})
 	return _c
 }
@@ -431,30 +435,30 @@ func (_c *FEVMActions_AgentPullFunds_Call) Return(_a0 *types.Transaction, _a1 er
 	return _c
 }
 
-func (_c *FEVMActions_AgentPullFunds_Call) RunAndReturn(run func(context.Context, common.Address, *big.Int, address.Address, *ecdsa.PrivateKey) (*types.Transaction, error)) *FEVMActions_AgentPullFunds_Call {
+func (_c *FEVMActions_AgentPullFunds_Call) RunAndReturn(run func(context.Context, common.Address, *big.Int, address.Address, *ecdsa.PrivateKey, *ecdsa.PrivateKey) (*types.Transaction, error)) *FEVMActions_AgentPullFunds_Call {
 	_c.Call.Return(run)
 	return _c
 }
 
-// AgentPushFunds provides a mock function with given fields: ctx, agentAddr, amount, miner, pk
-func (_m *FEVMActions) AgentPushFunds(ctx context.Context, agentAddr common.Address, amount *big.Int, miner address.Address, pk *ecdsa.PrivateKey) (*types.Transaction, error) {
-	ret := _m.Called(ctx, agentAddr, amount, miner, pk)
+// AgentPushFunds provides a mock function with given fields: ctx, agentAddr, amount, miner, senderKey, requesterKey
+func (_m *FEVMActions) AgentPushFunds(ctx context.Context, agentAddr common.Address, amount *big.Int, miner address.Address, senderKey *ecdsa.PrivateKey, requesterKey *ecdsa.PrivateKey) (*types.Transaction, error) {
+	ret := _m.Called(ctx, agentAddr, amount, miner, senderKey, requesterKey)
 
 	var r0 *types.Transaction
 	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context, common.Address, *big.Int, address.Address, *ecdsa.PrivateKey) (*types.Transaction, error)); ok {
-		return rf(ctx, agentAddr, amount, miner, pk)
+	if rf, ok := ret.Get(0).(func(context.Context, common.Address, *big.Int, address.Address, *ecdsa.PrivateKey, *ecdsa.PrivateKey) (*types.Transaction, error)); ok {
+		return rf(ctx, agentAddr, amount, miner, senderKey, requesterKey)
 	}
-	if rf, ok := ret.Get(0).(func(context.Context, common.Address, *big.Int, address.Address, *ecdsa.PrivateKey) *types.Transaction); ok {
-		r0 = rf(ctx, agentAddr, amount, miner, pk)
+	if rf, ok := ret.Get(0).(func(context.Context, common.Address, *big.Int, address.Address, *ecdsa.PrivateKey, *ecdsa.PrivateKey) *types.Transaction); ok {
+		r0 = rf(ctx, agentAddr, amount, miner, senderKey, requesterKey)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*types.Transaction)
 		}
 	}
 
-	if rf, ok := ret.Get(1).(func(context.Context, common.Address, *big.Int, address.Address, *ecdsa.PrivateKey) error); ok {
-		r1 = rf(ctx, agentAddr, amount, miner, pk)
+	if rf, ok := ret.Get(1).(func(context.Context, common.Address, *big.Int, address.Address, *ecdsa.PrivateKey, *ecdsa.PrivateKey) error); ok {
+		r1 = rf(ctx, agentAddr, amount, miner, senderKey, requesterKey)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -472,14 +476,15 @@ type FEVMActions_AgentPushFunds_Call struct {
 //   - agentAddr common.Address
 //   - amount *big.Int
 //   - miner address.Address
-//   - pk *ecdsa.PrivateKey
-func (_e *FEVMActions_Expecter) AgentPushFunds(ctx interface{}, agentAddr interface{}, amount interface{}, miner interface{}, pk interface{}) *FEVMActions_AgentPushFunds_Call {
-	return &FEVMActions_AgentPushFunds_Call{Call: _e.mock.On("AgentPushFunds", ctx, agentAddr, amount, miner, pk)}
+//   - senderKey *ecdsa.PrivateKey
+//   - requesterKey *ecdsa.PrivateKey
+func (_e *FEVMActions_Expecter) AgentPushFunds(ctx interface{}, agentAddr interface{}, amount interface{}, miner interface{}, senderKey interface{}, requesterKey interface{}) *FEVMActions_AgentPushFunds_Call {
+	return &FEVMActions_AgentPushFunds_Call{Call: _e.mock.On("AgentPushFunds", ctx, agentAddr, amount, miner, senderKey, requesterKey)}
 }
 
-func (_c *FEVMActions_AgentPushFunds_Call) Run(run func(ctx context.Context, agentAddr common.Address, amount *big.Int, miner address.Address, pk *ecdsa.PrivateKey)) *FEVMActions_AgentPushFunds_Call {
+func (_c *FEVMActions_AgentPushFunds_Call) Run(run func(ctx context.Context, agentAddr common.Address, amount *big.Int, miner address.Address, senderKey *ecdsa.PrivateKey, requesterKey *ecdsa.PrivateKey)) *FEVMActions_AgentPushFunds_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(common.Address), args[2].(*big.Int), args[3].(address.Address), args[4].(*ecdsa.PrivateKey))
+		run(args[0].(context.Context), args[1].(common.Address), args[2].(*big.Int), args[3].(address.Address), args[4].(*ecdsa.PrivateKey), args[5].(*ecdsa.PrivateKey))
 	})
 	return _c
 }
@@ -489,30 +494,86 @@ func (_c *FEVMActions_AgentPushFunds_Call) Return(_a0 *types.Transaction, _a1 er
 	return _c
 }
 
-func (_c *FEVMActions_AgentPushFunds_Call) RunAndReturn(run func(context.Context, common.Address, *big.Int, address.Address, *ecdsa.PrivateKey) (*types.Transaction, error)) *FEVMActions_AgentPushFunds_Call {
+func (_c *FEVMActions_AgentPushFunds_Call) RunAndReturn(run func(context.Context, common.Address, *big.Int, address.Address, *ecdsa.PrivateKey, *ecdsa.PrivateKey) (*types.Transaction, error)) *FEVMActions_AgentPushFunds_Call {
 	_c.Call.Return(run)
 	return _c
 }
 
-// AgentRemoveMiner provides a mock function with given fields: ctx, agentAddr, minerAddr, newOwnerAddr, pk
-func (_m *FEVMActions) AgentRemoveMiner(ctx context.Context, agentAddr common.Address, minerAddr address.Address, newOwnerAddr address.Address, pk *ecdsa.PrivateKey) (*types.Transaction, error) {
-	ret := _m.Called(ctx, agentAddr, minerAddr, newOwnerAddr, pk)
+// AgentRefreshRoutes provides a mock function with given fields: ctx, agentAddr, senderKey
+func (_m *FEVMActions) AgentRefreshRoutes(ctx context.Context, agentAddr common.Address, senderKey *ecdsa.PrivateKey) (*types.Transaction, error) {
+	ret := _m.Called(ctx, agentAddr, senderKey)
 
 	var r0 *types.Transaction
 	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context, common.Address, address.Address, address.Address, *ecdsa.PrivateKey) (*types.Transaction, error)); ok {
-		return rf(ctx, agentAddr, minerAddr, newOwnerAddr, pk)
+	if rf, ok := ret.Get(0).(func(context.Context, common.Address, *ecdsa.PrivateKey) (*types.Transaction, error)); ok {
+		return rf(ctx, agentAddr, senderKey)
 	}
-	if rf, ok := ret.Get(0).(func(context.Context, common.Address, address.Address, address.Address, *ecdsa.PrivateKey) *types.Transaction); ok {
-		r0 = rf(ctx, agentAddr, minerAddr, newOwnerAddr, pk)
+	if rf, ok := ret.Get(0).(func(context.Context, common.Address, *ecdsa.PrivateKey) *types.Transaction); ok {
+		r0 = rf(ctx, agentAddr, senderKey)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*types.Transaction)
 		}
 	}
 
-	if rf, ok := ret.Get(1).(func(context.Context, common.Address, address.Address, address.Address, *ecdsa.PrivateKey) error); ok {
-		r1 = rf(ctx, agentAddr, minerAddr, newOwnerAddr, pk)
+	if rf, ok := ret.Get(1).(func(context.Context, common.Address, *ecdsa.PrivateKey) error); ok {
+		r1 = rf(ctx, agentAddr, senderKey)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// FEVMActions_AgentRefreshRoutes_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'AgentRefreshRoutes'
+type FEVMActions_AgentRefreshRoutes_Call struct {
+	*mock.Call
+}
+
+// AgentRefreshRoutes is a helper method to define mock.On call
+//   - ctx context.Context
+//   - agentAddr common.Address
+//   - senderKey *ecdsa.PrivateKey
+func (_e *FEVMActions_Expecter) AgentRefreshRoutes(ctx interface{}, agentAddr interface{}, senderKey interface{}) *FEVMActions_AgentRefreshRoutes_Call {
+	return &FEVMActions_AgentRefreshRoutes_Call{Call: _e.mock.On("AgentRefreshRoutes", ctx, agentAddr, senderKey)}
+}
+
+func (_c *FEVMActions_AgentRefreshRoutes_Call) Run(run func(ctx context.Context, agentAddr common.Address, senderKey *ecdsa.PrivateKey)) *FEVMActions_AgentRefreshRoutes_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(common.Address), args[2].(*ecdsa.PrivateKey))
+	})
+	return _c
+}
+
+func (_c *FEVMActions_AgentRefreshRoutes_Call) Return(_a0 *types.Transaction, _a1 error) *FEVMActions_AgentRefreshRoutes_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *FEVMActions_AgentRefreshRoutes_Call) RunAndReturn(run func(context.Context, common.Address, *ecdsa.PrivateKey) (*types.Transaction, error)) *FEVMActions_AgentRefreshRoutes_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// AgentRemoveMiner provides a mock function with given fields: ctx, agentAddr, minerAddr, newOwnerAddr, senderKey, requesterKey
+func (_m *FEVMActions) AgentRemoveMiner(ctx context.Context, agentAddr common.Address, minerAddr address.Address, newOwnerAddr address.Address, senderKey *ecdsa.PrivateKey, requesterKey *ecdsa.PrivateKey) (*types.Transaction, error) {
+	ret := _m.Called(ctx, agentAddr, minerAddr, newOwnerAddr, senderKey, requesterKey)
+
+	var r0 *types.Transaction
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, common.Address, address.Address, address.Address, *ecdsa.PrivateKey, *ecdsa.PrivateKey) (*types.Transaction, error)); ok {
+		return rf(ctx, agentAddr, minerAddr, newOwnerAddr, senderKey, requesterKey)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, common.Address, address.Address, address.Address, *ecdsa.PrivateKey, *ecdsa.PrivateKey) *types.Transaction); ok {
+		r0 = rf(ctx, agentAddr, minerAddr, newOwnerAddr, senderKey, requesterKey)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*types.Transaction)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, common.Address, address.Address, address.Address, *ecdsa.PrivateKey, *ecdsa.PrivateKey) error); ok {
+		r1 = rf(ctx, agentAddr, minerAddr, newOwnerAddr, senderKey, requesterKey)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -530,14 +591,15 @@ type FEVMActions_AgentRemoveMiner_Call struct {
 //   - agentAddr common.Address
 //   - minerAddr address.Address
 //   - newOwnerAddr address.Address
-//   - pk *ecdsa.PrivateKey
-func (_e *FEVMActions_Expecter) AgentRemoveMiner(ctx interface{}, agentAddr interface{}, minerAddr interface{}, newOwnerAddr interface{}, pk interface{}) *FEVMActions_AgentRemoveMiner_Call {
-	return &FEVMActions_AgentRemoveMiner_Call{Call: _e.mock.On("AgentRemoveMiner", ctx, agentAddr, minerAddr, newOwnerAddr, pk)}
+//   - senderKey *ecdsa.PrivateKey
+//   - requesterKey *ecdsa.PrivateKey
+func (_e *FEVMActions_Expecter) AgentRemoveMiner(ctx interface{}, agentAddr interface{}, minerAddr interface{}, newOwnerAddr interface{}, senderKey interface{}, requesterKey interface{}) *FEVMActions_AgentRemoveMiner_Call {
+	return &FEVMActions_AgentRemoveMiner_Call{Call: _e.mock.On("AgentRemoveMiner", ctx, agentAddr, minerAddr, newOwnerAddr, senderKey, requesterKey)}
 }
 
-func (_c *FEVMActions_AgentRemoveMiner_Call) Run(run func(ctx context.Context, agentAddr common.Address, minerAddr address.Address, newOwnerAddr address.Address, pk *ecdsa.PrivateKey)) *FEVMActions_AgentRemoveMiner_Call {
+func (_c *FEVMActions_AgentRemoveMiner_Call) Run(run func(ctx context.Context, agentAddr common.Address, minerAddr address.Address, newOwnerAddr address.Address, senderKey *ecdsa.PrivateKey, requesterKey *ecdsa.PrivateKey)) *FEVMActions_AgentRemoveMiner_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(common.Address), args[2].(address.Address), args[3].(address.Address), args[4].(*ecdsa.PrivateKey))
+		run(args[0].(context.Context), args[1].(common.Address), args[2].(address.Address), args[3].(address.Address), args[4].(*ecdsa.PrivateKey), args[5].(*ecdsa.PrivateKey))
 	})
 	return _c
 }
@@ -547,30 +609,30 @@ func (_c *FEVMActions_AgentRemoveMiner_Call) Return(_a0 *types.Transaction, _a1 
 	return _c
 }
 
-func (_c *FEVMActions_AgentRemoveMiner_Call) RunAndReturn(run func(context.Context, common.Address, address.Address, address.Address, *ecdsa.PrivateKey) (*types.Transaction, error)) *FEVMActions_AgentRemoveMiner_Call {
+func (_c *FEVMActions_AgentRemoveMiner_Call) RunAndReturn(run func(context.Context, common.Address, address.Address, address.Address, *ecdsa.PrivateKey, *ecdsa.PrivateKey) (*types.Transaction, error)) *FEVMActions_AgentRemoveMiner_Call {
 	_c.Call.Return(run)
 	return _c
 }
 
-// AgentWithdraw provides a mock function with given fields: ctx, agentAddr, receiver, amount, pk
-func (_m *FEVMActions) AgentWithdraw(ctx context.Context, agentAddr common.Address, receiver common.Address, amount *big.Int, pk *ecdsa.PrivateKey) (*types.Transaction, error) {
-	ret := _m.Called(ctx, agentAddr, receiver, amount, pk)
+// AgentWithdraw provides a mock function with given fields: ctx, agentAddr, receiver, amount, senderKey, requesterKey
+func (_m *FEVMActions) AgentWithdraw(ctx context.Context, agentAddr common.Address, receiver common.Address, amount *big.Int, senderKey *ecdsa.PrivateKey, requesterKey *ecdsa.PrivateKey) (*types.Transaction, error) {
+	ret := _m.Called(ctx, agentAddr, receiver, amount, senderKey, requesterKey)
 
 	var r0 *types.Transaction
 	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context, common.Address, common.Address, *big.Int, *ecdsa.PrivateKey) (*types.Transaction, error)); ok {
-		return rf(ctx, agentAddr, receiver, amount, pk)
+	if rf, ok := ret.Get(0).(func(context.Context, common.Address, common.Address, *big.Int, *ecdsa.PrivateKey, *ecdsa.PrivateKey) (*types.Transaction, error)); ok {
+		return rf(ctx, agentAddr, receiver, amount, senderKey, requesterKey)
 	}
-	if rf, ok := ret.Get(0).(func(context.Context, common.Address, common.Address, *big.Int, *ecdsa.PrivateKey) *types.Transaction); ok {
-		r0 = rf(ctx, agentAddr, receiver, amount, pk)
+	if rf, ok := ret.Get(0).(func(context.Context, common.Address, common.Address, *big.Int, *ecdsa.PrivateKey, *ecdsa.PrivateKey) *types.Transaction); ok {
+		r0 = rf(ctx, agentAddr, receiver, amount, senderKey, requesterKey)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*types.Transaction)
 		}
 	}
 
-	if rf, ok := ret.Get(1).(func(context.Context, common.Address, common.Address, *big.Int, *ecdsa.PrivateKey) error); ok {
-		r1 = rf(ctx, agentAddr, receiver, amount, pk)
+	if rf, ok := ret.Get(1).(func(context.Context, common.Address, common.Address, *big.Int, *ecdsa.PrivateKey, *ecdsa.PrivateKey) error); ok {
+		r1 = rf(ctx, agentAddr, receiver, amount, senderKey, requesterKey)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -588,14 +650,15 @@ type FEVMActions_AgentWithdraw_Call struct {
 //   - agentAddr common.Address
 //   - receiver common.Address
 //   - amount *big.Int
-//   - pk *ecdsa.PrivateKey
-func (_e *FEVMActions_Expecter) AgentWithdraw(ctx interface{}, agentAddr interface{}, receiver interface{}, amount interface{}, pk interface{}) *FEVMActions_AgentWithdraw_Call {
-	return &FEVMActions_AgentWithdraw_Call{Call: _e.mock.On("AgentWithdraw", ctx, agentAddr, receiver, amount, pk)}
+//   - senderKey *ecdsa.PrivateKey
+//   - requesterKey *ecdsa.PrivateKey
+func (_e *FEVMActions_Expecter) AgentWithdraw(ctx interface{}, agentAddr interface{}, receiver interface{}, amount interface{}, senderKey interface{}, requesterKey interface{}) *FEVMActions_AgentWithdraw_Call {
+	return &FEVMActions_AgentWithdraw_Call{Call: _e.mock.On("AgentWithdraw", ctx, agentAddr, receiver, amount, senderKey, requesterKey)}
 }
 
-func (_c *FEVMActions_AgentWithdraw_Call) Run(run func(ctx context.Context, agentAddr common.Address, receiver common.Address, amount *big.Int, pk *ecdsa.PrivateKey)) *FEVMActions_AgentWithdraw_Call {
+func (_c *FEVMActions_AgentWithdraw_Call) Run(run func(ctx context.Context, agentAddr common.Address, receiver common.Address, amount *big.Int, senderKey *ecdsa.PrivateKey, requesterKey *ecdsa.PrivateKey)) *FEVMActions_AgentWithdraw_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(common.Address), args[2].(common.Address), args[3].(*big.Int), args[4].(*ecdsa.PrivateKey))
+		run(args[0].(context.Context), args[1].(common.Address), args[2].(common.Address), args[3].(*big.Int), args[4].(*ecdsa.PrivateKey), args[5].(*ecdsa.PrivateKey))
 	})
 	return _c
 }
@@ -605,7 +668,7 @@ func (_c *FEVMActions_AgentWithdraw_Call) Return(_a0 *types.Transaction, _a1 err
 	return _c
 }
 
-func (_c *FEVMActions_AgentWithdraw_Call) RunAndReturn(run func(context.Context, common.Address, common.Address, *big.Int, *ecdsa.PrivateKey) (*types.Transaction, error)) *FEVMActions_AgentWithdraw_Call {
+func (_c *FEVMActions_AgentWithdraw_Call) RunAndReturn(run func(context.Context, common.Address, common.Address, *big.Int, *ecdsa.PrivateKey, *ecdsa.PrivateKey) (*types.Transaction, error)) *FEVMActions_AgentWithdraw_Call {
 	_c.Call.Return(run)
 	return _c
 }
