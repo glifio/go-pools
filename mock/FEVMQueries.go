@@ -1609,6 +1609,60 @@ func (_c *FEVMQueries_InfPoolGetRate_Call) RunAndReturn(run func(context.Context
 	return _c
 }
 
+// InfPoolTotalAssets provides a mock function with given fields: ctx
+func (_m *FEVMQueries) InfPoolTotalAssets(ctx context.Context) (*big.Float, error) {
+	ret := _m.Called(ctx)
+
+	var r0 *big.Float
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context) (*big.Float, error)); ok {
+		return rf(ctx)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context) *big.Float); ok {
+		r0 = rf(ctx)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*big.Float)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context) error); ok {
+		r1 = rf(ctx)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// FEVMQueries_InfPoolTotalAssets_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'InfPoolTotalAssets'
+type FEVMQueries_InfPoolTotalAssets_Call struct {
+	*mock.Call
+}
+
+// InfPoolTotalAssets is a helper method to define mock.On call
+//   - ctx context.Context
+func (_e *FEVMQueries_Expecter) InfPoolTotalAssets(ctx interface{}) *FEVMQueries_InfPoolTotalAssets_Call {
+	return &FEVMQueries_InfPoolTotalAssets_Call{Call: _e.mock.On("InfPoolTotalAssets", ctx)}
+}
+
+func (_c *FEVMQueries_InfPoolTotalAssets_Call) Run(run func(ctx context.Context)) *FEVMQueries_InfPoolTotalAssets_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context))
+	})
+	return _c
+}
+
+func (_c *FEVMQueries_InfPoolTotalAssets_Call) Return(_a0 *big.Float, _a1 error) *FEVMQueries_InfPoolTotalAssets_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *FEVMQueries_InfPoolTotalAssets_Call) RunAndReturn(run func(context.Context) (*big.Float, error)) *FEVMQueries_InfPoolTotalAssets_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // InfinityPool provides a mock function with given fields:
 func (_m *FEVMQueries) InfinityPool() common.Address {
 	ret := _m.Called()

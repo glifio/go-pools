@@ -37,6 +37,7 @@ type FEVMQueries interface {
 	InfPoolGetAgentLvl(ctx context.Context, agentID *big.Int) (*big.Int, float64, error)
 	InfPoolGetAccount(ctx context.Context, agentAddr common.Address) (abigen.Account, error)
 	InfPoolBorrowableLiquidity(ctx context.Context) (*big.Float, error)
+	InfPoolTotalAssets(ctx context.Context) (*big.Float, error)
 	// pool registry methods
 	ListPools(ctx context.Context) ([]common.Address, error)
 	// ifil methods
