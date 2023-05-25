@@ -13,12 +13,17 @@ func MethodStrToBytes(methodStr constants.Method) ([4]byte, error) {
 		return [4]byte{}, err
 	}
 
-	var methodID [4]byte
-	copy(methodID[:], abi.Methods[string(methodStr)].ID[:4])
+	methodID := ToByte4Selector(abi.Methods[string(methodStr)].ID)
 
 	if methodID == [4]byte{} {
 		return [4]byte{}, errors.New("method not found")
 	}
 
 	return methodID, nil
+}
+
+func ToByte4Selector(bytes []byte) [4]byte {
+	var byte4 [4]byte
+	copy(byte4[:], bytes[:4])
+	return byte4
 }

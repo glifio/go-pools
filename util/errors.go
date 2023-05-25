@@ -77,9 +77,9 @@ func matchSelector(thrownSelector [4]byte) (bool, error) {
 	for _, abi := range abis {
 		for name, error := range abi.Errors {
 			// Compute the selector for the error
-			selector := crypto.Keccak256Hash([]byte(error.Sig))
+			selector := ToByte4Selector(crypto.Keccak256Hash([]byte(error.Sig)).Bytes())
 
-			if [4]byte(selector[:4]) == thrownSelector {
+			if selector == thrownSelector {
 				humanErr = fmt.Errorf("Transaction reverted with error: %s", name)
 			}
 		}
