@@ -9,6 +9,9 @@ import (
 
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/core/types"
+	lotusapi "github.com/filecoin-project/lotus/api"
+	filtypes "github.com/filecoin-project/lotus/chain/types"
+	"golang.org/x/xerrors"
 )
 
 func WriteTx(
@@ -54,4 +57,42 @@ func WriteTx(
 	fmt.Println("Transaction:", tx.Hash())
 
 	return tx, err
+}
+
+func propagateErr(returnTrace filtypes.ReturnTrace) error {
+	// chop off the first two bytes to get the FEVM error selector
+	matched, err := matchSelector(ToByte4Selector(returnTrace.Return[1:]))
+	if matched {
+		return xerrors.Errorf("Simulation reverted with error, tx not submitted: %s", err.Error())
+	}
+
+	return xerrors.Errorf("subcall error code: %s - return (could not decode) %x", returnTrace.ExitCode, returnTrace.Return[1:])
+}
+
+// recurses through the stack trace and pulls out any non 0 exit codes, returns the error
+func recursiveSubcallErrorThrown(trace *filtypes.ExecutionTrace, lClient *lotusapi.FullNodeStruct) error {
+	// Check the exit code of the current trace
+	if trace.MsgRct.ExitCode != 0 {
+		return propagateErr(trace.MsgRct)
+	}
+
+	// Recursively check the exit code of each subcall
+	for _, subcall := range trace.Subcalls {
+		err := recursiveSubcallErrorThrown(&subcall, lClient)
+		if err != nil {
+			return err
+		}
+	}
+
+	// If we've made it this far, none of the exit codes were non-zero
+	return nil
+}
+
+func SimulateFVMMsg(ctx context.Context, msg *filtypes.Message, lClient *lotusapi.FullNodeStruct) error {
+	call, err := lClient.StateCall(ctx, msg, filtypes.EmptyTSK)
+	if err != nil {
+		return err
+	}
+
+	return recursiveSubcallErrorThrown(&call.ExecutionTrace, lClient)
 }
