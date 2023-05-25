@@ -8,6 +8,8 @@ import (
 
 const SecondsInMinute = 60
 const EpochsInMinute = SecondsInMinute / builtin.EpochDurationSeconds
+const EpochsInDay = builtin.EpochsInDay
+const EpochsInWeek = EpochsInDay * 7
 
 // a credential is valid for 30 minutes
 const CredentialMinutesValid = 30
