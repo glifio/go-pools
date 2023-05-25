@@ -31,7 +31,7 @@ var (
 
 // CredParserMetaData contains all meta data concerning the CredParser contract.
 var CredParserMetaData = &bind.MetaData{
-	ABI: "[{\"inputs\":[{\"internalType\":\"bytes\",\"name\":\"_agentData\",\"type\":\"bytes\"}],\"name\":\"getAgentValue\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"pure\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes\",\"name\":\"_agentData\",\"type\":\"bytes\"}],\"name\":\"getCollateralValue\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"pure\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes\",\"name\":\"_agentData\",\"type\":\"bytes\"}],\"name\":\"getExpectedDailyRewards\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"pure\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes\",\"name\":\"_agentData\",\"type\":\"bytes\"}],\"name\":\"getFaultySectors\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"pure\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes\",\"name\":\"_agentData\",\"type\":\"bytes\"}],\"name\":\"getGCRED\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"pure\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes\",\"name\":\"_agentData\",\"type\":\"bytes\"}],\"name\":\"getGreenScore\",\"outputs\":[{\"internalType\":\"uint32\",\"name\":\"\",\"type\":\"uint32\"}],\"stateMutability\":\"pure\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes\",\"name\":\"_agentData\",\"type\":\"bytes\"}],\"name\":\"getLiveSectors\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"pure\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes\",\"name\":\"_agentData\",\"type\":\"bytes\"}],\"name\":\"getPrincipal\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"pure\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes\",\"name\":\"_agentData\",\"type\":\"bytes\"}],\"name\":\"getQAPower\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"pure\",\"type\":\"function\"}]",
+	ABI: "[{\"inputs\":[{\"internalType\":\"bytes\",\"name\":\"_agentData\",\"type\":\"bytes\"}],\"name\":\"getAgentValue\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"pure\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes\",\"name\":\"_agentData\",\"type\":\"bytes\"}],\"name\":\"getCollateralValue\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"pure\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes\",\"name\":\"_agentData\",\"type\":\"bytes\"}],\"name\":\"getExpectedDailyRewards\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"pure\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes\",\"name\":\"_agentData\",\"type\":\"bytes\"}],\"name\":\"getFaultySectors\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"pure\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes\",\"name\":\"_agentData\",\"type\":\"bytes\"}],\"name\":\"getGCRED\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"pure\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes\",\"name\":\"_agentData\",\"type\":\"bytes\"}],\"name\":\"getGreenScore\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"pure\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes\",\"name\":\"_agentData\",\"type\":\"bytes\"}],\"name\":\"getLiveSectors\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"pure\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes\",\"name\":\"_agentData\",\"type\":\"bytes\"}],\"name\":\"getPrincipal\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"pure\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes\",\"name\":\"_agentData\",\"type\":\"bytes\"}],\"name\":\"getQAPower\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"pure\",\"type\":\"function\"}]",
 }
 
 // CredParserABI is the input ABI used to generate the binding from.
@@ -337,16 +337,16 @@ func (_CredParser *CredParserCallerSession) GetGCRED(_agentData []byte) (*big.In
 
 // GetGreenScore is a free data retrieval call binding the contract method 0xb661e482.
 //
-// Solidity: function getGreenScore(bytes _agentData) pure returns(uint32)
-func (_CredParser *CredParserCaller) GetGreenScore(opts *bind.CallOpts, _agentData []byte) (uint32, error) {
+// Solidity: function getGreenScore(bytes _agentData) pure returns(uint256)
+func (_CredParser *CredParserCaller) GetGreenScore(opts *bind.CallOpts, _agentData []byte) (*big.Int, error) {
 	var out []interface{}
 	err := _CredParser.contract.Call(opts, &out, "getGreenScore", _agentData)
 
 	if err != nil {
-		return *new(uint32), err
+		return *new(*big.Int), err
 	}
 
-	out0 := *abi.ConvertType(out[0], new(uint32)).(*uint32)
+	out0 := *abi.ConvertType(out[0], new(*big.Int)).(**big.Int)
 
 	return out0, err
 
@@ -354,15 +354,15 @@ func (_CredParser *CredParserCaller) GetGreenScore(opts *bind.CallOpts, _agentDa
 
 // GetGreenScore is a free data retrieval call binding the contract method 0xb661e482.
 //
-// Solidity: function getGreenScore(bytes _agentData) pure returns(uint32)
-func (_CredParser *CredParserSession) GetGreenScore(_agentData []byte) (uint32, error) {
+// Solidity: function getGreenScore(bytes _agentData) pure returns(uint256)
+func (_CredParser *CredParserSession) GetGreenScore(_agentData []byte) (*big.Int, error) {
 	return _CredParser.Contract.GetGreenScore(&_CredParser.CallOpts, _agentData)
 }
 
 // GetGreenScore is a free data retrieval call binding the contract method 0xb661e482.
 //
-// Solidity: function getGreenScore(bytes _agentData) pure returns(uint32)
-func (_CredParser *CredParserCallerSession) GetGreenScore(_agentData []byte) (uint32, error) {
+// Solidity: function getGreenScore(bytes _agentData) pure returns(uint256)
+func (_CredParser *CredParserCallerSession) GetGreenScore(_agentData []byte) (*big.Int, error) {
 	return _CredParser.Contract.GetGreenScore(&_CredParser.CallOpts, _agentData)
 }
 
