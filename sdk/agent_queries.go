@@ -262,7 +262,7 @@ func (q *fevmQueries) AgentOwes(ctx context.Context, agentAddr common.Address) (
 	}
 	defer closer()
 
-	agentOwed, err := rpc.ADOClient.AmountOwed(ctx, agentAddr, constants.INFINITY_POOL_ID)
+	agentOwed, err := rpc.ADOClient.AgentAmountOwed(ctx, agentAddr, constants.INFINITY_POOL_ID)
 	if err != nil {
 		return nil, nil, err
 	}
