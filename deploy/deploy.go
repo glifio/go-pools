@@ -1,6 +1,8 @@
 package deploy
 
 import (
+	"math/big"
+
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/glifio/go-pools/types"
 )
@@ -29,6 +31,7 @@ var ProtoMeta = types.ProtocolMeta{
 	PoolRegistry:  common.HexToAddress("0x7aFe4f4Ca8f301FA4177CCCDd10a4a22756588e2"),
 	Router:        common.HexToAddress("0xe6e6e71E747EeD9fe45F0ff63E1B3E4a7c1199bF"),
 	WFIL:          common.HexToAddress("0x60E1773636CF5E4A227d9AC24F20fEca034ee25A"),
+	ChainID:       big.NewInt(314),
 }
 
 var TestProtoMeta = types.ProtocolMeta{
@@ -40,4 +43,5 @@ var TestProtoMeta = types.ProtocolMeta{
 	PoolRegistry:  common.HexToAddress("0x9de147901aA6a87bFC6BC1c84b2fE1a60bf38e1A"),
 	Router:        common.HexToAddress("0xa0770911848Bd1A0930Fc6782522381Bb6256617"),
 	WFIL:          common.HexToAddress("0xaC26a4Ab9cF2A8c5DBaB6fb4351ec0F4b07356c4"),
+	ChainID:       big.NewInt(314159),
 }
