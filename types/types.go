@@ -113,7 +113,25 @@ type PoolsSDK interface {
 }
 
 type AgentOwed struct {
-	AgentAddr  common.Address
-	AmountOwed *big.Int
-	Gcred      *big.Int
+	AgentAddr  common.Address `json:"agentAddr"`
+	AmountOwed *big.Int       `json:"amountOwed"`
+	Gcred      *big.Int       `json:"gcred"`
+}
+
+type ProtocolMeta struct {
+	AgentPolice   common.Address `json:"agentPolice"`
+	MinerRegistry common.Address `json:"minerRegistry"`
+	Router        common.Address `json:"router"`
+	PoolRegistry  common.Address `json:"poolRegistry"`
+	AgentFactory  common.Address `json:"agentFactory"`
+	IFIL          common.Address `json:"ifil"`
+	WFIL          common.Address `json:"wfil"`
+	InfinityPool  common.Address `json:"infinityPool"`
+	ChainID       *big.Int       `json:"chainID"`
+}
+
+type Extern struct {
+	AdoAddr       string `json:"adoAddr"`
+	LotusDialAddr string `json:"lotusDialAddr"`
+	LotusToken    string `json:"lotusToken"`
 }

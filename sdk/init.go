@@ -2,6 +2,7 @@ package sdk
 
 import (
 	"context"
+	"fmt"
 	"math/big"
 	"sync"
 
@@ -10,6 +11,7 @@ import (
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/glifio/go-pools/abigen"
 	"github.com/glifio/go-pools/constants"
+	"github.com/glifio/go-pools/deploy"
 	"github.com/glifio/go-pools/types"
 )
 
@@ -181,6 +183,61 @@ func LazyInit(
 	)
 
 	return nil
+}
+
+func New(
+	ctx context.Context,
+	chainID *big.Int,
+	extern types.Extern,
+) (types.PoolsSDK, error) {
+	var sdk types.PoolsSDK
+
+	ethClient, err := ethclient.Dial(extern.LotusDialAddr)
+	if err != nil {
+		return nil, err
+	}
+
+	id, err := ethClient.ChainID(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	var protoMeta types.ProtocolMeta
+	switch id.Int64() {
+	case constants.MainnetChainID:
+		protoMeta = deploy.ProtoMeta
+	case constants.CalibnetChainID:
+		protoMeta = deploy.TestProtoMeta
+	default:
+		return nil, fmt.Errorf("unsupported chain id: %d", id.Int64())
+	}
+
+	if protoMeta.ChainID.Cmp(chainID) != 0 {
+		return nil, fmt.Errorf("chain id mismatch: %d != %d", protoMeta.ChainID, chainID)
+	}
+
+	var namespace = "Mock"
+	if chainID.Int64() == constants.MainnetChainID {
+		namespace = "ADO"
+	}
+
+	sdk = InitFEVMConnection(
+		protoMeta.AgentPolice,
+		protoMeta.MinerRegistry,
+		protoMeta.Router,
+		protoMeta.PoolRegistry,
+		protoMeta.AgentFactory,
+		protoMeta.IFIL,
+		protoMeta.WFIL,
+		protoMeta.InfinityPool,
+		extern.AdoAddr,
+		namespace,
+		extern.LotusDialAddr,
+		extern.LotusToken,
+		chainID,
+	)
+
+	return sdk, nil
 }
 
 func Init(

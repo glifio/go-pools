@@ -6,6 +6,10 @@ import (
 	"github.com/filecoin-project/go-state-types/builtin"
 )
 
+const MainnetChainID = 314
+const CalibnetChainID = 314159
+const LocalnetChainID = 31415926
+
 const SecondsInMinute = 60
 const EpochsInMinute = SecondsInMinute / builtin.EpochDurationSeconds
 const EpochsInDay = builtin.EpochsInDay
@@ -40,6 +44,9 @@ var (
 	RouteCredParser    Route = "ROUTER_CRED_PARSER"
 	RouteAgentDeployer Route = "ROUTER_AGENT_DEPLOYER"
 )
+
+var dialAddr = "https://api.node.glif.io/rpc/v1"
+var t_dialAddr = "https://api.calibration.node.glif.io/rpc/v1"
 
 var MAX_UINT256 = new(big.Int).Exp(big.NewInt(2), big.NewInt(256), nil)
 var WAD = big.NewInt(1e18)
