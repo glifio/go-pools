@@ -48,6 +48,36 @@ func (q *fevmQueries) AgentOwner(ctx context.Context, address common.Address) (c
 	return agentCaller.Owner(&bind.CallOpts{Context: ctx})
 }
 
+func (q *fevmQueries) AgentAdministrator(ctx context.Context, address common.Address) (common.Address, error) {
+	client, err := q.extern.ConnectEthClient()
+	if err != nil {
+		return common.Address{}, err
+	}
+	defer client.Close()
+
+	agentCaller, err := abigen.NewAgentCaller(address, client)
+	if err != nil {
+		return common.Address{}, err
+	}
+
+	return agentCaller.Administration(&bind.CallOpts{Context: ctx})
+}
+
+func (q *fevmQueries) AgentDefaulted(ctx context.Context, address common.Address) (bool, error) {
+	client, err := q.extern.ConnectEthClient()
+	if err != nil {
+		return false, err
+	}
+	defer client.Close()
+
+	agentCaller, err := abigen.NewAgentCaller(address, client)
+	if err != nil {
+		return false, err
+	}
+
+	return agentCaller.Defaulted(&bind.CallOpts{Context: ctx})
+}
+
 func (q *fevmQueries) AgentOperator(ctx context.Context, address common.Address) (common.Address, error) {
 	client, err := q.extern.ConnectEthClient()
 	if err != nil {

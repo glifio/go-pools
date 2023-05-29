@@ -116,3 +116,23 @@ func (q *fevmQueries) InfPoolBorrowableLiquidity(ctx context.Context) (*big.Floa
 
 	return util.ToFIL(assets), nil
 }
+
+func (q *fevmQueries) InfPoolTotalBorrowed(ctx context.Context) (*big.Float, error) {
+	client, err := q.extern.ConnectEthClient()
+	if err != nil {
+		return nil, err
+	}
+	defer client.Close()
+
+	poolCaller, err := abigen.NewInfinityPoolCaller(q.infinityPool, client)
+	if err != nil {
+		return nil, err
+	}
+
+	assets, err := poolCaller.TotalBorrowed(nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return util.ToFIL(assets), nil
+}

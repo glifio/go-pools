@@ -50,3 +50,18 @@ func (q *fevmQueries) IFILPrice(ctx context.Context) (*big.Float, error) {
 	// return the price of 1 iFIL in FIL
 	return util.ToFIL(price), nil
 }
+
+func (q *fevmQueries) IFILMinter(ctx context.Context) (common.Address, error) {
+	client, err := q.extern.ConnectEthClient()
+	if err != nil {
+		return common.Address{}, err
+	}
+	defer client.Close()
+
+	poolTokenCaller, err := abigen.NewPoolTokenCaller(q.iFIL, client)
+	if err != nil {
+		return common.Address{}, err
+	}
+
+	return poolTokenCaller.Minter(nil)
+}
