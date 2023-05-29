@@ -71,10 +71,6 @@ func propagateErr(returnTrace filtypes.ReturnTrace) error {
 
 // recurses through the stack trace and pulls out any non 0 exit codes, returns the error
 func recursiveSubcallErrorThrown(trace *filtypes.ExecutionTrace, lClient *lotusapi.FullNodeStruct) error {
-	// Check the exit code of the current trace
-	if trace.MsgRct.ExitCode != 0 {
-		return propagateErr(trace.MsgRct)
-	}
 
 	// Recursively check the exit code of each subcall
 	for _, subcall := range trace.Subcalls {
@@ -82,6 +78,11 @@ func recursiveSubcallErrorThrown(trace *filtypes.ExecutionTrace, lClient *lotusa
 		if err != nil {
 			return err
 		}
+	}
+
+	// Check the exit code of the current trace last to make sure we propagate the error
+	if trace.MsgRct.ExitCode != 0 {
+		return propagateErr(trace.MsgRct)
 	}
 
 	// If we've made it this far, none of the exit codes were non-zero

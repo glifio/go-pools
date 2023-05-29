@@ -48,6 +48,36 @@ func (q *fevmQueries) AgentOwner(ctx context.Context, address common.Address) (c
 	return agentCaller.Owner(&bind.CallOpts{Context: ctx})
 }
 
+func (q *fevmQueries) AgentAdministrator(ctx context.Context, address common.Address) (common.Address, error) {
+	client, err := q.extern.ConnectEthClient()
+	if err != nil {
+		return common.Address{}, err
+	}
+	defer client.Close()
+
+	agentCaller, err := abigen.NewAgentCaller(address, client)
+	if err != nil {
+		return common.Address{}, err
+	}
+
+	return agentCaller.Administration(&bind.CallOpts{Context: ctx})
+}
+
+func (q *fevmQueries) AgentDefaulted(ctx context.Context, address common.Address) (bool, error) {
+	client, err := q.extern.ConnectEthClient()
+	if err != nil {
+		return false, err
+	}
+	defer client.Close()
+
+	agentCaller, err := abigen.NewAgentCaller(address, client)
+	if err != nil {
+		return false, err
+	}
+
+	return agentCaller.Defaulted(&bind.CallOpts{Context: ctx})
+}
+
 func (q *fevmQueries) AgentOperator(ctx context.Context, address common.Address) (common.Address, error) {
 	client, err := q.extern.ConnectEthClient()
 	if err != nil {
@@ -262,7 +292,7 @@ func (q *fevmQueries) AgentOwes(ctx context.Context, agentAddr common.Address) (
 	}
 	defer closer()
 
-	agentOwed, err := rpc.ADOClient.AmountOwed(ctx, agentAddr, constants.INFINITY_POOL_ID)
+	agentOwed, err := rpc.ADOClient.AgentAmountOwed(ctx, agentAddr, constants.INFINITY_POOL_ID)
 	if err != nil {
 		return nil, nil, err
 	}

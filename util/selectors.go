@@ -24,6 +24,6 @@ func MethodStrToBytes(methodStr constants.Method) ([4]byte, error) {
 
 func ToByte4Selector(bytes []byte) [4]byte {
 	var byte4 [4]byte
-	copy(byte4[:], bytes[:4])
+	copy(byte4[:], bytes)
 	return byte4
 }

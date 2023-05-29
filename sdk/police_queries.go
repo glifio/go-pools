@@ -32,3 +32,18 @@ func (q *fevmQueries) DefaultEpoch(ctx context.Context) (*big.Int, error) {
 
 	return chainHeadHeight.Sub(chainHeadHeight, defaultWindow), nil
 }
+
+func (q *fevmQueries) MaxConsecutiveFaultEpochs(ctx context.Context) (*big.Int, error) {
+	client, err := q.extern.ConnectEthClient()
+	if err != nil {
+		return nil, err
+	}
+	defer client.Close()
+
+	policeCaller, err := abigen.NewAgentPoliceCaller(q.agentPolice, client)
+	if err != nil {
+		return nil, err
+	}
+
+	return policeCaller.MaxConsecutiveFaultEpochs(&bind.CallOpts{Context: ctx})
+}

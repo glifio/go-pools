@@ -15,17 +15,21 @@ func (c *fevmExtern) ConnectEthClient() (*ethclient.Client, error) {
 }
 
 func (c *fevmExtern) ConnectLotusClient() (*lotusapi.FullNodeStruct, jsonrpc.ClientCloser, error) {
+	return connectLotusClient(c.dialAddr, c.token)
+}
+
+func connectLotusClient(lotusDialAddr string, lotusToken string) (*lotusapi.FullNodeStruct, jsonrpc.ClientCloser, error) {
 	head := http.Header{}
 
-	if c.token != "" {
-		head.Add("Authorization", "Bearer "+c.token)
+	if lotusToken != "" {
+		head.Add("Authorization", "Bearer "+lotusToken)
 	}
 
 	lapi := &lotusapi.FullNodeStruct{}
 
 	closer, err := jsonrpc.NewMergeClient(
 		context.Background(),
-		c.dialAddr,
+		lotusDialAddr,
 		"Filecoin",
 		lotusapi.GetInternalStructs(lapi),
 		head,

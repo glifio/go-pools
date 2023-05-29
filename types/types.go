@@ -25,6 +25,8 @@ type FEVMQueries interface {
 	AgentOwner(ctx context.Context, agentAddr common.Address) (common.Address, error)
 	AgentOperator(ctx context.Context, agentAddr common.Address) (common.Address, error)
 	AgentRequester(ctx context.Context, agentAddr common.Address) (common.Address, error)
+	AgentAdministrator(ctx context.Context, agentAddr common.Address) (common.Address, error)
+	AgentDefaulted(ctx context.Context, agentAddr common.Address) (bool, error)
 	AgentVersion(ctx context.Context, agentAddr common.Address) (uint8, uint8, error)
 	AgentIsValid(ctx context.Context, agentAddr common.Address) (bool, error)
 	AgentMiners(ctx context.Context, agentAddr common.Address) ([]address.Address, error)
@@ -32,17 +34,22 @@ type FEVMQueries interface {
 	AgentPrincipal(ctx context.Context, agentAddr common.Address) (*big.Int, error)
 	AgentOwes(ctx context.Context, agentAddr common.Address) (*big.Int, *big.Int, error)
 	AgentFaultyEpochStart(ctx context.Context, agentAddr common.Address) (*big.Int, error)
+	// agent factory methods
+	AgentFactoryAgentCount(ctx context.Context) (*big.Int, error)
 	// infinity pool methods
 	InfPoolGetRate(ctx context.Context, cred abigen.VerifiableCredential) (*big.Int, error)
 	InfPoolGetAgentLvl(ctx context.Context, agentID *big.Int) (*big.Int, float64, error)
 	InfPoolGetAccount(ctx context.Context, agentAddr common.Address) (abigen.Account, error)
 	InfPoolBorrowableLiquidity(ctx context.Context) (*big.Float, error)
 	InfPoolTotalAssets(ctx context.Context) (*big.Float, error)
+	InfPoolTotalBorrowed(ctx context.Context) (*big.Float, error)
 	// pool registry methods
 	ListPools(ctx context.Context) ([]common.Address, error)
 	// ifil methods
 	IFILBalanceOf(ctx context.Context, hodler common.Address) (*big.Float, error)
 	IFILPrice(ctx context.Context) (*big.Float, error)
+	IFILMinter(ctx context.Context) (common.Address, error)
+	IFILBurner(ctx context.Context) (common.Address, error)
 	// wfil methods
 	WFILBalanceOf(ctx context.Context, hodler common.Address) (*big.Float, error)
 	WFILAllowance(ctx context.Context, hodler common.Address, spender common.Address) (*big.Float, error)
@@ -50,6 +57,10 @@ type FEVMQueries interface {
 	CredentialUsed(ctx context.Context, v uint8, r [32]byte, s [32]byte) (bool, error)
 	CredentialValidityPeriod(ctx context.Context) (*big.Int, *big.Int, error)
 	DefaultEpoch(ctx context.Context) (*big.Int, error)
+	MaxConsecutiveFaultEpochs(ctx context.Context) (*big.Int, error)
+	// miner registry methods
+	MinerRegistryAgentMinersCount(ctx context.Context, agentID *big.Int) (*big.Int, error)
+	MinerRegistryAgentMinersList(ctx context.Context, agentID *big.Int) ([]address.Address, error)
 	// chain methods
 	ChainHeight(ctx context.Context) (*big.Int, error)
 	ChainHead(ctx context.Context) (*filtypes.TipSet, error)
@@ -113,7 +124,25 @@ type PoolsSDK interface {
 }
 
 type AgentOwed struct {
-	AgentAddr  common.Address
-	AmountOwed *big.Int
-	Gcred      *big.Int
+	AgentAddr  common.Address `json:"agentAddr"`
+	AmountOwed *big.Int       `json:"amountOwed"`
+	Gcred      *big.Int       `json:"gcred"`
+}
+
+type ProtocolMeta struct {
+	AgentPolice   common.Address `json:"agentPolice"`
+	MinerRegistry common.Address `json:"minerRegistry"`
+	Router        common.Address `json:"router"`
+	PoolRegistry  common.Address `json:"poolRegistry"`
+	AgentFactory  common.Address `json:"agentFactory"`
+	IFIL          common.Address `json:"ifil"`
+	WFIL          common.Address `json:"wfil"`
+	InfinityPool  common.Address `json:"infinityPool"`
+	ChainID       *big.Int       `json:"chainID"`
+}
+
+type Extern struct {
+	AdoAddr       string `json:"adoAddr"`
+	LotusDialAddr string `json:"lotusDialAddr"`
+	LotusToken    string `json:"lotusToken"`
 }
