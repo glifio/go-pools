@@ -82,7 +82,6 @@ func recursiveSubcallErrorThrown(trace *filtypes.ExecutionTrace, lClient *lotusa
 
 	// Check the exit code of the current trace last to make sure we propagate the error
 	if trace.MsgRct.ExitCode != 0 {
-		fmt.Printf("Exit code: %d", trace.MsgRct.ExitCode)
 		return propagateErr(trace.MsgRct)
 	}
 
