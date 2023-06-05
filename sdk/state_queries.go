@@ -19,7 +19,7 @@ func (q *fevmQueries) StateWaitTx(ctx context.Context, hash common.Hash, ch chan
 	defer client.Close()
 
 	for {
-		time.Sleep(time.Millisecond * 5000)
+		time.Sleep(time.Millisecond * 150000)
 
 		tx, err := client.TransactionReceipt(ctx, hash)
 		if err == nil && tx != nil {
@@ -38,6 +38,12 @@ func (q *fevmQueries) StateWaitReceipt(ctx context.Context, hash common.Hash) (*
 
 	s := spinner.New(spinner.CharSets[9], 100*time.Millisecond)
 	s.Start()
+
+	// wait for 5 confirmations before getting the receipt
+	err = q.StateWaitForConfirmations(ctx, 5)
+	if err != nil {
+		return nil, err
+	}
 
 	ch := make(chan *types.Receipt)
 	go q.StateWaitTx(ctx, hash, ch)
@@ -71,6 +77,33 @@ func (q *fevmQueries) StateWaitNextTick(ctx context.Context, currentHeight *big.
 	defer eapi.Close()
 
 	target := currentHeight.Uint64() + 1
+	for {
+		time.Sleep(time.Millisecond * 5000)
+
+		b, err := eapi.BlockNumber(ctx)
+		if err != nil {
+			return err
+		}
+
+		if b >= target {
+			return nil
+		}
+	}
+}
+
+func (q *fevmQueries) StateWaitForConfirmations(ctx context.Context, confirmations uint64) error {
+	eapi, err := q.extern.ConnectEthClient()
+	if err != nil {
+		return err
+	}
+	defer eapi.Close()
+
+	b, err := eapi.BlockNumber(ctx)
+	if err != nil {
+		return err
+	}
+
+	target := b + confirmations
 	for {
 		time.Sleep(time.Millisecond * 5000)
 
