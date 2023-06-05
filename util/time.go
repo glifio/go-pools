@@ -9,7 +9,7 @@ import (
 
 var (
 	// TODO change to mainnet
-	GENESIS_TS = uint64(1667326410)
+	GENESIS_TS = uint64(1598306430)
 )
 
 func EpochHeightToTimestamp(height *big.Int) time.Time {
