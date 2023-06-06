@@ -188,7 +188,7 @@ func (q *fevmQueries) AgentLiquidAssets(ctx context.Context, address common.Addr
 	return assets, nil
 }
 
-func (q *fevmQueries) AgentTotalPrincipal(ctx context.Context, agentAddr common.Address) (*big.Int, error) {
+func (q *fevmQueries) AgentPrincipal(ctx context.Context, agentAddr common.Address) (*big.Int, error) {
 	ethClient, err := q.extern.ConnectEthClient()
 	if err != nil {
 		return nil, err
