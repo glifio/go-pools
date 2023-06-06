@@ -16,7 +16,7 @@ import (
 var DIAL_ADDR = ""
 var TOKEN = ""
 
-func setupSuite(t *testing.T) (api.FullNode, jsonrpc.ClientCloser) {
+func setupSuite(t *testing.T) (api.FullNodeStruct, jsonrpc.ClientCloser) {
 	var lcli api.FullNodeStruct = api.FullNodeStruct{}
 	head := http.Header{}
 
@@ -44,7 +44,7 @@ func setupSuite(t *testing.T) (api.FullNode, jsonrpc.ClientCloser) {
 		t.Fatal(err)
 	}
 
-	return &lcli, closer
+	return lcli, closer
 }
 
 func teardownSuite(close jsonrpc.ClientCloser) {
@@ -96,9 +96,31 @@ func TestCmpWithOnChainSectorInfo(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	_, err = ComputeEDRLazy1(context.Background(), minerTest, ts, lapi)
+	edrPrecise, err := ComputeEDRPrecise(context.Background(), minerTest, ts, lapi)
 	if err != nil {
 		t.Fatal(err)
+	}
+
+	edrLazy1, err := ComputeEDRLazy1(context.Background(), minerTest, ts, lapi)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	edrLazy2, err := ComputeEDRLazy2(context.Background(), minerTest, ts, lapi)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if edrPrecise.Cmp(edrLazy1) != 0 {
+		t.Errorf("Precise vs lazy1 fail - expected %s, got %s", edrPrecise, edrLazy1.String())
+	}
+
+	if edrPrecise.Cmp(edrLazy2) != 0 {
+		t.Errorf("Precise vs lazy2 fail - expected %s, got %s", edrPrecise, edrLazy2.String())
+	}
+
+	if edrLazy1.Cmp(edrLazy2) != 0 {
+		t.Errorf("lazy1 vs laz2 fail - expected %s, got %s", edrLazy1, edrLazy2.String())
 	}
 
 }

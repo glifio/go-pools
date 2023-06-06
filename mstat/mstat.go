@@ -9,6 +9,7 @@ import (
 
 	"github.com/filecoin-project/go-address"
 	"github.com/filecoin-project/go-state-types/abi"
+	miner11 "github.com/filecoin-project/go-state-types/builtin/v11/miner"
 	"github.com/filecoin-project/go-state-types/builtin/v11/util/smoothing"
 	"github.com/filecoin-project/lotus/api"
 	"github.com/filecoin-project/lotus/blockstore"
@@ -64,7 +65,7 @@ func NewMinerStats() *MinerStats {
 	}
 }
 
-func ComputeMinerStats(ctx context.Context, minerAddr address.Address, ts *types.TipSet, api api.FullNode) (*MinerStats, error) {
+func ComputeMinerStats(ctx context.Context, minerAddr address.Address, ts *types.TipSet, api api.FullNodeStruct) (*MinerStats, error) {
 	minerStats := &MinerStats{}
 
 	mi, err := api.StateMinerInfo(ctx, minerAddr, ts.Key())
@@ -119,7 +120,21 @@ func ComputeMinerStats(ctx context.Context, minerAddr address.Address, ts *types
 	return minerStats, nil
 }
 
-func ComputeEDRLazy1(ctx context.Context, minerAddr address.Address, ts *types.TipSet, api api.FullNode) (*big.Int, error) {
+func ComputeEDRPrecise(ctx context.Context, minerAddr address.Address, ts *types.TipSet, api api.FullNodeStruct) (*big.Int, error) {
+	sectors, err := api.StateMinerActiveSectors(context.Background(), minerAddr, ts.Key())
+	if err != nil {
+		return nil, err
+	}
+
+	expectedDailyRewards := big.NewInt(0)
+	for _, sector := range sectors {
+		expectedDailyRewards = new(big.Int).Add(expectedDailyRewards, sector.ExpectedDayReward.Int)
+	}
+
+	return expectedDailyRewards, nil
+}
+
+func ComputeEDRLazy1(ctx context.Context, minerAddr address.Address, ts *types.TipSet, api api.FullNodeStruct) (*big.Int, error) {
 	pow, err := api.StateMinerPower(ctx, minerAddr, ts.Key())
 	if err != nil {
 		return nil, err
@@ -207,7 +222,27 @@ func ComputeEDRLazy1(ctx context.Context, minerAddr address.Address, ts *types.T
 	return big.NewInt(0), nil
 }
 
-func getSmoothedRew(ctx context.Context, api api.FullNode, ts *types.TipSet) (smoothing.FilterEstimate, error) {
+func ComputeEDRLazy2(ctx context.Context, minerAddr address.Address, ts *types.TipSet, api api.FullNodeStruct) (*big.Int, error) {
+	pow, err := api.StateMinerPower(ctx, minerAddr, ts.Key())
+	if err != nil {
+		return nil, err
+	}
+
+	smoothedRew, err := getSmoothedRew(ctx, api, ts)
+	if err != nil {
+		return nil, err
+	}
+
+	smoothedPow, err := getSmoothedPow(ctx, api, ts)
+	if err != nil {
+		return nil, err
+	}
+
+	expDayReward := miner11.ExpectedRewardForPower(smoothedRew, smoothedPow, pow.MinerPower.QualityAdjPower, builtin.EpochsInDay)
+	return expDayReward.Int, nil
+}
+
+func getSmoothedRew(ctx context.Context, api api.FullNodeStruct, ts *types.TipSet) (smoothing.FilterEstimate, error) {
 	ract, err := api.StateGetActor(ctx, reward.Address, ts.Key())
 	if err != nil {
 		return smoothing.FilterEstimate{}, err
@@ -231,7 +266,7 @@ func getSmoothedRew(ctx context.Context, api api.FullNode, ts *types.TipSet) (sm
 	), nil
 }
 
-func getBlockReward(ctx context.Context, api api.FullNode, ts *types.TipSet) (*big.Int, error) {
+func getBlockReward(ctx context.Context, api api.FullNodeStruct, ts *types.TipSet) (*big.Int, error) {
 	ract, err := api.StateGetActor(ctx, reward.Address, ts.Key())
 	if err != nil {
 		return big.NewInt(0), err
@@ -255,7 +290,7 @@ func getBlockReward(ctx context.Context, api api.FullNode, ts *types.TipSet) (*b
 	return blockReward.Int, nil
 }
 
-func getSmoothedPow(ctx context.Context, api api.FullNode, ts *types.TipSet) (smoothing.FilterEstimate, error) {
+func getSmoothedPow(ctx context.Context, api api.FullNodeStruct, ts *types.TipSet) (smoothing.FilterEstimate, error) {
 	pact, err := api.StateGetActor(ctx, power.Address, ts.Key())
 	if err != nil {
 		return smoothing.FilterEstimate{}, err
@@ -279,7 +314,7 @@ func getSmoothedPow(ctx context.Context, api api.FullNode, ts *types.TipSet) (sm
 	), nil
 }
 
-func loadMinerActor(ctx context.Context, api api.FullNode, minerAddr address.Address, ts *types.TipSet) (*types.ActorV5, miner.State, error) {
+func loadMinerActor(ctx context.Context, api api.FullNodeStruct, minerAddr address.Address, ts *types.TipSet) (*types.ActorV5, miner.State, error) {
 	mact, err := api.StateGetActor(ctx, minerAddr, ts.Key())
 	if err != nil {
 		return nil, nil, err
@@ -292,9 +327,9 @@ func loadMinerActor(ctx context.Context, api api.FullNode, minerAddr address.Add
 	return mact, state, err
 }
 
-func newTieredBlockstore(api api.FullNode) blockstore.Blockstore {
+func newTieredBlockstore(api api.FullNodeStruct) blockstore.Blockstore {
 	return blockstore.NewTieredBstore(
-		blockstore.NewAPIBlockstore(api),
+		blockstore.NewAPIBlockstore(&api),
 		blockstore.NewMemory(),
 	)
 }
@@ -308,7 +343,7 @@ func computePercentOf(x *big.Int) *big.Int {
 	return result.Div(result, r.Denom())
 }
 
-func computeSectorStatus(ctx context.Context, lotus api.FullNode, miner address.Address, tsk *types.TipSet) (*api.MinerSectors, error) {
+func computeSectorStatus(ctx context.Context, lotus api.FullNodeStruct, miner address.Address, tsk *types.TipSet) (*api.MinerSectors, error) {
 
 	sectorStatus := api.MinerSectors{}
 
