@@ -56,8 +56,8 @@ type ecdsaSignature struct {
 	R, S *big.Int
 }
 
-// signatures last approx 60 seconds
-var EXPIRATION_EPOCH_BUFFER = big.NewInt(2)
+// signatures last approx 2.5 minutes
+var EXPIRATION_EPOCH_BUFFER = big.NewInt(5)
 
 func VerifyJWS(ctx context.Context, jws string, query types.FEVMQueries) (*RequestClaims, error) {
 	var jwsIssuerPubkey *ecdsa.PublicKey

@@ -110,9 +110,13 @@ func ComputeAgentData(
 
 	var dte = DebtToEquityRatio(ead, equity)
 
-	var faultRatio = big.NewFloat(0).Quo(new(big.Float).SetInt(data.FaultySectors), new(big.Float).SetInt(data.LiveSectors))
+	var faultRatio = big.NewFloat(0)
+	var vestingToPledgeRatio = big.NewFloat(0)
 
-	var vestingToPledgeRatio = big.NewFloat(0).Quo(new(big.Float).SetInt(aggMinerStats.VestingFunds), new(big.Float).SetInt(aggMinerStats.PledgedFunds))
+	if data.LiveSectors.Int64() > 0 {
+		faultRatio = faultRatio.Quo(new(big.Float).SetInt(data.FaultySectors), new(big.Float).SetInt(data.LiveSectors))
+		vestingToPledgeRatio = vestingToPledgeRatio.Quo(new(big.Float).SetInt(aggMinerStats.VestingFunds), new(big.Float).SetInt(aggMinerStats.PledgedFunds))
+	}
 
 	data.Gcred = CreditScore(ead, ltv, ltcv, data.ExpectedDailyRewards, dte, faultRatio, vestingToPledgeRatio)
 
