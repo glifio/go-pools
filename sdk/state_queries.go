@@ -19,7 +19,7 @@ func (q *fevmQueries) StateWaitTx(ctx context.Context, hash common.Hash, ch chan
 	defer client.Close()
 
 	for {
-		time.Sleep(time.Millisecond * 150000)
+		time.Sleep(time.Millisecond * 5000)
 
 		tx, err := client.TransactionReceipt(ctx, hash)
 		if err == nil && tx != nil {
@@ -39,8 +39,8 @@ func (q *fevmQueries) StateWaitReceipt(ctx context.Context, hash common.Hash) (*
 	s := spinner.New(spinner.CharSets[9], 100*time.Millisecond)
 	s.Start()
 
-	// wait for 5 confirmations before getting the receipt
-	err = q.StateWaitForConfirmations(ctx, 5)
+	// wait for 1 confirmations before getting the receipt
+	err = q.StateWaitForConfirmations(ctx, 1)
 	if err != nil {
 		return nil, err
 	}
