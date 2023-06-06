@@ -14,6 +14,7 @@ const SecondsInMinute = 60
 const EpochsInMinute = SecondsInMinute / builtin.EpochDurationSeconds
 const EpochsInDay = builtin.EpochsInDay
 const EpochsInWeek = EpochsInDay * 7
+const EpochsInYear = EpochsInDay * 365
 
 // a credential is valid for 30 minutes
 const CredentialMinutesValid = 30

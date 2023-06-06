@@ -1879,6 +1879,61 @@ func (_c *FEVMQueries_InfPoolGetRate_Call) RunAndReturn(run func(context.Context
 	return _c
 }
 
+// InfPoolRateFromGCRED provides a mock function with given fields: ctx, gcred
+func (_m *FEVMQueries) InfPoolRateFromGCRED(ctx context.Context, gcred *big.Int) (*big.Float, error) {
+	ret := _m.Called(ctx, gcred)
+
+	var r0 *big.Float
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, *big.Int) (*big.Float, error)); ok {
+		return rf(ctx, gcred)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, *big.Int) *big.Float); ok {
+		r0 = rf(ctx, gcred)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*big.Float)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, *big.Int) error); ok {
+		r1 = rf(ctx, gcred)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// FEVMQueries_InfPoolRateFromGCRED_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'InfPoolRateFromGCRED'
+type FEVMQueries_InfPoolRateFromGCRED_Call struct {
+	*mock.Call
+}
+
+// InfPoolRateFromGCRED is a helper method to define mock.On call
+//   - ctx context.Context
+//   - gcred *big.Int
+func (_e *FEVMQueries_Expecter) InfPoolRateFromGCRED(ctx interface{}, gcred interface{}) *FEVMQueries_InfPoolRateFromGCRED_Call {
+	return &FEVMQueries_InfPoolRateFromGCRED_Call{Call: _e.mock.On("InfPoolRateFromGCRED", ctx, gcred)}
+}
+
+func (_c *FEVMQueries_InfPoolRateFromGCRED_Call) Run(run func(ctx context.Context, gcred *big.Int)) *FEVMQueries_InfPoolRateFromGCRED_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(*big.Int))
+	})
+	return _c
+}
+
+func (_c *FEVMQueries_InfPoolRateFromGCRED_Call) Return(_a0 *big.Float, _a1 error) *FEVMQueries_InfPoolRateFromGCRED_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *FEVMQueries_InfPoolRateFromGCRED_Call) RunAndReturn(run func(context.Context, *big.Int) (*big.Float, error)) *FEVMQueries_InfPoolRateFromGCRED_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // InfPoolTotalAssets provides a mock function with given fields: ctx
 func (_m *FEVMQueries) InfPoolTotalAssets(ctx context.Context) (*big.Float, error) {
 	ret := _m.Called(ctx)
