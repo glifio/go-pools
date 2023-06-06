@@ -18,7 +18,7 @@ func (q *fevmQueries) StateWaitTx(ctx context.Context, hash common.Hash, ch chan
 	defer client.Close()
 
 	for {
-		time.Sleep(time.Millisecond * 150000)
+		time.Sleep(time.Millisecond * 5000)
 
 		tx, err := client.TransactionReceipt(ctx, hash)
 		if err == nil && tx != nil {
@@ -35,8 +35,9 @@ func (q *fevmQueries) StateWaitReceipt(ctx context.Context, hash common.Hash) (*
 	}
 	defer eapi.Close()
 
-	// wait for 5 confirmations before getting the receipt
-	err = q.StateWaitForConfirmations(ctx, 5)
+  // FIXME: Temporarily reduced to speed up development, revert before merge - Jim
+	// wait for 1 confirmations before getting the receipt
+	err = q.StateWaitForConfirmations(ctx, 1)
 	if err != nil {
 		return nil, err
 	}
