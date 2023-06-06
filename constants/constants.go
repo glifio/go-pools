@@ -9,6 +9,7 @@ import (
 const MainnetChainID = 314
 const CalibnetChainID = 314159
 const LocalnetChainID = 31415926
+const AnvilChainID = 31337
 
 const SecondsInMinute = 60
 const EpochsInMinute = SecondsInMinute / builtin.EpochDurationSeconds
