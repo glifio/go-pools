@@ -191,8 +191,7 @@ func New(
 	extern types.Extern,
 ) (types.PoolsSDK, error) {
 	var sdk types.PoolsSDK
-
-	ethClient, err := ethclient.Dial(extern.LotusDialAddr)
+	ethClient, err := connectEthClient(extern.LotusDialAddr, extern.LotusToken)
 	if err != nil {
 		return nil, err
 	}

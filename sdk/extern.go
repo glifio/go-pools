@@ -3,15 +3,36 @@ package sdk
 import (
 	"context"
 	"net/http"
+	"time"
 
 	"github.com/ethereum/go-ethereum/ethclient"
+	ethrpc "github.com/ethereum/go-ethereum/rpc"
 	"github.com/filecoin-project/go-jsonrpc"
 	lotusapi "github.com/filecoin-project/lotus/api"
 	"github.com/glifio/go-pools/rpc"
 )
 
 func (c *fevmExtern) ConnectEthClient() (*ethclient.Client, error) {
-	return ethclient.Dial(c.dialAddr)
+	return connectEthClient(c.dialAddr, c.token)
+}
+
+func connectEthClient(dialAddr string, token string) (*ethclient.Client, error) {
+	if token == "" {
+		return ethclient.Dial(dialAddr)
+	}
+
+	tokenHeader := ethrpc.WithHeader("Authorization", "Bearer "+token)
+	httpClient := ethrpc.WithHTTPClient(&http.Client{
+		Timeout: 10 * time.Second,
+	})
+
+	client, err := ethrpc.DialOptions(context.Background(), dialAddr, httpClient, tokenHeader)
+	if err != nil {
+		return nil, err
+	}
+	defer client.Close()
+
+	return ethclient.NewClient(client), nil
 }
 
 func (c *fevmExtern) ConnectLotusClient() (*lotusapi.FullNodeStruct, jsonrpc.ClientCloser, error) {
