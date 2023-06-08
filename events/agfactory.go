@@ -25,9 +25,14 @@ func AgFactoryCreateAgentEvents(ctx context.Context, sdk types.PoolsSDK, startEp
 	}
 
 	var events []*abigen.AgentFactoryCreateAgent
+	// to do - can remove hashmap logic when https://github.com/filecoin-project/lotus/issues/10964 gets merged
+	var hashmap = make(map[string]bool)
 
 	for iter.Next() {
-		events = append(events, iter.Event)
+		if _, ok := hashmap[iter.Event.Raw.BlockHash.Hex()]; !ok {
+			hashmap[iter.Event.Raw.BlockHash.Hex()] = true
+			events = append(events, iter.Event)
+		}
 	}
 
 	return events, nil

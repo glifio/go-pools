@@ -50,11 +50,15 @@ func MinerRegRmMinerEvents(ctx context.Context, sdk types.PoolsSDK, agentsFilter
 		return []*abigen.MinerRegistryRemoveMiner{}, err
 	}
 
-	var rmMinerEvents []*abigen.MinerRegistryRemoveMiner
+	var events []*abigen.MinerRegistryRemoveMiner
+	var hashmap = make(map[string]bool)
 
 	for iter.Next() {
-		rmMinerEvents = append(rmMinerEvents, iter.Event)
+		if _, ok := hashmap[iter.Event.Raw.BlockHash.Hex()]; !ok {
+			hashmap[iter.Event.Raw.BlockHash.Hex()] = true
+			events = append(events, iter.Event)
+		}
 	}
 
-	return rmMinerEvents, nil
+	return events, nil
 }
