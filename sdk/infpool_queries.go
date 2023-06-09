@@ -70,9 +70,6 @@ func (q *fevmQueries) InfPoolGetRate(ctx context.Context, cred abigen.Verifiable
 		return nil, err
 	}
 
-	// div out the precision wad from the rate
-	rate.Div(rate, big.NewInt(1e18))
-
 	return rate, nil
 }
 
