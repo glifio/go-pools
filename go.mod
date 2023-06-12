@@ -6,7 +6,6 @@ replace github.com/ipsn/go-secp256k1 v0.0.0-20180726113642-9d62b9f0bc52 => githu
 
 require (
 	github.com/ALTree/bigfloat v0.0.0-20220102081255-38c8b72a9924
-	github.com/briandowns/spinner v1.23.0
 	github.com/ethereum/go-ethereum v1.11.6
 	github.com/filecoin-project/go-address v1.1.0
 	github.com/filecoin-project/go-crypto v0.0.1
@@ -35,7 +34,6 @@ require (
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/deckarep/golang-set/v2 v2.1.0 // indirect
 	github.com/decred/dcrd/dcrec/secp256k1/v4 v4.1.0 // indirect
-	github.com/fatih/color v1.13.0 // indirect
 	github.com/filecoin-project/go-amt-ipld/v2 v2.1.0 // indirect
 	github.com/filecoin-project/go-amt-ipld/v3 v3.1.0 // indirect
 	github.com/filecoin-project/go-amt-ipld/v4 v4.0.0 // indirect
@@ -109,7 +107,6 @@ require (
 	github.com/libp2p/go-libp2p-pubsub v0.9.3 // indirect
 	github.com/libp2p/go-msgio v0.3.0 // indirect
 	github.com/magefile/mage v1.9.0 // indirect
-	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/mattn/go-isatty v0.0.17 // indirect
 	github.com/miekg/dns v1.1.50 // indirect
 	github.com/minio/blake2b-simd v0.0.0-20160723061019-3f5f724cb5b1 // indirect
@@ -154,7 +151,6 @@ require (
 	golang.org/x/mod v0.9.0 // indirect
 	golang.org/x/net v0.8.0 // indirect
 	golang.org/x/sys v0.6.0 // indirect
-	golang.org/x/term v0.6.0 // indirect
 	golang.org/x/time v0.1.0 // indirect
 	golang.org/x/tools v0.7.0 // indirect
 	google.golang.org/protobuf v1.28.1 // indirect
