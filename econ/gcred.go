@@ -33,6 +33,11 @@ func InterestRate(gcred *big.Int) *big.Float {
 	return rate
 }
 
+func CreditScoreSimple(ead *big.Int, ltv *big.Float, ltc *big.Float, edr *big.Int, dte *big.Float, faultRatio *big.Float, vestingToPledgeRatio *big.Float) *big.Int {
+	score := big.NewInt(100)
+	return score
+}
+
 /*
 * Credit Score
 * Credit Score = (DTE * 30%) - (LTC * 30%) - (FaultRatio * 20%) - (VestingRatio * 20%)
