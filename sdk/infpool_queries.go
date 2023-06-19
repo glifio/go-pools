@@ -8,6 +8,8 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/glifio/go-pools/abigen"
 	"github.com/glifio/go-pools/constants"
+	"github.com/glifio/go-pools/econ"
+	"github.com/glifio/go-pools/types"
 	"github.com/glifio/go-pools/util"
 	"github.com/glifio/go-pools/vc"
 )
@@ -131,6 +133,110 @@ func (q *fevmQueries) InfPoolTotalBorrowed(ctx context.Context) (*big.Float, err
 	}
 
 	return util.ToFIL(assets), nil
+}
+
+func (q *fevmQueries) InfPoolIsApprovedWithReason(ctx context.Context, agentAddr common.Address, agentData *vc.AgentData) (bool, types.RejectionReason, error) {
+	client, err := q.extern.ConnectEthClient()
+	if err != nil {
+		return false, types.RejectionReasonNone, err
+	}
+	defer client.Close()
+
+	chainHeight, err := q.ChainHeight(ctx)
+	if err != nil {
+		return false, types.RejectionReasonNone, err
+	}
+
+	agentID, err := q.AgentID(ctx, agentAddr)
+	if err != nil {
+		return false, types.RejectionReasonNone, err
+	}
+
+	rateModule, err := q.RateModule()
+	if err != nil {
+		return false, "", err
+	}
+
+	rateModuleCaller, err := abigen.NewRateModuleCaller(rateModule, client)
+	if err != nil {
+		return false, "", err
+	}
+
+	account, err := q.InfPoolGetAccount(ctx, agentAddr)
+	if err != nil {
+		return false, types.RejectionReasonNone, err
+	}
+
+	if new(big.Int).Add(account.EpochsPaid, big.NewInt(int64(constants.RepeatBorrowEpochTolerance))).Cmp(chainHeight) == -1 {
+		return false, types.RejectionReasonPayUP, nil
+	}
+
+	agentLvl, err := rateModuleCaller.AccountLevel(nil, agentID)
+	if err != nil {
+		return false, "", err
+	}
+
+	agentCap, err := rateModuleCaller.Levels(nil, agentLvl)
+	if err != nil {
+		return false, "", err
+	}
+
+	maxAmtFromLvl := new(big.Int).Sub(agentCap, agentData.Principal)
+
+	if account.Principal.Cmp(maxAmtFromLvl) == 1 {
+		return false, types.RejectionReasonCap, nil
+	}
+
+	if agentData.Principal.Cmp(big.NewInt(0)) == 0 {
+		return false, types.RejectionReasonZeroCollateral, nil
+	}
+
+	collateralValue := econ.CollateralValue(agentData.AgentValue)
+	equityValue := new(big.Int).Sub(agentData.AgentValue, agentData.Principal)
+
+	maxLTV, err := rateModuleCaller.MaxLTV(nil)
+	if err != nil {
+		return false, "", err
+	}
+
+	maxDTE, err := rateModuleCaller.MaxDTE(nil)
+	if err != nil {
+		return false, "", err
+	}
+
+	maxDTI, err := rateModuleCaller.MaxDTI(nil)
+	if err != nil {
+		return false, "", err
+	}
+
+	ltv := new(big.Int).Div(new(big.Int).Mul(agentData.Principal, constants.WAD), collateralValue)
+	dte := new(big.Int).Div(new(big.Int).Mul(agentData.Principal, constants.WAD), equityValue)
+
+	if ltv.Cmp(maxLTV) == 1 {
+		return false, types.RejectionReasonLTV, nil
+	}
+
+	if dte.Cmp(maxDTE) == 1 {
+		return false, types.RejectionReasonDTE, nil
+	}
+
+	nullCred, err := vc.NullishVerifiableCredential(*agentData)
+	rate, err := q.InfPoolGetRate(ctx, *nullCred)
+	if err != nil {
+		return false, types.RejectionReasonNone, err
+	}
+
+	dailyFees := rate.Mul(rate, big.NewInt(constants.EpochsInDay))
+	dailyFees.Mul(dailyFees, agentData.Principal)
+	dailyFees.Div(dailyFees, constants.WAD)
+
+	dti := new(big.Int).Div(dailyFees, agentData.ExpectedDailyRewards)
+
+	if dti.Cmp(maxDTI) == 1 {
+		return false, types.RejectionReasonDTI, nil
+	}
+
+	return true, types.RejectionReasonNone, nil
 }
 
 func (q *fevmQueries) InfPoolRateFromGCRED(ctx context.Context, gcred *big.Int) (*big.Float, error) {
