@@ -46,6 +46,7 @@ type FEVMQueries interface {
 	InfPoolTotalAssets(ctx context.Context) (*big.Float, error)
 	InfPoolTotalBorrowed(ctx context.Context) (*big.Float, error)
 	InfPoolIsApprovedWithReason(ctx context.Context, agentAddr common.Address, agentData *vc.AgentData) (bool, RejectionReason, error)
+	InfPoolAgentMaxBorrow(ctx context.Context, agentAddr common.Address, agentData *vc.AgentData) (*big.Int, error)
 	// pool registry methods
 	ListPools(ctx context.Context) ([]common.Address, error)
 	// ifil methods

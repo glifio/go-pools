@@ -1659,6 +1659,62 @@ func (_c *FEVMQueries_IFILPrice_Call) RunAndReturn(run func(context.Context) (*b
 	return _c
 }
 
+// InfPoolAgentMaxBorrow provides a mock function with given fields: ctx, agentAddr, agentData
+func (_m *FEVMQueries) InfPoolAgentMaxBorrow(ctx context.Context, agentAddr common.Address, agentData *vc.AgentData) (*big.Int, error) {
+	ret := _m.Called(ctx, agentAddr, agentData)
+
+	var r0 *big.Int
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, common.Address, *vc.AgentData) (*big.Int, error)); ok {
+		return rf(ctx, agentAddr, agentData)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, common.Address, *vc.AgentData) *big.Int); ok {
+		r0 = rf(ctx, agentAddr, agentData)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*big.Int)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, common.Address, *vc.AgentData) error); ok {
+		r1 = rf(ctx, agentAddr, agentData)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// FEVMQueries_InfPoolAgentMaxBorrow_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'InfPoolAgentMaxBorrow'
+type FEVMQueries_InfPoolAgentMaxBorrow_Call struct {
+	*mock.Call
+}
+
+// InfPoolAgentMaxBorrow is a helper method to define mock.On call
+//   - ctx context.Context
+//   - agentAddr common.Address
+//   - agentData *vc.AgentData
+func (_e *FEVMQueries_Expecter) InfPoolAgentMaxBorrow(ctx interface{}, agentAddr interface{}, agentData interface{}) *FEVMQueries_InfPoolAgentMaxBorrow_Call {
+	return &FEVMQueries_InfPoolAgentMaxBorrow_Call{Call: _e.mock.On("InfPoolAgentMaxBorrow", ctx, agentAddr, agentData)}
+}
+
+func (_c *FEVMQueries_InfPoolAgentMaxBorrow_Call) Run(run func(ctx context.Context, agentAddr common.Address, agentData *vc.AgentData)) *FEVMQueries_InfPoolAgentMaxBorrow_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(common.Address), args[2].(*vc.AgentData))
+	})
+	return _c
+}
+
+func (_c *FEVMQueries_InfPoolAgentMaxBorrow_Call) Return(_a0 *big.Int, _a1 error) *FEVMQueries_InfPoolAgentMaxBorrow_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *FEVMQueries_InfPoolAgentMaxBorrow_Call) RunAndReturn(run func(context.Context, common.Address, *vc.AgentData) (*big.Int, error)) *FEVMQueries_InfPoolAgentMaxBorrow_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // InfPoolBorrowableLiquidity provides a mock function with given fields: ctx
 func (_m *FEVMQueries) InfPoolBorrowableLiquidity(ctx context.Context) (*big.Float, error) {
 	ret := _m.Called(ctx)
