@@ -221,6 +221,10 @@ func (q *fevmQueries) InfPoolIsApprovedWithReason(ctx context.Context, agentAddr
 	}
 
 	nullCred, err := vc.NullishVerifiableCredential(*agentData)
+	if err != nil {
+		return false, types.RejectionReasonNone, err
+	}
+
 	rate, err := q.InfPoolGetRate(ctx, *nullCred)
 	if err != nil {
 		return false, types.RejectionReasonNone, err
@@ -237,6 +241,83 @@ func (q *fevmQueries) InfPoolIsApprovedWithReason(ctx context.Context, agentAddr
 	}
 
 	return true, types.RejectionReasonNone, nil
+}
+
+func computeMaxDTICap(epochRate *big.Int, edr *big.Int, agentExistingPrincipal *big.Int, maxDTI *big.Int) *big.Int {
+	dailyRate := new(big.Int).Mul(epochRate, big.NewInt(constants.EpochsInDay))
+	maxBorrowDTICap := new(big.Int).Mul(edr, maxDTI)
+	// here we add a WAD in for precision, since dailyRate has an extra wad precision
+	maxBorrowDTICap.Mul(maxBorrowDTICap, constants.WAD)
+	maxBorrowDTICap.Div(maxBorrowDTICap, dailyRate)
+	maxBorrowDTICap.Sub(maxBorrowDTICap, agentExistingPrincipal)
+	return maxBorrowDTICap
+}
+
+func computeMaxDTECap(agentValue *big.Int, principal *big.Int) *big.Int {
+	return new(big.Int).Sub(agentValue, principal)
+}
+
+func computeMaxLTVCap(agentValue *big.Int, principal *big.Int) *big.Int {
+	maxBorrowLTVCap := new(big.Int).Div(agentValue, econ.CollateralValue(agentValue))
+	maxBorrowLTVCap.Sub(maxBorrowLTVCap, principal)
+	maxBorrowLTVCap.Mul(maxBorrowLTVCap, big.NewInt(2))
+	maxBorrowLTVCap.Div(maxBorrowLTVCap, big.NewInt(3))
+	maxBorrowLTVCap = maxBorrowLTVCap.Sub(maxBorrowLTVCap, principal)
+	return maxBorrowLTVCap
+}
+
+func findMinCap(values []*big.Int) *big.Int {
+	min := new(big.Int).Set(values[0]) // Copy the first value
+
+	for _, value := range values {
+		// If value is smaller than min, replace min
+		if value.Cmp(min) == -1 {
+			min = value
+		}
+	}
+
+	return min
+}
+
+func (q *fevmQueries) InfPoolAgentMaxBorrow(ctx context.Context, agentAddr common.Address, agentData *vc.AgentData) (*big.Int, error) {
+	client, err := q.extern.ConnectEthClient()
+	if err != nil {
+		return nil, err
+	}
+	defer client.Close()
+
+	rateModule, err := q.RateModule()
+	if err != nil {
+		return nil, err
+	}
+
+	rateModuleCaller, err := abigen.NewRateModuleCaller(rateModule, client)
+	if err != nil {
+		return nil, err
+	}
+
+	maxDTI, err := rateModuleCaller.MaxDTI(nil)
+	if err != nil {
+		return nil, err
+	}
+
+	nullCred, err := vc.NullishVerifiableCredential(*agentData)
+	if err != nil {
+		return nil, err
+	}
+
+	rate, err := q.InfPoolGetRate(ctx, *nullCred)
+	if err != nil {
+		return nil, err
+	}
+
+	caps := []*big.Int{
+		computeMaxDTICap(rate, agentData.ExpectedDailyRewards, agentData.Principal, maxDTI),
+		computeMaxDTECap(agentData.AgentValue, agentData.Principal),
+		computeMaxLTVCap(agentData.AgentValue, agentData.Principal),
+	}
+
+	return findMinCap(caps), nil
 }
 
 func (q *fevmQueries) InfPoolRateFromGCRED(ctx context.Context, gcred *big.Int) (*big.Float, error) {
