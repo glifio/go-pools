@@ -96,7 +96,6 @@ func MsigProposeFEVMTxWithValue(
 		To:    msigAddr,
 		From:  senderAddr,
 		Value: filbig.Zero(),
-		// Value:  filbig.NewFromGo(value),
 		Nonce:  nonce,
 		Method: builtin.MethodsMultisig.Propose,
 		Params: enc,
