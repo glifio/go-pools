@@ -1,14 +1,13 @@
 package util
 
 import (
-	"math"
 	"math/big"
 
 	"github.com/ethereum/go-ethereum/params"
 )
 
 func ToAtto(bal *big.Float) *big.Int {
-	wei := new(big.Float).Mul(bal, big.NewFloat(math.Pow10(18)))
+	wei := new(big.Float).Mul(bal, big.NewFloat(params.Ether))
 	result := new(big.Int)
 	wei.Int(result)
 	return result

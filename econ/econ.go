@@ -118,7 +118,7 @@ func ComputeAgentData(
 		vestingToPledgeRatio = vestingToPledgeRatio.Quo(new(big.Float).SetInt(aggMinerStats.VestingFunds), new(big.Float).SetInt(aggMinerStats.PledgedFunds))
 	}
 
-	data.Gcred = CreditScore(ead, ltv, ltcv, data.ExpectedDailyRewards, dte, faultRatio, vestingToPledgeRatio)
+	data.Gcred = CreditScoreSimple(ead, ltv, ltcv, data.ExpectedDailyRewards, dte, faultRatio, vestingToPledgeRatio)
 
 	return data, nil
 }
