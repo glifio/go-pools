@@ -257,13 +257,11 @@ func computeMaxDTECap(agentValue *big.Int, principal *big.Int) *big.Int {
 	return new(big.Int).Sub(agentValue, principal)
 }
 
+// P(new) = AgentValue(old) - 2*P(old)
+// where the value 2 is based on mstat.TerminationPenaltyRatio being .5
 func computeMaxLTVCap(agentValue *big.Int, principal *big.Int) *big.Int {
-	maxBorrowLTVCap := new(big.Int).Div(agentValue, econ.CollateralValue(agentValue))
-	maxBorrowLTVCap.Sub(maxBorrowLTVCap, principal)
-	maxBorrowLTVCap.Mul(maxBorrowLTVCap, big.NewInt(2))
-	maxBorrowLTVCap.Div(maxBorrowLTVCap, big.NewInt(3))
-	maxBorrowLTVCap = maxBorrowLTVCap.Sub(maxBorrowLTVCap, principal)
-	return maxBorrowLTVCap
+	oldPrincipalCap := new(big.Int).Mul(principal, big.NewInt(2))
+	return new(big.Int).Sub(agentValue, oldPrincipalCap)
 }
 
 func findMinCap(values []*big.Int) *big.Int {
