@@ -134,7 +134,9 @@ func (q *fevmQueries) InfPoolTotalBorrowed(ctx context.Context) (*big.Float, err
 
 	return util.ToFIL(assets), nil
 }
-
+// InfPoolIsApprovedWithReason returns whether a request has been approved or not, if 
+// it has been rejected, the reason is supplied. In the case of an error, the reason
+// is set to types.RejectionReasonNone.
 func (q *fevmQueries) InfPoolIsApprovedWithReason(ctx context.Context, agentAddr common.Address, agentData *vc.AgentData) (bool, types.RejectionReason, error) {
 	client, err := q.extern.ConnectEthClient()
 	if err != nil {
