@@ -14,6 +14,7 @@ import (
 	filtypes "github.com/filecoin-project/lotus/chain/types"
 	"github.com/glifio/go-pools/abigen"
 	"github.com/glifio/go-pools/constants"
+	"github.com/glifio/go-pools/vc"
 )
 
 //go:generate mockery --name FEVMQueries
@@ -44,6 +45,8 @@ type FEVMQueries interface {
 	InfPoolBorrowableLiquidity(ctx context.Context) (*big.Float, error)
 	InfPoolTotalAssets(ctx context.Context) (*big.Float, error)
 	InfPoolTotalBorrowed(ctx context.Context) (*big.Float, error)
+	InfPoolIsApprovedWithReason(ctx context.Context, agentAddr common.Address, agentData *vc.AgentData) (bool, RejectionReason, error)
+	InfPoolAgentMaxBorrow(ctx context.Context, agentAddr common.Address, agentData *vc.AgentData) (*big.Int, error)
 	InfPoolMaxEpochsOwedTolerance(ctx context.Context, agentAddr common.Address) (*big.Int, error)
 	// pool registry methods
 	ListPools(ctx context.Context) ([]common.Address, error)
