@@ -284,6 +284,11 @@ func (q *fevmQueries) InfPoolAgentMaxBorrow(ctx context.Context, agentAddr commo
 	}
 	defer client.Close()
 
+	agentID, err := q.AgentID(ctx, agentAddr)
+	if err != nil {
+		return nil, err
+	}
+
 	rateModule, err := q.RateModule()
 	if err != nil {
 		return nil, err
@@ -309,10 +314,23 @@ func (q *fevmQueries) InfPoolAgentMaxBorrow(ctx context.Context, agentAddr commo
 		return nil, err
 	}
 
+	agentLvl, err := rateModuleCaller.AccountLevel(nil, agentID)
+	if err != nil {
+		return nil, err
+	}
+
+	agentCap, err := rateModuleCaller.Levels(nil, agentLvl)
+	if err != nil {
+		return nil, err
+	}
+
+	maxAmtFromLvl := new(big.Int).Sub(agentCap, agentData.Principal)
+
 	caps := []*big.Int{
 		computeMaxDTICap(rate, agentData.ExpectedDailyRewards, agentData.Principal, maxDTI),
 		computeMaxDTECap(agentData.AgentValue, agentData.Principal),
 		computeMaxLTVCap(agentData.AgentValue, agentData.Principal),
+		maxAmtFromLvl,
 	}
 
 	return findMinCap(caps), nil
