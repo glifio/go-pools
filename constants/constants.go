@@ -20,8 +20,8 @@ const EpochsInYear = EpochsInDay * 365
 var DefaultWindow = EpochsInWeek * 3
 var RepeatBorrowEpochTolerance = EpochsInDay
 
-// a credential is valid for 30 minutes
-const CredentialMinutesValid = 30
+// a credential is valid for 5 minutes
+const CredentialMinutesValid = 5
 const CredentialEpochsValid = CredentialMinutesValid * EpochsInMinute
 
 type Method string

@@ -363,3 +363,18 @@ func (q *fevmQueries) InfPoolRateFromGCRED(ctx context.Context, gcred *big.Int) 
 
 	return util.ToFIL(perEpochRate), nil
 }
+
+func (q *fevmQueries) InfPoolMaxEpochsOwedTolerance(ctx context.Context, agentAddr common.Address) (*big.Int, error) {
+	client, err := q.extern.ConnectEthClient()
+	if err != nil {
+		return nil, err
+	}
+	defer client.Close()
+
+	poolCaller, err := abigen.NewInfinityPoolCaller(q.infinityPool, client)
+	if err != nil {
+		return nil, err
+	}
+
+	return poolCaller.MaxEpochsOwedTolerance(nil)
+}
