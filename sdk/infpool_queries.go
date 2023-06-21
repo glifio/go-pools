@@ -134,7 +134,8 @@ func (q *fevmQueries) InfPoolTotalBorrowed(ctx context.Context) (*big.Float, err
 
 	return util.ToFIL(assets), nil
 }
-// InfPoolIsApprovedWithReason returns whether a request has been approved or not, if 
+
+// InfPoolIsApprovedWithReason returns whether a request has been approved or not, if
 // it has been rejected, the reason is supplied. In the case of an error, the reason
 // is set to types.RejectionReasonNone.
 func (q *fevmQueries) InfPoolIsApprovedWithReason(ctx context.Context, agentAddr common.Address, agentData *vc.AgentData) (bool, types.RejectionReason, error) {
@@ -279,6 +280,17 @@ func findMinCap(values []*big.Int) *big.Int {
 	return min
 }
 
+func MaxBorrowFromAgentData(agentData *vc.AgentData, rate *big.Int) *big.Int {
+	caps := []*big.Int{
+		// TODO: maxDTI in computeMaxDTI is hardcoded to 1e18, this could be derived from the contracts
+		computeMaxDTICap(rate, agentData.ExpectedDailyRewards, agentData.Principal, big.NewInt(25e16)),
+		computeMaxDTECap(agentData.AgentValue, agentData.Principal),
+		computeMaxLTVCap(agentData.AgentValue, agentData.Principal),
+	}
+
+	return findMinCap(caps)
+}
+
 func (q *fevmQueries) InfPoolAgentMaxBorrow(ctx context.Context, agentAddr common.Address, agentData *vc.AgentData) (*big.Int, error) {
 	client, err := q.extern.ConnectEthClient()
 	if err != nil {
@@ -297,11 +309,6 @@ func (q *fevmQueries) InfPoolAgentMaxBorrow(ctx context.Context, agentAddr commo
 	}
 
 	rateModuleCaller, err := abigen.NewRateModuleCaller(rateModule, client)
-	if err != nil {
-		return nil, err
-	}
-
-	maxDTI, err := rateModuleCaller.MaxDTI(nil)
 	if err != nil {
 		return nil, err
 	}
@@ -329,9 +336,7 @@ func (q *fevmQueries) InfPoolAgentMaxBorrow(ctx context.Context, agentAddr commo
 	maxAmtFromLvl := new(big.Int).Sub(agentCap, agentData.Principal)
 
 	caps := []*big.Int{
-		computeMaxDTICap(rate, agentData.ExpectedDailyRewards, agentData.Principal, maxDTI),
-		computeMaxDTECap(agentData.AgentValue, agentData.Principal),
-		computeMaxLTVCap(agentData.AgentValue, agentData.Principal),
+		MaxBorrowFromAgentData(agentData, rate),
 		maxAmtFromLvl,
 	}
 
