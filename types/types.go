@@ -44,6 +44,7 @@ type FEVMQueries interface {
 	InfPoolBorrowableLiquidity(ctx context.Context) (*big.Float, error)
 	InfPoolTotalAssets(ctx context.Context) (*big.Float, error)
 	InfPoolTotalBorrowed(ctx context.Context) (*big.Float, error)
+	InfPoolMaxEpochsOwedTolerance(ctx context.Context, agentAddr common.Address) (*big.Int, error)
 	// pool registry methods
 	ListPools(ctx context.Context) ([]common.Address, error)
 	// ifil methods
