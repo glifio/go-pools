@@ -170,7 +170,7 @@ func (q *fevmQueries) InfPoolIsApprovedWithReason(ctx context.Context, agentAddr
 		return false, types.RejectionReasonNone, err
 	}
 
-	if new(big.Int).Add(account.EpochsPaid, big.NewInt(int64(constants.RepeatBorrowEpochTolerance))).Cmp(chainHeight) == -1 {
+	if account.EpochsPaid.Cmp(big.NewInt(0)) == 1 && new(big.Int).Add(account.EpochsPaid, big.NewInt(int64(constants.RepeatBorrowEpochTolerance))).Cmp(chainHeight) == -1 {
 		return false, types.RejectionReasonPayUP, nil
 	}
 
