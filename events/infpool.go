@@ -25,13 +25,9 @@ func InfPoolBorrowEvents(ctx context.Context, sdk types.PoolsSDK, agentsFilter [
 	}
 
 	var events []*abigen.InfinityPoolBorrow
-	var hashmap = make(map[string]bool)
 
 	for iter.Next() {
-		if _, ok := hashmap[iter.Event.Raw.BlockHash.Hex()]; !ok {
-			hashmap[iter.Event.Raw.BlockHash.Hex()] = true
-			events = append(events, iter.Event)
-		}
+		events = append(events, iter.Event)
 	}
 
 	return events, nil
@@ -54,13 +50,9 @@ func InfPoolPayEvents(ctx context.Context, sdk types.PoolsSDK, agentsFilter []*b
 	}
 
 	var events []*abigen.InfinityPoolPay
-	var hashmap = make(map[string]bool)
 
 	for iter.Next() {
-		if _, ok := hashmap[iter.Event.Raw.BlockHash.Hex()]; !ok {
-			hashmap[iter.Event.Raw.BlockHash.Hex()] = true
-			events = append(events, iter.Event)
-		}
+		events = append(events, iter.Event)
 	}
 
 	return events, nil
@@ -83,13 +75,9 @@ func InfPoolDepositEvents(ctx context.Context, sdk types.PoolsSDK, startEpoch *b
 	}
 
 	var events []*abigen.InfinityPoolDeposit
-	var hashmap = make(map[string]bool)
 
 	for iter.Next() {
-		if _, ok := hashmap[iter.Event.Raw.BlockHash.Hex()]; !ok {
-			hashmap[iter.Event.Raw.BlockHash.Hex()] = true
-			events = append(events, iter.Event)
-		}
+		events = append(events, iter.Event)
 	}
 
 	return events, nil
