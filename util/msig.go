@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"errors"
+	"math/big"
 
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/common"
@@ -27,6 +28,30 @@ func MsigProposeFEVMTx(
 	abi *abi.ABI,
 	methodName string,
 	args []interface{},
+) (*ltypes.Message, error) {
+	return MsigProposeFEVMTxWithValue(
+		ctx,
+		senderAddr,
+		msigAddr,
+		contractAddr,
+		nonce,
+		abi,
+		methodName,
+		args,
+		big.NewInt(0),
+	)
+}
+
+func MsigProposeFEVMTxWithValue(
+	ctx context.Context,
+	senderAddr address.Address,
+	msigAddr address.Address,
+	contractAddr common.Address,
+	nonce uint64,
+	abi *abi.ABI,
+	methodName string,
+	args []interface{},
+	value *big.Int,
 ) (*ltypes.Message, error) {
 	contractAddrFilForm, err := ethtypes.ParseEthAddress(contractAddr.String())
 	if err != nil {
@@ -58,7 +83,7 @@ func MsigProposeFEVMTx(
 
 	enc, actErr := actors.SerializeParams(&multisig0.ProposeParams{
 		To:     contractAddrDel,
-		Value:  filbig.Zero(),
+		Value:  filbig.NewFromGo(value),
 		Method: builtin.MethodsEVM.InvokeContract,
 		Params: cborParams.Bytes(),
 	})
@@ -68,9 +93,9 @@ func MsigProposeFEVMTx(
 	}
 
 	return &ltypes.Message{
-		To:     msigAddr,
-		From:   senderAddr,
-		Value:  filbig.Zero(),
+		To:    msigAddr,
+		From:  senderAddr,
+		Value: filbig.Zero(),
 		Nonce:  nonce,
 		Method: builtin.MethodsMultisig.Propose,
 		Params: enc,

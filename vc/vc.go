@@ -83,7 +83,7 @@ func TypedEIP712(
 	}
 }
 
-func abiEncodeClaim(claim AgentData) ([]byte, error) {
+func AbiEncodeClaim(claim AgentData) ([]byte, error) {
 	// here we create an array of Args to encode for AgentData
 	var arguments abi.Arguments
 	// here are the params to abi.encode into bytes
@@ -107,6 +107,36 @@ func abiEncodeClaim(claim AgentData) ([]byte, error) {
 	return arguments.Pack(params...)
 }
 
+func AbiDecodeClaim(claim []byte) (*AgentData, error) {
+	// Define the ABI arguments
+	var arguments abi.Arguments
+	uint256Ty, _ := abi.NewType("uint256", "", nil)
+	numFields := reflect.TypeOf(AgentData{}).NumField()
+
+	for i := 0; i < numFields; i++ {
+		arguments = append(arguments, abi.Argument{Type: uint256Ty})
+	}
+
+	out, err := arguments.Unpack(claim)
+	if err != nil {
+		return nil, err
+	}
+
+	// Convert the slice of big.Ints into an AgentData
+	return &AgentData{
+		AgentValue:                  out[0].(*big.Int),
+		CollateralValue:             out[1].(*big.Int),
+		ExpectedDailyFaultPenalties: out[2].(*big.Int),
+		ExpectedDailyRewards:        out[3].(*big.Int),
+		Gcred:                       out[4].(*big.Int),
+		QaPower:                     out[5].(*big.Int),
+		Principal:                   out[6].(*big.Int),
+		FaultySectors:               out[7].(*big.Int),
+		LiveSectors:                 out[8].(*big.Int),
+		GreenScore:                  out[9].(*big.Int),
+	}, nil
+}
+
 func NewVerifiableCredential(
 	issuer common.Address,
 	subject *big.Int,
@@ -121,7 +151,7 @@ func NewVerifiableCredential(
 	if subject.Cmp(common.Big0) == 0 {
 		return &abigen.VerifiableCredential{}, ErrZeroSubject
 	}
-	claimBytes, err := abiEncodeClaim(claim)
+	claimBytes, err := AbiEncodeClaim(claim)
 	if err != nil {
 		return &abigen.VerifiableCredential{}, err
 	}
@@ -139,7 +169,7 @@ func NewVerifiableCredential(
 }
 
 func NullishVerifiableCredential(claim AgentData) (*abigen.VerifiableCredential, error) {
-	claimBytes, err := abiEncodeClaim(claim)
+	claimBytes, err := AbiEncodeClaim(claim)
 	if err != nil {
 		return &abigen.VerifiableCredential{}, err
 	}
