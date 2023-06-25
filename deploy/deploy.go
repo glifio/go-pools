@@ -45,3 +45,8 @@ var TestProtoMeta = types.ProtocolMeta{
 	WFIL:          common.HexToAddress("0xaC26a4Ab9cF2A8c5DBaB6fb4351ec0F4b07356c4"),
 	ChainID:       big.NewInt(314159),
 }
+
+var (
+	ProtocolDeployEpoch  = big.NewInt(0)
+	TProtocolDeployEpoch = big.NewInt(559673)
+)
