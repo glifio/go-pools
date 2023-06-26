@@ -47,6 +47,6 @@ var TestProtoMeta = types.ProtocolMeta{
 }
 
 var (
-	ProtocolDeployEpoch  = big.NewInt(0)
+	ProtocolDeployEpoch  = big.NewInt(2890957)
 	TProtocolDeployEpoch = big.NewInt(559673)
 )
