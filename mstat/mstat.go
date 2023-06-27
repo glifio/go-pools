@@ -316,7 +316,7 @@ func computeSectorStatus(ctx context.Context, lotus api.FullNode, miner address.
 
 	// loop back in steps of 1000 tipsets 10 times and avarage the sector count
 	for i := 0; i < LOOK_BACK_LIMIT; i++ {
-		ts, err := lotus.ChainGetTipSetByHeight(ctx, tsk.Height()-abi.ChainEpoch((i*2880)), tsk.Key())
+		ts, err := lotus.ChainGetTipSetByHeight(ctx, tsk.Height()-abi.ChainEpoch((i*200)), tsk.Key())
 		if err != nil {
 			return nil, err
 		}
