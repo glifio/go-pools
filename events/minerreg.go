@@ -26,9 +26,13 @@ func MinerRegAddMinerEvents(ctx context.Context, sdk types.PoolsSDK, agentsFilte
 	}
 
 	var addMinerEvents []*abigen.MinerRegistryAddMiner
+	var hashmap = make(map[string]bool)
 
 	for iter.Next() {
-		addMinerEvents = append(addMinerEvents, iter.Event)
+		if _, ok := hashmap[iter.Event.Raw.TxHash.Hex()]; !ok {
+			hashmap[iter.Event.Raw.TxHash.Hex()] = true
+			addMinerEvents = append(addMinerEvents, iter.Event)
+		}
 	}
 
 	return addMinerEvents, nil
@@ -54,8 +58,8 @@ func MinerRegRmMinerEvents(ctx context.Context, sdk types.PoolsSDK, agentsFilter
 	var hashmap = make(map[string]bool)
 
 	for iter.Next() {
-		if _, ok := hashmap[iter.Event.Raw.BlockHash.Hex()]; !ok {
-			hashmap[iter.Event.Raw.BlockHash.Hex()] = true
+		if _, ok := hashmap[iter.Event.Raw.TxHash.Hex()]; !ok {
+			hashmap[iter.Event.Raw.TxHash.Hex()] = true
 			events = append(events, iter.Event)
 		}
 	}

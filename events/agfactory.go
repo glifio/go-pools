@@ -29,8 +29,8 @@ func AgFactoryCreateAgentEvents(ctx context.Context, sdk types.PoolsSDK, startEp
 	var hashmap = make(map[string]bool)
 
 	for iter.Next() {
-		if _, ok := hashmap[iter.Event.Raw.BlockHash.Hex()]; !ok {
-			hashmap[iter.Event.Raw.BlockHash.Hex()] = true
+		if _, ok := hashmap[iter.Event.Raw.TxHash.Hex()]; !ok {
+			hashmap[iter.Event.Raw.TxHash.Hex()] = true
 			events = append(events, iter.Event)
 		}
 	}

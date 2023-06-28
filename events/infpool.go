@@ -28,8 +28,8 @@ func InfPoolBorrowEvents(ctx context.Context, sdk types.PoolsSDK, agentsFilter [
 	var hashmap = make(map[string]bool)
 
 	for iter.Next() {
-		if _, ok := hashmap[iter.Event.Raw.BlockHash.Hex()]; !ok {
-			hashmap[iter.Event.Raw.BlockHash.Hex()] = true
+		if _, ok := hashmap[iter.Event.Raw.TxHash.Hex()]; !ok {
+			hashmap[iter.Event.Raw.TxHash.Hex()] = true
 			events = append(events, iter.Event)
 		}
 	}
@@ -57,8 +57,8 @@ func InfPoolPayEvents(ctx context.Context, sdk types.PoolsSDK, agentsFilter []*b
 	var hashmap = make(map[string]bool)
 
 	for iter.Next() {
-		if _, ok := hashmap[iter.Event.Raw.BlockHash.Hex()]; !ok {
-			hashmap[iter.Event.Raw.BlockHash.Hex()] = true
+		if _, ok := hashmap[iter.Event.Raw.TxHash.Hex()]; !ok {
+			hashmap[iter.Event.Raw.TxHash.Hex()] = true
 			events = append(events, iter.Event)
 		}
 	}
@@ -86,8 +86,8 @@ func InfPoolDepositEvents(ctx context.Context, sdk types.PoolsSDK, startEpoch *b
 	var hashmap = make(map[string]bool)
 
 	for iter.Next() {
-		if _, ok := hashmap[iter.Event.Raw.BlockHash.Hex()]; !ok {
-			hashmap[iter.Event.Raw.BlockHash.Hex()] = true
+		if _, ok := hashmap[iter.Event.Raw.TxHash.Hex()]; !ok {
+			hashmap[iter.Event.Raw.TxHash.Hex()] = true
 			events = append(events, iter.Event)
 		}
 	}
