@@ -2,6 +2,7 @@ package events
 
 import (
 	"context"
+	"log"
 	"math/big"
 
 	"github.com/ethereum/go-ethereum/common"
@@ -20,18 +21,30 @@ func MinerRegAddMinerEvents(ctx context.Context, sdk types.PoolsSDK, agentsFilte
 		return []*abigen.MinerRegistryAddMiner{}, err
 	}
 
-	iter, err := minerRegFilterer.FilterAddMiner(getFilterOpts(ctx, startEpoch, endEpoch, sdk.Query().ChainID()), agentsFilter, nil)
-	if err != nil {
-		return []*abigen.MinerRegistryAddMiner{}, err
-	}
-
 	var addMinerEvents []*abigen.MinerRegistryAddMiner
 	var hashmap = make(map[string]bool)
 
-	for iter.Next() {
-		if _, ok := hashmap[iter.Event.Raw.TxHash.Hex()]; !ok {
-			hashmap[iter.Event.Raw.TxHash.Hex()] = true
-			addMinerEvents = append(addMinerEvents, iter.Event)
+	chunkSize := big.NewInt(50000)
+
+	len := big.NewInt(0).Sub(endEpoch, startEpoch)
+	log.Println("len", len)
+	for i := startEpoch; i.Cmp(endEpoch) == -1; i.Add(i, chunkSize) {
+		end := big.NewInt(0).Add(i, chunkSize)
+		if end.Cmp(endEpoch) == 1 {
+			end = endEpoch
+		}
+		log.Println("chunk", i, "->", end)
+
+		iter, err := minerRegFilterer.FilterAddMiner(getFilterOpts(ctx, i, end, sdk.Query().ChainID()), agentsFilter, nil)
+		if err != nil {
+			return []*abigen.MinerRegistryAddMiner{}, err
+		}
+
+		for iter.Next() {
+			if _, ok := hashmap[iter.Event.Raw.TxHash.Hex()]; !ok {
+				hashmap[iter.Event.Raw.TxHash.Hex()] = true
+				addMinerEvents = append(addMinerEvents, iter.Event)
+			}
 		}
 	}
 
@@ -49,18 +62,29 @@ func MinerRegRmMinerEvents(ctx context.Context, sdk types.PoolsSDK, agentsFilter
 		return []*abigen.MinerRegistryRemoveMiner{}, err
 	}
 
-	iter, err := minerRegFilterer.FilterRemoveMiner(getFilterOpts(ctx, startEpoch, endEpoch, sdk.Query().ChainID()), agentsFilter, nil)
-	if err != nil {
-		return []*abigen.MinerRegistryRemoveMiner{}, err
-	}
-
 	var events []*abigen.MinerRegistryRemoveMiner
 	var hashmap = make(map[string]bool)
 
-	for iter.Next() {
-		if _, ok := hashmap[iter.Event.Raw.TxHash.Hex()]; !ok {
-			hashmap[iter.Event.Raw.TxHash.Hex()] = true
-			events = append(events, iter.Event)
+	chunkSize := big.NewInt(50000)
+
+	len := big.NewInt(0).Sub(endEpoch, startEpoch)
+	log.Println("len", len)
+	for i := startEpoch; i.Cmp(endEpoch) == -1; i.Add(i, chunkSize) {
+		end := big.NewInt(0).Add(i, chunkSize)
+		if end.Cmp(endEpoch) == 1 {
+			end = endEpoch
+		}
+		log.Println("chunk", i, "->", end)
+
+		iter, err := minerRegFilterer.FilterRemoveMiner(getFilterOpts(ctx, i, end, sdk.Query().ChainID()), agentsFilter, nil)
+		if err != nil {
+			return []*abigen.MinerRegistryRemoveMiner{}, err
+		}
+		for iter.Next() {
+			if _, ok := hashmap[iter.Event.Raw.TxHash.Hex()]; !ok {
+				hashmap[iter.Event.Raw.TxHash.Hex()] = true
+				events = append(events, iter.Event)
+			}
 		}
 	}
 
