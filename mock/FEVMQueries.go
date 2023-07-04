@@ -1823,6 +1823,60 @@ func (_c *FEVMQueries_InfPoolBorrowableLiquidity_Call) RunAndReturn(run func(con
 	return _c
 }
 
+// InfPoolFeesAccrued provides a mock function with given fields: ctx
+func (_m *FEVMQueries) InfPoolFeesAccrued(ctx context.Context) (*big.Int, error) {
+	ret := _m.Called(ctx)
+
+	var r0 *big.Int
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context) (*big.Int, error)); ok {
+		return rf(ctx)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context) *big.Int); ok {
+		r0 = rf(ctx)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*big.Int)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context) error); ok {
+		r1 = rf(ctx)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// FEVMQueries_InfPoolFeesAccrued_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'InfPoolFeesAccrued'
+type FEVMQueries_InfPoolFeesAccrued_Call struct {
+	*mock.Call
+}
+
+// InfPoolFeesAccrued is a helper method to define mock.On call
+//   - ctx context.Context
+func (_e *FEVMQueries_Expecter) InfPoolFeesAccrued(ctx interface{}) *FEVMQueries_InfPoolFeesAccrued_Call {
+	return &FEVMQueries_InfPoolFeesAccrued_Call{Call: _e.mock.On("InfPoolFeesAccrued", ctx)}
+}
+
+func (_c *FEVMQueries_InfPoolFeesAccrued_Call) Run(run func(ctx context.Context)) *FEVMQueries_InfPoolFeesAccrued_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context))
+	})
+	return _c
+}
+
+func (_c *FEVMQueries_InfPoolFeesAccrued_Call) Return(_a0 *big.Int, _a1 error) *FEVMQueries_InfPoolFeesAccrued_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *FEVMQueries_InfPoolFeesAccrued_Call) RunAndReturn(run func(context.Context) (*big.Int, error)) *FEVMQueries_InfPoolFeesAccrued_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // InfPoolGetAccount provides a mock function with given fields: ctx, agentAddr
 func (_m *FEVMQueries) InfPoolGetAccount(ctx context.Context, agentAddr common.Address) (abigen.Account, error) {
 	ret := _m.Called(ctx, agentAddr)
