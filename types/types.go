@@ -52,7 +52,8 @@ type FEVMQueries interface {
 	ListPools(ctx context.Context) ([]common.Address, error)
 	// ifil methods
 	IFILBalanceOf(ctx context.Context, hodler common.Address) (*big.Float, error)
-	IFILPrice(ctx context.Context) (*big.Float, error)
+	IFILPrice(ctx context.Context) (*big.Int, error)
+	IFILSupply(ctx context.Context) (*big.Int, error)
 	IFILMinter(ctx context.Context) (common.Address, error)
 	IFILBurner(ctx context.Context) (common.Address, error)
 	// wfil methods
