@@ -1,0 +1,53 @@
+package events
+
+import (
+	"context"
+	"log"
+	"math/big"
+
+	"github.com/ethereum/go-ethereum/common"
+	"github.com/glifio/go-pools/abigen"
+	"github.com/glifio/go-pools/types"
+)
+
+func PrestakeEvents(ctx context.Context, sdk types.PoolsSDK, startEpoch *big.Int, endEpoch *big.Int) ([]*abigen.PreStakeDeposit, error) {
+	chunkSize := big.NewInt(50000)
+
+	ethclient, err := sdk.Extern().ConnectEthClient()
+	if err != nil {
+		return []*abigen.PreStakeDeposit{}, err
+	}
+
+	filterer, err := abigen.NewPreStakeFilterer(common.HexToAddress("0x0EC46aD7aA8600118DA4bD64239c3DC364fD0274"), ethclient)
+	if err != nil {
+		return []*abigen.PreStakeDeposit{}, err
+	}
+
+	var events []*abigen.PreStakeDeposit
+	// to do - can remove hashmap logic when https://github.com/filecoin-project/lotus/issues/10964 gets merged
+	var hashmap = make(map[string]bool)
+
+	len := big.NewInt(0).Sub(endEpoch, startEpoch)
+	log.Println("len", len)
+	for i := startEpoch; i.Cmp(endEpoch) == -1; i.Add(i, chunkSize) {
+		end := big.NewInt(0).Add(i, chunkSize)
+		if end.Cmp(endEpoch) == 1 {
+			end = endEpoch
+		}
+		log.Println("chunk", i, "->", end)
+
+		iter, err := filterer.FilterDeposit(getFilterOpts(ctx, i, end, sdk.Query().ChainID()), nil)
+		if err != nil {
+			return []*abigen.PreStakeDeposit{}, err
+		}
+
+		for iter.Next() {
+			if _, ok := hashmap[iter.Event.Raw.TxHash.Hex()]; !ok {
+				hashmap[iter.Event.Raw.TxHash.Hex()] = true
+				events = append(events, iter.Event)
+			}
+		}
+	}
+
+	return events, nil
+}
