@@ -63,6 +63,7 @@ func MinerRegRmMinerEvents(ctx context.Context, sdk types.PoolsSDK, agentsFilter
 	}
 
 	var events []*abigen.MinerRegistryRemoveMiner
+	var hashmap = make(map[string]bool)
 
 	chunkSize := big.NewInt(50000)
 
