@@ -1606,19 +1606,19 @@ func (_c *FEVMQueries_IFILMinter_Call) RunAndReturn(run func(context.Context) (c
 }
 
 // IFILPrice provides a mock function with given fields: ctx
-func (_m *FEVMQueries) IFILPrice(ctx context.Context) (*big.Float, error) {
+func (_m *FEVMQueries) IFILPrice(ctx context.Context) (*big.Int, error) {
 	ret := _m.Called(ctx)
 
-	var r0 *big.Float
+	var r0 *big.Int
 	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context) (*big.Float, error)); ok {
+	if rf, ok := ret.Get(0).(func(context.Context) (*big.Int, error)); ok {
 		return rf(ctx)
 	}
-	if rf, ok := ret.Get(0).(func(context.Context) *big.Float); ok {
+	if rf, ok := ret.Get(0).(func(context.Context) *big.Int); ok {
 		r0 = rf(ctx)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*big.Float)
+			r0 = ret.Get(0).(*big.Int)
 		}
 	}
 
@@ -1649,12 +1649,66 @@ func (_c *FEVMQueries_IFILPrice_Call) Run(run func(ctx context.Context)) *FEVMQu
 	return _c
 }
 
-func (_c *FEVMQueries_IFILPrice_Call) Return(_a0 *big.Float, _a1 error) *FEVMQueries_IFILPrice_Call {
+func (_c *FEVMQueries_IFILPrice_Call) Return(_a0 *big.Int, _a1 error) *FEVMQueries_IFILPrice_Call {
 	_c.Call.Return(_a0, _a1)
 	return _c
 }
 
-func (_c *FEVMQueries_IFILPrice_Call) RunAndReturn(run func(context.Context) (*big.Float, error)) *FEVMQueries_IFILPrice_Call {
+func (_c *FEVMQueries_IFILPrice_Call) RunAndReturn(run func(context.Context) (*big.Int, error)) *FEVMQueries_IFILPrice_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// IFILSupply provides a mock function with given fields: ctx
+func (_m *FEVMQueries) IFILSupply(ctx context.Context) (*big.Int, error) {
+	ret := _m.Called(ctx)
+
+	var r0 *big.Int
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context) (*big.Int, error)); ok {
+		return rf(ctx)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context) *big.Int); ok {
+		r0 = rf(ctx)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*big.Int)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context) error); ok {
+		r1 = rf(ctx)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// FEVMQueries_IFILSupply_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'IFILSupply'
+type FEVMQueries_IFILSupply_Call struct {
+	*mock.Call
+}
+
+// IFILSupply is a helper method to define mock.On call
+//   - ctx context.Context
+func (_e *FEVMQueries_Expecter) IFILSupply(ctx interface{}) *FEVMQueries_IFILSupply_Call {
+	return &FEVMQueries_IFILSupply_Call{Call: _e.mock.On("IFILSupply", ctx)}
+}
+
+func (_c *FEVMQueries_IFILSupply_Call) Run(run func(ctx context.Context)) *FEVMQueries_IFILSupply_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context))
+	})
+	return _c
+}
+
+func (_c *FEVMQueries_IFILSupply_Call) Return(_a0 *big.Int, _a1 error) *FEVMQueries_IFILSupply_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *FEVMQueries_IFILSupply_Call) RunAndReturn(run func(context.Context) (*big.Int, error)) *FEVMQueries_IFILSupply_Call {
 	_c.Call.Return(run)
 	return _c
 }

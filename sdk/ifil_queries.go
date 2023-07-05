@@ -30,7 +30,22 @@ func (q *fevmQueries) IFILBalanceOf(ctx context.Context, address common.Address)
 	return util.ToFIL(bal), nil
 }
 
-func (q *fevmQueries) IFILPrice(ctx context.Context) (*big.Float, error) {
+func (q *fevmQueries) IFILSupply(ctx context.Context) (*big.Int, error) {
+	client, err := q.extern.ConnectEthClient()
+	if err != nil {
+		return nil, err
+	}
+	defer client.Close()
+
+	iFILCaller, err := abigen.NewPoolTokenCaller(q.iFIL, client)
+	if err != nil {
+		return nil, err
+	}
+
+	return iFILCaller.TotalSupply(nil)
+}
+
+func (q *fevmQueries) IFILPrice(ctx context.Context) (*big.Int, error) {
 	client, err := q.extern.ConnectEthClient()
 	if err != nil {
 		return nil, err
@@ -42,13 +57,7 @@ func (q *fevmQueries) IFILPrice(ctx context.Context) (*big.Float, error) {
 		return nil, err
 	}
 
-	price, err := infPoolCaller.ConvertToAssets(nil, constants.WAD)
-	if err != nil {
-		return nil, err
-	}
-
-	// return the price of 1 iFIL in FIL
-	return util.ToFIL(price), nil
+	return infPoolCaller.ConvertToAssets(nil, constants.WAD)
 }
 
 func (q *fevmQueries) IFILMinter(ctx context.Context) (common.Address, error) {

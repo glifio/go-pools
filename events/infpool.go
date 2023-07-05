@@ -23,7 +23,6 @@ func InfPoolBorrowEvents(ctx context.Context, sdk types.PoolsSDK, agentsFilter [
 	}
 
 	var events []*abigen.InfinityPoolBorrow
-	var hashmap = make(map[string]bool)
 
 	len := big.NewInt(0).Sub(endEpoch, startEpoch)
 	log.Println("len", len)
@@ -33,7 +32,6 @@ func InfPoolBorrowEvents(ctx context.Context, sdk types.PoolsSDK, agentsFilter [
 			end = endEpoch
 		}
 		log.Println("chunk", i, "->", end)
-
 		iter, err := filterer.FilterBorrow(getFilterOpts(ctx, i, end, sdk.Query().ChainID()), agentsFilter)
 		if err != nil {
 			return []*abigen.InfinityPoolBorrow{}, err
@@ -62,7 +60,6 @@ func InfPoolPayEvents(ctx context.Context, sdk types.PoolsSDK, agentsFilter []*b
 
 	chunkSize := big.NewInt(50000)
 	var events []*abigen.InfinityPoolPay
-	var hashmap = make(map[string]bool)
 
 	len := big.NewInt(0).Sub(endEpoch, startEpoch)
 	log.Println("len", len)
@@ -102,7 +99,6 @@ func InfPoolDepositEvents(ctx context.Context, sdk types.PoolsSDK, startEpoch *b
 
 	chunkSize := big.NewInt(50000)
 	var events []*abigen.InfinityPoolDeposit
-	var hashmap = make(map[string]bool)
 
 	len := big.NewInt(0).Sub(endEpoch, startEpoch)
 	log.Println("len", len)
