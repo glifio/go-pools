@@ -400,3 +400,18 @@ func (q *fevmQueries) InfPoolMaxEpochsOwedTolerance(ctx context.Context, agentAd
 
 	return poolCaller.MaxEpochsOwedTolerance(nil)
 }
+
+func (q *fevmQueries) InfPoolFeesAccrued(ctx context.Context) (*big.Int, error) {
+	client, err := q.extern.ConnectEthClient()
+	if err != nil {
+		return nil, err
+	}
+	defer client.Close()
+
+	poolCaller, err := abigen.NewInfinityPoolCaller(q.infinityPool, client)
+	if err != nil {
+		return nil, err
+	}
+
+	return poolCaller.FeesCollected(nil)
+}

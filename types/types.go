@@ -48,6 +48,7 @@ type FEVMQueries interface {
 	InfPoolIsApprovedWithReason(ctx context.Context, agentAddr common.Address, agentData *vc.AgentData) (bool, RejectionReason, error)
 	InfPoolAgentMaxBorrow(ctx context.Context, agentAddr common.Address, agentData *vc.AgentData) (*big.Int, error)
 	InfPoolMaxEpochsOwedTolerance(ctx context.Context, agentAddr common.Address) (*big.Int, error)
+	InfPoolFeesAccrued(ctx context.Context) (*big.Int, error)
 	// pool registry methods
 	ListPools(ctx context.Context) ([]common.Address, error)
 	// ifil methods
