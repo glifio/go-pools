@@ -184,9 +184,7 @@ func (q *fevmQueries) InfPoolIsApprovedWithReason(ctx context.Context, agentAddr
 		return false, "", err
 	}
 
-	maxAmtFromLvl := new(big.Int).Sub(agentCap, agentData.Principal)
-
-	if account.Principal.Cmp(maxAmtFromLvl) == 1 {
+	if agentData.Principal.Cmp(agentCap) == 1 {
 		return false, types.RejectionReasonCap, nil
 	}
 
@@ -214,7 +212,6 @@ func (q *fevmQueries) InfPoolIsApprovedWithReason(ctx context.Context, agentAddr
 
 	ltv := new(big.Int).Div(new(big.Int).Mul(agentData.Principal, constants.WAD), collateralValue)
 	dte := new(big.Int).Div(new(big.Int).Mul(agentData.Principal, constants.WAD), equityValue)
-
 	if ltv.Cmp(maxLTV) == 1 {
 		return false, types.RejectionReasonLTV, nil
 	}
