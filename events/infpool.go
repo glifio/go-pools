@@ -2,7 +2,6 @@ package events
 
 import (
 	"context"
-	"log"
 	"math/big"
 
 	"github.com/glifio/go-pools/abigen"
@@ -25,14 +24,11 @@ func InfPoolBorrowEvents(ctx context.Context, sdk types.PoolsSDK, agentsFilter [
 	var events []*abigen.InfinityPoolBorrow
 	var hashmap = make(map[string]bool)
 
-	len := big.NewInt(0).Sub(endEpoch, startEpoch)
-	log.Println("len", len)
 	for i := startEpoch; i.Cmp(endEpoch) == -1; i.Add(i, chunkSize) {
 		end := big.NewInt(0).Add(i, chunkSize)
 		if end.Cmp(endEpoch) == 1 {
 			end = endEpoch
 		}
-		log.Println("chunk", i, "->", end)
 
 		iter, err := filterer.FilterBorrow(getFilterOpts(ctx, i, end, sdk.Query().ChainID()), agentsFilter)
 		if err != nil {
@@ -64,14 +60,11 @@ func InfPoolPayEvents(ctx context.Context, sdk types.PoolsSDK, agentsFilter []*b
 	var events []*abigen.InfinityPoolPay
 	var hashmap = make(map[string]bool)
 
-	len := big.NewInt(0).Sub(endEpoch, startEpoch)
-	log.Println("len", len)
 	for i := startEpoch; i.Cmp(endEpoch) == -1; i.Add(i, chunkSize) {
 		end := big.NewInt(0).Add(i, chunkSize)
 		if end.Cmp(endEpoch) == 1 {
 			end = endEpoch
 		}
-		log.Println("chunk", i, "->", end)
 
 		iter, err := filterer.FilterPay(getFilterOpts(ctx, i, end, sdk.Query().ChainID()), agentsFilter)
 		if err != nil {
@@ -104,14 +97,11 @@ func InfPoolDepositEvents(ctx context.Context, sdk types.PoolsSDK, startEpoch *b
 	var events []*abigen.InfinityPoolDeposit
 	var hashmap = make(map[string]bool)
 
-	len := big.NewInt(0).Sub(endEpoch, startEpoch)
-	log.Println("len", len)
 	for i := startEpoch; i.Cmp(endEpoch) == -1; i.Add(i, chunkSize) {
 		end := big.NewInt(0).Add(i, chunkSize)
 		if end.Cmp(endEpoch) == 1 {
 			end = endEpoch
 		}
-		log.Println("chunk", i, "->", end)
 
 		iter, err := filterer.FilterDeposit(getFilterOpts(ctx, i, end, sdk.Query().ChainID()), nil, nil)
 		if err != nil {

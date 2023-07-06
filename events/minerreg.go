@@ -2,7 +2,6 @@ package events
 
 import (
 	"context"
-	"log"
 	"math/big"
 
 	"github.com/ethereum/go-ethereum/common"
@@ -26,14 +25,11 @@ func MinerRegAddMinerEvents(ctx context.Context, sdk types.PoolsSDK, agentsFilte
 
 	chunkSize := big.NewInt(50000)
 
-	len := big.NewInt(0).Sub(endEpoch, startEpoch)
-	log.Println("len", len)
 	for i := startEpoch; i.Cmp(endEpoch) == -1; i.Add(i, chunkSize) {
 		end := big.NewInt(0).Add(i, chunkSize)
 		if end.Cmp(endEpoch) == 1 {
 			end = endEpoch
 		}
-		log.Println("chunk", i, "->", end)
 
 		iter, err := minerRegFilterer.FilterAddMiner(getFilterOpts(ctx, i, end, sdk.Query().ChainID()), agentsFilter, nil)
 		if err != nil {
@@ -67,14 +63,11 @@ func MinerRegRmMinerEvents(ctx context.Context, sdk types.PoolsSDK, agentsFilter
 
 	chunkSize := big.NewInt(50000)
 
-	len := big.NewInt(0).Sub(endEpoch, startEpoch)
-	log.Println("len", len)
 	for i := startEpoch; i.Cmp(endEpoch) == -1; i.Add(i, chunkSize) {
 		end := big.NewInt(0).Add(i, chunkSize)
 		if end.Cmp(endEpoch) == 1 {
 			end = endEpoch
 		}
-		log.Println("chunk", i, "->", end)
 
 		iter, err := minerRegFilterer.FilterRemoveMiner(getFilterOpts(ctx, i, end, sdk.Query().ChainID()), agentsFilter, nil)
 		if err != nil {
