@@ -30,7 +30,7 @@ func (q *fevmQueries) IFILBalanceOf(ctx context.Context, address common.Address)
 	return util.ToFIL(bal), nil
 }
 
-func (q *fevmQueries) IFILSupply(ctx context.Context) (*big.Int, error) {
+func (q *fevmQueries) IFILSupply(ctx context.Context, blockNumber *big.Int) (*big.Int, error) {
 	client, err := q.extern.ConnectEthClient()
 	if err != nil {
 		return nil, err
@@ -42,10 +42,10 @@ func (q *fevmQueries) IFILSupply(ctx context.Context) (*big.Int, error) {
 		return nil, err
 	}
 
-	return iFILCaller.TotalSupply(nil)
+	return iFILCaller.TotalSupply(&bind.CallOpts{Context: ctx, BlockNumber: blockNumber})
 }
 
-func (q *fevmQueries) IFILPrice(ctx context.Context) (*big.Int, error) {
+func (q *fevmQueries) IFILPrice(ctx context.Context, blockNumber *big.Int) (*big.Int, error) {
 	client, err := q.extern.ConnectEthClient()
 	if err != nil {
 		return nil, err
@@ -57,7 +57,7 @@ func (q *fevmQueries) IFILPrice(ctx context.Context) (*big.Int, error) {
 		return nil, err
 	}
 
-	return infPoolCaller.ConvertToAssets(nil, constants.WAD)
+	return infPoolCaller.ConvertToAssets(&bind.CallOpts{Context: ctx, BlockNumber: blockNumber}, constants.WAD)
 }
 
 func (q *fevmQueries) IFILMinter(ctx context.Context) (common.Address, error) {

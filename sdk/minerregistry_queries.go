@@ -4,12 +4,13 @@ import (
 	"context"
 	"math/big"
 
+	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/filecoin-project/go-address"
 	"github.com/glifio/go-pools/abigen"
 	"github.com/glifio/go-pools/util"
 )
 
-func (q *fevmQueries) MinerRegistryAgentMinersCount(ctx context.Context, agentID *big.Int) (*big.Int, error) {
+func (q *fevmQueries) MinerRegistryAgentMinersCount(ctx context.Context, agentID *big.Int, blockNumber *big.Int) (*big.Int, error) {
 	client, err := q.extern.ConnectEthClient()
 	if err != nil {
 		return nil, err
@@ -21,10 +22,10 @@ func (q *fevmQueries) MinerRegistryAgentMinersCount(ctx context.Context, agentID
 		return nil, err
 	}
 
-	return mregistryCaller.MinersCount(nil, agentID)
+	return mregistryCaller.MinersCount(&bind.CallOpts{Context: ctx, BlockNumber: blockNumber}, agentID)
 }
 
-func (q *fevmQueries) MinerRegistryAgentMinersList(ctx context.Context, agentID *big.Int) ([]address.Address, error) {
+func (q *fevmQueries) MinerRegistryAgentMinersList(ctx context.Context, agentID *big.Int, blockNumber *big.Int) ([]address.Address, error) {
 	client, err := q.extern.ConnectEthClient()
 	if err != nil {
 		return nil, err
@@ -36,7 +37,7 @@ func (q *fevmQueries) MinerRegistryAgentMinersList(ctx context.Context, agentID 
 		return nil, err
 	}
 
-	count, err := mregistryCaller.MinersCount(nil, agentID)
+	count, err := mregistryCaller.MinersCount(&bind.CallOpts{Context: ctx, BlockNumber: blockNumber}, agentID)
 	if err != nil {
 		return nil, err
 	}
@@ -45,7 +46,7 @@ func (q *fevmQueries) MinerRegistryAgentMinersList(ctx context.Context, agentID 
 	for i := int64(0); i < count.Int64(); i++ {
 		index := big.NewInt(i) // convert loop index to *big.Int
 		tasks[i] = func() (interface{}, error) {
-			return mregistryCaller.GetMiner(nil, agentID, index)
+			return mregistryCaller.GetMiner(&bind.CallOpts{Context: ctx, BlockNumber: blockNumber}, agentID, index)
 		}
 	}
 
