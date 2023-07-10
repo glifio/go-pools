@@ -21,7 +21,7 @@ import (
 type FEVMQueries interface {
 	// agent methods
 	AgentID(ctx context.Context, agentAddr common.Address) (*big.Int, error)
-	AgentAccount(ctx context.Context, agentAddr common.Address, poolID *big.Int) (abigen.Account, error)
+	AgentAccount(ctx context.Context, agentAddr common.Address, poolID *big.Int, blockNumber *big.Int) (abigen.Account, error)
 	AgentAddrIDFromRcpt(ctx context.Context, rcpt *types.Receipt) (common.Address, *big.Int, error)
 	AgentOwner(ctx context.Context, agentAddr common.Address) (common.Address, error)
 	AgentOperator(ctx context.Context, agentAddr common.Address) (common.Address, error)
@@ -30,31 +30,31 @@ type FEVMQueries interface {
 	AgentDefaulted(ctx context.Context, agentAddr common.Address) (bool, error)
 	AgentVersion(ctx context.Context, agentAddr common.Address) (uint8, uint8, error)
 	AgentIsValid(ctx context.Context, agentAddr common.Address) (bool, error)
-	AgentMiners(ctx context.Context, agentAddr common.Address) ([]address.Address, error)
-	AgentLiquidAssets(ctx context.Context, agentAddr common.Address) (*big.Int, error)
-	AgentPrincipal(ctx context.Context, agentAddr common.Address) (*big.Int, error)
+	AgentMiners(ctx context.Context, agentAddr common.Address, blockNumber *big.Int) ([]address.Address, error)
+	AgentLiquidAssets(ctx context.Context, agentAddr common.Address, blockNumber *big.Int) (*big.Int, error)
+	AgentPrincipal(ctx context.Context, agentAddr common.Address, blockNumber *big.Int) (*big.Int, error)
 	AgentOwes(ctx context.Context, agentAddr common.Address) (*big.Int, *big.Int, error)
 	AgentFaultyEpochStart(ctx context.Context, agentAddr common.Address) (*big.Int, error)
 	// agent factory methods
-	AgentFactoryAgentCount(ctx context.Context) (*big.Int, error)
+	AgentFactoryAgentCount(ctx context.Context, blockNumber *big.Int) (*big.Int, error)
 	// infinity pool methods
 	InfPoolGetRate(ctx context.Context, cred abigen.VerifiableCredential) (*big.Int, error)
 	InfPoolRateFromGCRED(ctx context.Context, gcred *big.Int) (*big.Float, error)
 	InfPoolGetAgentLvl(ctx context.Context, agentID *big.Int) (*big.Int, float64, error)
-	InfPoolGetAccount(ctx context.Context, agentAddr common.Address) (abigen.Account, error)
-	InfPoolBorrowableLiquidity(ctx context.Context) (*big.Float, error)
-	InfPoolTotalAssets(ctx context.Context) (*big.Float, error)
-	InfPoolTotalBorrowed(ctx context.Context) (*big.Float, error)
+	InfPoolGetAccount(ctx context.Context, agentAddr common.Address, blockNumber *big.Int) (abigen.Account, error)
+	InfPoolBorrowableLiquidity(ctx context.Context, blockNumber *big.Int) (*big.Float, error)
+	InfPoolTotalAssets(ctx context.Context, blockNumber *big.Int) (*big.Float, error)
+	InfPoolTotalBorrowed(ctx context.Context, blockNumber *big.Int) (*big.Float, error)
 	InfPoolIsApprovedWithReason(ctx context.Context, agentAddr common.Address, agentData *vc.AgentData) (bool, RejectionReason, error)
 	InfPoolAgentMaxBorrow(ctx context.Context, agentAddr common.Address, agentData *vc.AgentData) (*big.Int, error)
 	InfPoolMaxEpochsOwedTolerance(ctx context.Context, agentAddr common.Address) (*big.Int, error)
-	InfPoolFeesAccrued(ctx context.Context) (*big.Int, error)
+	InfPoolFeesAccrued(ctx context.Context, blockNumber *big.Int) (*big.Int, error)
 	// pool registry methods
 	ListPools(ctx context.Context) ([]common.Address, error)
 	// ifil methods
 	IFILBalanceOf(ctx context.Context, hodler common.Address) (*big.Float, error)
-	IFILPrice(ctx context.Context) (*big.Int, error)
-	IFILSupply(ctx context.Context) (*big.Int, error)
+	IFILPrice(ctx context.Context, blockNumber *big.Int) (*big.Int, error)
+	IFILSupply(ctx context.Context, blockNumber *big.Int) (*big.Int, error)
 	IFILMinter(ctx context.Context) (common.Address, error)
 	IFILBurner(ctx context.Context) (common.Address, error)
 	// wfil methods
@@ -66,8 +66,8 @@ type FEVMQueries interface {
 	DefaultEpoch(ctx context.Context) (*big.Int, error)
 	MaxConsecutiveFaultEpochs(ctx context.Context) (*big.Int, error)
 	// miner registry methods
-	MinerRegistryAgentMinersCount(ctx context.Context, agentID *big.Int) (*big.Int, error)
-	MinerRegistryAgentMinersList(ctx context.Context, agentID *big.Int) ([]address.Address, error)
+	MinerRegistryAgentMinersCount(ctx context.Context, agentID *big.Int, blockNumber *big.Int) (*big.Int, error)
+	MinerRegistryAgentMinersList(ctx context.Context, agentID *big.Int, blockNumber *big.Int) ([]address.Address, error)
 	// chain methods
 	ChainHeight(ctx context.Context) (*big.Int, error)
 	ChainHead(ctx context.Context) (*filtypes.TipSet, error)
