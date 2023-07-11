@@ -96,7 +96,7 @@ func (a *fevmActions) AgentBorrow(ctx context.Context, agentAddr common.Address,
 		return nil, err
 	}
 
-	fmt.Printf("Max borrow now: %s\n", maxBorrowNow.String())
+	fmt.Printf("Debug: max borrow now: %s\n", util.ToFIL(maxBorrowNow))
 
 	// if amount.Cmp(maxBorrowNow) > 0 {
 	// 	return nil, errors.New("amount exceeds max borrow - run `glif agent preview borrow <amount>` to get more information.")
