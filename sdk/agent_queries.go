@@ -131,6 +131,7 @@ func (q *fevmQueries) AgentIsValid(ctx context.Context, address common.Address) 
 func (q *fevmQueries) AgentMiners(
 	ctx context.Context,
 	agentAddr common.Address,
+	blockNumber *big.Int,
 ) ([]address.Address, error) {
 	ethClient, err := q.extern.ConnectEthClient()
 	if err != nil {
@@ -148,7 +149,7 @@ func (q *fevmQueries) AgentMiners(
 		return nil, err
 	}
 
-	minerCount, err := minerRegCaller.MinersCount(&bind.CallOpts{Context: ctx}, id)
+	minerCount, err := minerRegCaller.MinersCount(&bind.CallOpts{Context: ctx, BlockNumber: blockNumber}, id)
 	if err != nil {
 		return nil, err
 	}
@@ -156,7 +157,7 @@ func (q *fevmQueries) AgentMiners(
 	miners := []address.Address{}
 
 	for i := big.NewInt(0); i.Cmp(minerCount) == -1; i.Add(i, big.NewInt(1)) {
-		miner, err := minerRegCaller.GetMiner(&bind.CallOpts{Context: ctx}, id, i)
+		miner, err := minerRegCaller.GetMiner(&bind.CallOpts{Context: ctx, BlockNumber: blockNumber}, id, i)
 		if err != nil {
 			return nil, err
 		}
@@ -168,7 +169,7 @@ func (q *fevmQueries) AgentMiners(
 	return miners, nil
 }
 
-func (q *fevmQueries) AgentLiquidAssets(ctx context.Context, address common.Address) (*big.Int, error) {
+func (q *fevmQueries) AgentLiquidAssets(ctx context.Context, address common.Address, blockNumber *big.Int) (*big.Int, error) {
 	client, err := q.extern.ConnectEthClient()
 	if err != nil {
 		return nil, err
@@ -180,7 +181,7 @@ func (q *fevmQueries) AgentLiquidAssets(ctx context.Context, address common.Addr
 		return nil, err
 	}
 
-	assets, err := agentCaller.LiquidAssets(nil)
+	assets, err := agentCaller.LiquidAssets(&bind.CallOpts{Context: ctx, BlockNumber: blockNumber})
 	if err != nil {
 		return nil, err
 	}
@@ -188,7 +189,7 @@ func (q *fevmQueries) AgentLiquidAssets(ctx context.Context, address common.Addr
 	return assets, nil
 }
 
-func (q *fevmQueries) AgentPrincipal(ctx context.Context, agentAddr common.Address) (*big.Int, error) {
+func (q *fevmQueries) AgentPrincipal(ctx context.Context, agentAddr common.Address, blockNumber *big.Int) (*big.Int, error) {
 	ethClient, err := q.extern.ConnectEthClient()
 	if err != nil {
 		return nil, err
@@ -205,7 +206,7 @@ func (q *fevmQueries) AgentPrincipal(ctx context.Context, agentAddr common.Addre
 		return nil, err
 	}
 
-	poolIDs, err := poolRegistryCaller.PoolIDs(&bind.CallOpts{Context: ctx}, agentID)
+	poolIDs, err := poolRegistryCaller.PoolIDs(&bind.CallOpts{Context: ctx, BlockNumber: blockNumber}, agentID)
 	if err != nil {
 		return nil, err
 	}
@@ -217,7 +218,7 @@ func (q *fevmQueries) AgentPrincipal(ctx context.Context, agentAddr common.Addre
 
 	principal := big.NewInt(0)
 	for _, poolID := range poolIDs {
-		account, err := routerCaller.GetAccount(&bind.CallOpts{Context: ctx}, agentID, poolID)
+		account, err := routerCaller.GetAccount(&bind.CallOpts{Context: ctx, BlockNumber: blockNumber}, agentID, poolID)
 		if err != nil {
 			return nil, err
 		}
@@ -227,7 +228,7 @@ func (q *fevmQueries) AgentPrincipal(ctx context.Context, agentAddr common.Addre
 	return principal, nil
 }
 
-func (q *fevmQueries) AgentAccount(ctx context.Context, agentAddr common.Address, poolID *big.Int) (abigen.Account, error) {
+func (q *fevmQueries) AgentAccount(ctx context.Context, agentAddr common.Address, poolID *big.Int, blockNumber *big.Int) (abigen.Account, error) {
 	ethClient, err := q.extern.ConnectEthClient()
 	if err != nil {
 		return abigen.Account{}, err
@@ -244,7 +245,7 @@ func (q *fevmQueries) AgentAccount(ctx context.Context, agentAddr common.Address
 		return abigen.Account{}, err
 	}
 
-	return routerCaller.GetAccount(&bind.CallOpts{Context: ctx}, agentID, poolID)
+	return routerCaller.GetAccount(&bind.CallOpts{Context: ctx, BlockNumber: blockNumber}, agentID, poolID)
 }
 
 func (q *fevmQueries) AgentAddrIDFromRcpt(ctx context.Context, receipt *types.Receipt) (common.Address, *big.Int, error) {

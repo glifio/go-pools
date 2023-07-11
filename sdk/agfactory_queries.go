@@ -4,10 +4,11 @@ import (
 	"context"
 	"math/big"
 
+	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/glifio/go-pools/abigen"
 )
 
-func (q *fevmQueries) AgentFactoryAgentCount(ctx context.Context) (*big.Int, error) {
+func (q *fevmQueries) AgentFactoryAgentCount(ctx context.Context, blockNumber *big.Int) (*big.Int, error) {
 	client, err := q.extern.ConnectEthClient()
 	if err != nil {
 		return nil, err
@@ -19,5 +20,5 @@ func (q *fevmQueries) AgentFactoryAgentCount(ctx context.Context) (*big.Int, err
 		return nil, err
 	}
 
-	return agFactoryCaller.AgentCount(nil)
+	return agFactoryCaller.AgentCount(&bind.CallOpts{Context: ctx, BlockNumber: blockNumber})
 }

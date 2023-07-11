@@ -111,7 +111,15 @@ func ComputeMinerStats(ctx context.Context, minerAddr address.Address, ts *types
 	if err != nil {
 		return nil, err
 	}
-	minerStats.ExpectedDailyReward = edr
+
+	// calculate estimated daily vesting rewards as 1/180 of vesting funds
+	edvr := big.NewInt(0)
+	if minerStats.VestingFunds != nil && minerStats.VestingFunds.Cmp(big.NewInt(0)) == 1 {
+		edvr = big.NewInt(0).Div(minerStats.VestingFunds, big.NewInt(180))
+	}
+
+	// expected daily reward is the sum of edr and edvr
+	minerStats.ExpectedDailyReward = big.NewInt(0).Add(edr, edvr)
 	minerStats.PenaltyFaultPerDay = new(big.Int).Mul(edr, big.NewInt(3))
 
 	minerStats.GreenScore = big.NewInt(0)
