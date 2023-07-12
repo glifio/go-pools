@@ -6,6 +6,7 @@ import (
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/glifio/go-pools/abigen"
+	"github.com/glifio/go-pools/constants"
 	"github.com/glifio/go-pools/types"
 )
 
@@ -23,10 +24,8 @@ func MinerRegAddMinerEvents(ctx context.Context, sdk types.PoolsSDK, agentsFilte
 	var addMinerEvents []*abigen.MinerRegistryAddMiner
 	var hashmap = make(map[string]bool)
 
-	chunkSize := big.NewInt(50000)
-
-	for i := startEpoch; i.Cmp(endEpoch) == -1; i.Add(i, chunkSize) {
-		end := big.NewInt(0).Add(i, chunkSize)
+	for i := startEpoch; i.Cmp(endEpoch) == -1; i.Add(i, constants.CHUNKSIZE) {
+		end := big.NewInt(0).Add(i, constants.CHUNKSIZE)
 		if end.Cmp(endEpoch) == 1 {
 			end = endEpoch
 		}
@@ -61,10 +60,8 @@ func MinerRegRmMinerEvents(ctx context.Context, sdk types.PoolsSDK, agentsFilter
 	var events []*abigen.MinerRegistryRemoveMiner
 	var hashmap = make(map[string]bool)
 
-	chunkSize := big.NewInt(50000)
-
-	for i := startEpoch; i.Cmp(endEpoch) == -1; i.Add(i, chunkSize) {
-		end := big.NewInt(0).Add(i, chunkSize)
+	for i := startEpoch; i.Cmp(endEpoch) == -1; i.Add(i, constants.CHUNKSIZE) {
+		end := big.NewInt(0).Add(i, constants.CHUNKSIZE)
 		if end.Cmp(endEpoch) == 1 {
 			end = endEpoch
 		}

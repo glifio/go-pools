@@ -5,6 +5,7 @@ import (
 	"math/big"
 
 	"github.com/glifio/go-pools/abigen"
+	"github.com/glifio/go-pools/constants"
 	"github.com/glifio/go-pools/types"
 )
 
@@ -93,12 +94,11 @@ func InfPoolDepositEvents(ctx context.Context, sdk types.PoolsSDK, startEpoch *b
 		return []*abigen.InfinityPoolDeposit{}, err
 	}
 
-	chunkSize := big.NewInt(50000)
 	var events []*abigen.InfinityPoolDeposit
 	var hashmap = make(map[string]bool)
 
-	for i := startEpoch; i.Cmp(endEpoch) == -1; i.Add(i, chunkSize) {
-		end := big.NewInt(0).Add(i, chunkSize)
+	for i := startEpoch; i.Cmp(endEpoch) == -1; i.Add(i, constants.CHUNKSIZE) {
+		end := big.NewInt(0).Add(i, constants.CHUNKSIZE)
 		if end.Cmp(endEpoch) == 1 {
 			end = endEpoch
 		}
