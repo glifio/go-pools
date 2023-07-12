@@ -116,17 +116,21 @@ func LazyInit(
 	dialAddr string,
 	token string,
 ) error {
+	fmt.Println("Jim LazyInit 1")
 	client, err := ethclient.Dial(dialAddr)
 	if err != nil {
+		fmt.Println("Jim LazyInit 2")
 		return err
 	}
 	defer client.Close()
 
+	fmt.Println("Jim LazyInit 3")
 	chainID, err := client.ChainID(ctx)
 	if err != nil {
 		return err
 	}
 
+	fmt.Println("Jim LazyInit 4")
 	routerCaller, err := abigen.NewRouterCaller(router, client)
 	if err != nil {
 		return err
@@ -166,6 +170,8 @@ func LazyInit(
 		return err
 	}
 
+	fmt.Println("Jim LazyInit 5")
+
 	*sdk = InitFEVMConnection(
 		routes[constants.RouteAgentPolice],
 		routes[constants.RouteMinerRegistry],
@@ -181,6 +187,7 @@ func LazyInit(
 		token,
 		chainID,
 	)
+	fmt.Println("Jim LazyInit 6")
 
 	return nil
 }
