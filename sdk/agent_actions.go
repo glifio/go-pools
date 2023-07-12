@@ -4,6 +4,7 @@ import (
 	"context"
 	"crypto/ecdsa"
 	"errors"
+	"fmt"
 	"math/big"
 
 	"github.com/ethereum/go-ethereum/common"
@@ -95,9 +96,11 @@ func (a *fevmActions) AgentBorrow(ctx context.Context, agentAddr common.Address,
 		return nil, err
 	}
 
-	if amount.Cmp(maxBorrowNow) > 0 {
-		return nil, errors.New("amount exceeds max borrow - run `glif agent preview borrow <amount>` to get more information.")
-	}
+	fmt.Printf("Debug: max borrow now: %0.09f\n", util.ToFIL(maxBorrowNow))
+
+	// if amount.Cmp(maxBorrowNow) > 0 {
+	// 	return nil, errors.New("amount exceeds max borrow - run `glif agent preview borrow <amount>` to get more information.")
+	// }
 
 	return util.WriteTx(ctx, senderKey, a.queries.ChainID(), common.Big0, nonce, args, agentTransactor.Borrow, "Agent Borrow")
 }

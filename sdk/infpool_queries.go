@@ -14,8 +14,8 @@ import (
 	"github.com/glifio/go-pools/vc"
 )
 
-func (q *fevmQueries) InfPoolGetAccount(ctx context.Context, agentAddr common.Address) (abigen.Account, error) {
-	return q.AgentAccount(ctx, agentAddr, constants.INFINITY_POOL_ID)
+func (q *fevmQueries) InfPoolGetAccount(ctx context.Context, agentAddr common.Address, blockNumber *big.Int) (abigen.Account, error) {
+	return q.AgentAccount(ctx, agentAddr, constants.INFINITY_POOL_ID, blockNumber)
 }
 
 func (q *fevmQueries) InfPoolGetAgentLvl(ctx context.Context, agentID *big.Int) (*big.Int, float64, error) {
@@ -75,7 +75,7 @@ func (q *fevmQueries) InfPoolGetRate(ctx context.Context, cred abigen.Verifiable
 	return rate, nil
 }
 
-func (q *fevmQueries) InfPoolTotalAssets(ctx context.Context) (*big.Float, error) {
+func (q *fevmQueries) InfPoolTotalAssets(ctx context.Context, blockNumber *big.Int) (*big.Float, error) {
 	client, err := q.extern.ConnectEthClient()
 	if err != nil {
 		return nil, err
@@ -87,7 +87,7 @@ func (q *fevmQueries) InfPoolTotalAssets(ctx context.Context) (*big.Float, error
 		return nil, err
 	}
 
-	assets, err := poolCaller.TotalAssets(nil)
+	assets, err := poolCaller.TotalAssets(&bind.CallOpts{Context: ctx, BlockNumber: blockNumber})
 	if err != nil {
 		return nil, err
 	}
@@ -95,7 +95,7 @@ func (q *fevmQueries) InfPoolTotalAssets(ctx context.Context) (*big.Float, error
 	return util.ToFIL(assets), nil
 }
 
-func (q *fevmQueries) InfPoolBorrowableLiquidity(ctx context.Context) (*big.Float, error) {
+func (q *fevmQueries) InfPoolBorrowableLiquidity(ctx context.Context, blockNumber *big.Int) (*big.Float, error) {
 	client, err := q.extern.ConnectEthClient()
 	if err != nil {
 		return nil, err
@@ -107,7 +107,7 @@ func (q *fevmQueries) InfPoolBorrowableLiquidity(ctx context.Context) (*big.Floa
 		return nil, err
 	}
 
-	assets, err := poolCaller.TotalBorrowableAssets(nil)
+	assets, err := poolCaller.TotalBorrowableAssets(&bind.CallOpts{Context: ctx, BlockNumber: blockNumber})
 	if err != nil {
 		return nil, err
 	}
@@ -115,7 +115,7 @@ func (q *fevmQueries) InfPoolBorrowableLiquidity(ctx context.Context) (*big.Floa
 	return util.ToFIL(assets), nil
 }
 
-func (q *fevmQueries) InfPoolTotalBorrowed(ctx context.Context) (*big.Float, error) {
+func (q *fevmQueries) InfPoolTotalBorrowed(ctx context.Context, blockNumber *big.Int) (*big.Float, error) {
 	client, err := q.extern.ConnectEthClient()
 	if err != nil {
 		return nil, err
@@ -127,7 +127,7 @@ func (q *fevmQueries) InfPoolTotalBorrowed(ctx context.Context) (*big.Float, err
 		return nil, err
 	}
 
-	assets, err := poolCaller.TotalBorrowed(nil)
+	assets, err := poolCaller.TotalBorrowed(&bind.CallOpts{Context: ctx, BlockNumber: blockNumber})
 	if err != nil {
 		return nil, err
 	}
@@ -165,7 +165,7 @@ func (q *fevmQueries) InfPoolIsApprovedWithReason(ctx context.Context, agentAddr
 		return false, "", err
 	}
 
-	account, err := q.InfPoolGetAccount(ctx, agentAddr)
+	account, err := q.InfPoolGetAccount(ctx, agentAddr, nil)
 	if err != nil {
 		return false, types.RejectionReasonNone, err
 	}
@@ -184,9 +184,7 @@ func (q *fevmQueries) InfPoolIsApprovedWithReason(ctx context.Context, agentAddr
 		return false, "", err
 	}
 
-	maxAmtFromLvl := new(big.Int).Sub(agentCap, agentData.Principal)
-
-	if account.Principal.Cmp(maxAmtFromLvl) == 1 {
+	if agentData.Principal.Cmp(agentCap) == 1 {
 		return false, types.RejectionReasonCap, nil
 	}
 
@@ -214,7 +212,6 @@ func (q *fevmQueries) InfPoolIsApprovedWithReason(ctx context.Context, agentAddr
 
 	ltv := new(big.Int).Div(new(big.Int).Mul(agentData.Principal, constants.WAD), collateralValue)
 	dte := new(big.Int).Div(new(big.Int).Mul(agentData.Principal, constants.WAD), equityValue)
-
 	if ltv.Cmp(maxLTV) == 1 {
 		return false, types.RejectionReasonLTV, nil
 	}
@@ -402,4 +399,19 @@ func (q *fevmQueries) InfPoolMaxEpochsOwedTolerance(ctx context.Context, agentAd
 	}
 
 	return poolCaller.MaxEpochsOwedTolerance(nil)
+}
+
+func (q *fevmQueries) InfPoolFeesAccrued(ctx context.Context, blockNumber *big.Int) (*big.Int, error) {
+	client, err := q.extern.ConnectEthClient()
+	if err != nil {
+		return nil, err
+	}
+	defer client.Close()
+
+	poolCaller, err := abigen.NewInfinityPoolCaller(q.infinityPool, client)
+	if err != nil {
+		return nil, err
+	}
+
+	return poolCaller.FeesCollected(&bind.CallOpts{Context: ctx, BlockNumber: blockNumber})
 }

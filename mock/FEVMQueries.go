@@ -38,23 +38,23 @@ func (_m *FEVMQueries) EXPECT() *FEVMQueries_Expecter {
 	return &FEVMQueries_Expecter{mock: &_m.Mock}
 }
 
-// AgentAccount provides a mock function with given fields: ctx, agentAddr, poolID
-func (_m *FEVMQueries) AgentAccount(ctx context.Context, agentAddr common.Address, poolID *big.Int) (abigen.Account, error) {
-	ret := _m.Called(ctx, agentAddr, poolID)
+// AgentAccount provides a mock function with given fields: ctx, agentAddr, poolID, blockheight
+func (_m *FEVMQueries) AgentAccount(ctx context.Context, agentAddr common.Address, poolID *big.Int, blockheight *big.Int) (abigen.Account, error) {
+	ret := _m.Called(ctx, agentAddr, poolID, blockheight)
 
 	var r0 abigen.Account
 	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context, common.Address, *big.Int) (abigen.Account, error)); ok {
-		return rf(ctx, agentAddr, poolID)
+	if rf, ok := ret.Get(0).(func(context.Context, common.Address, *big.Int, *big.Int) (abigen.Account, error)); ok {
+		return rf(ctx, agentAddr, poolID, blockheight)
 	}
-	if rf, ok := ret.Get(0).(func(context.Context, common.Address, *big.Int) abigen.Account); ok {
-		r0 = rf(ctx, agentAddr, poolID)
+	if rf, ok := ret.Get(0).(func(context.Context, common.Address, *big.Int, *big.Int) abigen.Account); ok {
+		r0 = rf(ctx, agentAddr, poolID, blockheight)
 	} else {
 		r0 = ret.Get(0).(abigen.Account)
 	}
 
-	if rf, ok := ret.Get(1).(func(context.Context, common.Address, *big.Int) error); ok {
-		r1 = rf(ctx, agentAddr, poolID)
+	if rf, ok := ret.Get(1).(func(context.Context, common.Address, *big.Int, *big.Int) error); ok {
+		r1 = rf(ctx, agentAddr, poolID, blockheight)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -71,13 +71,14 @@ type FEVMQueries_AgentAccount_Call struct {
 //   - ctx context.Context
 //   - agentAddr common.Address
 //   - poolID *big.Int
-func (_e *FEVMQueries_Expecter) AgentAccount(ctx interface{}, agentAddr interface{}, poolID interface{}) *FEVMQueries_AgentAccount_Call {
-	return &FEVMQueries_AgentAccount_Call{Call: _e.mock.On("AgentAccount", ctx, agentAddr, poolID)}
+//   - blockheight *big.Int
+func (_e *FEVMQueries_Expecter) AgentAccount(ctx interface{}, agentAddr interface{}, poolID interface{}, blockheight interface{}) *FEVMQueries_AgentAccount_Call {
+	return &FEVMQueries_AgentAccount_Call{Call: _e.mock.On("AgentAccount", ctx, agentAddr, poolID, blockheight)}
 }
 
-func (_c *FEVMQueries_AgentAccount_Call) Run(run func(ctx context.Context, agentAddr common.Address, poolID *big.Int)) *FEVMQueries_AgentAccount_Call {
+func (_c *FEVMQueries_AgentAccount_Call) Run(run func(ctx context.Context, agentAddr common.Address, poolID *big.Int, blockheight *big.Int)) *FEVMQueries_AgentAccount_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(common.Address), args[2].(*big.Int))
+		run(args[0].(context.Context), args[1].(common.Address), args[2].(*big.Int), args[3].(*big.Int))
 	})
 	return _c
 }
@@ -87,7 +88,7 @@ func (_c *FEVMQueries_AgentAccount_Call) Return(_a0 abigen.Account, _a1 error) *
 	return _c
 }
 
-func (_c *FEVMQueries_AgentAccount_Call) RunAndReturn(run func(context.Context, common.Address, *big.Int) (abigen.Account, error)) *FEVMQueries_AgentAccount_Call {
+func (_c *FEVMQueries_AgentAccount_Call) RunAndReturn(run func(context.Context, common.Address, *big.Int, *big.Int) (abigen.Account, error)) *FEVMQueries_AgentAccount_Call {
 	_c.Call.Return(run)
 	return _c
 }
@@ -307,25 +308,25 @@ func (_c *FEVMQueries_AgentFactory_Call) RunAndReturn(run func() common.Address)
 	return _c
 }
 
-// AgentFactoryAgentCount provides a mock function with given fields: ctx
-func (_m *FEVMQueries) AgentFactoryAgentCount(ctx context.Context) (*big.Int, error) {
-	ret := _m.Called(ctx)
+// AgentFactoryAgentCount provides a mock function with given fields: ctx, blockheight
+func (_m *FEVMQueries) AgentFactoryAgentCount(ctx context.Context, blockheight *big.Int) (*big.Int, error) {
+	ret := _m.Called(ctx, blockheight)
 
 	var r0 *big.Int
 	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context) (*big.Int, error)); ok {
-		return rf(ctx)
+	if rf, ok := ret.Get(0).(func(context.Context, *big.Int) (*big.Int, error)); ok {
+		return rf(ctx, blockheight)
 	}
-	if rf, ok := ret.Get(0).(func(context.Context) *big.Int); ok {
-		r0 = rf(ctx)
+	if rf, ok := ret.Get(0).(func(context.Context, *big.Int) *big.Int); ok {
+		r0 = rf(ctx, blockheight)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*big.Int)
 		}
 	}
 
-	if rf, ok := ret.Get(1).(func(context.Context) error); ok {
-		r1 = rf(ctx)
+	if rf, ok := ret.Get(1).(func(context.Context, *big.Int) error); ok {
+		r1 = rf(ctx, blockheight)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -340,13 +341,14 @@ type FEVMQueries_AgentFactoryAgentCount_Call struct {
 
 // AgentFactoryAgentCount is a helper method to define mock.On call
 //   - ctx context.Context
-func (_e *FEVMQueries_Expecter) AgentFactoryAgentCount(ctx interface{}) *FEVMQueries_AgentFactoryAgentCount_Call {
-	return &FEVMQueries_AgentFactoryAgentCount_Call{Call: _e.mock.On("AgentFactoryAgentCount", ctx)}
+//   - blockheight *big.Int
+func (_e *FEVMQueries_Expecter) AgentFactoryAgentCount(ctx interface{}, blockheight interface{}) *FEVMQueries_AgentFactoryAgentCount_Call {
+	return &FEVMQueries_AgentFactoryAgentCount_Call{Call: _e.mock.On("AgentFactoryAgentCount", ctx, blockheight)}
 }
 
-func (_c *FEVMQueries_AgentFactoryAgentCount_Call) Run(run func(ctx context.Context)) *FEVMQueries_AgentFactoryAgentCount_Call {
+func (_c *FEVMQueries_AgentFactoryAgentCount_Call) Run(run func(ctx context.Context, blockheight *big.Int)) *FEVMQueries_AgentFactoryAgentCount_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context))
+		run(args[0].(context.Context), args[1].(*big.Int))
 	})
 	return _c
 }
@@ -356,7 +358,7 @@ func (_c *FEVMQueries_AgentFactoryAgentCount_Call) Return(_a0 *big.Int, _a1 erro
 	return _c
 }
 
-func (_c *FEVMQueries_AgentFactoryAgentCount_Call) RunAndReturn(run func(context.Context) (*big.Int, error)) *FEVMQueries_AgentFactoryAgentCount_Call {
+func (_c *FEVMQueries_AgentFactoryAgentCount_Call) RunAndReturn(run func(context.Context, *big.Int) (*big.Int, error)) *FEVMQueries_AgentFactoryAgentCount_Call {
 	_c.Call.Return(run)
 	return _c
 }
@@ -524,25 +526,25 @@ func (_c *FEVMQueries_AgentIsValid_Call) RunAndReturn(run func(context.Context, 
 	return _c
 }
 
-// AgentLiquidAssets provides a mock function with given fields: ctx, agentAddr
-func (_m *FEVMQueries) AgentLiquidAssets(ctx context.Context, agentAddr common.Address) (*big.Int, error) {
-	ret := _m.Called(ctx, agentAddr)
+// AgentLiquidAssets provides a mock function with given fields: ctx, agentAddr, blockheight
+func (_m *FEVMQueries) AgentLiquidAssets(ctx context.Context, agentAddr common.Address, blockheight *big.Int) (*big.Int, error) {
+	ret := _m.Called(ctx, agentAddr, blockheight)
 
 	var r0 *big.Int
 	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context, common.Address) (*big.Int, error)); ok {
-		return rf(ctx, agentAddr)
+	if rf, ok := ret.Get(0).(func(context.Context, common.Address, *big.Int) (*big.Int, error)); ok {
+		return rf(ctx, agentAddr, blockheight)
 	}
-	if rf, ok := ret.Get(0).(func(context.Context, common.Address) *big.Int); ok {
-		r0 = rf(ctx, agentAddr)
+	if rf, ok := ret.Get(0).(func(context.Context, common.Address, *big.Int) *big.Int); ok {
+		r0 = rf(ctx, agentAddr, blockheight)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*big.Int)
 		}
 	}
 
-	if rf, ok := ret.Get(1).(func(context.Context, common.Address) error); ok {
-		r1 = rf(ctx, agentAddr)
+	if rf, ok := ret.Get(1).(func(context.Context, common.Address, *big.Int) error); ok {
+		r1 = rf(ctx, agentAddr, blockheight)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -558,13 +560,14 @@ type FEVMQueries_AgentLiquidAssets_Call struct {
 // AgentLiquidAssets is a helper method to define mock.On call
 //   - ctx context.Context
 //   - agentAddr common.Address
-func (_e *FEVMQueries_Expecter) AgentLiquidAssets(ctx interface{}, agentAddr interface{}) *FEVMQueries_AgentLiquidAssets_Call {
-	return &FEVMQueries_AgentLiquidAssets_Call{Call: _e.mock.On("AgentLiquidAssets", ctx, agentAddr)}
+//   - blockheight *big.Int
+func (_e *FEVMQueries_Expecter) AgentLiquidAssets(ctx interface{}, agentAddr interface{}, blockheight interface{}) *FEVMQueries_AgentLiquidAssets_Call {
+	return &FEVMQueries_AgentLiquidAssets_Call{Call: _e.mock.On("AgentLiquidAssets", ctx, agentAddr, blockheight)}
 }
 
-func (_c *FEVMQueries_AgentLiquidAssets_Call) Run(run func(ctx context.Context, agentAddr common.Address)) *FEVMQueries_AgentLiquidAssets_Call {
+func (_c *FEVMQueries_AgentLiquidAssets_Call) Run(run func(ctx context.Context, agentAddr common.Address, blockheight *big.Int)) *FEVMQueries_AgentLiquidAssets_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(common.Address))
+		run(args[0].(context.Context), args[1].(common.Address), args[2].(*big.Int))
 	})
 	return _c
 }
@@ -574,30 +577,30 @@ func (_c *FEVMQueries_AgentLiquidAssets_Call) Return(_a0 *big.Int, _a1 error) *F
 	return _c
 }
 
-func (_c *FEVMQueries_AgentLiquidAssets_Call) RunAndReturn(run func(context.Context, common.Address) (*big.Int, error)) *FEVMQueries_AgentLiquidAssets_Call {
+func (_c *FEVMQueries_AgentLiquidAssets_Call) RunAndReturn(run func(context.Context, common.Address, *big.Int) (*big.Int, error)) *FEVMQueries_AgentLiquidAssets_Call {
 	_c.Call.Return(run)
 	return _c
 }
 
-// AgentMiners provides a mock function with given fields: ctx, agentAddr
-func (_m *FEVMQueries) AgentMiners(ctx context.Context, agentAddr common.Address) ([]address.Address, error) {
-	ret := _m.Called(ctx, agentAddr)
+// AgentMiners provides a mock function with given fields: ctx, agentAddr, blockheight
+func (_m *FEVMQueries) AgentMiners(ctx context.Context, agentAddr common.Address, blockheight *big.Int) ([]address.Address, error) {
+	ret := _m.Called(ctx, agentAddr, blockheight)
 
 	var r0 []address.Address
 	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context, common.Address) ([]address.Address, error)); ok {
-		return rf(ctx, agentAddr)
+	if rf, ok := ret.Get(0).(func(context.Context, common.Address, *big.Int) ([]address.Address, error)); ok {
+		return rf(ctx, agentAddr, blockheight)
 	}
-	if rf, ok := ret.Get(0).(func(context.Context, common.Address) []address.Address); ok {
-		r0 = rf(ctx, agentAddr)
+	if rf, ok := ret.Get(0).(func(context.Context, common.Address, *big.Int) []address.Address); ok {
+		r0 = rf(ctx, agentAddr, blockheight)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).([]address.Address)
 		}
 	}
 
-	if rf, ok := ret.Get(1).(func(context.Context, common.Address) error); ok {
-		r1 = rf(ctx, agentAddr)
+	if rf, ok := ret.Get(1).(func(context.Context, common.Address, *big.Int) error); ok {
+		r1 = rf(ctx, agentAddr, blockheight)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -613,13 +616,14 @@ type FEVMQueries_AgentMiners_Call struct {
 // AgentMiners is a helper method to define mock.On call
 //   - ctx context.Context
 //   - agentAddr common.Address
-func (_e *FEVMQueries_Expecter) AgentMiners(ctx interface{}, agentAddr interface{}) *FEVMQueries_AgentMiners_Call {
-	return &FEVMQueries_AgentMiners_Call{Call: _e.mock.On("AgentMiners", ctx, agentAddr)}
+//   - blockheight *big.Int
+func (_e *FEVMQueries_Expecter) AgentMiners(ctx interface{}, agentAddr interface{}, blockheight interface{}) *FEVMQueries_AgentMiners_Call {
+	return &FEVMQueries_AgentMiners_Call{Call: _e.mock.On("AgentMiners", ctx, agentAddr, blockheight)}
 }
 
-func (_c *FEVMQueries_AgentMiners_Call) Run(run func(ctx context.Context, agentAddr common.Address)) *FEVMQueries_AgentMiners_Call {
+func (_c *FEVMQueries_AgentMiners_Call) Run(run func(ctx context.Context, agentAddr common.Address, blockheight *big.Int)) *FEVMQueries_AgentMiners_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(common.Address))
+		run(args[0].(context.Context), args[1].(common.Address), args[2].(*big.Int))
 	})
 	return _c
 }
@@ -629,7 +633,7 @@ func (_c *FEVMQueries_AgentMiners_Call) Return(_a0 []address.Address, _a1 error)
 	return _c
 }
 
-func (_c *FEVMQueries_AgentMiners_Call) RunAndReturn(run func(context.Context, common.Address) ([]address.Address, error)) *FEVMQueries_AgentMiners_Call {
+func (_c *FEVMQueries_AgentMiners_Call) RunAndReturn(run func(context.Context, common.Address, *big.Int) ([]address.Address, error)) *FEVMQueries_AgentMiners_Call {
 	_c.Call.Return(run)
 	return _c
 }
@@ -851,25 +855,25 @@ func (_c *FEVMQueries_AgentPolice_Call) RunAndReturn(run func() common.Address) 
 	return _c
 }
 
-// AgentPrincipal provides a mock function with given fields: ctx, agentAddr
-func (_m *FEVMQueries) AgentPrincipal(ctx context.Context, agentAddr common.Address) (*big.Int, error) {
-	ret := _m.Called(ctx, agentAddr)
+// AgentPrincipal provides a mock function with given fields: ctx, agentAddr, blockheight
+func (_m *FEVMQueries) AgentPrincipal(ctx context.Context, agentAddr common.Address, blockheight *big.Int) (*big.Int, error) {
+	ret := _m.Called(ctx, agentAddr, blockheight)
 
 	var r0 *big.Int
 	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context, common.Address) (*big.Int, error)); ok {
-		return rf(ctx, agentAddr)
+	if rf, ok := ret.Get(0).(func(context.Context, common.Address, *big.Int) (*big.Int, error)); ok {
+		return rf(ctx, agentAddr, blockheight)
 	}
-	if rf, ok := ret.Get(0).(func(context.Context, common.Address) *big.Int); ok {
-		r0 = rf(ctx, agentAddr)
+	if rf, ok := ret.Get(0).(func(context.Context, common.Address, *big.Int) *big.Int); ok {
+		r0 = rf(ctx, agentAddr, blockheight)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*big.Int)
 		}
 	}
 
-	if rf, ok := ret.Get(1).(func(context.Context, common.Address) error); ok {
-		r1 = rf(ctx, agentAddr)
+	if rf, ok := ret.Get(1).(func(context.Context, common.Address, *big.Int) error); ok {
+		r1 = rf(ctx, agentAddr, blockheight)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -885,13 +889,14 @@ type FEVMQueries_AgentPrincipal_Call struct {
 // AgentPrincipal is a helper method to define mock.On call
 //   - ctx context.Context
 //   - agentAddr common.Address
-func (_e *FEVMQueries_Expecter) AgentPrincipal(ctx interface{}, agentAddr interface{}) *FEVMQueries_AgentPrincipal_Call {
-	return &FEVMQueries_AgentPrincipal_Call{Call: _e.mock.On("AgentPrincipal", ctx, agentAddr)}
+//   - blockheight *big.Int
+func (_e *FEVMQueries_Expecter) AgentPrincipal(ctx interface{}, agentAddr interface{}, blockheight interface{}) *FEVMQueries_AgentPrincipal_Call {
+	return &FEVMQueries_AgentPrincipal_Call{Call: _e.mock.On("AgentPrincipal", ctx, agentAddr, blockheight)}
 }
 
-func (_c *FEVMQueries_AgentPrincipal_Call) Run(run func(ctx context.Context, agentAddr common.Address)) *FEVMQueries_AgentPrincipal_Call {
+func (_c *FEVMQueries_AgentPrincipal_Call) Run(run func(ctx context.Context, agentAddr common.Address, blockheight *big.Int)) *FEVMQueries_AgentPrincipal_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(common.Address))
+		run(args[0].(context.Context), args[1].(common.Address), args[2].(*big.Int))
 	})
 	return _c
 }
@@ -901,7 +906,7 @@ func (_c *FEVMQueries_AgentPrincipal_Call) Return(_a0 *big.Int, _a1 error) *FEVM
 	return _c
 }
 
-func (_c *FEVMQueries_AgentPrincipal_Call) RunAndReturn(run func(context.Context, common.Address) (*big.Int, error)) *FEVMQueries_AgentPrincipal_Call {
+func (_c *FEVMQueries_AgentPrincipal_Call) RunAndReturn(run func(context.Context, common.Address, *big.Int) (*big.Int, error)) *FEVMQueries_AgentPrincipal_Call {
 	_c.Call.Return(run)
 	return _c
 }
@@ -1605,25 +1610,25 @@ func (_c *FEVMQueries_IFILMinter_Call) RunAndReturn(run func(context.Context) (c
 	return _c
 }
 
-// IFILPrice provides a mock function with given fields: ctx
-func (_m *FEVMQueries) IFILPrice(ctx context.Context) (*big.Int, error) {
-	ret := _m.Called(ctx)
+// IFILPrice provides a mock function with given fields: ctx, blockheight
+func (_m *FEVMQueries) IFILPrice(ctx context.Context, blockheight *big.Int) (*big.Int, error) {
+	ret := _m.Called(ctx, blockheight)
 
 	var r0 *big.Int
 	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context) (*big.Int, error)); ok {
-		return rf(ctx)
+	if rf, ok := ret.Get(0).(func(context.Context, *big.Int) (*big.Int, error)); ok {
+		return rf(ctx, blockheight)
 	}
-	if rf, ok := ret.Get(0).(func(context.Context) *big.Int); ok {
-		r0 = rf(ctx)
+	if rf, ok := ret.Get(0).(func(context.Context, *big.Int) *big.Int); ok {
+		r0 = rf(ctx, blockheight)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*big.Int)
 		}
 	}
 
-	if rf, ok := ret.Get(1).(func(context.Context) error); ok {
-		r1 = rf(ctx)
+	if rf, ok := ret.Get(1).(func(context.Context, *big.Int) error); ok {
+		r1 = rf(ctx, blockheight)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -1638,13 +1643,14 @@ type FEVMQueries_IFILPrice_Call struct {
 
 // IFILPrice is a helper method to define mock.On call
 //   - ctx context.Context
-func (_e *FEVMQueries_Expecter) IFILPrice(ctx interface{}) *FEVMQueries_IFILPrice_Call {
-	return &FEVMQueries_IFILPrice_Call{Call: _e.mock.On("IFILPrice", ctx)}
+//   - blockheight *big.Int
+func (_e *FEVMQueries_Expecter) IFILPrice(ctx interface{}, blockheight interface{}) *FEVMQueries_IFILPrice_Call {
+	return &FEVMQueries_IFILPrice_Call{Call: _e.mock.On("IFILPrice", ctx, blockheight)}
 }
 
-func (_c *FEVMQueries_IFILPrice_Call) Run(run func(ctx context.Context)) *FEVMQueries_IFILPrice_Call {
+func (_c *FEVMQueries_IFILPrice_Call) Run(run func(ctx context.Context, blockheight *big.Int)) *FEVMQueries_IFILPrice_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context))
+		run(args[0].(context.Context), args[1].(*big.Int))
 	})
 	return _c
 }
@@ -1654,30 +1660,30 @@ func (_c *FEVMQueries_IFILPrice_Call) Return(_a0 *big.Int, _a1 error) *FEVMQueri
 	return _c
 }
 
-func (_c *FEVMQueries_IFILPrice_Call) RunAndReturn(run func(context.Context) (*big.Int, error)) *FEVMQueries_IFILPrice_Call {
+func (_c *FEVMQueries_IFILPrice_Call) RunAndReturn(run func(context.Context, *big.Int) (*big.Int, error)) *FEVMQueries_IFILPrice_Call {
 	_c.Call.Return(run)
 	return _c
 }
 
-// IFILSupply provides a mock function with given fields: ctx
-func (_m *FEVMQueries) IFILSupply(ctx context.Context) (*big.Int, error) {
-	ret := _m.Called(ctx)
+// IFILSupply provides a mock function with given fields: ctx, blockheight
+func (_m *FEVMQueries) IFILSupply(ctx context.Context, blockheight *big.Int) (*big.Int, error) {
+	ret := _m.Called(ctx, blockheight)
 
 	var r0 *big.Int
 	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context) (*big.Int, error)); ok {
-		return rf(ctx)
+	if rf, ok := ret.Get(0).(func(context.Context, *big.Int) (*big.Int, error)); ok {
+		return rf(ctx, blockheight)
 	}
-	if rf, ok := ret.Get(0).(func(context.Context) *big.Int); ok {
-		r0 = rf(ctx)
+	if rf, ok := ret.Get(0).(func(context.Context, *big.Int) *big.Int); ok {
+		r0 = rf(ctx, blockheight)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*big.Int)
 		}
 	}
 
-	if rf, ok := ret.Get(1).(func(context.Context) error); ok {
-		r1 = rf(ctx)
+	if rf, ok := ret.Get(1).(func(context.Context, *big.Int) error); ok {
+		r1 = rf(ctx, blockheight)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -1692,13 +1698,14 @@ type FEVMQueries_IFILSupply_Call struct {
 
 // IFILSupply is a helper method to define mock.On call
 //   - ctx context.Context
-func (_e *FEVMQueries_Expecter) IFILSupply(ctx interface{}) *FEVMQueries_IFILSupply_Call {
-	return &FEVMQueries_IFILSupply_Call{Call: _e.mock.On("IFILSupply", ctx)}
+//   - blockheight *big.Int
+func (_e *FEVMQueries_Expecter) IFILSupply(ctx interface{}, blockheight interface{}) *FEVMQueries_IFILSupply_Call {
+	return &FEVMQueries_IFILSupply_Call{Call: _e.mock.On("IFILSupply", ctx, blockheight)}
 }
 
-func (_c *FEVMQueries_IFILSupply_Call) Run(run func(ctx context.Context)) *FEVMQueries_IFILSupply_Call {
+func (_c *FEVMQueries_IFILSupply_Call) Run(run func(ctx context.Context, blockheight *big.Int)) *FEVMQueries_IFILSupply_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context))
+		run(args[0].(context.Context), args[1].(*big.Int))
 	})
 	return _c
 }
@@ -1708,7 +1715,7 @@ func (_c *FEVMQueries_IFILSupply_Call) Return(_a0 *big.Int, _a1 error) *FEVMQuer
 	return _c
 }
 
-func (_c *FEVMQueries_IFILSupply_Call) RunAndReturn(run func(context.Context) (*big.Int, error)) *FEVMQueries_IFILSupply_Call {
+func (_c *FEVMQueries_IFILSupply_Call) RunAndReturn(run func(context.Context, *big.Int) (*big.Int, error)) *FEVMQueries_IFILSupply_Call {
 	_c.Call.Return(run)
 	return _c
 }
@@ -1769,25 +1776,25 @@ func (_c *FEVMQueries_InfPoolAgentMaxBorrow_Call) RunAndReturn(run func(context.
 	return _c
 }
 
-// InfPoolBorrowableLiquidity provides a mock function with given fields: ctx
-func (_m *FEVMQueries) InfPoolBorrowableLiquidity(ctx context.Context) (*big.Float, error) {
-	ret := _m.Called(ctx)
+// InfPoolBorrowableLiquidity provides a mock function with given fields: ctx, blockheight
+func (_m *FEVMQueries) InfPoolBorrowableLiquidity(ctx context.Context, blockheight *big.Int) (*big.Float, error) {
+	ret := _m.Called(ctx, blockheight)
 
 	var r0 *big.Float
 	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context) (*big.Float, error)); ok {
-		return rf(ctx)
+	if rf, ok := ret.Get(0).(func(context.Context, *big.Int) (*big.Float, error)); ok {
+		return rf(ctx, blockheight)
 	}
-	if rf, ok := ret.Get(0).(func(context.Context) *big.Float); ok {
-		r0 = rf(ctx)
+	if rf, ok := ret.Get(0).(func(context.Context, *big.Int) *big.Float); ok {
+		r0 = rf(ctx, blockheight)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*big.Float)
 		}
 	}
 
-	if rf, ok := ret.Get(1).(func(context.Context) error); ok {
-		r1 = rf(ctx)
+	if rf, ok := ret.Get(1).(func(context.Context, *big.Int) error); ok {
+		r1 = rf(ctx, blockheight)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -1802,13 +1809,14 @@ type FEVMQueries_InfPoolBorrowableLiquidity_Call struct {
 
 // InfPoolBorrowableLiquidity is a helper method to define mock.On call
 //   - ctx context.Context
-func (_e *FEVMQueries_Expecter) InfPoolBorrowableLiquidity(ctx interface{}) *FEVMQueries_InfPoolBorrowableLiquidity_Call {
-	return &FEVMQueries_InfPoolBorrowableLiquidity_Call{Call: _e.mock.On("InfPoolBorrowableLiquidity", ctx)}
+//   - blockheight *big.Int
+func (_e *FEVMQueries_Expecter) InfPoolBorrowableLiquidity(ctx interface{}, blockheight interface{}) *FEVMQueries_InfPoolBorrowableLiquidity_Call {
+	return &FEVMQueries_InfPoolBorrowableLiquidity_Call{Call: _e.mock.On("InfPoolBorrowableLiquidity", ctx, blockheight)}
 }
 
-func (_c *FEVMQueries_InfPoolBorrowableLiquidity_Call) Run(run func(ctx context.Context)) *FEVMQueries_InfPoolBorrowableLiquidity_Call {
+func (_c *FEVMQueries_InfPoolBorrowableLiquidity_Call) Run(run func(ctx context.Context, blockheight *big.Int)) *FEVMQueries_InfPoolBorrowableLiquidity_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context))
+		run(args[0].(context.Context), args[1].(*big.Int))
 	})
 	return _c
 }
@@ -1818,28 +1826,83 @@ func (_c *FEVMQueries_InfPoolBorrowableLiquidity_Call) Return(_a0 *big.Float, _a
 	return _c
 }
 
-func (_c *FEVMQueries_InfPoolBorrowableLiquidity_Call) RunAndReturn(run func(context.Context) (*big.Float, error)) *FEVMQueries_InfPoolBorrowableLiquidity_Call {
+func (_c *FEVMQueries_InfPoolBorrowableLiquidity_Call) RunAndReturn(run func(context.Context, *big.Int) (*big.Float, error)) *FEVMQueries_InfPoolBorrowableLiquidity_Call {
 	_c.Call.Return(run)
 	return _c
 }
 
-// InfPoolGetAccount provides a mock function with given fields: ctx, agentAddr
-func (_m *FEVMQueries) InfPoolGetAccount(ctx context.Context, agentAddr common.Address) (abigen.Account, error) {
-	ret := _m.Called(ctx, agentAddr)
+// InfPoolFeesAccrued provides a mock function with given fields: ctx, blockheight
+func (_m *FEVMQueries) InfPoolFeesAccrued(ctx context.Context, blockheight *big.Int) (*big.Int, error) {
+	ret := _m.Called(ctx, blockheight)
+
+	var r0 *big.Int
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, *big.Int) (*big.Int, error)); ok {
+		return rf(ctx, blockheight)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, *big.Int) *big.Int); ok {
+		r0 = rf(ctx, blockheight)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*big.Int)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, *big.Int) error); ok {
+		r1 = rf(ctx, blockheight)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// FEVMQueries_InfPoolFeesAccrued_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'InfPoolFeesAccrued'
+type FEVMQueries_InfPoolFeesAccrued_Call struct {
+	*mock.Call
+}
+
+// InfPoolFeesAccrued is a helper method to define mock.On call
+//   - ctx context.Context
+//   - blockheight *big.Int
+func (_e *FEVMQueries_Expecter) InfPoolFeesAccrued(ctx interface{}, blockheight interface{}) *FEVMQueries_InfPoolFeesAccrued_Call {
+	return &FEVMQueries_InfPoolFeesAccrued_Call{Call: _e.mock.On("InfPoolFeesAccrued", ctx, blockheight)}
+}
+
+func (_c *FEVMQueries_InfPoolFeesAccrued_Call) Run(run func(ctx context.Context, blockheight *big.Int)) *FEVMQueries_InfPoolFeesAccrued_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(*big.Int))
+	})
+	return _c
+}
+
+func (_c *FEVMQueries_InfPoolFeesAccrued_Call) Return(_a0 *big.Int, _a1 error) *FEVMQueries_InfPoolFeesAccrued_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *FEVMQueries_InfPoolFeesAccrued_Call) RunAndReturn(run func(context.Context, *big.Int) (*big.Int, error)) *FEVMQueries_InfPoolFeesAccrued_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// InfPoolGetAccount provides a mock function with given fields: ctx, agentAddr, blockheight
+func (_m *FEVMQueries) InfPoolGetAccount(ctx context.Context, agentAddr common.Address, blockheight *big.Int) (abigen.Account, error) {
+	ret := _m.Called(ctx, agentAddr, blockheight)
 
 	var r0 abigen.Account
 	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context, common.Address) (abigen.Account, error)); ok {
-		return rf(ctx, agentAddr)
+	if rf, ok := ret.Get(0).(func(context.Context, common.Address, *big.Int) (abigen.Account, error)); ok {
+		return rf(ctx, agentAddr, blockheight)
 	}
-	if rf, ok := ret.Get(0).(func(context.Context, common.Address) abigen.Account); ok {
-		r0 = rf(ctx, agentAddr)
+	if rf, ok := ret.Get(0).(func(context.Context, common.Address, *big.Int) abigen.Account); ok {
+		r0 = rf(ctx, agentAddr, blockheight)
 	} else {
 		r0 = ret.Get(0).(abigen.Account)
 	}
 
-	if rf, ok := ret.Get(1).(func(context.Context, common.Address) error); ok {
-		r1 = rf(ctx, agentAddr)
+	if rf, ok := ret.Get(1).(func(context.Context, common.Address, *big.Int) error); ok {
+		r1 = rf(ctx, agentAddr, blockheight)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -1855,13 +1918,14 @@ type FEVMQueries_InfPoolGetAccount_Call struct {
 // InfPoolGetAccount is a helper method to define mock.On call
 //   - ctx context.Context
 //   - agentAddr common.Address
-func (_e *FEVMQueries_Expecter) InfPoolGetAccount(ctx interface{}, agentAddr interface{}) *FEVMQueries_InfPoolGetAccount_Call {
-	return &FEVMQueries_InfPoolGetAccount_Call{Call: _e.mock.On("InfPoolGetAccount", ctx, agentAddr)}
+//   - blockheight *big.Int
+func (_e *FEVMQueries_Expecter) InfPoolGetAccount(ctx interface{}, agentAddr interface{}, blockheight interface{}) *FEVMQueries_InfPoolGetAccount_Call {
+	return &FEVMQueries_InfPoolGetAccount_Call{Call: _e.mock.On("InfPoolGetAccount", ctx, agentAddr, blockheight)}
 }
 
-func (_c *FEVMQueries_InfPoolGetAccount_Call) Run(run func(ctx context.Context, agentAddr common.Address)) *FEVMQueries_InfPoolGetAccount_Call {
+func (_c *FEVMQueries_InfPoolGetAccount_Call) Run(run func(ctx context.Context, agentAddr common.Address, blockheight *big.Int)) *FEVMQueries_InfPoolGetAccount_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(common.Address))
+		run(args[0].(context.Context), args[1].(common.Address), args[2].(*big.Int))
 	})
 	return _c
 }
@@ -1871,7 +1935,7 @@ func (_c *FEVMQueries_InfPoolGetAccount_Call) Return(_a0 abigen.Account, _a1 err
 	return _c
 }
 
-func (_c *FEVMQueries_InfPoolGetAccount_Call) RunAndReturn(run func(context.Context, common.Address) (abigen.Account, error)) *FEVMQueries_InfPoolGetAccount_Call {
+func (_c *FEVMQueries_InfPoolGetAccount_Call) RunAndReturn(run func(context.Context, common.Address, *big.Int) (abigen.Account, error)) *FEVMQueries_InfPoolGetAccount_Call {
 	_c.Call.Return(run)
 	return _c
 }
@@ -2164,25 +2228,25 @@ func (_c *FEVMQueries_InfPoolRateFromGCRED_Call) RunAndReturn(run func(context.C
 	return _c
 }
 
-// InfPoolTotalAssets provides a mock function with given fields: ctx
-func (_m *FEVMQueries) InfPoolTotalAssets(ctx context.Context) (*big.Float, error) {
-	ret := _m.Called(ctx)
+// InfPoolTotalAssets provides a mock function with given fields: ctx, blockheight
+func (_m *FEVMQueries) InfPoolTotalAssets(ctx context.Context, blockheight *big.Int) (*big.Float, error) {
+	ret := _m.Called(ctx, blockheight)
 
 	var r0 *big.Float
 	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context) (*big.Float, error)); ok {
-		return rf(ctx)
+	if rf, ok := ret.Get(0).(func(context.Context, *big.Int) (*big.Float, error)); ok {
+		return rf(ctx, blockheight)
 	}
-	if rf, ok := ret.Get(0).(func(context.Context) *big.Float); ok {
-		r0 = rf(ctx)
+	if rf, ok := ret.Get(0).(func(context.Context, *big.Int) *big.Float); ok {
+		r0 = rf(ctx, blockheight)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*big.Float)
 		}
 	}
 
-	if rf, ok := ret.Get(1).(func(context.Context) error); ok {
-		r1 = rf(ctx)
+	if rf, ok := ret.Get(1).(func(context.Context, *big.Int) error); ok {
+		r1 = rf(ctx, blockheight)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -2197,13 +2261,14 @@ type FEVMQueries_InfPoolTotalAssets_Call struct {
 
 // InfPoolTotalAssets is a helper method to define mock.On call
 //   - ctx context.Context
-func (_e *FEVMQueries_Expecter) InfPoolTotalAssets(ctx interface{}) *FEVMQueries_InfPoolTotalAssets_Call {
-	return &FEVMQueries_InfPoolTotalAssets_Call{Call: _e.mock.On("InfPoolTotalAssets", ctx)}
+//   - blockheight *big.Int
+func (_e *FEVMQueries_Expecter) InfPoolTotalAssets(ctx interface{}, blockheight interface{}) *FEVMQueries_InfPoolTotalAssets_Call {
+	return &FEVMQueries_InfPoolTotalAssets_Call{Call: _e.mock.On("InfPoolTotalAssets", ctx, blockheight)}
 }
 
-func (_c *FEVMQueries_InfPoolTotalAssets_Call) Run(run func(ctx context.Context)) *FEVMQueries_InfPoolTotalAssets_Call {
+func (_c *FEVMQueries_InfPoolTotalAssets_Call) Run(run func(ctx context.Context, blockheight *big.Int)) *FEVMQueries_InfPoolTotalAssets_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context))
+		run(args[0].(context.Context), args[1].(*big.Int))
 	})
 	return _c
 }
@@ -2213,30 +2278,30 @@ func (_c *FEVMQueries_InfPoolTotalAssets_Call) Return(_a0 *big.Float, _a1 error)
 	return _c
 }
 
-func (_c *FEVMQueries_InfPoolTotalAssets_Call) RunAndReturn(run func(context.Context) (*big.Float, error)) *FEVMQueries_InfPoolTotalAssets_Call {
+func (_c *FEVMQueries_InfPoolTotalAssets_Call) RunAndReturn(run func(context.Context, *big.Int) (*big.Float, error)) *FEVMQueries_InfPoolTotalAssets_Call {
 	_c.Call.Return(run)
 	return _c
 }
 
-// InfPoolTotalBorrowed provides a mock function with given fields: ctx
-func (_m *FEVMQueries) InfPoolTotalBorrowed(ctx context.Context) (*big.Float, error) {
-	ret := _m.Called(ctx)
+// InfPoolTotalBorrowed provides a mock function with given fields: ctx, blockheight
+func (_m *FEVMQueries) InfPoolTotalBorrowed(ctx context.Context, blockheight *big.Int) (*big.Float, error) {
+	ret := _m.Called(ctx, blockheight)
 
 	var r0 *big.Float
 	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context) (*big.Float, error)); ok {
-		return rf(ctx)
+	if rf, ok := ret.Get(0).(func(context.Context, *big.Int) (*big.Float, error)); ok {
+		return rf(ctx, blockheight)
 	}
-	if rf, ok := ret.Get(0).(func(context.Context) *big.Float); ok {
-		r0 = rf(ctx)
+	if rf, ok := ret.Get(0).(func(context.Context, *big.Int) *big.Float); ok {
+		r0 = rf(ctx, blockheight)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*big.Float)
 		}
 	}
 
-	if rf, ok := ret.Get(1).(func(context.Context) error); ok {
-		r1 = rf(ctx)
+	if rf, ok := ret.Get(1).(func(context.Context, *big.Int) error); ok {
+		r1 = rf(ctx, blockheight)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -2251,13 +2316,14 @@ type FEVMQueries_InfPoolTotalBorrowed_Call struct {
 
 // InfPoolTotalBorrowed is a helper method to define mock.On call
 //   - ctx context.Context
-func (_e *FEVMQueries_Expecter) InfPoolTotalBorrowed(ctx interface{}) *FEVMQueries_InfPoolTotalBorrowed_Call {
-	return &FEVMQueries_InfPoolTotalBorrowed_Call{Call: _e.mock.On("InfPoolTotalBorrowed", ctx)}
+//   - blockheight *big.Int
+func (_e *FEVMQueries_Expecter) InfPoolTotalBorrowed(ctx interface{}, blockheight interface{}) *FEVMQueries_InfPoolTotalBorrowed_Call {
+	return &FEVMQueries_InfPoolTotalBorrowed_Call{Call: _e.mock.On("InfPoolTotalBorrowed", ctx, blockheight)}
 }
 
-func (_c *FEVMQueries_InfPoolTotalBorrowed_Call) Run(run func(ctx context.Context)) *FEVMQueries_InfPoolTotalBorrowed_Call {
+func (_c *FEVMQueries_InfPoolTotalBorrowed_Call) Run(run func(ctx context.Context, blockheight *big.Int)) *FEVMQueries_InfPoolTotalBorrowed_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context))
+		run(args[0].(context.Context), args[1].(*big.Int))
 	})
 	return _c
 }
@@ -2267,7 +2333,7 @@ func (_c *FEVMQueries_InfPoolTotalBorrowed_Call) Return(_a0 *big.Float, _a1 erro
 	return _c
 }
 
-func (_c *FEVMQueries_InfPoolTotalBorrowed_Call) RunAndReturn(run func(context.Context) (*big.Float, error)) *FEVMQueries_InfPoolTotalBorrowed_Call {
+func (_c *FEVMQueries_InfPoolTotalBorrowed_Call) RunAndReturn(run func(context.Context, *big.Int) (*big.Float, error)) *FEVMQueries_InfPoolTotalBorrowed_Call {
 	_c.Call.Return(run)
 	return _c
 }
@@ -2466,25 +2532,25 @@ func (_c *FEVMQueries_MinerRegistry_Call) RunAndReturn(run func() common.Address
 	return _c
 }
 
-// MinerRegistryAgentMinersCount provides a mock function with given fields: ctx, agentID
-func (_m *FEVMQueries) MinerRegistryAgentMinersCount(ctx context.Context, agentID *big.Int) (*big.Int, error) {
-	ret := _m.Called(ctx, agentID)
+// MinerRegistryAgentMinersCount provides a mock function with given fields: ctx, agentID, blockheight
+func (_m *FEVMQueries) MinerRegistryAgentMinersCount(ctx context.Context, agentID *big.Int, blockheight *big.Int) (*big.Int, error) {
+	ret := _m.Called(ctx, agentID, blockheight)
 
 	var r0 *big.Int
 	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context, *big.Int) (*big.Int, error)); ok {
-		return rf(ctx, agentID)
+	if rf, ok := ret.Get(0).(func(context.Context, *big.Int, *big.Int) (*big.Int, error)); ok {
+		return rf(ctx, agentID, blockheight)
 	}
-	if rf, ok := ret.Get(0).(func(context.Context, *big.Int) *big.Int); ok {
-		r0 = rf(ctx, agentID)
+	if rf, ok := ret.Get(0).(func(context.Context, *big.Int, *big.Int) *big.Int); ok {
+		r0 = rf(ctx, agentID, blockheight)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*big.Int)
 		}
 	}
 
-	if rf, ok := ret.Get(1).(func(context.Context, *big.Int) error); ok {
-		r1 = rf(ctx, agentID)
+	if rf, ok := ret.Get(1).(func(context.Context, *big.Int, *big.Int) error); ok {
+		r1 = rf(ctx, agentID, blockheight)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -2500,13 +2566,14 @@ type FEVMQueries_MinerRegistryAgentMinersCount_Call struct {
 // MinerRegistryAgentMinersCount is a helper method to define mock.On call
 //   - ctx context.Context
 //   - agentID *big.Int
-func (_e *FEVMQueries_Expecter) MinerRegistryAgentMinersCount(ctx interface{}, agentID interface{}) *FEVMQueries_MinerRegistryAgentMinersCount_Call {
-	return &FEVMQueries_MinerRegistryAgentMinersCount_Call{Call: _e.mock.On("MinerRegistryAgentMinersCount", ctx, agentID)}
+//   - blockheight *big.Int
+func (_e *FEVMQueries_Expecter) MinerRegistryAgentMinersCount(ctx interface{}, agentID interface{}, blockheight interface{}) *FEVMQueries_MinerRegistryAgentMinersCount_Call {
+	return &FEVMQueries_MinerRegistryAgentMinersCount_Call{Call: _e.mock.On("MinerRegistryAgentMinersCount", ctx, agentID, blockheight)}
 }
 
-func (_c *FEVMQueries_MinerRegistryAgentMinersCount_Call) Run(run func(ctx context.Context, agentID *big.Int)) *FEVMQueries_MinerRegistryAgentMinersCount_Call {
+func (_c *FEVMQueries_MinerRegistryAgentMinersCount_Call) Run(run func(ctx context.Context, agentID *big.Int, blockheight *big.Int)) *FEVMQueries_MinerRegistryAgentMinersCount_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(*big.Int))
+		run(args[0].(context.Context), args[1].(*big.Int), args[2].(*big.Int))
 	})
 	return _c
 }
@@ -2516,30 +2583,30 @@ func (_c *FEVMQueries_MinerRegistryAgentMinersCount_Call) Return(_a0 *big.Int, _
 	return _c
 }
 
-func (_c *FEVMQueries_MinerRegistryAgentMinersCount_Call) RunAndReturn(run func(context.Context, *big.Int) (*big.Int, error)) *FEVMQueries_MinerRegistryAgentMinersCount_Call {
+func (_c *FEVMQueries_MinerRegistryAgentMinersCount_Call) RunAndReturn(run func(context.Context, *big.Int, *big.Int) (*big.Int, error)) *FEVMQueries_MinerRegistryAgentMinersCount_Call {
 	_c.Call.Return(run)
 	return _c
 }
 
-// MinerRegistryAgentMinersList provides a mock function with given fields: ctx, agentID
-func (_m *FEVMQueries) MinerRegistryAgentMinersList(ctx context.Context, agentID *big.Int) ([]address.Address, error) {
-	ret := _m.Called(ctx, agentID)
+// MinerRegistryAgentMinersList provides a mock function with given fields: ctx, agentID, blockheight
+func (_m *FEVMQueries) MinerRegistryAgentMinersList(ctx context.Context, agentID *big.Int, blockheight *big.Int) ([]address.Address, error) {
+	ret := _m.Called(ctx, agentID, blockheight)
 
 	var r0 []address.Address
 	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context, *big.Int) ([]address.Address, error)); ok {
-		return rf(ctx, agentID)
+	if rf, ok := ret.Get(0).(func(context.Context, *big.Int, *big.Int) ([]address.Address, error)); ok {
+		return rf(ctx, agentID, blockheight)
 	}
-	if rf, ok := ret.Get(0).(func(context.Context, *big.Int) []address.Address); ok {
-		r0 = rf(ctx, agentID)
+	if rf, ok := ret.Get(0).(func(context.Context, *big.Int, *big.Int) []address.Address); ok {
+		r0 = rf(ctx, agentID, blockheight)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).([]address.Address)
 		}
 	}
 
-	if rf, ok := ret.Get(1).(func(context.Context, *big.Int) error); ok {
-		r1 = rf(ctx, agentID)
+	if rf, ok := ret.Get(1).(func(context.Context, *big.Int, *big.Int) error); ok {
+		r1 = rf(ctx, agentID, blockheight)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -2555,13 +2622,14 @@ type FEVMQueries_MinerRegistryAgentMinersList_Call struct {
 // MinerRegistryAgentMinersList is a helper method to define mock.On call
 //   - ctx context.Context
 //   - agentID *big.Int
-func (_e *FEVMQueries_Expecter) MinerRegistryAgentMinersList(ctx interface{}, agentID interface{}) *FEVMQueries_MinerRegistryAgentMinersList_Call {
-	return &FEVMQueries_MinerRegistryAgentMinersList_Call{Call: _e.mock.On("MinerRegistryAgentMinersList", ctx, agentID)}
+//   - blockheight *big.Int
+func (_e *FEVMQueries_Expecter) MinerRegistryAgentMinersList(ctx interface{}, agentID interface{}, blockheight interface{}) *FEVMQueries_MinerRegistryAgentMinersList_Call {
+	return &FEVMQueries_MinerRegistryAgentMinersList_Call{Call: _e.mock.On("MinerRegistryAgentMinersList", ctx, agentID, blockheight)}
 }
 
-func (_c *FEVMQueries_MinerRegistryAgentMinersList_Call) Run(run func(ctx context.Context, agentID *big.Int)) *FEVMQueries_MinerRegistryAgentMinersList_Call {
+func (_c *FEVMQueries_MinerRegistryAgentMinersList_Call) Run(run func(ctx context.Context, agentID *big.Int, blockheight *big.Int)) *FEVMQueries_MinerRegistryAgentMinersList_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(*big.Int))
+		run(args[0].(context.Context), args[1].(*big.Int), args[2].(*big.Int))
 	})
 	return _c
 }
@@ -2571,7 +2639,7 @@ func (_c *FEVMQueries_MinerRegistryAgentMinersList_Call) Return(_a0 []address.Ad
 	return _c
 }
 
-func (_c *FEVMQueries_MinerRegistryAgentMinersList_Call) RunAndReturn(run func(context.Context, *big.Int) ([]address.Address, error)) *FEVMQueries_MinerRegistryAgentMinersList_Call {
+func (_c *FEVMQueries_MinerRegistryAgentMinersList_Call) RunAndReturn(run func(context.Context, *big.Int, *big.Int) ([]address.Address, error)) *FEVMQueries_MinerRegistryAgentMinersList_Call {
 	_c.Call.Return(run)
 	return _c
 }
