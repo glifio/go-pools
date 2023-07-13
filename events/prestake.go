@@ -4,24 +4,25 @@ import (
 	"context"
 	"math/big"
 
+	"github.com/ethereum/go-ethereum/common"
 	"github.com/glifio/go-pools/abigen"
 	"github.com/glifio/go-pools/constants"
 	"github.com/glifio/go-pools/types"
 )
 
-func AgFactoryCreateAgentEvents(ctx context.Context, sdk types.PoolsSDK, startEpoch *big.Int, endEpoch *big.Int) ([]*abigen.AgentFactoryCreateAgent, error) {
+func PrestakeEvents(ctx context.Context, sdk types.PoolsSDK, startEpoch *big.Int, endEpoch *big.Int) ([]*abigen.PreStakeDeposit, error) {
 
 	ethclient, err := sdk.Extern().ConnectEthClient()
 	if err != nil {
-		return []*abigen.AgentFactoryCreateAgent{}, err
+		return []*abigen.PreStakeDeposit{}, err
 	}
 
-	filterer, err := abigen.NewAgentFactoryFilterer(sdk.Query().AgentFactory(), ethclient)
+	filterer, err := abigen.NewPreStakeFilterer(common.HexToAddress("0x0EC46aD7aA8600118DA4bD64239c3DC364fD0274"), ethclient)
 	if err != nil {
-		return []*abigen.AgentFactoryCreateAgent{}, err
+		return []*abigen.PreStakeDeposit{}, err
 	}
 
-	var events []*abigen.AgentFactoryCreateAgent
+	var events []*abigen.PreStakeDeposit
 	// to do - can remove hashmap logic when https://github.com/filecoin-project/lotus/issues/10964 gets merged
 	var hashmap = make(map[string]bool)
 
@@ -31,9 +32,9 @@ func AgFactoryCreateAgentEvents(ctx context.Context, sdk types.PoolsSDK, startEp
 			end = endEpoch
 		}
 
-		iter, err := filterer.FilterCreateAgent(getFilterOpts(ctx, i, end, sdk.Query().ChainID()), nil, nil, nil)
+		iter, err := filterer.FilterDeposit(getFilterOpts(ctx, i, end, sdk.Query().ChainID()), nil)
 		if err != nil {
-			return []*abigen.AgentFactoryCreateAgent{}, err
+			return []*abigen.PreStakeDeposit{}, err
 		}
 
 		for iter.Next() {

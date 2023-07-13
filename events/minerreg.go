@@ -6,6 +6,7 @@ import (
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/glifio/go-pools/abigen"
+	"github.com/glifio/go-pools/constants"
 	"github.com/glifio/go-pools/types"
 )
 
@@ -20,15 +21,26 @@ func MinerRegAddMinerEvents(ctx context.Context, sdk types.PoolsSDK, agentsFilte
 		return []*abigen.MinerRegistryAddMiner{}, err
 	}
 
-	iter, err := minerRegFilterer.FilterAddMiner(getFilterOpts(ctx, startEpoch, endEpoch, sdk.Query().ChainID()), agentsFilter, nil)
-	if err != nil {
-		return []*abigen.MinerRegistryAddMiner{}, err
-	}
-
 	var addMinerEvents []*abigen.MinerRegistryAddMiner
+	var hashmap = make(map[string]bool)
 
-	for iter.Next() {
-		addMinerEvents = append(addMinerEvents, iter.Event)
+	for i := startEpoch; i.Cmp(endEpoch) == -1; i.Add(i, constants.CHUNKSIZE) {
+		end := big.NewInt(0).Add(i, constants.CHUNKSIZE)
+		if end.Cmp(endEpoch) == 1 {
+			end = endEpoch
+		}
+
+		iter, err := minerRegFilterer.FilterAddMiner(getFilterOpts(ctx, i, end, sdk.Query().ChainID()), agentsFilter, nil)
+		if err != nil {
+			return []*abigen.MinerRegistryAddMiner{}, err
+		}
+
+		for iter.Next() {
+			if _, ok := hashmap[iter.Event.Raw.TxHash.Hex()]; !ok {
+				hashmap[iter.Event.Raw.TxHash.Hex()] = true
+				addMinerEvents = append(addMinerEvents, iter.Event)
+			}
+		}
 	}
 
 	return addMinerEvents, nil
@@ -45,15 +57,25 @@ func MinerRegRmMinerEvents(ctx context.Context, sdk types.PoolsSDK, agentsFilter
 		return []*abigen.MinerRegistryRemoveMiner{}, err
 	}
 
-	iter, err := minerRegFilterer.FilterRemoveMiner(getFilterOpts(ctx, startEpoch, endEpoch, sdk.Query().ChainID()), agentsFilter, nil)
-	if err != nil {
-		return []*abigen.MinerRegistryRemoveMiner{}, err
-	}
-
 	var events []*abigen.MinerRegistryRemoveMiner
+	var hashmap = make(map[string]bool)
 
-	for iter.Next() {
-		events = append(events, iter.Event)
+	for i := startEpoch; i.Cmp(endEpoch) == -1; i.Add(i, constants.CHUNKSIZE) {
+		end := big.NewInt(0).Add(i, constants.CHUNKSIZE)
+		if end.Cmp(endEpoch) == 1 {
+			end = endEpoch
+		}
+
+		iter, err := minerRegFilterer.FilterRemoveMiner(getFilterOpts(ctx, i, end, sdk.Query().ChainID()), agentsFilter, nil)
+		if err != nil {
+			return []*abigen.MinerRegistryRemoveMiner{}, err
+		}
+		for iter.Next() {
+			if _, ok := hashmap[iter.Event.Raw.TxHash.Hex()]; !ok {
+				hashmap[iter.Event.Raw.TxHash.Hex()] = true
+				events = append(events, iter.Event)
+			}
+		}
 	}
 
 	return events, nil

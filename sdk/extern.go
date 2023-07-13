@@ -3,7 +3,6 @@ package sdk
 import (
 	"context"
 	"net/http"
-	"time"
 
 	"github.com/ethereum/go-ethereum/ethclient"
 	ethrpc "github.com/ethereum/go-ethereum/rpc"
@@ -23,7 +22,7 @@ func connectEthClient(dialAddr string, token string) (*ethclient.Client, error) 
 
 	tokenHeader := ethrpc.WithHeader("Authorization", "Bearer "+token)
 	httpClient := ethrpc.WithHTTPClient(&http.Client{
-		Timeout: 10 * time.Second,
+		Timeout: 0,
 	})
 
 	client, err := ethrpc.DialOptions(context.Background(), dialAddr, httpClient, tokenHeader)
