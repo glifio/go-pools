@@ -47,6 +47,11 @@ var TestProtoMeta = types.ProtocolMeta{
 }
 
 var (
+	FilForwarder  = common.HexToAddress("0x2B3ef6906429b580b7b2080de5CA893BC282c225")
+	TFilForwarder = common.HexToAddress("0x2B3ef6906429b580b7b2080de5CA893BC282c225")
+)
+
+var (
 	ProtocolDeployEpoch  = big.NewInt(2890957)
 	TProtocolDeployEpoch = big.NewInt(559673)
 )
