@@ -60,4 +60,4 @@ var WAD = big.NewInt(1e18)
 // cache this here to not fetch it from the contracts every time we need it
 var INFINITY_POOL_ID = big.NewInt(0)
 
-var CHUNKSIZE = big.NewInt(10000)
+var CHUNKSIZE = big.NewInt(50000)
