@@ -10,8 +10,6 @@ import (
 )
 
 func InfPoolBorrowEvents(ctx context.Context, sdk types.PoolsSDK, agentsFilter []*big.Int, startEpoch *big.Int, endEpoch *big.Int) ([]*abigen.InfinityPoolBorrow, error) {
-	chunkSize := big.NewInt(50000)
-
 	ethclient, err := sdk.Extern().ConnectEthClient()
 	if err != nil {
 		return []*abigen.InfinityPoolBorrow{}, err
@@ -25,8 +23,8 @@ func InfPoolBorrowEvents(ctx context.Context, sdk types.PoolsSDK, agentsFilter [
 	var events []*abigen.InfinityPoolBorrow
 	var hashmap = make(map[string]bool)
 
-	for i := startEpoch; i.Cmp(endEpoch) == -1; i.Add(i, chunkSize) {
-		end := big.NewInt(0).Add(i, chunkSize)
+	for i := startEpoch; i.Cmp(endEpoch) == -1; i.Add(i, constants.CHUNKSIZE) {
+		end := big.NewInt(0).Add(i, constants.CHUNKSIZE)
 		if end.Cmp(endEpoch) == 1 {
 			end = endEpoch
 		}
@@ -57,12 +55,11 @@ func InfPoolPayEvents(ctx context.Context, sdk types.PoolsSDK, agentsFilter []*b
 		return []*abigen.InfinityPoolPay{}, err
 	}
 
-	chunkSize := big.NewInt(50000)
 	var events []*abigen.InfinityPoolPay
 	var hashmap = make(map[string]bool)
 
-	for i := startEpoch; i.Cmp(endEpoch) == -1; i.Add(i, chunkSize) {
-		end := big.NewInt(0).Add(i, chunkSize)
+	for i := startEpoch; i.Cmp(endEpoch) == -1; i.Add(i, constants.CHUNKSIZE) {
+		end := big.NewInt(0).Add(i, constants.CHUNKSIZE)
 		if end.Cmp(endEpoch) == 1 {
 			end = endEpoch
 		}

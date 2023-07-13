@@ -42,8 +42,3 @@ func getFilterOpts(ctx context.Context, startEpoch *big.Int, endEpoch *big.Int, 
 
 	return &bind.FilterOpts{Context: ctx, Start: start, End: end}
 }
-
-func getWatchOpts(ctx context.Context, startEpoch *big.Int, chainID *big.Int) *bind.WatchOpts {
-	start := getStartEpochIfNil(startEpoch, chainID)
-	return &bind.WatchOpts{Start: &start, Context: ctx}
-}
