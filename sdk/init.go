@@ -133,9 +133,11 @@ func LazyInit(
 	fmt.Println("Jim LazyInit 4")
 	routerCaller, err := abigen.NewRouterCaller(router, client)
 	if err != nil {
+		fmt.Println("Jim LazyInit 4a")
 		return err
 	}
 
+	fmt.Println("Jim LazyInit 4b")
 	fetchRoutes := []constants.Route{
 		constants.RouteAgentPolice,
 		constants.RouteAgentFactory,
@@ -144,29 +146,39 @@ func LazyInit(
 		constants.RouteWFIL,
 	}
 
+	fmt.Println("Jim LazyInit 4c")
 	routes, err := getRoutes(ctx, fetchRoutes, routerCaller)
 	if err != nil {
+		fmt.Println("Jim LazyInit 4d")
 		return err
 	}
 
+	fmt.Println("Jim LazyInit 4e")
 	poolRegCaller, err := abigen.NewPoolRegistryCaller(routes[constants.RoutePoolRegistry], client)
 	if err != nil {
+		fmt.Println("Jim LazyInit 4f")
 		return err
 	}
 
 	// infpool is poolID 0
+	fmt.Println("Jim LazyInit 4g")
 	infpool, err := poolRegCaller.AllPools(&bind.CallOpts{Context: ctx}, big.NewInt(0))
 	if err != nil {
+		fmt.Println("Jim LazyInit 4h")
 		return err
 	}
 
+	fmt.Println("Jim LazyInit 4i")
 	infpoolCaller, err := abigen.NewInfinityPoolCaller(infpool, client)
 	if err != nil {
+		fmt.Println("Jim LazyInit 4j")
 		return err
 	}
 
+	fmt.Println("Jim LazyInit 4k")
 	iFIL, err := infpoolCaller.LiquidStakingToken(&bind.CallOpts{Context: ctx})
 	if err != nil {
+		fmt.Println("Jim LazyInit 4l")
 		return err
 	}
 
