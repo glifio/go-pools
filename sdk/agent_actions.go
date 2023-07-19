@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"math/big"
 
+	"github.com/ethereum/go-ethereum/accounts"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/filecoin-project/go-address"
@@ -19,7 +20,15 @@ import (
 	"github.com/glifio/go-pools/vc"
 )
 
-func (a *fevmActions) AgentCreate(ctx context.Context, owner common.Address, operator common.Address, request common.Address, pk *ecdsa.PrivateKey) (*types.Transaction, error) {
+func (a *fevmActions) AgentCreate(
+	ctx context.Context,
+	owner common.Address,
+	operator common.Address,
+	request common.Address,
+	wallet accounts.Wallet,
+	account accounts.Account,
+	passphrase string,
+) (*types.Transaction, error) {
 	client, err := a.extern.ConnectEthClient()
 	if err != nil {
 		return nil, err
@@ -31,10 +40,7 @@ func (a *fevmActions) AgentCreate(ctx context.Context, owner common.Address, ope
 		return nil, err
 	}
 
-	fromAddr, _, err := util.DeriveAddrFromPk(pk)
-	if err != nil {
-		return nil, err
-	}
+	fromAddr := owner
 
 	nonce, err := a.queries.ChainGetNonce(ctx, fromAddr)
 	if err != nil {
@@ -43,7 +49,18 @@ func (a *fevmActions) AgentCreate(ctx context.Context, owner common.Address, ope
 
 	args := []interface{}{owner, operator, request}
 
-	return util.WriteTx(ctx, pk, a.queries.ChainID(), common.Big0, nonce, args, agentFactoryTransactor.Create, "Agent Create")
+	return util.WriteWalletTx(
+		ctx,
+		wallet,
+		account,
+		passphrase,
+		a.queries.ChainID(),
+		common.Big0,
+		nonce,
+		args,
+		agentFactoryTransactor.Create,
+		"Agent Create",
+	)
 }
 
 func (a *fevmActions) AgentBorrow(ctx context.Context, agentAddr common.Address, poolID *big.Int, amount *big.Int, senderKey *ecdsa.PrivateKey, requesterKey *ecdsa.PrivateKey) (*types.Transaction, error) {
