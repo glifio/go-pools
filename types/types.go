@@ -98,7 +98,7 @@ type FEVMQueries interface {
 type FEVMActions interface {
 	// agent actions
 	AgentCreate(ctx context.Context, owner common.Address, operator common.Address, request common.Address, wallet accounts.Wallet, account accounts.Account, passphrase string) (*types.Transaction, error)
-	AgentBorrow(ctx context.Context, agentAddr common.Address, poolID *big.Int, amount *big.Int, senderKey *ecdsa.PrivateKey, requesterKey *ecdsa.PrivateKey) (*types.Transaction, error)
+	AgentBorrow(ctx context.Context, agentAddr common.Address, poolID *big.Int, amount *big.Int, ownerWallet accounts.Wallet, ownerAccount accounts.Account, ownerPassphrase string, requesterKey *ecdsa.PrivateKey) (*types.Transaction, error)
 	AgentPay(ctx context.Context, agentAddr common.Address, poolID *big.Int, amount *big.Int, senderKey *ecdsa.PrivateKey, requesterKey *ecdsa.PrivateKey) (*types.Transaction, error)
 	AgentAddMiner(ctx context.Context, agentAddr common.Address, minerAddr address.Address, ownerWallet accounts.Wallet, ownerAccount accounts.Account, ownerPassphrase string, requesterKey *ecdsa.PrivateKey) (*types.Transaction, error)
 	AgentRemoveMiner(ctx context.Context, agentAddr common.Address, minerAddr address.Address, newOwnerAddr address.Address, senderKey *ecdsa.PrivateKey, requesterKey *ecdsa.PrivateKey) (*types.Transaction, error)

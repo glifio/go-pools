@@ -63,7 +63,16 @@ func (a *fevmActions) AgentCreate(
 	)
 }
 
-func (a *fevmActions) AgentBorrow(ctx context.Context, agentAddr common.Address, poolID *big.Int, amount *big.Int, senderKey *ecdsa.PrivateKey, requesterKey *ecdsa.PrivateKey) (*types.Transaction, error) {
+func (a *fevmActions) AgentBorrow(
+	ctx context.Context,
+	agentAddr common.Address,
+	poolID *big.Int,
+	amount *big.Int,
+	ownerWallet accounts.Wallet,
+	ownerAccount accounts.Account,
+	ownerPassphrase string,
+	requesterKey *ecdsa.PrivateKey,
+) (*types.Transaction, error) {
 	client, err := a.extern.ConnectEthClient()
 	if err != nil {
 		return nil, err
@@ -91,12 +100,7 @@ func (a *fevmActions) AgentBorrow(ctx context.Context, agentAddr common.Address,
 		return nil, err
 	}
 
-	fromAddr, _, err := util.DeriveAddrFromPk(senderKey)
-	if err != nil {
-		return nil, err
-	}
-
-	nonce, err := a.queries.ChainGetNonce(ctx, fromAddr)
+	nonce, err := a.queries.ChainGetNonce(ctx, ownerAccount.Address)
 	if err != nil {
 		return nil, err
 	}
@@ -119,7 +123,7 @@ func (a *fevmActions) AgentBorrow(ctx context.Context, agentAddr common.Address,
 	// 	return nil, errors.New("amount exceeds max borrow - run `glif agent preview borrow <amount>` to get more information.")
 	// }
 
-	return util.WriteTx_old(ctx, senderKey, a.queries.ChainID(), common.Big0, nonce, args, agentTransactor.Borrow, "Agent Borrow")
+	return util.WriteTx(ctx, ownerWallet, ownerAccount, ownerPassphrase, a.queries.ChainID(), common.Big0, nonce, args, agentTransactor.Borrow, "Agent Borrow")
 }
 
 func (a *fevmActions) AgentPay(ctx context.Context, agentAddr common.Address, poolID *big.Int, amount *big.Int, senderKey *ecdsa.PrivateKey, requesterKey *ecdsa.PrivateKey) (*types.Transaction, error) {
