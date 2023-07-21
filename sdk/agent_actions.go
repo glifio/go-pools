@@ -49,7 +49,7 @@ func (a *fevmActions) AgentCreate(
 
 	args := []interface{}{owner, operator, request}
 
-	return util.WriteWalletTx(
+	return util.WriteTx(
 		ctx,
 		wallet,
 		account,
@@ -119,7 +119,7 @@ func (a *fevmActions) AgentBorrow(ctx context.Context, agentAddr common.Address,
 	// 	return nil, errors.New("amount exceeds max borrow - run `glif agent preview borrow <amount>` to get more information.")
 	// }
 
-	return util.WriteTx(ctx, senderKey, a.queries.ChainID(), common.Big0, nonce, args, agentTransactor.Borrow, "Agent Borrow")
+	return util.WriteTx_old(ctx, senderKey, a.queries.ChainID(), common.Big0, nonce, args, agentTransactor.Borrow, "Agent Borrow")
 }
 
 func (a *fevmActions) AgentPay(ctx context.Context, agentAddr common.Address, poolID *big.Int, amount *big.Int, senderKey *ecdsa.PrivateKey, requesterKey *ecdsa.PrivateKey) (*types.Transaction, error) {
@@ -162,10 +162,18 @@ func (a *fevmActions) AgentPay(ctx context.Context, agentAddr common.Address, po
 
 	args := []interface{}{poolID, sc}
 
-	return util.WriteTx(ctx, senderKey, a.queries.ChainID(), common.Big0, nonce, args, agentTransactor.Pay, "Agent Pay")
+	return util.WriteTx_old(ctx, senderKey, a.queries.ChainID(), common.Big0, nonce, args, agentTransactor.Pay, "Agent Pay")
 }
 
-func (a *fevmActions) AgentAddMiner(ctx context.Context, agentAddr common.Address, minerAddr address.Address, senderKey *ecdsa.PrivateKey, requesterKey *ecdsa.PrivateKey) (*types.Transaction, error) {
+func (a *fevmActions) AgentAddMiner(
+	ctx context.Context,
+	agentAddr common.Address,
+	minerAddr address.Address,
+	ownerWallet accounts.Wallet,
+	ownerAccount accounts.Account,
+	ownerPassphrase string,
+	requesterKey *ecdsa.PrivateKey,
+) (*types.Transaction, error) {
 	client, err := a.extern.ConnectEthClient()
 	if err != nil {
 		return nil, err
@@ -193,10 +201,7 @@ func (a *fevmActions) AgentAddMiner(ctx context.Context, agentAddr common.Addres
 		return nil, err
 	}
 
-	fromAddr, _, err := util.DeriveAddrFromPk(senderKey)
-	if err != nil {
-		return nil, err
-	}
+	fromAddr := ownerAccount.Address
 
 	nonce, err := a.queries.ChainGetNonce(ctx, fromAddr)
 	if err != nil {
@@ -205,7 +210,18 @@ func (a *fevmActions) AgentAddMiner(ctx context.Context, agentAddr common.Addres
 
 	args := []interface{}{sc}
 
-	tx, err := util.WriteTx(ctx, senderKey, a.queries.ChainID(), common.Big0, nonce, args, agentTransactor.AddMiner, "Agent Add Miner")
+	tx, err := util.WriteTx(
+		ctx,
+		ownerWallet,
+		ownerAccount,
+		ownerPassphrase,
+		a.queries.ChainID(),
+		common.Big0,
+		nonce,
+		args,
+		agentTransactor.AddMiner,
+		"Agent Add Miner",
+	)
 	if err != nil {
 		return nil, err
 	}
@@ -269,7 +285,7 @@ func (a *fevmActions) AgentRemoveMiner(ctx context.Context, agentAddr common.Add
 
 	args := []interface{}{newOwner64, sc}
 
-	tx, err := util.WriteTx(ctx, senderKey, a.queries.ChainID(), common.Big0, nonce, args, agentTransactor.RemoveMiner, "Agent Remove Miner")
+	tx, err := util.WriteTx_old(ctx, senderKey, a.queries.ChainID(), common.Big0, nonce, args, agentTransactor.RemoveMiner, "Agent Remove Miner")
 	if err != nil {
 		return nil, err
 	}
@@ -323,7 +339,7 @@ func (a *fevmActions) AgentChangeMinerWorker(ctx context.Context, agentAddr comm
 
 	args := []interface{}{minerID, workerID, controlIDs}
 
-	tx, err := util.WriteTx(ctx, pk, a.queries.ChainID(), common.Big0, nonce, args, agentTransactor.ChangeMinerWorker, "Agent Change Miner Worker")
+	tx, err := util.WriteTx_old(ctx, pk, a.queries.ChainID(), common.Big0, nonce, args, agentTransactor.ChangeMinerWorker, "Agent Change Miner Worker")
 	if err != nil {
 		return nil, err
 	}
@@ -360,7 +376,7 @@ func (a *fevmActions) AgentConfirmMinerWorkerChange(ctx context.Context, agentAd
 
 	args := []interface{}{minerU64}
 
-	tx, err := util.WriteTx(ctx, pk, a.queries.ChainID(), common.Big0, nonce, args, agentTransactor.ConfirmChangeMinerWorker, "Agent Confirm Miner Worker Change")
+	tx, err := util.WriteTx_old(ctx, pk, a.queries.ChainID(), common.Big0, nonce, args, agentTransactor.ConfirmChangeMinerWorker, "Agent Confirm Miner Worker Change")
 	if err != nil {
 		return nil, err
 	}
@@ -433,7 +449,7 @@ func (a *fevmActions) AgentPullFunds(ctx context.Context, agentAddr common.Addre
 
 	args := []interface{}{sc}
 
-	return util.WriteTx(ctx, senderKey, a.queries.ChainID(), common.Big0, nonce, args, agentTransactor.PullFunds, "Agent Pull Funds")
+	return util.WriteTx_old(ctx, senderKey, a.queries.ChainID(), common.Big0, nonce, args, agentTransactor.PullFunds, "Agent Pull Funds")
 }
 
 // AgentPushFunds pushes funds from the agent to a miner
@@ -501,7 +517,7 @@ func (a *fevmActions) AgentPushFunds(ctx context.Context, agentAddr common.Addre
 
 	args := []interface{}{sc}
 
-	return util.WriteTx(ctx, senderKey, a.queries.ChainID(), common.Big0, nonce, args, agentTransactor.PushFunds, "Agent Push Funds")
+	return util.WriteTx_old(ctx, senderKey, a.queries.ChainID(), common.Big0, nonce, args, agentTransactor.PushFunds, "Agent Push Funds")
 }
 
 func (a *fevmActions) AgentWithdraw(ctx context.Context, agentAddr common.Address, receiver common.Address, amount *big.Int, senderKey *ecdsa.PrivateKey, requesterKey *ecdsa.PrivateKey) (*types.Transaction, error) {
@@ -544,7 +560,7 @@ func (a *fevmActions) AgentWithdraw(ctx context.Context, agentAddr common.Addres
 
 	args := []interface{}{receiver, sc}
 
-	return util.WriteTx(ctx, senderKey, a.queries.ChainID(), common.Big0, nonce, args, agentTransactor.Withdraw, "Agent Withdraw")
+	return util.WriteTx_old(ctx, senderKey, a.queries.ChainID(), common.Big0, nonce, args, agentTransactor.Withdraw, "Agent Withdraw")
 }
 
 func (a *fevmActions) AgentRefreshRoutes(ctx context.Context, agentAddr common.Address, senderKey *ecdsa.PrivateKey) (*types.Transaction, error) {
@@ -569,5 +585,5 @@ func (a *fevmActions) AgentRefreshRoutes(ctx context.Context, agentAddr common.A
 		return nil, err
 	}
 
-	return util.WriteTx(ctx, senderKey, a.queries.ChainID(), common.Big0, nonce, []interface{}{}, agentTransactor.RefreshRoutes, "Agent RefreshRoutes")
+	return util.WriteTx_old(ctx, senderKey, a.queries.ChainID(), common.Big0, nonce, []interface{}{}, agentTransactor.RefreshRoutes, "Agent RefreshRoutes")
 }

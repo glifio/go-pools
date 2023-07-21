@@ -16,7 +16,7 @@ import (
 	"golang.org/x/xerrors"
 )
 
-func WriteTx(
+func WriteTx_old(
 	ctx context.Context,
 	pk *ecdsa.PrivateKey,
 	chainID *big.Int,
@@ -61,7 +61,7 @@ func WriteTx(
 	return tx, err
 }
 
-func WriteWalletTx(
+func WriteTx(
 	ctx context.Context,
 	wallet accounts.Wallet,
 	account accounts.Account,

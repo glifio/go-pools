@@ -35,7 +35,7 @@ func (a *fevmActions) IFILTransfer(ctx context.Context, receiver common.Address,
 
 	args := []interface{}{receiver, amount}
 
-	return util.WriteTx(ctx, pk, a.queries.ChainID(), common.Big0, nonce, args, iFILTransactor.Transfer, "Transfer iFIL")
+	return util.WriteTx_old(ctx, pk, a.queries.ChainID(), common.Big0, nonce, args, iFILTransactor.Transfer, "Transfer iFIL")
 }
 
 func (a *fevmActions) IFILApprove(ctx context.Context, spender common.Address, allowance *big.Int, pk *ecdsa.PrivateKey) (*types.Transaction, error) {
@@ -62,5 +62,5 @@ func (a *fevmActions) IFILApprove(ctx context.Context, spender common.Address, a
 
 	args := []interface{}{spender, allowance}
 
-	return util.WriteTx(ctx, pk, a.queries.ChainID(), common.Big0, nonce, args, iFILTransactor.Approve, "Approve iFIL")
+	return util.WriteTx_old(ctx, pk, a.queries.ChainID(), common.Big0, nonce, args, iFILTransactor.Approve, "Approve iFIL")
 }

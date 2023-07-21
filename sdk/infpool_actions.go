@@ -35,5 +35,5 @@ func (a *fevmActions) InfPoolDepositFIL(ctx context.Context, receiver common.Add
 
 	args := []interface{}{receiver}
 
-	return util.WriteTx(ctx, pk, a.queries.ChainID(), amount, nonce, args, poolTransactor.Deposit0, "Deposit FIL")
+	return util.WriteTx_old(ctx, pk, a.queries.ChainID(), amount, nonce, args, poolTransactor.Deposit0, "Deposit FIL")
 }
