@@ -457,7 +457,16 @@ func (a *fevmActions) AgentPullFunds(ctx context.Context, agentAddr common.Addre
 }
 
 // AgentPushFunds pushes funds from the agent to a miner
-func (a *fevmActions) AgentPushFunds(ctx context.Context, agentAddr common.Address, amount *big.Int, minerAddr address.Address, senderKey *ecdsa.PrivateKey, requesterKey *ecdsa.PrivateKey) (*types.Transaction, error) {
+func (a *fevmActions) AgentPushFunds(
+	ctx context.Context,
+	agentAddr common.Address,
+	amount *big.Int,
+	minerAddr address.Address,
+	senderWallet accounts.Wallet,
+	senderAccount accounts.Account,
+	senderPassphrase string,
+	requesterKey *ecdsa.PrivateKey,
+) (*types.Transaction, error) {
 	client, err := a.extern.ConnectEthClient()
 	if err != nil {
 		return nil, err
@@ -509,19 +518,14 @@ func (a *fevmActions) AgentPushFunds(ctx context.Context, agentAddr common.Addre
 		return nil, err
 	}
 
-	fromAddr, _, err := util.DeriveAddrFromPk(senderKey)
-	if err != nil {
-		return nil, err
-	}
-
-	nonce, err := a.queries.ChainGetNonce(ctx, fromAddr)
+	nonce, err := a.queries.ChainGetNonce(ctx, senderAccount.Address)
 	if err != nil {
 		return nil, err
 	}
 
 	args := []interface{}{sc}
 
-	return util.WriteTx_old(ctx, senderKey, a.queries.ChainID(), common.Big0, nonce, args, agentTransactor.PushFunds, "Agent Push Funds")
+	return util.WriteTx(ctx, senderWallet, senderAccount, senderPassphrase, a.queries.ChainID(), common.Big0, nonce, args, agentTransactor.PushFunds, "Agent Push Funds")
 }
 
 func (a *fevmActions) AgentWithdraw(ctx context.Context, agentAddr common.Address, receiver common.Address, amount *big.Int, senderKey *ecdsa.PrivateKey, requesterKey *ecdsa.PrivateKey) (*types.Transaction, error) {

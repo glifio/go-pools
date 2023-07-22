@@ -105,7 +105,7 @@ type FEVMActions interface {
 	AgentChangeMinerWorker(ctx context.Context, agentAddr common.Address, minerAddr address.Address, workerAddr address.Address, controlAddrs []address.Address, pk *ecdsa.PrivateKey) (*types.Transaction, error)
 	AgentConfirmMinerWorkerChange(ctx context.Context, agentAddr common.Address, minerAddr address.Address, pk *ecdsa.PrivateKey) (*types.Transaction, error)
 	AgentPullFunds(ctx context.Context, agentAddr common.Address, amount *big.Int, miner address.Address, senderKey *ecdsa.PrivateKey, requesterKey *ecdsa.PrivateKey) (*types.Transaction, error)
-	AgentPushFunds(ctx context.Context, agentAddr common.Address, amount *big.Int, miner address.Address, senderKey *ecdsa.PrivateKey, requesterKey *ecdsa.PrivateKey) (*types.Transaction, error)
+	AgentPushFunds(ctx context.Context, agentAddr common.Address, amount *big.Int, miner address.Address, senderWallet accounts.Wallet, senderAccount accounts.Account, senderPassphrase string, requesterKey *ecdsa.PrivateKey) (*types.Transaction, error)
 	AgentWithdraw(ctx context.Context, agentAddr common.Address, receiver common.Address, amount *big.Int, senderKey *ecdsa.PrivateKey, requesterKey *ecdsa.PrivateKey) (*types.Transaction, error)
 	AgentRefreshRoutes(ctx context.Context, agentAddr common.Address, senderKey *ecdsa.PrivateKey) (*types.Transaction, error)
 
