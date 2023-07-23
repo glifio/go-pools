@@ -103,7 +103,7 @@ type FEVMActions interface {
 	AgentAddMiner(ctx context.Context, agentAddr common.Address, minerAddr address.Address, ownerWallet accounts.Wallet, ownerAccount accounts.Account, ownerPassphrase string, requesterKey *ecdsa.PrivateKey) (*types.Transaction, error)
 	AgentRemoveMiner(ctx context.Context, agentAddr common.Address, minerAddr address.Address, newOwnerAddr address.Address, senderKey *ecdsa.PrivateKey, requesterKey *ecdsa.PrivateKey) (*types.Transaction, error)
 	AgentChangeMinerWorker(ctx context.Context, agentAddr common.Address, minerAddr address.Address, workerAddr address.Address, controlAddrs []address.Address, ownerWallet accounts.Wallet, ownerAccount accounts.Account, ownerPassphrase string) (*types.Transaction, error)
-	AgentConfirmMinerWorkerChange(ctx context.Context, agentAddr common.Address, minerAddr address.Address, pk *ecdsa.PrivateKey) (*types.Transaction, error)
+	AgentConfirmMinerWorkerChange(ctx context.Context, agentAddr common.Address, minerAddr address.Address, ownerWallet accounts.Wallet, ownerAccount accounts.Account, ownerPassphrase string) (*types.Transaction, error)
 	AgentPullFunds(ctx context.Context, agentAddr common.Address, amount *big.Int, miner address.Address, senderKey *ecdsa.PrivateKey, requesterKey *ecdsa.PrivateKey) (*types.Transaction, error)
 	AgentPushFunds(ctx context.Context, agentAddr common.Address, amount *big.Int, miner address.Address, senderWallet accounts.Wallet, senderAccount accounts.Account, senderPassphrase string, requesterKey *ecdsa.PrivateKey) (*types.Transaction, error)
 	AgentWithdraw(ctx context.Context, agentAddr common.Address, receiver common.Address, amount *big.Int, senderKey *ecdsa.PrivateKey, requesterKey *ecdsa.PrivateKey) (*types.Transaction, error)
