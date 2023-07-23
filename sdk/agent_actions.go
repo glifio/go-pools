@@ -233,7 +233,16 @@ func (a *fevmActions) AgentAddMiner(
 	return tx, nil
 }
 
-func (a *fevmActions) AgentRemoveMiner(ctx context.Context, agentAddr common.Address, minerAddr address.Address, newOwnerAddr address.Address, senderKey *ecdsa.PrivateKey, requesterKey *ecdsa.PrivateKey) (*types.Transaction, error) {
+func (a *fevmActions) AgentRemoveMiner(
+	ctx context.Context,
+	agentAddr common.Address,
+	minerAddr address.Address,
+	newOwnerAddr address.Address,
+	ownerWallet accounts.Wallet,
+	ownerAccount accounts.Account,
+	ownerPassphrase string,
+	requesterKey *ecdsa.PrivateKey,
+) (*types.Transaction, error) {
 	if newOwnerAddr.Protocol() != address.ID {
 		lapi, closer, err := a.extern.ConnectLotusClient()
 		if err != nil {
@@ -267,12 +276,7 @@ func (a *fevmActions) AgentRemoveMiner(ctx context.Context, agentAddr common.Add
 
 	agentTransactor, err := abigen.NewAgentTransactor(agentAddr, client)
 
-	fromAddr, _, err := util.DeriveAddrFromPk(senderKey)
-	if err != nil {
-		return nil, err
-	}
-
-	nonce, err := a.queries.ChainGetNonce(ctx, fromAddr)
+	nonce, err := a.queries.ChainGetNonce(ctx, ownerAccount.Address)
 	if err != nil {
 		return nil, err
 	}
@@ -289,7 +293,7 @@ func (a *fevmActions) AgentRemoveMiner(ctx context.Context, agentAddr common.Add
 
 	args := []interface{}{newOwner64, sc}
 
-	tx, err := util.WriteTx_old(ctx, senderKey, a.queries.ChainID(), common.Big0, nonce, args, agentTransactor.RemoveMiner, "Agent Remove Miner")
+	tx, err := util.WriteTx(ctx, ownerWallet, ownerAccount, ownerPassphrase, a.queries.ChainID(), common.Big0, nonce, args, agentTransactor.RemoveMiner, "Agent Remove Miner")
 	if err != nil {
 		return nil, err
 	}
