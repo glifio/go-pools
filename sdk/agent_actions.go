@@ -297,7 +297,16 @@ func (a *fevmActions) AgentRemoveMiner(ctx context.Context, agentAddr common.Add
 	return tx, nil
 }
 
-func (a *fevmActions) AgentChangeMinerWorker(ctx context.Context, agentAddr common.Address, minerAddr address.Address, workerAddr address.Address, controlAddrs []address.Address, pk *ecdsa.PrivateKey) (*types.Transaction, error) {
+func (a *fevmActions) AgentChangeMinerWorker(
+	ctx context.Context,
+	agentAddr common.Address,
+	minerAddr address.Address,
+	workerAddr address.Address,
+	controlAddrs []address.Address,
+	ownerWallet accounts.Wallet,
+	ownerAccount accounts.Account,
+	ownerPassphrase string,
+) (*types.Transaction, error) {
 	client, err := a.extern.ConnectEthClient()
 	if err != nil {
 		return nil, err
@@ -331,19 +340,14 @@ func (a *fevmActions) AgentChangeMinerWorker(ctx context.Context, agentAddr comm
 		controlIDs = append(controlIDs, controlID)
 	}
 
-	fromAddr, _, err := util.DeriveAddrFromPk(pk)
-	if err != nil {
-		return nil, err
-	}
-
-	nonce, err := a.queries.ChainGetNonce(ctx, fromAddr)
+	nonce, err := a.queries.ChainGetNonce(ctx, ownerAccount.Address)
 	if err != nil {
 		return nil, err
 	}
 
 	args := []interface{}{minerID, workerID, controlIDs}
 
-	tx, err := util.WriteTx_old(ctx, pk, a.queries.ChainID(), common.Big0, nonce, args, agentTransactor.ChangeMinerWorker, "Agent Change Miner Worker")
+	tx, err := util.WriteTx(ctx, ownerWallet, ownerAccount, ownerPassphrase, a.queries.ChainID(), common.Big0, nonce, args, agentTransactor.ChangeMinerWorker, "Agent Change Miner Worker")
 	if err != nil {
 		return nil, err
 	}
@@ -351,7 +355,14 @@ func (a *fevmActions) AgentChangeMinerWorker(ctx context.Context, agentAddr comm
 	return tx, nil
 }
 
-func (a *fevmActions) AgentConfirmMinerWorkerChange(ctx context.Context, agentAddr common.Address, minerAddr address.Address, pk *ecdsa.PrivateKey) (*types.Transaction, error) {
+func (a *fevmActions) AgentConfirmMinerWorkerChange(
+	ctx context.Context,
+	agentAddr common.Address,
+	minerAddr address.Address,
+	ownerWallet accounts.Wallet,
+	ownerAccount accounts.Account,
+	ownerPassphrase string,
+) (*types.Transaction, error) {
 	client, err := a.extern.ConnectEthClient()
 	if err != nil {
 		return nil, err
@@ -368,19 +379,14 @@ func (a *fevmActions) AgentConfirmMinerWorkerChange(ctx context.Context, agentAd
 		return nil, err
 	}
 
-	fromAddr, _, err := util.DeriveAddrFromPk(pk)
-	if err != nil {
-		return nil, err
-	}
-
-	nonce, err := a.queries.ChainGetNonce(ctx, fromAddr)
+	nonce, err := a.queries.ChainGetNonce(ctx, ownerAccount.Address)
 	if err != nil {
 		return nil, err
 	}
 
 	args := []interface{}{minerU64}
 
-	tx, err := util.WriteTx_old(ctx, pk, a.queries.ChainID(), common.Big0, nonce, args, agentTransactor.ConfirmChangeMinerWorker, "Agent Confirm Miner Worker Change")
+	tx, err := util.WriteTx(ctx, ownerWallet, ownerAccount, ownerPassphrase, a.queries.ChainID(), common.Big0, nonce, args, agentTransactor.ConfirmChangeMinerWorker, "Agent Confirm Miner Worker Change")
 	if err != nil {
 		return nil, err
 	}
