@@ -593,7 +593,13 @@ func (a *fevmActions) AgentWithdraw(
 	return util.WriteTx(ctx, ownerWallet, ownerAccount, ownerPassphrase, a.queries.ChainID(), common.Big0, nonce, args, agentTransactor.Withdraw, "Agent Withdraw")
 }
 
-func (a *fevmActions) AgentRefreshRoutes(ctx context.Context, agentAddr common.Address, senderKey *ecdsa.PrivateKey) (*types.Transaction, error) {
+func (a *fevmActions) AgentRefreshRoutes(
+	ctx context.Context,
+	agentAddr common.Address,
+	senderWallet accounts.Wallet,
+	senderAccount accounts.Account,
+	senderPassphrase string,
+) (*types.Transaction, error) {
 	client, err := a.extern.ConnectEthClient()
 	if err != nil {
 		return nil, err
@@ -605,15 +611,10 @@ func (a *fevmActions) AgentRefreshRoutes(ctx context.Context, agentAddr common.A
 		return nil, err
 	}
 
-	fromAddr, _, err := util.DeriveAddrFromPk(senderKey)
+	nonce, err := a.queries.ChainGetNonce(ctx, senderAccount.Address)
 	if err != nil {
 		return nil, err
 	}
 
-	nonce, err := a.queries.ChainGetNonce(ctx, fromAddr)
-	if err != nil {
-		return nil, err
-	}
-
-	return util.WriteTx_old(ctx, senderKey, a.queries.ChainID(), common.Big0, nonce, []interface{}{}, agentTransactor.RefreshRoutes, "Agent RefreshRoutes")
+	return util.WriteTx(ctx, senderWallet, senderAccount, senderPassphrase, a.queries.ChainID(), common.Big0, nonce, []interface{}{}, agentTransactor.RefreshRoutes, "Agent RefreshRoutes")
 }

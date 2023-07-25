@@ -107,7 +107,7 @@ type FEVMActions interface {
 	AgentPullFunds(ctx context.Context, agentAddr common.Address, amount *big.Int, miner address.Address, senderWallet accounts.Wallet, senderAccount accounts.Account, senderPassphrase string, requesterKey *ecdsa.PrivateKey) (*types.Transaction, error)
 	AgentPushFunds(ctx context.Context, agentAddr common.Address, amount *big.Int, miner address.Address, senderWallet accounts.Wallet, senderAccount accounts.Account, senderPassphrase string, requesterKey *ecdsa.PrivateKey) (*types.Transaction, error)
 	AgentWithdraw(ctx context.Context, agentAddr common.Address, receiver common.Address, amount *big.Int, ownerWallet accounts.Wallet, ownerAccount accounts.Account, ownerPassphrase string, requesterKey *ecdsa.PrivateKey) (*types.Transaction, error)
-	AgentRefreshRoutes(ctx context.Context, agentAddr common.Address, senderKey *ecdsa.PrivateKey) (*types.Transaction, error)
+	AgentRefreshRoutes(ctx context.Context, agentAddr common.Address, senderWallet accounts.Wallet, senderAccount accounts.Account, senderPassphrase string) (*types.Transaction, error)
 
 	// infinity pool actions
 	InfPoolDepositFIL(ctx context.Context, agentAddr common.Address, amount *big.Int, pk *ecdsa.PrivateKey) (*types.Transaction, error)
