@@ -2,16 +2,23 @@ package sdk
 
 import (
 	"context"
-	"crypto/ecdsa"
 	"math/big"
 
+	"github.com/ethereum/go-ethereum/accounts"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/glifio/go-pools/abigen"
 	"github.com/glifio/go-pools/util"
 )
 
-func (a *fevmActions) InfPoolDepositFIL(ctx context.Context, receiver common.Address, amount *big.Int, pk *ecdsa.PrivateKey) (*types.Transaction, error) {
+func (a *fevmActions) InfPoolDepositFIL(
+	ctx context.Context,
+	receiver common.Address,
+	amount *big.Int,
+	senderWallet accounts.Wallet,
+	senderAccount accounts.Account,
+	senderPassphrase string,
+) (*types.Transaction, error) {
 	client, err := a.extern.ConnectEthClient()
 	if err != nil {
 		return nil, err
@@ -23,17 +30,12 @@ func (a *fevmActions) InfPoolDepositFIL(ctx context.Context, receiver common.Add
 		return nil, err
 	}
 
-	fromAddr, _, err := util.DeriveAddrFromPk(pk)
-	if err != nil {
-		return nil, err
-	}
-
-	nonce, err := a.queries.ChainGetNonce(ctx, fromAddr)
+	nonce, err := a.queries.ChainGetNonce(ctx, senderAccount.Address)
 	if err != nil {
 		return nil, err
 	}
 
 	args := []interface{}{receiver}
 
-	return util.WriteTx_old(ctx, pk, a.queries.ChainID(), amount, nonce, args, poolTransactor.Deposit0, "Deposit FIL")
+	return util.WriteTx(ctx, senderWallet, senderAccount, senderPassphrase, a.queries.ChainID(), amount, nonce, args, poolTransactor.Deposit0, "Deposit FIL")
 }

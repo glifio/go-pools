@@ -110,7 +110,7 @@ type FEVMActions interface {
 	AgentRefreshRoutes(ctx context.Context, agentAddr common.Address, senderWallet accounts.Wallet, senderAccount accounts.Account, senderPassphrase string) (*types.Transaction, error)
 
 	// infinity pool actions
-	InfPoolDepositFIL(ctx context.Context, agentAddr common.Address, amount *big.Int, pk *ecdsa.PrivateKey) (*types.Transaction, error)
+	InfPoolDepositFIL(ctx context.Context, agentAddr common.Address, amount *big.Int, senderWallet accounts.Wallet, senderAccount accounts.Account, senderPassphrase string) (*types.Transaction, error)
 
 	// iFIL actions
 	IFILTransfer(ctx context.Context, receiver common.Address, amount *big.Int, pk *ecdsa.PrivateKey) (*types.Transaction, error)
