@@ -114,7 +114,7 @@ type FEVMActions interface {
 
 	// iFIL actions
 	IFILTransfer(ctx context.Context, receiver common.Address, amount *big.Int, senderWallet accounts.Wallet, senderAccount accounts.Account, senderPassphrase string) (*types.Transaction, error)
-	IFILApprove(ctx context.Context, spender common.Address, allowance *big.Int, pk *ecdsa.PrivateKey) (*types.Transaction, error)
+	IFILApprove(ctx context.Context, spender common.Address, allowance *big.Int, senderWallet accounts.Wallet, senderAccount accounts.Account, senderPassphrase string) (*types.Transaction, error)
 }
 
 //go:generate mockery --name FEVMExtern

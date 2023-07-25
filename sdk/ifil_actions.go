@@ -2,7 +2,6 @@ package sdk
 
 import (
 	"context"
-	"crypto/ecdsa"
 	"math/big"
 
 	"github.com/ethereum/go-ethereum/accounts"
@@ -41,7 +40,14 @@ func (a *fevmActions) IFILTransfer(
 	return util.WriteTx(ctx, senderWallet, senderAccount, senderPassphrase, a.queries.ChainID(), common.Big0, nonce, args, iFILTransactor.Transfer, "Transfer iFIL")
 }
 
-func (a *fevmActions) IFILApprove(ctx context.Context, spender common.Address, allowance *big.Int, pk *ecdsa.PrivateKey) (*types.Transaction, error) {
+func (a *fevmActions) IFILApprove(
+	ctx context.Context,
+	spender common.Address,
+	allowance *big.Int,
+	senderWallet accounts.Wallet,
+	senderAccount accounts.Account,
+	senderPassphrase string,
+) (*types.Transaction, error) {
 	client, err := a.extern.ConnectEthClient()
 	if err != nil {
 		return nil, err
@@ -53,17 +59,12 @@ func (a *fevmActions) IFILApprove(ctx context.Context, spender common.Address, a
 		return nil, err
 	}
 
-	fromAddr, _, err := util.DeriveAddrFromPk(pk)
-	if err != nil {
-		return nil, err
-	}
-
-	nonce, err := a.queries.ChainGetNonce(ctx, fromAddr)
+	nonce, err := a.queries.ChainGetNonce(ctx, senderAccount.Address)
 	if err != nil {
 		return nil, err
 	}
 
 	args := []interface{}{spender, allowance}
 
-	return util.WriteTx_old(ctx, pk, a.queries.ChainID(), common.Big0, nonce, args, iFILTransactor.Approve, "Approve iFIL")
+	return util.WriteTx(ctx, senderWallet, senderAccount, senderPassphrase, a.queries.ChainID(), common.Big0, nonce, args, iFILTransactor.Approve, "Approve iFIL")
 }
