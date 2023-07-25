@@ -127,6 +127,31 @@ func ComputeMinerStats(ctx context.Context, minerAddr address.Address, ts *types
 	return minerStats, nil
 }
 
+func ComputeFilPerTiB(ctx context.Context, ts *types.TipSet, api api.FullNode) (*float64, error) {
+	// get the block rewards for this epoch
+	reward, err := getBlockReward(ctx, api, ts)
+	if err != nil {
+		return nil, err
+	}
+
+	// get the smoothed power for this epoch
+	power, err := api.StateMinerPower(ctx, address.Undef, ts.Key())
+	if err != nil {
+		return nil, err
+	}
+
+	// calculate the ratio of reward to power
+	ratio, _ := new(big.Rat).SetFrac(
+		big.NewInt(0).Mul(reward, big.NewInt(0).SetUint64(build.BlocksPerEpoch)),
+		big.NewInt(0).Div(power.TotalPower.QualityAdjPower.Int, big.NewInt(1099511627776)),
+	).Float64()
+
+	// multiply by 2880 to get the daily reward
+	ratio = ratio * 2880
+
+	return &ratio, nil
+}
+
 func ComputeEDRLazy1(ctx context.Context, minerAddr address.Address, ts *types.TipSet, api api.FullNode) (*big.Int, error) {
 	pow, err := api.StateMinerPower(ctx, minerAddr, ts.Key())
 	if err != nil {
