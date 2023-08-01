@@ -26,6 +26,7 @@ func WriteTx(
 	writeTx interface{},
 	label string,
 ) (*types.Transaction, error) {
+	fmt.Println("Jim WriteTx")
 	auth, err := walletutils.NewEthWalletTransactor(wallet, &account, passphrase, chainID)
 	if err != nil {
 		return &types.Transaction{}, err
