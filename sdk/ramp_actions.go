@@ -33,7 +33,7 @@ func (a *fevmActions) RampWithdraw(ctx context.Context, assets *big.Int, receive
 		return nil, err
 	}
 
-	args := []interface{}{assets, receiver, fromAddr}
+	args := []interface{}{assets, receiver, fromAddr, common.Big0}
 
 	return util.WriteTx(ctx, pk, a.queries.ChainID(), common.Big0, nonce, args, rampTransactor.Withdraw, "Withdraw from Ramp")
 }
@@ -60,7 +60,7 @@ func (a *fevmActions) RampRedeem(ctx context.Context, shares *big.Int, receiver 
 		return nil, err
 	}
 
-	args := []interface{}{shares, receiver, fromAddr}
+	args := []interface{}{shares, receiver, fromAddr, common.Big0}
 
 	return util.WriteTx(ctx, pk, a.queries.ChainID(), common.Big0, nonce, args, rampTransactor.Redeem, "Redeem from Ramp")
 }

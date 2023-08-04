@@ -40,7 +40,7 @@ var TestProtoMeta = types.ProtocolMeta{
 	AgentPolice:   common.HexToAddress("0xDA730B08A67D261fD8343c2061a269A2296c8469"),
 	IFIL:          common.HexToAddress("0x8c97F94b2cDbF7Dc0098057334d9908C4dC0a885"),
 	InfinityPool:  common.HexToAddress("0x37621D9a49FFE8f13BF2Adcb87f1b115D82ac378"),
-	SimpleRamp:    common.HexToAddress(""),
+	SimpleRamp:    common.HexToAddress("0xbF6d35C529ab4d0b50d9001545d932df9EC03E5C"),
 	MinerRegistry: common.HexToAddress("0xac13FF4743594344152Af8d1626cC80257bdf5C0"),
 	PoolRegistry:  common.HexToAddress("0x9de147901aA6a87bFC6BC1c84b2fE1a60bf38e1A"),
 	Router:        common.HexToAddress("0xa0770911848Bd1A0930Fc6782522381Bb6256617"),
