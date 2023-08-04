@@ -24,6 +24,7 @@ func InitFEVMConnection(
 	iFIL common.Address,
 	wFIL common.Address,
 	infinityPool common.Address,
+	simpleRamp common.Address,
 	adoAddr string,
 	adoNamespace string,
 	dialAddr string,
@@ -42,6 +43,7 @@ func InitFEVMConnection(
 		iFIL:          iFIL,
 		wFIL:          wFIL,
 		infinityPool:  infinityPool,
+		simpleRamp:    simpleRamp,
 		agentFactory:  agentFactory,
 		poolRegistry:  poolRegistry,
 		minerRegistry: minerRegistry,
@@ -166,6 +168,11 @@ func LazyInit(
 		return err
 	}
 
+	simpleRamp, err := infpoolCaller.Ramp(&bind.CallOpts{Context: ctx})
+	if err != nil {
+		return err
+	}
+
 	*sdk = InitFEVMConnection(
 		routes[constants.RouteAgentPolice],
 		routes[constants.RouteMinerRegistry],
@@ -175,6 +182,7 @@ func LazyInit(
 		iFIL,
 		routes[constants.RouteWFIL],
 		infpool,
+		simpleRamp,
 		adoAddr,
 		adoNamespace,
 		dialAddr,
@@ -229,6 +237,7 @@ func New(
 		protoMeta.IFIL,
 		protoMeta.WFIL,
 		protoMeta.InfinityPool,
+		protoMeta.SimpleRamp,
 		extern.AdoAddr,
 		namespace,
 		extern.LotusDialAddr,
@@ -250,6 +259,7 @@ func Init(
 	iFIL common.Address,
 	wFIL common.Address,
 	infinityPool common.Address,
+	simpleRamp common.Address,
 	adoAddr string,
 	adoNamespace string,
 	dialAddr string,
@@ -275,6 +285,7 @@ func Init(
 		iFIL,
 		wFIL,
 		infinityPool,
+		simpleRamp,
 		adoAddr,
 		adoNamespace,
 		dialAddr,
