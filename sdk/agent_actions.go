@@ -4,7 +4,6 @@ import (
 	"context"
 	"crypto/ecdsa"
 	"errors"
-	"fmt"
 	"math/big"
 
 	"github.com/ethereum/go-ethereum/common"
@@ -16,7 +15,6 @@ import (
 	token "github.com/glifio/go-pools/jws"
 	"github.com/glifio/go-pools/rpc"
 	"github.com/glifio/go-pools/util"
-	"github.com/glifio/go-pools/vc"
 )
 
 func (a *fevmActions) AgentCreate(ctx context.Context, owner common.Address, operator common.Address, request common.Address, pk *ecdsa.PrivateKey) (*types.Transaction, error) {
@@ -85,22 +83,6 @@ func (a *fevmActions) AgentBorrow(ctx context.Context, agentAddr common.Address,
 	}
 
 	args := []interface{}{poolID, sc}
-	// TODO: this isn't great because we'd rather not get the credential if the amount is too high
-	agentData, err := vc.AbiDecodeClaim(sc.Vc.Claim)
-	if err != nil {
-		return nil, err
-	}
-
-	maxBorrowNow, err := a.queries.InfPoolAgentMaxBorrow(ctx, agentAddr, agentData)
-	if err != nil {
-		return nil, err
-	}
-
-	fmt.Printf("Debug: max borrow now: %0.09f\n", util.ToFIL(maxBorrowNow))
-
-	// if amount.Cmp(maxBorrowNow) > 0 {
-	// 	return nil, errors.New("amount exceeds max borrow - run `glif agent preview borrow <amount>` to get more information.")
-	// }
 
 	return util.WriteTx(ctx, senderKey, a.queries.ChainID(), common.Big0, nonce, args, agentTransactor.Borrow, "Agent Borrow")
 }
