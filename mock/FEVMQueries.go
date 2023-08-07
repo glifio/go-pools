@@ -1776,6 +1776,62 @@ func (_c *FEVMQueries_InfPoolAgentMaxBorrow_Call) RunAndReturn(run func(context.
 	return _c
 }
 
+// InfPoolAgentMaxWithdraw provides a mock function with given fields: ctx, agentAddr, agentData
+func (_m *FEVMQueries) InfPoolAgentMaxWithdraw(ctx context.Context, agentAddr common.Address, agentData *vc.AgentData) (*big.Int, error) {
+	ret := _m.Called(ctx, agentAddr, agentData)
+
+	var r0 *big.Int
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, common.Address, *vc.AgentData) (*big.Int, error)); ok {
+		return rf(ctx, agentAddr, agentData)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, common.Address, *vc.AgentData) *big.Int); ok {
+		r0 = rf(ctx, agentAddr, agentData)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*big.Int)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, common.Address, *vc.AgentData) error); ok {
+		r1 = rf(ctx, agentAddr, agentData)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// FEVMQueries_InfPoolAgentMaxWithdraw_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'InfPoolAgentMaxWithdraw'
+type FEVMQueries_InfPoolAgentMaxWithdraw_Call struct {
+	*mock.Call
+}
+
+// InfPoolAgentMaxWithdraw is a helper method to define mock.On call
+//   - ctx context.Context
+//   - agentAddr common.Address
+//   - agentData *vc.AgentData
+func (_e *FEVMQueries_Expecter) InfPoolAgentMaxWithdraw(ctx interface{}, agentAddr interface{}, agentData interface{}) *FEVMQueries_InfPoolAgentMaxWithdraw_Call {
+	return &FEVMQueries_InfPoolAgentMaxWithdraw_Call{Call: _e.mock.On("InfPoolAgentMaxWithdraw", ctx, agentAddr, agentData)}
+}
+
+func (_c *FEVMQueries_InfPoolAgentMaxWithdraw_Call) Run(run func(ctx context.Context, agentAddr common.Address, agentData *vc.AgentData)) *FEVMQueries_InfPoolAgentMaxWithdraw_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(common.Address), args[2].(*vc.AgentData))
+	})
+	return _c
+}
+
+func (_c *FEVMQueries_InfPoolAgentMaxWithdraw_Call) Return(_a0 *big.Int, _a1 error) *FEVMQueries_InfPoolAgentMaxWithdraw_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *FEVMQueries_InfPoolAgentMaxWithdraw_Call) RunAndReturn(run func(context.Context, common.Address, *vc.AgentData) (*big.Int, error)) *FEVMQueries_InfPoolAgentMaxWithdraw_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // InfPoolBorrowableLiquidity provides a mock function with given fields: ctx, blockNumber
 func (_m *FEVMQueries) InfPoolBorrowableLiquidity(ctx context.Context, blockNumber *big.Int) (*big.Float, error) {
 	ret := _m.Called(ctx, blockNumber)

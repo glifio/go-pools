@@ -299,7 +299,7 @@ func findMinCap(values []*big.Int) *big.Int {
 
 func MaxBorrowFromAgentData(agentData *vc.AgentData, rate *big.Int) *big.Int {
 	caps := []*big.Int{
-		// TODO: maxDTI in computeMaxDTI is hardcoded to 1e18, this could be derived from the contracts
+		// TODO: maxDTI in computeMaxDTI is hardcoded to 25%, this could be derived from the contracts
 		computeMaxDTICap(rate, agentData.ExpectedDailyRewards, agentData.Principal, big.NewInt(25e16)),
 		computeMaxDTECap(agentData.AgentValue, agentData.Principal),
 		computeMaxLTVCap(agentData.AgentValue, agentData.Principal),
@@ -358,6 +358,34 @@ func (q *fevmQueries) InfPoolAgentMaxBorrow(ctx context.Context, agentAddr commo
 	}
 
 	return findMinCap(caps), nil
+}
+
+// here we solve for max LTV and DTE after withdrawal
+// max LTV = 2(CV - P)
+// max DTE = Equity / 2
+func maxWithdraw(agentData *vc.AgentData) (*big.Int, error) {
+	if agentData.AgentValue.Cmp(big.NewInt(0)) == 0 {
+		return big.NewInt(0), nil
+	} else if agentData.AgentValue.Cmp(agentData.Principal) < 1 {
+		return big.NewInt(0), nil
+	}
+
+	// the max at any time is half the Agent's equity value, but the LTV check can further constrain this
+	equityVal := new(big.Int).Sub(agentData.AgentValue, agentData.Principal)
+	equityVal.Div(equityVal, big.NewInt(2))
+
+	caps := []*big.Int{
+		// LTV check
+		new(big.Int).Mul(big.NewInt(2), new(big.Int).Sub(agentData.CollateralValue, agentData.Principal)),
+		// DTE
+		equityVal,
+	}
+
+	return findMinCap(caps), nil
+}
+
+func (q *fevmQueries) InfPoolAgentMaxWithdraw(ctx context.Context, agentAddr common.Address, agentData *vc.AgentData) (*big.Int, error) {
+	return maxWithdraw(agentData)
 }
 
 func (q *fevmQueries) InfPoolRateFromGCRED(ctx context.Context, gcred *big.Int) (*big.Float, error) {

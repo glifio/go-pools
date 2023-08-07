@@ -48,6 +48,7 @@ type FEVMQueries interface {
 	InfPoolExitReserve(ctx context.Context, blockNumber *big.Int) (*big.Float, error)
 	InfPoolIsApprovedWithReason(ctx context.Context, agentAddr common.Address, agentData *vc.AgentData) (bool, RejectionReason, error)
 	InfPoolAgentMaxBorrow(ctx context.Context, agentAddr common.Address, agentData *vc.AgentData) (*big.Int, error)
+	InfPoolAgentMaxWithdraw(ctx context.Context, agentAddr common.Address, agentData *vc.AgentData) (*big.Int, error)
 	InfPoolMaxEpochsOwedTolerance(ctx context.Context, agentAddr common.Address) (*big.Int, error)
 	InfPoolFeesAccrued(ctx context.Context, blockNumber *big.Int) (*big.Int, error)
 	// pool registry methods
