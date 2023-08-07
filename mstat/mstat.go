@@ -5,7 +5,6 @@ import (
 	"log"
 	"math"
 	"math/big"
-	"time"
 
 	"github.com/filecoin-project/go-address"
 	"github.com/filecoin-project/go-state-types/abi"
@@ -164,7 +163,7 @@ func ComputeEDRLazy1(ctx context.Context, minerAddr address.Address, ts *types.T
 		if err != nil {
 			return nil, err
 		}
-		log.Printf("block reward: %v", reward)
+		// log.Printf("block reward: %v", reward)
 
 		winRatio := new(big.Rat).SetFrac(
 			types.BigMul(pow.MinerPower.QualityAdjPower, types.NewInt(build.BlocksPerEpoch)).Int,
@@ -186,50 +185,50 @@ func ComputeEDRLazy1(ctx context.Context, minerAddr address.Address, ts *types.T
 				new(big.Rat).SetInt64(builtin.EpochsInDay),
 			).Float64()
 
-			weekly, _ := new(big.Rat).Mul(
-				winRatio,
-				new(big.Rat).SetInt64(7*builtin.EpochsInDay),
-			).Float64()
+			// weekly, _ := new(big.Rat).Mul(
+			// 	winRatio,
+			// 	new(big.Rat).SetInt64(7*builtin.EpochsInDay),
+			// ).Float64()
 
-			avgDuration, _ := new(big.Rat).Mul(
-				new(big.Rat).SetInt64(builtin.EpochDurationSeconds),
-				new(big.Rat).Inv(winRatio),
-			).Float64()
+			// avgDuration, _ := new(big.Rat).Mul(
+			// 	new(big.Rat).SetInt64(builtin.EpochDurationSeconds),
+			// 	new(big.Rat).Inv(winRatio),
+			// ).Float64()
 
-			log.Print("Projected average block win rate: ")
-			log.Printf(
-				"%.02f/week (every %s)",
-				weekly,
-				(time.Second * time.Duration(avgDuration)).Truncate(time.Second).String(),
-			)
-			log.Printf(
-				"%.02f/day (every %s)",
-				daily,
-				(time.Second * time.Duration(avgDuration)).Truncate(time.Second).String(),
-			)
+			// log.Print("Projected average block win rate: ")
+			// log.Printf(
+			// 	"%.02f/week (every %s)",
+			// 	weekly,
+			// 	(time.Second * time.Duration(avgDuration)).Truncate(time.Second).String(),
+			// )
+			// log.Printf(
+			// 	"%.02f/day (every %s)",
+			// 	daily,
+			// 	(time.Second * time.Duration(avgDuration)).Truncate(time.Second).String(),
+			// )
 
 			// Geometric distribution of P(Y < k) calculated as described in https://en.wikipedia.org/wiki/Geometric_distribution#Probability_Outcomes_Examples
 			// https://www.wolframalpha.com/input/?i=t+%3E+0%3B+p+%3E+0%3B+p+%3C+1%3B+c+%3E+0%3B+c+%3C1%3B+1-%281-p%29%5E%28t%29%3Dc%3B+solve+t
 			// t == how many dice-rolls (epochs) before win
 			// p == winRate == ( minerPower / netPower )
 			// c == target probability of win ( 99.9% in this case )
-			log.Print("Projected block win with ")
-			log.Printf(
-				"99.9%% probability every %s",
-				(time.Second * time.Duration(
-					builtin.EpochDurationSeconds*math.Log(1-0.999)/
-						math.Log(1-winRatioFloat),
-				)).Truncate(time.Second).String(),
-			)
-			log.Println("(projections DO NOT account for future network and miner growth)")
+			// log.Print("Projected block win with ")
+			// log.Printf(
+			// 	"99.9%% probability every %s",
+			// 	(time.Second * time.Duration(
+			// 		builtin.EpochDurationSeconds*math.Log(1-0.999)/
+			// 			math.Log(1-winRatioFloat),
+			// 	)).Truncate(time.Second).String(),
+			// )
+			// log.Println("(projections DO NOT account for future network and miner growth)")
 
 			dailyFloat := new(big.Float).SetFloat64(daily)
-			log.Printf("daily win ratio: %v", dailyFloat)
+			// log.Printf("daily win ratio: %v", dailyFloat)
 
 			rewardFloat := new(big.Float).SetInt(reward)
 
 			totalRewardsBigFloat := new(big.Float).Mul(dailyFloat, rewardFloat)
-			log.Printf("total reward: %v", totalRewardsBigFloat)
+			// log.Printf("total reward: %v", totalRewardsBigFloat)
 
 			edr, _ := totalRewardsBigFloat.Int(nil)
 
@@ -357,7 +356,6 @@ func computeSectorStatus(ctx context.Context, lotus api.FullNode, miner address.
 		if err != nil {
 			return nil, err
 		}
-		log.Printf("Sector count(%d): %d", ts.Height(), sectorCount)
 
 		// add result to the total and average it
 		sectorStatus.Live += sectorCount.Live
@@ -368,8 +366,6 @@ func computeSectorStatus(ctx context.Context, lotus api.FullNode, miner address.
 	sectorStatus.Live = sectorStatus.Live / LOOK_BACK_LIMIT
 	sectorStatus.Active = sectorStatus.Active / LOOK_BACK_LIMIT
 	sectorStatus.Faulty = sectorStatus.Faulty / LOOK_BACK_LIMIT
-
-	log.Printf("Sector average(%d): %d", tsk.Height(), sectorStatus)
 
 	return &sectorStatus, nil
 }
