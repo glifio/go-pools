@@ -342,15 +342,23 @@ func (q *fevmQueries) InfPoolAgentMaxBorrow(ctx context.Context, agentAddr commo
 
 // here we solve for max LTV and DTE after withdrawal
 // max LTV = 2(CV - P)
-// max DTE = EquityVal - P
+// max DTE = (EquityVal - P)
 func maxWithdraw(agentData *vc.AgentData) (*big.Int, error) {
+	if agentData.AgentValue.Cmp(big.NewInt(0)) == 0 {
+		return big.NewInt(0), nil
+	} else if agentData.AgentValue.Cmp(agentData.Principal) < 1 {
+		return big.NewInt(0), nil
+	}
+
+	// the max at any time is half the Agent's equity value, but the LTV check can further constrain this
 	equityVal := new(big.Int).Sub(agentData.AgentValue, agentData.Principal)
+	equityVal.Div(equityVal, big.NewInt(2))
 
 	caps := []*big.Int{
 		// LTV check
 		new(big.Int).Mul(big.NewInt(2), new(big.Int).Sub(agentData.CollateralValue, agentData.Principal)),
 		// DTE
-		new(big.Int).Sub(equityVal, agentData.Principal),
+		equityVal,
 	}
 
 	return findMinCap(caps), nil
