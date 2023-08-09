@@ -4,12 +4,13 @@ import (
 	"context"
 	"math/big"
 
+	"github.com/ethereum/go-ethereum/common"
 	"github.com/glifio/go-pools/abigen"
 	"github.com/glifio/go-pools/constants"
 	"github.com/glifio/go-pools/types"
 )
 
-func SimpleRampWithdrawEvents(ctx context.Context, sdk types.PoolsSDK, agentsFilter []*big.Int, startEpoch *big.Int, endEpoch *big.Int) ([]*abigen.SimpleRampWithdraw, error) {
+func SimpleRampWithdrawEvents(ctx context.Context, sdk types.PoolsSDK, caller []common.Address, receiver []common.Address, owner []common.Address, startEpoch *big.Int, endEpoch *big.Int) ([]*abigen.SimpleRampWithdraw, error) {
 	ethclient, err := sdk.Extern().ConnectEthClient()
 	if err != nil {
 		return []*abigen.SimpleRampWithdraw{}, err
@@ -29,7 +30,7 @@ func SimpleRampWithdrawEvents(ctx context.Context, sdk types.PoolsSDK, agentsFil
 			end = endEpoch
 		}
 
-		iter, err := filterer.FilterWithdraw(getFilterOpts(ctx, i, end, sdk.Query().ChainID()), nil, nil, nil)
+		iter, err := filterer.FilterWithdraw(getFilterOpts(ctx, i, end, sdk.Query().ChainID()), caller, receiver, owner)
 		if err != nil {
 			return []*abigen.SimpleRampWithdraw{}, err
 		}
