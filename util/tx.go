@@ -6,11 +6,11 @@ import (
 	"math/big"
 	"reflect"
 
-	"github.com/ethereum/go-ethereum/accounts"
 	"github.com/ethereum/go-ethereum/core/types"
 	lotusapi "github.com/filecoin-project/lotus/api"
 	filtypes "github.com/filecoin-project/lotus/chain/types"
 	walletutils "github.com/glifio/go-wallet-utils"
+	"github.com/glifio/go-wallet-utils/accounts"
 	"golang.org/x/xerrors"
 )
 

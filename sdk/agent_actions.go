@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"math/big"
 
-	"github.com/ethereum/go-ethereum/accounts"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/filecoin-project/go-address"
@@ -18,6 +17,7 @@ import (
 	"github.com/glifio/go-pools/rpc"
 	"github.com/glifio/go-pools/util"
 	"github.com/glifio/go-pools/vc"
+	"github.com/glifio/go-wallet-utils/accounts"
 )
 
 func (a *fevmActions) AgentCreate(
@@ -100,7 +100,7 @@ func (a *fevmActions) AgentBorrow(
 		return nil, err
 	}
 
-	nonce, err := a.queries.ChainGetNonce(ctx, ownerAccount.Address)
+	nonce, err := a.queries.ChainGetNonce(ctx, ownerAccount.EthAccount.Address)
 	if err != nil {
 		return nil, err
 	}
@@ -153,7 +153,7 @@ func (a *fevmActions) AgentPay(
 	}
 	defer closer()
 
-	nonce, err := a.queries.ChainGetNonce(ctx, senderAccount.Address)
+	nonce, err := a.queries.ChainGetNonce(ctx, senderAccount.EthAccount.Address)
 	if err != nil {
 		return nil, err
 	}
@@ -209,7 +209,7 @@ func (a *fevmActions) AgentAddMiner(
 		return nil, err
 	}
 
-	fromAddr := ownerAccount.Address
+	fromAddr := ownerAccount.EthAccount.Address
 
 	nonce, err := a.queries.ChainGetNonce(ctx, fromAddr)
 	if err != nil {
@@ -280,7 +280,7 @@ func (a *fevmActions) AgentRemoveMiner(
 
 	agentTransactor, err := abigen.NewAgentTransactor(agentAddr, client)
 
-	nonce, err := a.queries.ChainGetNonce(ctx, ownerAccount.Address)
+	nonce, err := a.queries.ChainGetNonce(ctx, ownerAccount.EthAccount.Address)
 	if err != nil {
 		return nil, err
 	}
@@ -348,7 +348,7 @@ func (a *fevmActions) AgentChangeMinerWorker(
 		controlIDs = append(controlIDs, controlID)
 	}
 
-	nonce, err := a.queries.ChainGetNonce(ctx, ownerAccount.Address)
+	nonce, err := a.queries.ChainGetNonce(ctx, ownerAccount.EthAccount.Address)
 	if err != nil {
 		return nil, err
 	}
@@ -387,7 +387,7 @@ func (a *fevmActions) AgentConfirmMinerWorkerChange(
 		return nil, err
 	}
 
-	nonce, err := a.queries.ChainGetNonce(ctx, ownerAccount.Address)
+	nonce, err := a.queries.ChainGetNonce(ctx, ownerAccount.EthAccount.Address)
 	if err != nil {
 		return nil, err
 	}
@@ -464,7 +464,7 @@ func (a *fevmActions) AgentPullFunds(
 		return nil, err
 	}
 
-	nonce, err := a.queries.ChainGetNonce(ctx, senderAccount.Address)
+	nonce, err := a.queries.ChainGetNonce(ctx, senderAccount.EthAccount.Address)
 	if err != nil {
 		return nil, err
 	}
@@ -536,7 +536,7 @@ func (a *fevmActions) AgentPushFunds(
 		return nil, err
 	}
 
-	nonce, err := a.queries.ChainGetNonce(ctx, senderAccount.Address)
+	nonce, err := a.queries.ChainGetNonce(ctx, senderAccount.EthAccount.Address)
 	if err != nil {
 		return nil, err
 	}
@@ -573,7 +573,7 @@ func (a *fevmActions) AgentWithdraw(
 	}
 	defer closer()
 
-	nonce, err := a.queries.ChainGetNonce(ctx, ownerAccount.Address)
+	nonce, err := a.queries.ChainGetNonce(ctx, ownerAccount.EthAccount.Address)
 	if err != nil {
 		return nil, err
 	}
@@ -611,7 +611,7 @@ func (a *fevmActions) AgentRefreshRoutes(
 		return nil, err
 	}
 
-	nonce, err := a.queries.ChainGetNonce(ctx, senderAccount.Address)
+	nonce, err := a.queries.ChainGetNonce(ctx, senderAccount.EthAccount.Address)
 	if err != nil {
 		return nil, err
 	}

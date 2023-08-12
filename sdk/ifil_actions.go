@@ -4,11 +4,11 @@ import (
 	"context"
 	"math/big"
 
-	"github.com/ethereum/go-ethereum/accounts"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/glifio/go-pools/abigen"
 	"github.com/glifio/go-pools/util"
+	"github.com/glifio/go-wallet-utils/accounts"
 )
 
 func (a *fevmActions) IFILTransfer(
@@ -30,7 +30,7 @@ func (a *fevmActions) IFILTransfer(
 		return nil, err
 	}
 
-	nonce, err := a.queries.ChainGetNonce(ctx, senderAccount.Address)
+	nonce, err := a.queries.ChainGetNonce(ctx, senderAccount.EthAccount.Address)
 	if err != nil {
 		return nil, err
 	}
@@ -59,7 +59,7 @@ func (a *fevmActions) IFILApprove(
 		return nil, err
 	}
 
-	nonce, err := a.queries.ChainGetNonce(ctx, senderAccount.Address)
+	nonce, err := a.queries.ChainGetNonce(ctx, senderAccount.EthAccount.Address)
 	if err != nil {
 		return nil, err
 	}
