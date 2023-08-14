@@ -6,7 +6,9 @@ import (
 	"math/big"
 	"reflect"
 
+	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
+	"github.com/ethereum/go-ethereum/ethclient"
 	lotusapi "github.com/filecoin-project/lotus/api"
 	filtypes "github.com/filecoin-project/lotus/chain/types"
 	walletutils "github.com/glifio/go-wallet-utils"
@@ -16,6 +18,8 @@ import (
 
 func WriteTx(
 	ctx context.Context,
+	lapi *lotusapi.FullNodeStruct,
+	client *ethclient.Client,
 	wallet accounts.Wallet,
 	account accounts.Account,
 	passphrase string,
@@ -23,10 +27,12 @@ func WriteTx(
 	value *big.Int,
 	nonce *big.Int,
 	args []interface{},
-	writeTx interface{},
+	abigenTransactor interface{},
+	contractAddress common.Address,
+	methodName string,
 	label string,
 ) (*types.Transaction, error) {
-	auth, err := walletutils.NewWalletTransactor(wallet, &account, passphrase, chainID)
+	wrappedClient, auth, err := walletutils.NewWalletTransactor(ctx, lapi, client, wallet, &account, passphrase, chainID)
 	if err != nil {
 		return &types.Transaction{}, err
 	}
@@ -34,31 +40,45 @@ func WriteTx(
 	auth.Nonce = nonce
 	auth.Value = value
 
-	// Use reflection to call the writeTx function with the required arguments
-	writeTxValue := reflect.ValueOf(writeTx)
-	writeTxArgs := []reflect.Value{reflect.ValueOf(auth)}
-
-	argStrings := make([]string, len(args))
-	for i, arg := range args {
-		writeTxArgs = append(writeTxArgs, reflect.ValueOf(arg))
-		argStrings[i] = StringifyArg(arg)
+	// Get instance using abigenTransactor and wrappedClient
+	abigenTransactorValue := reflect.ValueOf(abigenTransactor)
+	abigenTransactorArgs := []reflect.Value{
+		reflect.ValueOf(contractAddress),
+		reflect.ValueOf(wrappedClient),
 	}
-	result := writeTxValue.Call(writeTxArgs)
+	instance := abigenTransactorValue.Call(abigenTransactorArgs)
+	fmt.Printf("Jim instance %+v\n", instance)
 
-	if !result[1].IsNil() {
-		return nil, HumanReadableRevert(result[1].Interface().(error))
-	}
+	return nil, fmt.Errorf("Stopped")
+	/*
+		// Construct call to method
 
-	// Get the transaction and error from the result
-	tx := result[0].Interface().(*types.Transaction)
+		// Use reflection to call the writeTx function with the required arguments
+		writeTxValue := reflect.ValueOf(writeTx)
+		writeTxArgs := []reflect.Value{reflect.ValueOf(auth)}
 
-	if tx == nil {
-		return nil, fmt.Errorf("Transaction is nil")
-	}
+		argStrings := make([]string, len(args))
+		for i, arg := range args {
+			writeTxArgs = append(writeTxArgs, reflect.ValueOf(arg))
+			argStrings[i] = StringifyArg(arg)
+		}
+		result := writeTxValue.Call(writeTxArgs)
 
-	fmt.Println("Transaction:", tx.Hash())
+		if !result[1].IsNil() {
+			return nil, HumanReadableRevert(result[1].Interface().(error))
+		}
 
-	return tx, err
+		// Get the transaction and error from the result
+		tx := result[0].Interface().(*types.Transaction)
+
+		if tx == nil {
+			return nil, fmt.Errorf("Transaction is nil")
+		}
+
+		fmt.Println("Transaction:", tx.Hash())
+
+		return tx, err
+	*/
 }
 
 func propagateErr(returnTrace filtypes.ReturnTrace) error {

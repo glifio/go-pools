@@ -19,16 +19,24 @@ func (a *fevmActions) InfPoolDepositFIL(
 	senderAccount accounts.Account,
 	senderPassphrase string,
 ) (*types.Transaction, error) {
+	lapi, lcloser, err := a.extern.ConnectLotusClient()
+	if err != nil {
+		return nil, err
+	}
+	defer lcloser()
+
 	client, err := a.extern.ConnectEthClient()
 	if err != nil {
 		return nil, err
 	}
 	defer client.Close()
 
-	poolTransactor, err := abigen.NewInfinityPoolTransactor(a.queries.InfinityPool(), client)
-	if err != nil {
-		return nil, err
-	}
+	/*
+		poolTransactor, err := abigen.NewInfinityPoolTransactor(a.queries.InfinityPool(), client)
+		if err != nil {
+			return nil, err
+		}
+	*/
 
 	nonce, err := a.queries.ChainGetNonce(ctx, senderAccount.EthAccount.Address)
 	if err != nil {
@@ -37,5 +45,20 @@ func (a *fevmActions) InfPoolDepositFIL(
 
 	args := []interface{}{receiver}
 
-	return util.WriteTx(ctx, senderWallet, senderAccount, senderPassphrase, a.queries.ChainID(), amount, nonce, args, poolTransactor.Deposit0, "Deposit FIL")
+	return util.WriteTx(
+		ctx,
+		lapi,
+		client,
+		senderWallet,
+		senderAccount,
+		senderPassphrase,
+		a.queries.ChainID(),
+		amount,
+		nonce,
+		args,
+		abigen.NewInfinityPoolTransactor,
+		a.queries.InfinityPool(),
+		"Deposit0",
+		"Deposit FIL",
+	)
 }

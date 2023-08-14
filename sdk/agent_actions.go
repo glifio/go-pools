@@ -29,16 +29,25 @@ func (a *fevmActions) AgentCreate(
 	account accounts.Account,
 	passphrase string,
 ) (*types.Transaction, error) {
+	lapi, lcloser, err := a.extern.ConnectLotusClient()
+	if err != nil {
+		return nil, err
+	}
+	defer lcloser()
+
 	client, err := a.extern.ConnectEthClient()
 	if err != nil {
 		return nil, err
 	}
 	defer client.Close()
 
-	agentFactoryTransactor, err := abigen.NewAgentFactoryTransactor(a.queries.AgentFactory(), client)
-	if err != nil {
-		return nil, err
-	}
+	/*
+		agentFactoryTransactor, err := abigen.NewAgentFactoryTransactor(a.queries.AgentFactory(), client)
+		if err != nil {
+			return nil, err
+		}
+		return agentFactoryTransactor, nil
+	*/
 
 	fromAddr := owner
 
@@ -51,6 +60,8 @@ func (a *fevmActions) AgentCreate(
 
 	return util.WriteTx(
 		ctx,
+		lapi,
+		client,
 		wallet,
 		account,
 		passphrase,
@@ -58,7 +69,9 @@ func (a *fevmActions) AgentCreate(
 		common.Big0,
 		nonce,
 		args,
-		agentFactoryTransactor.Create,
+		abigen.NewAgentFactoryTransactor,
+		a.queries.AgentFactory(),
+		"Create",
 		"Agent Create",
 	)
 }
@@ -73,16 +86,24 @@ func (a *fevmActions) AgentBorrow(
 	ownerPassphrase string,
 	requesterKey *ecdsa.PrivateKey,
 ) (*types.Transaction, error) {
+	lapi, lcloser, err := a.extern.ConnectLotusClient()
+	if err != nil {
+		return nil, err
+	}
+	defer lcloser()
+
 	client, err := a.extern.ConnectEthClient()
 	if err != nil {
 		return nil, err
 	}
 	defer client.Close()
 
-	agentTransactor, err := abigen.NewAgentTransactor(agentAddr, client)
-	if err != nil {
-		return nil, err
-	}
+	/*
+		agentTransactor, err := abigen.NewAgentTransactor(agentAddr, client)
+		if err != nil {
+			return nil, err
+		}
+	*/
 
 	closer, err := a.extern.ConnectAdoClient(ctx)
 	if err != nil {
@@ -123,7 +144,22 @@ func (a *fevmActions) AgentBorrow(
 	// 	return nil, errors.New("amount exceeds max borrow - run `glif agent preview borrow <amount>` to get more information.")
 	// }
 
-	return util.WriteTx(ctx, ownerWallet, ownerAccount, ownerPassphrase, a.queries.ChainID(), common.Big0, nonce, args, agentTransactor.Borrow, "Agent Borrow")
+	return util.WriteTx(
+		ctx,
+		lapi,
+		client,
+		ownerWallet,
+		ownerAccount,
+		ownerPassphrase,
+		a.queries.ChainID(),
+		common.Big0,
+		nonce,
+		args,
+		abigen.NewAgentTransactor,
+		agentAddr,
+		"Borrow",
+		"Agent Borrow",
+	)
 }
 
 func (a *fevmActions) AgentPay(
@@ -136,16 +172,24 @@ func (a *fevmActions) AgentPay(
 	senderPassphrase string,
 	requesterKey *ecdsa.PrivateKey,
 ) (*types.Transaction, error) {
+	lapi, lcloser, err := a.extern.ConnectLotusClient()
+	if err != nil {
+		return nil, err
+	}
+	defer lcloser()
+
 	client, err := a.extern.ConnectEthClient()
 	if err != nil {
 		return nil, err
 	}
 	defer client.Close()
 
-	agentTransactor, err := abigen.NewAgentTransactor(agentAddr, client)
-	if err != nil {
-		return nil, err
-	}
+	/*
+		agentTransactor, err := abigen.NewAgentTransactor(agentAddr, client)
+		if err != nil {
+			return nil, err
+		}
+	*/
 
 	closer, err := a.extern.ConnectAdoClient(ctx)
 	if err != nil {
@@ -170,7 +214,22 @@ func (a *fevmActions) AgentPay(
 
 	args := []interface{}{poolID, sc}
 
-	return util.WriteTx(ctx, senderWallet, senderAccount, senderPassphrase, a.queries.ChainID(), common.Big0, nonce, args, agentTransactor.Pay, "Agent Pay")
+	return util.WriteTx(
+		ctx,
+		lapi,
+		client,
+		senderWallet,
+		senderAccount,
+		senderPassphrase,
+		a.queries.ChainID(),
+		common.Big0,
+		nonce,
+		args,
+		abigen.NewAgentTransactor,
+		agentAddr,
+		"Pay",
+		"Agent Pay",
+	)
 }
 
 func (a *fevmActions) AgentAddMiner(
@@ -182,6 +241,12 @@ func (a *fevmActions) AgentAddMiner(
 	ownerPassphrase string,
 	requesterKey *ecdsa.PrivateKey,
 ) (*types.Transaction, error) {
+	lapi, lcloser, err := a.extern.ConnectLotusClient()
+	if err != nil {
+		return nil, err
+	}
+	defer lcloser()
+
 	client, err := a.extern.ConnectEthClient()
 	if err != nil {
 		return nil, err
@@ -194,10 +259,12 @@ func (a *fevmActions) AgentAddMiner(
 	}
 	defer closer()
 
-	agentTransactor, err := abigen.NewAgentTransactor(agentAddr, client)
-	if err != nil {
-		return nil, err
-	}
+	/*
+		agentTransactor, err := abigen.NewAgentTransactor(agentAddr, client)
+		if err != nil {
+			return nil, err
+		}
+	*/
 
 	jws, err := token.SignJWS(ctx, agentAddr, minerAddr, common.Big0, constants.MethodAddMiner, requesterKey, a.queries)
 	if err != nil {
@@ -220,6 +287,8 @@ func (a *fevmActions) AgentAddMiner(
 
 	tx, err := util.WriteTx(
 		ctx,
+		lapi,
+		client,
 		ownerWallet,
 		ownerAccount,
 		ownerPassphrase,
@@ -227,7 +296,9 @@ func (a *fevmActions) AgentAddMiner(
 		common.Big0,
 		nonce,
 		args,
-		agentTransactor.AddMiner,
+		abigen.NewAgentTransactor,
+		agentAddr,
+		"AddMiner",
 		"Agent Add Miner",
 	)
 	if err != nil {
@@ -266,6 +337,12 @@ func (a *fevmActions) AgentRemoveMiner(
 		return nil, err
 	}
 
+	lapi, lcloser, err := a.extern.ConnectLotusClient()
+	if err != nil {
+		return nil, err
+	}
+	defer lcloser()
+
 	client, err := a.extern.ConnectEthClient()
 	if err != nil {
 		return nil, err
@@ -278,7 +355,9 @@ func (a *fevmActions) AgentRemoveMiner(
 	}
 	defer closer()
 
-	agentTransactor, err := abigen.NewAgentTransactor(agentAddr, client)
+	/*
+		agentTransactor, err := abigen.NewAgentTransactor(agentAddr, client)
+	*/
 
 	nonce, err := a.queries.ChainGetNonce(ctx, ownerAccount.EthAccount.Address)
 	if err != nil {
@@ -297,7 +376,22 @@ func (a *fevmActions) AgentRemoveMiner(
 
 	args := []interface{}{newOwner64, sc}
 
-	tx, err := util.WriteTx(ctx, ownerWallet, ownerAccount, ownerPassphrase, a.queries.ChainID(), common.Big0, nonce, args, agentTransactor.RemoveMiner, "Agent Remove Miner")
+	tx, err := util.WriteTx(
+		ctx,
+		lapi,
+		client,
+		ownerWallet,
+		ownerAccount,
+		ownerPassphrase,
+		a.queries.ChainID(),
+		common.Big0,
+		nonce,
+		args,
+		abigen.NewAgentTransactor,
+		agentAddr,
+		"RemoveMiner",
+		"Agent Remove Miner",
+	)
 	if err != nil {
 		return nil, err
 	}
@@ -315,16 +409,24 @@ func (a *fevmActions) AgentChangeMinerWorker(
 	ownerAccount accounts.Account,
 	ownerPassphrase string,
 ) (*types.Transaction, error) {
+	lapi, lcloser, err := a.extern.ConnectLotusClient()
+	if err != nil {
+		return nil, err
+	}
+	defer lcloser()
+
 	client, err := a.extern.ConnectEthClient()
 	if err != nil {
 		return nil, err
 	}
 	defer client.Close()
 
-	agentTransactor, err := abigen.NewAgentTransactor(agentAddr, client)
-	if err != nil {
-		return nil, err
-	}
+	/*
+		agentTransactor, err := abigen.NewAgentTransactor(agentAddr, client)
+		if err != nil {
+			return nil, err
+		}
+	*/
 
 	// convert miner address to ID address
 	minerID, err := address.IDFromAddress(minerAddr)
@@ -355,7 +457,22 @@ func (a *fevmActions) AgentChangeMinerWorker(
 
 	args := []interface{}{minerID, workerID, controlIDs}
 
-	tx, err := util.WriteTx(ctx, ownerWallet, ownerAccount, ownerPassphrase, a.queries.ChainID(), common.Big0, nonce, args, agentTransactor.ChangeMinerWorker, "Agent Change Miner Worker")
+	tx, err := util.WriteTx(
+		ctx,
+		lapi,
+		client,
+		ownerWallet,
+		ownerAccount,
+		ownerPassphrase,
+		a.queries.ChainID(),
+		common.Big0,
+		nonce,
+		args,
+		abigen.NewAgentTransactor,
+		agentAddr,
+		"ChangeMinerWorker",
+		"Agent Change Miner Worker",
+	)
 	if err != nil {
 		return nil, err
 	}
@@ -371,6 +488,12 @@ func (a *fevmActions) AgentConfirmMinerWorkerChange(
 	ownerAccount accounts.Account,
 	ownerPassphrase string,
 ) (*types.Transaction, error) {
+	lapi, lcloser, err := a.extern.ConnectLotusClient()
+	if err != nil {
+		return nil, err
+	}
+	defer lcloser()
+
 	client, err := a.extern.ConnectEthClient()
 	if err != nil {
 		return nil, err
@@ -382,10 +505,12 @@ func (a *fevmActions) AgentConfirmMinerWorkerChange(
 		return nil, err
 	}
 
-	agentTransactor, err := abigen.NewAgentTransactor(agentAddr, client)
-	if err != nil {
-		return nil, err
-	}
+	/*
+		agentTransactor, err := abigen.NewAgentTransactor(agentAddr, client)
+		if err != nil {
+			return nil, err
+		}
+	*/
 
 	nonce, err := a.queries.ChainGetNonce(ctx, ownerAccount.EthAccount.Address)
 	if err != nil {
@@ -394,7 +519,22 @@ func (a *fevmActions) AgentConfirmMinerWorkerChange(
 
 	args := []interface{}{minerU64}
 
-	tx, err := util.WriteTx(ctx, ownerWallet, ownerAccount, ownerPassphrase, a.queries.ChainID(), common.Big0, nonce, args, agentTransactor.ConfirmChangeMinerWorker, "Agent Confirm Miner Worker Change")
+	tx, err := util.WriteTx(
+		ctx,
+		lapi,
+		client,
+		ownerWallet,
+		ownerAccount,
+		ownerPassphrase,
+		a.queries.ChainID(),
+		common.Big0,
+		nonce,
+		args,
+		abigen.NewAgentTransactor,
+		agentAddr,
+		"ConfirmChangeMinerWorker",
+		"Agent Confirm Miner Worker Change",
+	)
 	if err != nil {
 		return nil, err
 	}
@@ -413,6 +553,12 @@ func (a *fevmActions) AgentPullFunds(
 	senderPassphrase string,
 	requesterKey *ecdsa.PrivateKey,
 ) (*types.Transaction, error) {
+	lapi, lcloser, err := a.extern.ConnectLotusClient()
+	if err != nil {
+		return nil, err
+	}
+	defer lcloser()
+
 	client, err := a.extern.ConnectEthClient()
 	if err != nil {
 		return nil, err
@@ -459,10 +605,12 @@ func (a *fevmActions) AgentPullFunds(
 		return nil, err
 	}
 
-	agentTransactor, err := abigen.NewAgentTransactor(agentAddr, client)
-	if err != nil {
-		return nil, err
-	}
+	/*
+		agentTransactor, err := abigen.NewAgentTransactor(agentAddr, client)
+		if err != nil {
+			return nil, err
+		}
+	*/
 
 	nonce, err := a.queries.ChainGetNonce(ctx, senderAccount.EthAccount.Address)
 	if err != nil {
@@ -471,7 +619,22 @@ func (a *fevmActions) AgentPullFunds(
 
 	args := []interface{}{sc}
 
-	return util.WriteTx(ctx, senderWallet, senderAccount, senderPassphrase, a.queries.ChainID(), common.Big0, nonce, args, agentTransactor.PullFunds, "Agent Pull Funds")
+	return util.WriteTx(
+		ctx,
+		lapi,
+		client,
+		senderWallet,
+		senderAccount,
+		senderPassphrase,
+		a.queries.ChainID(),
+		common.Big0,
+		nonce,
+		args,
+		abigen.NewAgentTransactor,
+		agentAddr,
+		"PullFunds",
+		"Agent Pull Funds",
+	)
 }
 
 // AgentPushFunds pushes funds from the agent to a miner
@@ -485,6 +648,12 @@ func (a *fevmActions) AgentPushFunds(
 	senderPassphrase string,
 	requesterKey *ecdsa.PrivateKey,
 ) (*types.Transaction, error) {
+	lapi, lcloser, err := a.extern.ConnectLotusClient()
+	if err != nil {
+		return nil, err
+	}
+	defer lcloser()
+
 	client, err := a.extern.ConnectEthClient()
 	if err != nil {
 		return nil, err
@@ -531,10 +700,12 @@ func (a *fevmActions) AgentPushFunds(
 		return nil, err
 	}
 
-	agentTransactor, err := abigen.NewAgentTransactor(agentAddr, client)
-	if err != nil {
-		return nil, err
-	}
+	/*
+		agentTransactor, err := abigen.NewAgentTransactor(agentAddr, client)
+		if err != nil {
+			return nil, err
+		}
+	*/
 
 	nonce, err := a.queries.ChainGetNonce(ctx, senderAccount.EthAccount.Address)
 	if err != nil {
@@ -543,7 +714,22 @@ func (a *fevmActions) AgentPushFunds(
 
 	args := []interface{}{sc}
 
-	return util.WriteTx(ctx, senderWallet, senderAccount, senderPassphrase, a.queries.ChainID(), common.Big0, nonce, args, agentTransactor.PushFunds, "Agent Push Funds")
+	return util.WriteTx(
+		ctx,
+		lapi,
+		client,
+		senderWallet,
+		senderAccount,
+		senderPassphrase,
+		a.queries.ChainID(),
+		common.Big0,
+		nonce,
+		args,
+		abigen.NewAgentTransactor,
+		agentAddr,
+		"PushFunds",
+		"Agent Push Funds",
+	)
 }
 
 func (a *fevmActions) AgentWithdraw(
@@ -556,16 +742,24 @@ func (a *fevmActions) AgentWithdraw(
 	ownerPassphrase string,
 	requesterKey *ecdsa.PrivateKey,
 ) (*types.Transaction, error) {
+	lapi, lcloser, err := a.extern.ConnectLotusClient()
+	if err != nil {
+		return nil, err
+	}
+	defer lcloser()
+
 	client, err := a.extern.ConnectEthClient()
 	if err != nil {
 		return nil, err
 	}
 	defer client.Close()
 
-	agentTransactor, err := abigen.NewAgentTransactor(agentAddr, client)
-	if err != nil {
-		return nil, err
-	}
+	/*
+		agentTransactor, err := abigen.NewAgentTransactor(agentAddr, client)
+		if err != nil {
+			return nil, err
+		}
+	*/
 
 	closer, err := a.extern.ConnectAdoClient(ctx)
 	if err != nil {
@@ -590,7 +784,22 @@ func (a *fevmActions) AgentWithdraw(
 
 	args := []interface{}{receiver, sc}
 
-	return util.WriteTx(ctx, ownerWallet, ownerAccount, ownerPassphrase, a.queries.ChainID(), common.Big0, nonce, args, agentTransactor.Withdraw, "Agent Withdraw")
+	return util.WriteTx(
+		ctx,
+		lapi,
+		client,
+		ownerWallet,
+		ownerAccount,
+		ownerPassphrase,
+		a.queries.ChainID(),
+		common.Big0,
+		nonce,
+		args,
+		abigen.NewAgentTransactor,
+		agentAddr,
+		"Withdraw",
+		"Agent Withdraw",
+	)
 }
 
 func (a *fevmActions) AgentRefreshRoutes(
@@ -600,21 +809,44 @@ func (a *fevmActions) AgentRefreshRoutes(
 	senderAccount accounts.Account,
 	senderPassphrase string,
 ) (*types.Transaction, error) {
+	lapi, lcloser, err := a.extern.ConnectLotusClient()
+	if err != nil {
+		return nil, err
+	}
+	defer lcloser()
+
 	client, err := a.extern.ConnectEthClient()
 	if err != nil {
 		return nil, err
 	}
 	defer client.Close()
 
-	agentTransactor, err := abigen.NewAgentTransactor(agentAddr, client)
-	if err != nil {
-		return nil, err
-	}
+	/*
+		agentTransactor, err := abigen.NewAgentTransactor(agentAddr, client)
+		if err != nil {
+			return nil, err
+		}
+	*/
 
 	nonce, err := a.queries.ChainGetNonce(ctx, senderAccount.EthAccount.Address)
 	if err != nil {
 		return nil, err
 	}
 
-	return util.WriteTx(ctx, senderWallet, senderAccount, senderPassphrase, a.queries.ChainID(), common.Big0, nonce, []interface{}{}, agentTransactor.RefreshRoutes, "Agent RefreshRoutes")
+	return util.WriteTx(
+		ctx,
+		lapi,
+		client,
+		senderWallet,
+		senderAccount,
+		senderPassphrase,
+		a.queries.ChainID(),
+		common.Big0,
+		nonce,
+		[]interface{}{},
+		abigen.NewAgentTransactor,
+		agentAddr,
+		"RefreshRoutes",
+		"Agent RefreshRoutes",
+	)
 }

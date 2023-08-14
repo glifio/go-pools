@@ -19,16 +19,24 @@ func (a *fevmActions) IFILTransfer(
 	senderAccount accounts.Account,
 	senderPassphrase string,
 ) (*types.Transaction, error) {
+	lapi, lcloser, err := a.extern.ConnectLotusClient()
+	if err != nil {
+		return nil, err
+	}
+	defer lcloser()
+
 	client, err := a.extern.ConnectEthClient()
 	if err != nil {
 		return nil, err
 	}
 	defer client.Close()
 
-	iFILTransactor, err := abigen.NewPoolTokenTransactor(a.queries.IFIL(), client)
-	if err != nil {
-		return nil, err
-	}
+	/*
+		iFILTransactor, err := abigen.NewPoolTokenTransactor(a.queries.IFIL(), client)
+		if err != nil {
+			return nil, err
+		}
+	*/
 
 	nonce, err := a.queries.ChainGetNonce(ctx, senderAccount.EthAccount.Address)
 	if err != nil {
@@ -37,7 +45,22 @@ func (a *fevmActions) IFILTransfer(
 
 	args := []interface{}{receiver, amount}
 
-	return util.WriteTx(ctx, senderWallet, senderAccount, senderPassphrase, a.queries.ChainID(), common.Big0, nonce, args, iFILTransactor.Transfer, "Transfer iFIL")
+	return util.WriteTx(
+		ctx,
+		lapi,
+		client,
+		senderWallet,
+		senderAccount,
+		senderPassphrase,
+		a.queries.ChainID(),
+		common.Big0,
+		nonce,
+		args,
+		abigen.NewPoolTokenTransactor,
+		a.queries.IFIL(),
+		"Transfer",
+		"Transfer iFIL",
+	)
 }
 
 func (a *fevmActions) IFILApprove(
@@ -48,16 +71,24 @@ func (a *fevmActions) IFILApprove(
 	senderAccount accounts.Account,
 	senderPassphrase string,
 ) (*types.Transaction, error) {
+	lapi, lcloser, err := a.extern.ConnectLotusClient()
+	if err != nil {
+		return nil, err
+	}
+	defer lcloser()
+
 	client, err := a.extern.ConnectEthClient()
 	if err != nil {
 		return nil, err
 	}
 	defer client.Close()
 
-	iFILTransactor, err := abigen.NewPoolTokenTransactor(a.queries.IFIL(), client)
-	if err != nil {
-		return nil, err
-	}
+	/*
+		iFILTransactor, err := abigen.NewPoolTokenTransactor(a.queries.IFIL(), client)
+		if err != nil {
+			return nil, err
+		}
+	*/
 
 	nonce, err := a.queries.ChainGetNonce(ctx, senderAccount.EthAccount.Address)
 	if err != nil {
@@ -66,5 +97,20 @@ func (a *fevmActions) IFILApprove(
 
 	args := []interface{}{spender, allowance}
 
-	return util.WriteTx(ctx, senderWallet, senderAccount, senderPassphrase, a.queries.ChainID(), common.Big0, nonce, args, iFILTransactor.Approve, "Approve iFIL")
+	return util.WriteTx(
+		ctx,
+		lapi,
+		client,
+		senderWallet,
+		senderAccount,
+		senderPassphrase,
+		a.queries.ChainID(),
+		common.Big0,
+		nonce,
+		args,
+		abigen.NewPoolTokenTransactor,
+		a.queries.IFIL(),
+		"Approve",
+		"Approve iFIL",
+	)
 }
