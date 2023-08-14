@@ -31,6 +31,7 @@ type fevmQueries struct {
 	agentFactory  common.Address
 	iFIL          common.Address
 	infinityPool  common.Address
+	simpleRamp    common.Address
 	wFIL          common.Address
 	chainID       *big.Int
 	types.FEVMQueries

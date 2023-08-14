@@ -45,6 +45,7 @@ type FEVMQueries interface {
 	InfPoolBorrowableLiquidity(ctx context.Context, blockNumber *big.Int) (*big.Float, error)
 	InfPoolTotalAssets(ctx context.Context, blockNumber *big.Int) (*big.Float, error)
 	InfPoolTotalBorrowed(ctx context.Context, blockNumber *big.Int) (*big.Float, error)
+	InfPoolExitReserve(ctx context.Context, blockNumber *big.Int) (*big.Float, error)
 	InfPoolIsApprovedWithReason(ctx context.Context, agentAddr common.Address, agentData *vc.AgentData) (bool, RejectionReason, error)
 	InfPoolAgentMaxBorrow(ctx context.Context, agentAddr common.Address, agentData *vc.AgentData) (*big.Int, error)
 	InfPoolAgentMaxWithdraw(ctx context.Context, agentAddr common.Address, agentData *vc.AgentData) (*big.Int, error)
@@ -90,6 +91,7 @@ type FEVMQueries interface {
 	IFIL() common.Address
 	WFIL() common.Address
 	InfinityPool() common.Address
+	SimpleRamp() common.Address
 	// RateModule gets fetched from InfinityPool
 	RateModule() (common.Address, error)
 }
@@ -111,6 +113,10 @@ type FEVMActions interface {
 
 	// infinity pool actions
 	InfPoolDepositFIL(ctx context.Context, agentAddr common.Address, amount *big.Int, pk *ecdsa.PrivateKey) (*types.Transaction, error)
+
+	// ramp actions
+	RampWithdraw(ctx context.Context, assets *big.Int, receiver common.Address, pk *ecdsa.PrivateKey) (*types.Transaction, error)
+	RampRedeem(ctx context.Context, shares *big.Int, receiver common.Address, pk *ecdsa.PrivateKey) (*types.Transaction, error)
 
 	// iFIL actions
 	IFILTransfer(ctx context.Context, receiver common.Address, amount *big.Int, pk *ecdsa.PrivateKey) (*types.Transaction, error)
@@ -146,6 +152,7 @@ type ProtocolMeta struct {
 	IFIL          common.Address `json:"ifil"`
 	WFIL          common.Address `json:"wfil"`
 	InfinityPool  common.Address `json:"infinityPool"`
+	SimpleRamp    common.Address `json:"simpleRamp"`
 	ChainID       *big.Int       `json:"chainID"`
 }
 

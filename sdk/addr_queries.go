@@ -37,6 +37,10 @@ func (q *fevmQueries) InfinityPool() common.Address {
 	return q.infinityPool
 }
 
+func (q *fevmQueries) SimpleRamp() common.Address {
+	return q.simpleRamp
+}
+
 func (q *fevmQueries) RateModule() (common.Address, error) {
 	client, err := q.extern.ConnectEthClient()
 	if err != nil {

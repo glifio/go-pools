@@ -1887,6 +1887,61 @@ func (_c *FEVMQueries_InfPoolBorrowableLiquidity_Call) RunAndReturn(run func(con
 	return _c
 }
 
+// InfPoolExitReserve provides a mock function with given fields: ctx, blockNumber
+func (_m *FEVMQueries) InfPoolExitReserve(ctx context.Context, blockNumber *big.Int) (*big.Float, error) {
+	ret := _m.Called(ctx, blockNumber)
+
+	var r0 *big.Float
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, *big.Int) (*big.Float, error)); ok {
+		return rf(ctx, blockNumber)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, *big.Int) *big.Float); ok {
+		r0 = rf(ctx, blockNumber)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*big.Float)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, *big.Int) error); ok {
+		r1 = rf(ctx, blockNumber)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// FEVMQueries_InfPoolExitReserve_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'InfPoolExitReserve'
+type FEVMQueries_InfPoolExitReserve_Call struct {
+	*mock.Call
+}
+
+// InfPoolExitReserve is a helper method to define mock.On call
+//   - ctx context.Context
+//   - blockNumber *big.Int
+func (_e *FEVMQueries_Expecter) InfPoolExitReserve(ctx interface{}, blockNumber interface{}) *FEVMQueries_InfPoolExitReserve_Call {
+	return &FEVMQueries_InfPoolExitReserve_Call{Call: _e.mock.On("InfPoolExitReserve", ctx, blockNumber)}
+}
+
+func (_c *FEVMQueries_InfPoolExitReserve_Call) Run(run func(ctx context.Context, blockNumber *big.Int)) *FEVMQueries_InfPoolExitReserve_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(*big.Int))
+	})
+	return _c
+}
+
+func (_c *FEVMQueries_InfPoolExitReserve_Call) Return(_a0 *big.Float, _a1 error) *FEVMQueries_InfPoolExitReserve_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *FEVMQueries_InfPoolExitReserve_Call) RunAndReturn(run func(context.Context, *big.Int) (*big.Float, error)) *FEVMQueries_InfPoolExitReserve_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // InfPoolFeesAccrued provides a mock function with given fields: ctx, blockNumber
 func (_m *FEVMQueries) InfPoolFeesAccrued(ctx context.Context, blockNumber *big.Int) (*big.Int, error) {
 	ret := _m.Called(ctx, blockNumber)
@@ -2944,6 +2999,49 @@ func (_c *FEVMQueries_RouterOwner_Call) Return(_a0 common.Address, _a1 error) *F
 }
 
 func (_c *FEVMQueries_RouterOwner_Call) RunAndReturn(run func(context.Context) (common.Address, error)) *FEVMQueries_RouterOwner_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// SimpleRamp provides a mock function with given fields:
+func (_m *FEVMQueries) SimpleRamp() common.Address {
+	ret := _m.Called()
+
+	var r0 common.Address
+	if rf, ok := ret.Get(0).(func() common.Address); ok {
+		r0 = rf()
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(common.Address)
+		}
+	}
+
+	return r0
+}
+
+// FEVMQueries_SimpleRamp_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'SimpleRamp'
+type FEVMQueries_SimpleRamp_Call struct {
+	*mock.Call
+}
+
+// SimpleRamp is a helper method to define mock.On call
+func (_e *FEVMQueries_Expecter) SimpleRamp() *FEVMQueries_SimpleRamp_Call {
+	return &FEVMQueries_SimpleRamp_Call{Call: _e.mock.On("SimpleRamp")}
+}
+
+func (_c *FEVMQueries_SimpleRamp_Call) Run(run func()) *FEVMQueries_SimpleRamp_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run()
+	})
+	return _c
+}
+
+func (_c *FEVMQueries_SimpleRamp_Call) Return(_a0 common.Address) *FEVMQueries_SimpleRamp_Call {
+	_c.Call.Return(_a0)
+	return _c
+}
+
+func (_c *FEVMQueries_SimpleRamp_Call) RunAndReturn(run func() common.Address) *FEVMQueries_SimpleRamp_Call {
 	_c.Call.Return(run)
 	return _c
 }
