@@ -46,39 +46,38 @@ func WriteTx(
 		reflect.ValueOf(contractAddress),
 		reflect.ValueOf(wrappedClient),
 	}
-	instance := abigenTransactorValue.Call(abigenTransactorArgs)
-	fmt.Printf("Jim instance %+v\n", instance)
+	abigenTransactorResults := abigenTransactorValue.Call(abigenTransactorArgs)
+	instance := abigenTransactorResults[0]
+	if !abigenTransactorResults[1].IsNil() {
+		err = abigenTransactorResults[1].Interface().(error)
+		return nil, err
+	}
 
-	return nil, fmt.Errorf("Stopped")
-	/*
-		// Construct call to method
+	// Use reflection to call the writeTx function with the required arguments
+	writeTxValue := instance.MethodByName(methodName)
+	writeTxArgs := []reflect.Value{reflect.ValueOf(auth)}
 
-		// Use reflection to call the writeTx function with the required arguments
-		writeTxValue := reflect.ValueOf(writeTx)
-		writeTxArgs := []reflect.Value{reflect.ValueOf(auth)}
+	argStrings := make([]string, len(args))
+	for i, arg := range args {
+		writeTxArgs = append(writeTxArgs, reflect.ValueOf(arg))
+		argStrings[i] = StringifyArg(arg)
+	}
+	result := writeTxValue.Call(writeTxArgs)
 
-		argStrings := make([]string, len(args))
-		for i, arg := range args {
-			writeTxArgs = append(writeTxArgs, reflect.ValueOf(arg))
-			argStrings[i] = StringifyArg(arg)
-		}
-		result := writeTxValue.Call(writeTxArgs)
+	if !result[1].IsNil() {
+		return nil, HumanReadableRevert(result[1].Interface().(error))
+	}
 
-		if !result[1].IsNil() {
-			return nil, HumanReadableRevert(result[1].Interface().(error))
-		}
+	// Get the transaction and error from the result
+	tx := result[0].Interface().(*types.Transaction)
 
-		// Get the transaction and error from the result
-		tx := result[0].Interface().(*types.Transaction)
+	if tx == nil {
+		return nil, fmt.Errorf("Transaction is nil")
+	}
 
-		if tx == nil {
-			return nil, fmt.Errorf("Transaction is nil")
-		}
+	fmt.Println("Transaction:", tx.Hash())
 
-		fmt.Println("Transaction:", tx.Hash())
-
-		return tx, err
-	*/
+	return tx, err
 }
 
 func propagateErr(returnTrace filtypes.ReturnTrace) error {
