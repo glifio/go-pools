@@ -28,32 +28,24 @@ func (a *fevmActions) AgentCreate(
 	wallet accounts.Wallet,
 	account accounts.Account,
 	passphrase string,
-) (*types.Transaction, error) {
+) (common.Hash, *types.Transaction, error) {
 	lapi, lcloser, err := a.extern.ConnectLotusClient()
 	if err != nil {
-		return nil, err
+		return common.Hash{}, nil, err
 	}
 	defer lcloser()
 
 	client, err := a.extern.ConnectEthClient()
 	if err != nil {
-		return nil, err
+		return common.Hash{}, nil, err
 	}
 	defer client.Close()
-
-	/*
-		agentFactoryTransactor, err := abigen.NewAgentFactoryTransactor(a.queries.AgentFactory(), client)
-		if err != nil {
-			return nil, err
-		}
-		return agentFactoryTransactor, nil
-	*/
 
 	fromAddr := owner
 
 	nonce, err := a.queries.ChainGetNonce(ctx, fromAddr)
 	if err != nil {
-		return nil, err
+		return common.Hash{}, nil, err
 	}
 
 	args := []interface{}{owner, operator, request}
@@ -85,57 +77,50 @@ func (a *fevmActions) AgentBorrow(
 	ownerAccount accounts.Account,
 	ownerPassphrase string,
 	requesterKey *ecdsa.PrivateKey,
-) (*types.Transaction, error) {
+) (common.Hash, *types.Transaction, error) {
 	lapi, lcloser, err := a.extern.ConnectLotusClient()
 	if err != nil {
-		return nil, err
+		return common.Hash{}, nil, err
 	}
 	defer lcloser()
 
 	client, err := a.extern.ConnectEthClient()
 	if err != nil {
-		return nil, err
+		return common.Hash{}, nil, err
 	}
 	defer client.Close()
 
-	/*
-		agentTransactor, err := abigen.NewAgentTransactor(agentAddr, client)
-		if err != nil {
-			return nil, err
-		}
-	*/
-
 	closer, err := a.extern.ConnectAdoClient(ctx)
 	if err != nil {
-		return nil, err
+		return common.Hash{}, nil, err
 	}
 	defer closer()
 
 	jws, err := token.SignJWS(ctx, agentAddr, address.Undef, amount, constants.MethodBorrow, requesterKey, a.queries)
 	if err != nil {
-		return nil, err
+		return common.Hash{}, nil, err
 	}
 
 	sc, err := rpc.ADOClient.SignCredential(ctx, jws)
 	if err != nil {
-		return nil, err
+		return common.Hash{}, nil, err
 	}
 
 	nonce, err := a.queries.ChainGetNonce(ctx, ownerAccount.EthAccount.Address)
 	if err != nil {
-		return nil, err
+		return common.Hash{}, nil, err
 	}
 
 	args := []interface{}{poolID, sc}
 	// TODO: this isn't great because we'd rather not get the credential if the amount is too high
 	agentData, err := vc.AbiDecodeClaim(sc.Vc.Claim)
 	if err != nil {
-		return nil, err
+		return common.Hash{}, nil, err
 	}
 
 	maxBorrowNow, err := a.queries.InfPoolAgentMaxBorrow(ctx, agentAddr, agentData)
 	if err != nil {
-		return nil, err
+		return common.Hash{}, nil, err
 	}
 
 	fmt.Printf("Debug: max borrow now: %0.09f\n", util.ToFIL(maxBorrowNow))
@@ -171,45 +156,38 @@ func (a *fevmActions) AgentPay(
 	senderAccount accounts.Account,
 	senderPassphrase string,
 	requesterKey *ecdsa.PrivateKey,
-) (*types.Transaction, error) {
+) (common.Hash, *types.Transaction, error) {
 	lapi, lcloser, err := a.extern.ConnectLotusClient()
 	if err != nil {
-		return nil, err
+		return common.Hash{}, nil, err
 	}
 	defer lcloser()
 
 	client, err := a.extern.ConnectEthClient()
 	if err != nil {
-		return nil, err
+		return common.Hash{}, nil, err
 	}
 	defer client.Close()
 
-	/*
-		agentTransactor, err := abigen.NewAgentTransactor(agentAddr, client)
-		if err != nil {
-			return nil, err
-		}
-	*/
-
 	closer, err := a.extern.ConnectAdoClient(ctx)
 	if err != nil {
-		return nil, err
+		return common.Hash{}, nil, err
 	}
 	defer closer()
 
 	nonce, err := a.queries.ChainGetNonce(ctx, senderAccount.EthAccount.Address)
 	if err != nil {
-		return nil, err
+		return common.Hash{}, nil, err
 	}
 
 	jws, err := token.SignJWS(ctx, agentAddr, address.Undef, amount, constants.MethodPay, requesterKey, a.queries)
 	if err != nil {
-		return nil, err
+		return common.Hash{}, nil, err
 	}
 
 	sc, err := rpc.ADOClient.SignCredential(ctx, jws)
 	if err != nil {
-		return nil, err
+		return common.Hash{}, nil, err
 	}
 
 	args := []interface{}{poolID, sc}
@@ -240,52 +218,45 @@ func (a *fevmActions) AgentAddMiner(
 	ownerAccount accounts.Account,
 	ownerPassphrase string,
 	requesterKey *ecdsa.PrivateKey,
-) (*types.Transaction, error) {
+) (common.Hash, *types.Transaction, error) {
 	lapi, lcloser, err := a.extern.ConnectLotusClient()
 	if err != nil {
-		return nil, err
+		return common.Hash{}, nil, err
 	}
 	defer lcloser()
 
 	client, err := a.extern.ConnectEthClient()
 	if err != nil {
-		return nil, err
+		return common.Hash{}, nil, err
 	}
 	defer client.Close()
 
 	closer, err := a.extern.ConnectAdoClient(ctx)
 	if err != nil {
-		return nil, err
+		return common.Hash{}, nil, err
 	}
 	defer closer()
 
-	/*
-		agentTransactor, err := abigen.NewAgentTransactor(agentAddr, client)
-		if err != nil {
-			return nil, err
-		}
-	*/
-
 	jws, err := token.SignJWS(ctx, agentAddr, minerAddr, common.Big0, constants.MethodAddMiner, requesterKey, a.queries)
 	if err != nil {
-		return nil, err
+		return common.Hash{}, nil, err
 	}
 
 	sc, err := rpc.ADOClient.SignCredential(ctx, jws)
 	if err != nil {
-		return nil, err
+		return common.Hash{}, nil, err
 	}
 
 	fromAddr := ownerAccount.EthAccount.Address
 
 	nonce, err := a.queries.ChainGetNonce(ctx, fromAddr)
 	if err != nil {
-		return nil, err
+		return common.Hash{}, nil, err
 	}
 
 	args := []interface{}{sc}
 
-	tx, err := util.WriteTx(
+	txHash, tx, err := util.WriteTx(
 		ctx,
 		lapi,
 		client,
@@ -302,10 +273,10 @@ func (a *fevmActions) AgentAddMiner(
 		"Agent Add Miner",
 	)
 	if err != nil {
-		return nil, err
+		return common.Hash{}, nil, err
 	}
 
-	return tx, nil
+	return txHash, tx, nil
 }
 
 func (a *fevmActions) AgentRemoveMiner(
@@ -317,66 +288,62 @@ func (a *fevmActions) AgentRemoveMiner(
 	ownerAccount accounts.Account,
 	ownerPassphrase string,
 	requesterKey *ecdsa.PrivateKey,
-) (*types.Transaction, error) {
+) (common.Hash, *types.Transaction, error) {
 	if newOwnerAddr.Protocol() != address.ID {
 		lapi, closer, err := a.extern.ConnectLotusClient()
 		if err != nil {
-			return nil, err
+			return common.Hash{}, nil, err
 		}
 		defer closer()
 
 		idAddr, err := lapi.StateLookupID(context.Background(), newOwnerAddr, ltypes.EmptyTSK)
 		if err != nil {
-			return nil, err
+			return common.Hash{}, nil, err
 		}
 		newOwnerAddr = idAddr
 	}
 
 	newOwner64, err := address.IDFromAddress(newOwnerAddr)
 	if err != nil {
-		return nil, err
+		return common.Hash{}, nil, err
 	}
 
 	lapi, lcloser, err := a.extern.ConnectLotusClient()
 	if err != nil {
-		return nil, err
+		return common.Hash{}, nil, err
 	}
 	defer lcloser()
 
 	client, err := a.extern.ConnectEthClient()
 	if err != nil {
-		return nil, err
+		return common.Hash{}, nil, err
 	}
 	defer client.Close()
 
 	closer, err := a.extern.ConnectAdoClient(ctx)
 	if err != nil {
-		return nil, err
+		return common.Hash{}, nil, err
 	}
 	defer closer()
 
-	/*
-		agentTransactor, err := abigen.NewAgentTransactor(agentAddr, client)
-	*/
-
 	nonce, err := a.queries.ChainGetNonce(ctx, ownerAccount.EthAccount.Address)
 	if err != nil {
-		return nil, err
+		return common.Hash{}, nil, err
 	}
 
 	jws, err := token.SignJWS(ctx, agentAddr, minerAddr, common.Big0, constants.MethodRemoveMiner, requesterKey, a.queries)
 	if err != nil {
-		return nil, err
+		return common.Hash{}, nil, err
 	}
 
 	sc, err := rpc.ADOClient.SignCredential(ctx, jws)
 	if err != nil {
-		return nil, err
+		return common.Hash{}, nil, err
 	}
 
 	args := []interface{}{newOwner64, sc}
 
-	tx, err := util.WriteTx(
+	txHash, tx, err := util.WriteTx(
 		ctx,
 		lapi,
 		client,
@@ -393,10 +360,10 @@ func (a *fevmActions) AgentRemoveMiner(
 		"Agent Remove Miner",
 	)
 	if err != nil {
-		return nil, err
+		return common.Hash{}, nil, err
 	}
 
-	return tx, nil
+	return txHash, tx, nil
 }
 
 func (a *fevmActions) AgentChangeMinerWorker(
@@ -408,36 +375,29 @@ func (a *fevmActions) AgentChangeMinerWorker(
 	ownerWallet accounts.Wallet,
 	ownerAccount accounts.Account,
 	ownerPassphrase string,
-) (*types.Transaction, error) {
+) (common.Hash, *types.Transaction, error) {
 	lapi, lcloser, err := a.extern.ConnectLotusClient()
 	if err != nil {
-		return nil, err
+		return common.Hash{}, nil, err
 	}
 	defer lcloser()
 
 	client, err := a.extern.ConnectEthClient()
 	if err != nil {
-		return nil, err
+		return common.Hash{}, nil, err
 	}
 	defer client.Close()
-
-	/*
-		agentTransactor, err := abigen.NewAgentTransactor(agentAddr, client)
-		if err != nil {
-			return nil, err
-		}
-	*/
 
 	// convert miner address to ID address
 	minerID, err := address.IDFromAddress(minerAddr)
 	if err != nil {
-		return nil, err
+		return common.Hash{}, nil, err
 	}
 
 	// convert worker address to ID address
 	workerID, err := address.IDFromAddress(workerAddr)
 	if err != nil {
-		return nil, err
+		return common.Hash{}, nil, err
 	}
 
 	// convert control addresses to ID addresses
@@ -445,19 +405,19 @@ func (a *fevmActions) AgentChangeMinerWorker(
 	for _, controlAddr := range controlAddrs {
 		controlID, err := address.IDFromAddress(controlAddr)
 		if err != nil {
-			return nil, err
+			return common.Hash{}, nil, err
 		}
 		controlIDs = append(controlIDs, controlID)
 	}
 
 	nonce, err := a.queries.ChainGetNonce(ctx, ownerAccount.EthAccount.Address)
 	if err != nil {
-		return nil, err
+		return common.Hash{}, nil, err
 	}
 
 	args := []interface{}{minerID, workerID, controlIDs}
 
-	tx, err := util.WriteTx(
+	txHash, tx, err := util.WriteTx(
 		ctx,
 		lapi,
 		client,
@@ -474,10 +434,10 @@ func (a *fevmActions) AgentChangeMinerWorker(
 		"Agent Change Miner Worker",
 	)
 	if err != nil {
-		return nil, err
+		return common.Hash{}, nil, err
 	}
 
-	return tx, nil
+	return txHash, tx, nil
 }
 
 func (a *fevmActions) AgentConfirmMinerWorkerChange(
@@ -487,39 +447,32 @@ func (a *fevmActions) AgentConfirmMinerWorkerChange(
 	ownerWallet accounts.Wallet,
 	ownerAccount accounts.Account,
 	ownerPassphrase string,
-) (*types.Transaction, error) {
+) (common.Hash, *types.Transaction, error) {
 	lapi, lcloser, err := a.extern.ConnectLotusClient()
 	if err != nil {
-		return nil, err
+		return common.Hash{}, nil, err
 	}
 	defer lcloser()
 
 	client, err := a.extern.ConnectEthClient()
 	if err != nil {
-		return nil, err
+		return common.Hash{}, nil, err
 	}
 	defer client.Close()
 
 	minerU64, err := address.IDFromAddress(minerAddr)
 	if err != nil {
-		return nil, err
+		return common.Hash{}, nil, err
 	}
-
-	/*
-		agentTransactor, err := abigen.NewAgentTransactor(agentAddr, client)
-		if err != nil {
-			return nil, err
-		}
-	*/
 
 	nonce, err := a.queries.ChainGetNonce(ctx, ownerAccount.EthAccount.Address)
 	if err != nil {
-		return nil, err
+		return common.Hash{}, nil, err
 	}
 
 	args := []interface{}{minerU64}
 
-	tx, err := util.WriteTx(
+	txHash, tx, err := util.WriteTx(
 		ctx,
 		lapi,
 		client,
@@ -536,10 +489,10 @@ func (a *fevmActions) AgentConfirmMinerWorkerChange(
 		"Agent Confirm Miner Worker Change",
 	)
 	if err != nil {
-		return nil, err
+		return common.Hash{}, nil, err
 	}
 
-	return tx, nil
+	return txHash, tx, nil
 }
 
 // AgentPullFunds pulls funds from the agent to a miner
@@ -552,69 +505,62 @@ func (a *fevmActions) AgentPullFunds(
 	senderAccount accounts.Account,
 	senderPassphrase string,
 	requesterKey *ecdsa.PrivateKey,
-) (*types.Transaction, error) {
+) (common.Hash, *types.Transaction, error) {
 	lapi, lcloser, err := a.extern.ConnectLotusClient()
 	if err != nil {
-		return nil, err
+		return common.Hash{}, nil, err
 	}
 	defer lcloser()
 
 	client, err := a.extern.ConnectEthClient()
 	if err != nil {
-		return nil, err
+		return common.Hash{}, nil, err
 	}
 	defer client.Close()
 
 	agentID, err := a.queries.AgentID(ctx, agentAddr)
 	if err != nil {
-		return nil, err
+		return common.Hash{}, nil, err
 	}
 
 	minerRegistryCaller, err := abigen.NewMinerRegistryCaller(a.queries.MinerRegistry(), client)
 	if err != nil {
-		return nil, err
+		return common.Hash{}, nil, err
 	}
 
 	minerU64, err := address.IDFromAddress(minerAddr)
 	if err != nil {
-		return nil, err
+		return common.Hash{}, nil, err
 	}
 
 	registered, err := minerRegistryCaller.MinerRegistered(nil, agentID, minerU64)
 	if err != nil {
-		return nil, err
+		return common.Hash{}, nil, err
 	}
 
 	if !registered {
-		return nil, errors.New("Miner not registered with agent. Be sure to call `agent add-miner` first before pulling funds.")
+		return common.Hash{}, nil, errors.New("Miner not registered with agent. Be sure to call `agent add-miner` first before pulling funds.")
 	}
 
 	closer, err := a.extern.ConnectAdoClient(ctx)
 	if err != nil {
-		return nil, err
+		return common.Hash{}, nil, err
 	}
 	defer closer()
 
 	jws, err := token.SignJWS(ctx, agentAddr, minerAddr, amount, constants.MethodPullFunds, requesterKey, a.queries)
 	if err != nil {
-		return nil, err
+		return common.Hash{}, nil, err
 	}
 
 	sc, err := rpc.ADOClient.SignCredential(ctx, jws)
 	if err != nil {
-		return nil, err
+		return common.Hash{}, nil, err
 	}
-
-	/*
-		agentTransactor, err := abigen.NewAgentTransactor(agentAddr, client)
-		if err != nil {
-			return nil, err
-		}
-	*/
 
 	nonce, err := a.queries.ChainGetNonce(ctx, senderAccount.EthAccount.Address)
 	if err != nil {
-		return nil, err
+		return common.Hash{}, nil, err
 	}
 
 	args := []interface{}{sc}
@@ -647,69 +593,62 @@ func (a *fevmActions) AgentPushFunds(
 	senderAccount accounts.Account,
 	senderPassphrase string,
 	requesterKey *ecdsa.PrivateKey,
-) (*types.Transaction, error) {
+) (common.Hash, *types.Transaction, error) {
 	lapi, lcloser, err := a.extern.ConnectLotusClient()
 	if err != nil {
-		return nil, err
+		return common.Hash{}, nil, err
 	}
 	defer lcloser()
 
 	client, err := a.extern.ConnectEthClient()
 	if err != nil {
-		return nil, err
+		return common.Hash{}, nil, err
 	}
 	defer client.Close()
 
 	agentID, err := a.queries.AgentID(ctx, agentAddr)
 	if err != nil {
-		return nil, err
+		return common.Hash{}, nil, err
 	}
 
 	minerRegistryCaller, err := abigen.NewMinerRegistryCaller(a.queries.MinerRegistry(), client)
 	if err != nil {
-		return nil, err
+		return common.Hash{}, nil, err
 	}
 
 	minerU64, err := address.IDFromAddress(minerAddr)
 	if err != nil {
-		return nil, err
+		return common.Hash{}, nil, err
 	}
 
 	registered, err := minerRegistryCaller.MinerRegistered(nil, agentID, minerU64)
 	if err != nil {
-		return nil, err
+		return common.Hash{}, nil, err
 	}
 
 	if !registered {
-		return nil, errors.New("Miner not registered with agent. Be sure to call `agent add-miner` first before pushing funds.")
+		return common.Hash{}, nil, errors.New("Miner not registered with agent. Be sure to call `agent add-miner` first before pushing funds.")
 	}
 
 	closer, err := a.extern.ConnectAdoClient(ctx)
 	if err != nil {
-		return nil, err
+		return common.Hash{}, nil, err
 	}
 	defer closer()
 
 	jws, err := token.SignJWS(ctx, agentAddr, minerAddr, amount, constants.MethodPushFunds, requesterKey, a.queries)
 	if err != nil {
-		return nil, err
+		return common.Hash{}, nil, err
 	}
 
 	sc, err := rpc.ADOClient.SignCredential(ctx, jws)
 	if err != nil {
-		return nil, err
+		return common.Hash{}, nil, err
 	}
-
-	/*
-		agentTransactor, err := abigen.NewAgentTransactor(agentAddr, client)
-		if err != nil {
-			return nil, err
-		}
-	*/
 
 	nonce, err := a.queries.ChainGetNonce(ctx, senderAccount.EthAccount.Address)
 	if err != nil {
-		return nil, err
+		return common.Hash{}, nil, err
 	}
 
 	args := []interface{}{sc}
@@ -741,45 +680,38 @@ func (a *fevmActions) AgentWithdraw(
 	ownerAccount accounts.Account,
 	ownerPassphrase string,
 	requesterKey *ecdsa.PrivateKey,
-) (*types.Transaction, error) {
+) (common.Hash, *types.Transaction, error) {
 	lapi, lcloser, err := a.extern.ConnectLotusClient()
 	if err != nil {
-		return nil, err
+		return common.Hash{}, nil, err
 	}
 	defer lcloser()
 
 	client, err := a.extern.ConnectEthClient()
 	if err != nil {
-		return nil, err
+		return common.Hash{}, nil, err
 	}
 	defer client.Close()
 
-	/*
-		agentTransactor, err := abigen.NewAgentTransactor(agentAddr, client)
-		if err != nil {
-			return nil, err
-		}
-	*/
-
 	closer, err := a.extern.ConnectAdoClient(ctx)
 	if err != nil {
-		return nil, err
+		return common.Hash{}, nil, err
 	}
 	defer closer()
 
 	nonce, err := a.queries.ChainGetNonce(ctx, ownerAccount.EthAccount.Address)
 	if err != nil {
-		return nil, err
+		return common.Hash{}, nil, err
 	}
 
 	jws, err := token.SignJWS(ctx, agentAddr, address.Undef, amount, constants.MethodWithdraw, requesterKey, a.queries)
 	if err != nil {
-		return nil, err
+		return common.Hash{}, nil, err
 	}
 
 	sc, err := rpc.ADOClient.SignCredential(ctx, jws)
 	if err != nil {
-		return nil, err
+		return common.Hash{}, nil, err
 	}
 
 	args := []interface{}{receiver, sc}
@@ -808,29 +740,22 @@ func (a *fevmActions) AgentRefreshRoutes(
 	senderWallet accounts.Wallet,
 	senderAccount accounts.Account,
 	senderPassphrase string,
-) (*types.Transaction, error) {
+) (common.Hash, *types.Transaction, error) {
 	lapi, lcloser, err := a.extern.ConnectLotusClient()
 	if err != nil {
-		return nil, err
+		return common.Hash{}, nil, err
 	}
 	defer lcloser()
 
 	client, err := a.extern.ConnectEthClient()
 	if err != nil {
-		return nil, err
+		return common.Hash{}, nil, err
 	}
 	defer client.Close()
 
-	/*
-		agentTransactor, err := abigen.NewAgentTransactor(agentAddr, client)
-		if err != nil {
-			return nil, err
-		}
-	*/
-
 	nonce, err := a.queries.ChainGetNonce(ctx, senderAccount.EthAccount.Address)
 	if err != nil {
-		return nil, err
+		return common.Hash{}, nil, err
 	}
 
 	return util.WriteTx(

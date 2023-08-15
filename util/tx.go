@@ -31,10 +31,10 @@ func WriteTx(
 	contractAddress common.Address,
 	methodName string,
 	label string,
-) (*types.Transaction, error) {
+) (common.Hash, *types.Transaction, error) {
 	wrappedClient, auth, err := walletutils.NewWalletTransactor(ctx, lapi, client, wallet, &account, passphrase, chainID)
 	if err != nil {
-		return &types.Transaction{}, err
+		return common.Hash{}, &types.Transaction{}, err
 	}
 
 	auth.Nonce = nonce
@@ -50,7 +50,7 @@ func WriteTx(
 	instance := abigenTransactorResults[0]
 	if !abigenTransactorResults[1].IsNil() {
 		err = abigenTransactorResults[1].Interface().(error)
-		return nil, err
+		return common.Hash{}, nil, err
 	}
 
 	// Use reflection to call the writeTx function with the required arguments
@@ -65,19 +65,22 @@ func WriteTx(
 	result := writeTxValue.Call(writeTxArgs)
 
 	if !result[1].IsNil() {
-		return nil, HumanReadableRevert(result[1].Interface().(error))
+		return common.Hash{}, nil, HumanReadableRevert(result[1].Interface().(error))
 	}
 
 	// Get the transaction and error from the result
 	tx := result[0].Interface().(*types.Transaction)
 
 	if tx == nil {
-		return nil, fmt.Errorf("Transaction is nil")
+		return common.Hash{}, nil, fmt.Errorf("Transaction is nil")
 	}
 
-	fmt.Println("Transaction:", tx.Hash())
+	// fmt.Println("Original Eth Transaction Hash:", tx.Hash())
 
-	return tx, err
+	txHash := wrappedClient.FilecoinEthHash(tx.Hash())
+	fmt.Println("Transaction:", txHash)
+
+	return txHash, tx, err
 }
 
 func propagateErr(returnTrace filtypes.ReturnTrace) error {

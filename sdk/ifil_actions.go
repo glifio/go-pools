@@ -18,29 +18,22 @@ func (a *fevmActions) IFILTransfer(
 	senderWallet accounts.Wallet,
 	senderAccount accounts.Account,
 	senderPassphrase string,
-) (*types.Transaction, error) {
+) (common.Hash, *types.Transaction, error) {
 	lapi, lcloser, err := a.extern.ConnectLotusClient()
 	if err != nil {
-		return nil, err
+		return common.Hash{}, nil, err
 	}
 	defer lcloser()
 
 	client, err := a.extern.ConnectEthClient()
 	if err != nil {
-		return nil, err
+		return common.Hash{}, nil, err
 	}
 	defer client.Close()
 
-	/*
-		iFILTransactor, err := abigen.NewPoolTokenTransactor(a.queries.IFIL(), client)
-		if err != nil {
-			return nil, err
-		}
-	*/
-
 	nonce, err := a.queries.ChainGetNonce(ctx, senderAccount.EthAccount.Address)
 	if err != nil {
-		return nil, err
+		return common.Hash{}, nil, err
 	}
 
 	args := []interface{}{receiver, amount}
@@ -70,29 +63,22 @@ func (a *fevmActions) IFILApprove(
 	senderWallet accounts.Wallet,
 	senderAccount accounts.Account,
 	senderPassphrase string,
-) (*types.Transaction, error) {
+) (common.Hash, *types.Transaction, error) {
 	lapi, lcloser, err := a.extern.ConnectLotusClient()
 	if err != nil {
-		return nil, err
+		return common.Hash{}, nil, err
 	}
 	defer lcloser()
 
 	client, err := a.extern.ConnectEthClient()
 	if err != nil {
-		return nil, err
+		return common.Hash{}, nil, err
 	}
 	defer client.Close()
 
-	/*
-		iFILTransactor, err := abigen.NewPoolTokenTransactor(a.queries.IFIL(), client)
-		if err != nil {
-			return nil, err
-		}
-	*/
-
 	nonce, err := a.queries.ChainGetNonce(ctx, senderAccount.EthAccount.Address)
 	if err != nil {
-		return nil, err
+		return common.Hash{}, nil, err
 	}
 
 	args := []interface{}{spender, allowance}

@@ -18,16 +18,16 @@ func (a *fevmActions) InfPoolDepositFIL(
 	senderWallet accounts.Wallet,
 	senderAccount accounts.Account,
 	senderPassphrase string,
-) (*types.Transaction, error) {
+) (common.Hash, *types.Transaction, error) {
 	lapi, lcloser, err := a.extern.ConnectLotusClient()
 	if err != nil {
-		return nil, err
+		return common.Hash{}, nil, err
 	}
 	defer lcloser()
 
 	client, err := a.extern.ConnectEthClient()
 	if err != nil {
-		return nil, err
+		return common.Hash{}, nil, err
 	}
 	defer client.Close()
 
@@ -40,7 +40,7 @@ func (a *fevmActions) InfPoolDepositFIL(
 
 	nonce, err := a.queries.ChainGetNonce(ctx, senderAccount.EthAccount.Address)
 	if err != nil {
-		return nil, err
+		return common.Hash{}, nil, err
 	}
 
 	args := []interface{}{receiver}
