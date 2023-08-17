@@ -28,13 +28,14 @@ type Method string
 
 // these method names must match the names in the Agent contract in order to get the right function signature
 var (
-	MethodBorrow      Method = "borrow"
-	MethodPay         Method = "pay"
-	MethodAddMiner    Method = "addMiner"
-	MethodRemoveMiner Method = "removeMiner"
-	MethodWithdraw    Method = "withdraw"
-	MethodPushFunds   Method = "pushFunds"
-	MethodPullFunds   Method = "pullFunds"
+	MethodBorrow       Method = "borrow"
+	MethodPay          Method = "pay"
+	MethodAddMiner     Method = "addMiner"
+	MethodRemoveMiner  Method = "removeMiner"
+	MethodWithdraw     Method = "withdraw"
+	MethodPushFunds    Method = "pushFunds"
+	MethodPullFunds    Method = "pullFunds"
+	MethodSetRecovered Method = "setRecovered"
 )
 
 type Route string
