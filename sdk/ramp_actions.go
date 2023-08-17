@@ -35,7 +35,7 @@ func (a *fevmActions) RampWithdraw(ctx context.Context, assets *big.Int, receive
 
 	args := []interface{}{assets, receiver, fromAddr, common.Big0}
 
-	return util.WriteTx(ctx, pk, a.queries.ChainID(), common.Big0, nonce, args, rampTransactor.Withdraw, "Withdraw from Ramp")
+	return util.WriteTx(ctx, pk, a.queries.ChainID(), common.Big0, nonce, args, rampTransactor.WithdrawF, "Withdraw from Ramp")
 }
 
 func (a *fevmActions) RampRedeem(ctx context.Context, shares *big.Int, receiver common.Address, pk *ecdsa.PrivateKey) (*types.Transaction, error) {
@@ -62,5 +62,5 @@ func (a *fevmActions) RampRedeem(ctx context.Context, shares *big.Int, receiver 
 
 	args := []interface{}{shares, receiver, fromAddr, common.Big0}
 
-	return util.WriteTx(ctx, pk, a.queries.ChainID(), common.Big0, nonce, args, rampTransactor.Redeem, "Redeem from Ramp")
+	return util.WriteTx(ctx, pk, a.queries.ChainID(), common.Big0, nonce, args, rampTransactor.RedeemF, "Redeem from Ramp")
 }
