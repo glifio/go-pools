@@ -28,13 +28,14 @@ type Method string
 
 // these method names must match the names in the Agent contract in order to get the right function signature
 var (
-	MethodBorrow      Method = "borrow"
-	MethodPay         Method = "pay"
-	MethodAddMiner    Method = "addMiner"
-	MethodRemoveMiner Method = "removeMiner"
-	MethodWithdraw    Method = "withdraw"
-	MethodPushFunds   Method = "pushFunds"
-	MethodPullFunds   Method = "pullFunds"
+	MethodBorrow       Method = "borrow"
+	MethodPay          Method = "pay"
+	MethodAddMiner     Method = "addMiner"
+	MethodRemoveMiner  Method = "removeMiner"
+	MethodWithdraw     Method = "withdraw"
+	MethodPushFunds    Method = "pushFunds"
+	MethodPullFunds    Method = "pullFunds"
+	MethodSetRecovered Method = "setRecovered"
 )
 
 type Route string
@@ -59,3 +60,5 @@ var WAD = big.NewInt(1e18)
 // the infinity pool is the first pool created, and has a 0 id
 // cache this here to not fetch it from the contracts every time we need it
 var INFINITY_POOL_ID = big.NewInt(0)
+
+var CHUNKSIZE = big.NewInt(50000)

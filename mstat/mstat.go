@@ -5,7 +5,6 @@ import (
 	"log"
 	"math"
 	"math/big"
-	"time"
 
 	"github.com/filecoin-project/go-address"
 	"github.com/filecoin-project/go-state-types/abi"
@@ -127,6 +126,31 @@ func ComputeMinerStats(ctx context.Context, minerAddr address.Address, ts *types
 	return minerStats, nil
 }
 
+func ComputeFilPerTiB(ctx context.Context, ts *types.TipSet, api api.FullNode) (*float64, error) {
+	// get the block rewards for this epoch
+	reward, err := getBlockReward(ctx, api, ts)
+	if err != nil {
+		return nil, err
+	}
+
+	// get the smoothed power for this epoch
+	power, err := api.StateMinerPower(ctx, address.Undef, ts.Key())
+	if err != nil {
+		return nil, err
+	}
+
+	// calculate the ratio of reward to power
+	ratio, _ := new(big.Rat).SetFrac(
+		big.NewInt(0).Mul(reward, big.NewInt(0).SetUint64(build.BlocksPerEpoch)),
+		big.NewInt(0).Div(power.TotalPower.QualityAdjPower.Int, big.NewInt(1099511627776)),
+	).Float64()
+
+	// multiply by 2880 to get the daily reward
+	ratio = ratio * 2880
+
+	return &ratio, nil
+}
+
 func ComputeEDRLazy1(ctx context.Context, minerAddr address.Address, ts *types.TipSet, api api.FullNode) (*big.Int, error) {
 	pow, err := api.StateMinerPower(ctx, minerAddr, ts.Key())
 	if err != nil {
@@ -139,7 +163,6 @@ func ComputeEDRLazy1(ctx context.Context, minerAddr address.Address, ts *types.T
 		if err != nil {
 			return nil, err
 		}
-		log.Printf("block reward: %v", reward)
 
 		winRatio := new(big.Rat).SetFrac(
 			types.BigMul(pow.MinerPower.QualityAdjPower, types.NewInt(build.BlocksPerEpoch)).Int,
@@ -161,50 +184,11 @@ func ComputeEDRLazy1(ctx context.Context, minerAddr address.Address, ts *types.T
 				new(big.Rat).SetInt64(builtin.EpochsInDay),
 			).Float64()
 
-			weekly, _ := new(big.Rat).Mul(
-				winRatio,
-				new(big.Rat).SetInt64(7*builtin.EpochsInDay),
-			).Float64()
-
-			avgDuration, _ := new(big.Rat).Mul(
-				new(big.Rat).SetInt64(builtin.EpochDurationSeconds),
-				new(big.Rat).Inv(winRatio),
-			).Float64()
-
-			log.Print("Projected average block win rate: ")
-			log.Printf(
-				"%.02f/week (every %s)",
-				weekly,
-				(time.Second * time.Duration(avgDuration)).Truncate(time.Second).String(),
-			)
-			log.Printf(
-				"%.02f/day (every %s)",
-				daily,
-				(time.Second * time.Duration(avgDuration)).Truncate(time.Second).String(),
-			)
-
-			// Geometric distribution of P(Y < k) calculated as described in https://en.wikipedia.org/wiki/Geometric_distribution#Probability_Outcomes_Examples
-			// https://www.wolframalpha.com/input/?i=t+%3E+0%3B+p+%3E+0%3B+p+%3C+1%3B+c+%3E+0%3B+c+%3C1%3B+1-%281-p%29%5E%28t%29%3Dc%3B+solve+t
-			// t == how many dice-rolls (epochs) before win
-			// p == winRate == ( minerPower / netPower )
-			// c == target probability of win ( 99.9% in this case )
-			log.Print("Projected block win with ")
-			log.Printf(
-				"99.9%% probability every %s",
-				(time.Second * time.Duration(
-					builtin.EpochDurationSeconds*math.Log(1-0.999)/
-						math.Log(1-winRatioFloat),
-				)).Truncate(time.Second).String(),
-			)
-			log.Println("(projections DO NOT account for future network and miner growth)")
-
 			dailyFloat := new(big.Float).SetFloat64(daily)
-			log.Printf("daily win ratio: %v", dailyFloat)
 
 			rewardFloat := new(big.Float).SetInt(reward)
 
 			totalRewardsBigFloat := new(big.Float).Mul(dailyFloat, rewardFloat)
-			log.Printf("total reward: %v", totalRewardsBigFloat)
 
 			edr, _ := totalRewardsBigFloat.Int(nil)
 
@@ -332,7 +316,6 @@ func computeSectorStatus(ctx context.Context, lotus api.FullNode, miner address.
 		if err != nil {
 			return nil, err
 		}
-		log.Printf("Sector count(%d): %d", ts.Height(), sectorCount)
 
 		// add result to the total and average it
 		sectorStatus.Live += sectorCount.Live
@@ -343,8 +326,6 @@ func computeSectorStatus(ctx context.Context, lotus api.FullNode, miner address.
 	sectorStatus.Live = sectorStatus.Live / LOOK_BACK_LIMIT
 	sectorStatus.Active = sectorStatus.Active / LOOK_BACK_LIMIT
 	sectorStatus.Faulty = sectorStatus.Faulty / LOOK_BACK_LIMIT
-
-	log.Printf("Sector average(%d): %d", tsk.Height(), sectorStatus)
 
 	return &sectorStatus, nil
 }

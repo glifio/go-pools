@@ -873,6 +873,120 @@ func (_c *FEVMActions_InfPoolDepositFIL_Call) RunAndReturn(run func(context.Cont
 	return _c
 }
 
+// RampRedeem provides a mock function with given fields: ctx, shares, receiver, pk
+func (_m *FEVMActions) RampRedeem(ctx context.Context, shares *big.Int, receiver common.Address, pk *ecdsa.PrivateKey) (*types.Transaction, error) {
+	ret := _m.Called(ctx, shares, receiver, pk)
+
+	var r0 *types.Transaction
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, *big.Int, common.Address, *ecdsa.PrivateKey) (*types.Transaction, error)); ok {
+		return rf(ctx, shares, receiver, pk)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, *big.Int, common.Address, *ecdsa.PrivateKey) *types.Transaction); ok {
+		r0 = rf(ctx, shares, receiver, pk)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*types.Transaction)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, *big.Int, common.Address, *ecdsa.PrivateKey) error); ok {
+		r1 = rf(ctx, shares, receiver, pk)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// FEVMActions_RampRedeem_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'RampRedeem'
+type FEVMActions_RampRedeem_Call struct {
+	*mock.Call
+}
+
+// RampRedeem is a helper method to define mock.On call
+//   - ctx context.Context
+//   - shares *big.Int
+//   - receiver common.Address
+//   - pk *ecdsa.PrivateKey
+func (_e *FEVMActions_Expecter) RampRedeem(ctx interface{}, shares interface{}, receiver interface{}, pk interface{}) *FEVMActions_RampRedeem_Call {
+	return &FEVMActions_RampRedeem_Call{Call: _e.mock.On("RampRedeem", ctx, shares, receiver, pk)}
+}
+
+func (_c *FEVMActions_RampRedeem_Call) Run(run func(ctx context.Context, shares *big.Int, receiver common.Address, pk *ecdsa.PrivateKey)) *FEVMActions_RampRedeem_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(*big.Int), args[2].(common.Address), args[3].(*ecdsa.PrivateKey))
+	})
+	return _c
+}
+
+func (_c *FEVMActions_RampRedeem_Call) Return(_a0 *types.Transaction, _a1 error) *FEVMActions_RampRedeem_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *FEVMActions_RampRedeem_Call) RunAndReturn(run func(context.Context, *big.Int, common.Address, *ecdsa.PrivateKey) (*types.Transaction, error)) *FEVMActions_RampRedeem_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// RampWithdraw provides a mock function with given fields: ctx, assets, receiver, pk
+func (_m *FEVMActions) RampWithdraw(ctx context.Context, assets *big.Int, receiver common.Address, pk *ecdsa.PrivateKey) (*types.Transaction, error) {
+	ret := _m.Called(ctx, assets, receiver, pk)
+
+	var r0 *types.Transaction
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, *big.Int, common.Address, *ecdsa.PrivateKey) (*types.Transaction, error)); ok {
+		return rf(ctx, assets, receiver, pk)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, *big.Int, common.Address, *ecdsa.PrivateKey) *types.Transaction); ok {
+		r0 = rf(ctx, assets, receiver, pk)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*types.Transaction)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, *big.Int, common.Address, *ecdsa.PrivateKey) error); ok {
+		r1 = rf(ctx, assets, receiver, pk)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// FEVMActions_RampWithdraw_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'RampWithdraw'
+type FEVMActions_RampWithdraw_Call struct {
+	*mock.Call
+}
+
+// RampWithdraw is a helper method to define mock.On call
+//   - ctx context.Context
+//   - assets *big.Int
+//   - receiver common.Address
+//   - pk *ecdsa.PrivateKey
+func (_e *FEVMActions_Expecter) RampWithdraw(ctx interface{}, assets interface{}, receiver interface{}, pk interface{}) *FEVMActions_RampWithdraw_Call {
+	return &FEVMActions_RampWithdraw_Call{Call: _e.mock.On("RampWithdraw", ctx, assets, receiver, pk)}
+}
+
+func (_c *FEVMActions_RampWithdraw_Call) Run(run func(ctx context.Context, assets *big.Int, receiver common.Address, pk *ecdsa.PrivateKey)) *FEVMActions_RampWithdraw_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(*big.Int), args[2].(common.Address), args[3].(*ecdsa.PrivateKey))
+	})
+	return _c
+}
+
+func (_c *FEVMActions_RampWithdraw_Call) Return(_a0 *types.Transaction, _a1 error) *FEVMActions_RampWithdraw_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *FEVMActions_RampWithdraw_Call) RunAndReturn(run func(context.Context, *big.Int, common.Address, *ecdsa.PrivateKey) (*types.Transaction, error)) *FEVMActions_RampWithdraw_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 type mockConstructorTestingTNewFEVMActions interface {
 	mock.TestingT
 	Cleanup(func())
