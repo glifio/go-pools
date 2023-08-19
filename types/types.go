@@ -116,8 +116,8 @@ type FEVMActions interface {
 	InfPoolDepositFIL(ctx context.Context, agentAddr common.Address, amount *big.Int, senderWallet accounts.Wallet, senderAccount accounts.Account, senderPassphrase string) (*types.Transaction, error)
 
 	// ramp actions
-	RampWithdraw(ctx context.Context, assets *big.Int, receiver common.Address, pk *ecdsa.PrivateKey) (*types.Transaction, error)
-	RampRedeem(ctx context.Context, shares *big.Int, receiver common.Address, pk *ecdsa.PrivateKey) (*types.Transaction, error)
+	RampWithdraw(ctx context.Context, assets *big.Int, receiver common.Address, senderWallet accounts.Wallet, senderAccount accounts.Account, senderPassphrase string) (*types.Transaction, error)
+	RampRedeem(ctx context.Context, shares *big.Int, receiver common.Address, senderWallet accounts.Wallet, senderAccount accounts.Account, senderPassphrase string) (*types.Transaction, error)
 
 	// iFIL actions
 	IFILTransfer(ctx context.Context, receiver common.Address, amount *big.Int, senderWallet accounts.Wallet, senderAccount accounts.Account, senderPassphrase string) (*types.Transaction, error)
