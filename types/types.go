@@ -5,7 +5,6 @@ import (
 	"crypto/ecdsa"
 	"math/big"
 
-	"github.com/ethereum/go-ethereum/accounts"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
@@ -102,27 +101,27 @@ type FEVMQueries interface {
 type FEVMActions interface {
 	// agent actions
 	AgentCreate(ctx context.Context, auth *bind.TransactOpts, owner common.Address, operator common.Address, request common.Address) (*types.Transaction, error)
-	AgentBorrow(ctx context.Context, agentAddr common.Address, poolID *big.Int, amount *big.Int, ownerWallet accounts.Wallet, ownerAccount accounts.Account, ownerPassphrase string, requesterKey *ecdsa.PrivateKey) (*types.Transaction, error)
-	AgentPay(ctx context.Context, agentAddr common.Address, poolID *big.Int, amount *big.Int, senderWallet accounts.Wallet, senderAccount accounts.Account, senderPassphrase string, requesterKey *ecdsa.PrivateKey) (*types.Transaction, error)
+	AgentBorrow(ctx context.Context, auth *bind.TransactOpts, agentAddr common.Address, poolID *big.Int, amount *big.Int, requesterKey *ecdsa.PrivateKey) (*types.Transaction, error)
+	AgentPay(ctx context.Context, auth *bind.TransactOpts, agentAddr common.Address, poolID *big.Int, amount *big.Int, requesterKey *ecdsa.PrivateKey) (*types.Transaction, error)
 	AgentAddMiner(ctx context.Context, auth *bind.TransactOpts, agentAddr common.Address, minerAddr address.Address, requesterKey *ecdsa.PrivateKey) (*types.Transaction, error)
-	AgentRemoveMiner(ctx context.Context, agentAddr common.Address, minerAddr address.Address, newOwnerAddr address.Address, ownerWallet accounts.Wallet, ownerAccount accounts.Account, ownerPassphrase string, requesterKey *ecdsa.PrivateKey) (*types.Transaction, error)
-	AgentChangeMinerWorker(ctx context.Context, agentAddr common.Address, minerAddr address.Address, workerAddr address.Address, controlAddrs []address.Address, ownerWallet accounts.Wallet, ownerAccount accounts.Account, ownerPassphrase string) (*types.Transaction, error)
-	AgentConfirmMinerWorkerChange(ctx context.Context, agentAddr common.Address, minerAddr address.Address, ownerWallet accounts.Wallet, ownerAccount accounts.Account, ownerPassphrase string) (*types.Transaction, error)
-	AgentPullFunds(ctx context.Context, agentAddr common.Address, amount *big.Int, miner address.Address, senderWallet accounts.Wallet, senderAccount accounts.Account, senderPassphrase string, requesterKey *ecdsa.PrivateKey) (*types.Transaction, error)
-	AgentPushFunds(ctx context.Context, agentAddr common.Address, amount *big.Int, miner address.Address, senderWallet accounts.Wallet, senderAccount accounts.Account, senderPassphrase string, requesterKey *ecdsa.PrivateKey) (*types.Transaction, error)
-	AgentWithdraw(ctx context.Context, agentAddr common.Address, receiver common.Address, amount *big.Int, ownerWallet accounts.Wallet, ownerAccount accounts.Account, ownerPassphrase string, requesterKey *ecdsa.PrivateKey) (*types.Transaction, error)
-	AgentRefreshRoutes(ctx context.Context, agentAddr common.Address, senderWallet accounts.Wallet, senderAccount accounts.Account, senderPassphrase string) (*types.Transaction, error)
+	AgentRemoveMiner(ctx context.Context, auth *bind.TransactOpts, agentAddr common.Address, minerAddr address.Address, newOwnerAddr address.Address, requesterKey *ecdsa.PrivateKey) (*types.Transaction, error)
+	AgentChangeMinerWorker(ctx context.Context, auth *bind.TransactOpts, agentAddr common.Address, minerAddr address.Address, workerAddr address.Address, controlAddrs []address.Address) (*types.Transaction, error)
+	AgentConfirmMinerWorkerChange(ctx context.Context, auth *bind.TransactOpts, agentAddr common.Address, minerAddr address.Address) (*types.Transaction, error)
+	AgentPullFunds(ctx context.Context, auth *bind.TransactOpts, agentAddr common.Address, amount *big.Int, miner address.Address, requesterKey *ecdsa.PrivateKey) (*types.Transaction, error)
+	AgentPushFunds(ctx context.Context, auth *bind.TransactOpts, agentAddr common.Address, amount *big.Int, miner address.Address, requesterKey *ecdsa.PrivateKey) (*types.Transaction, error)
+	AgentWithdraw(ctx context.Context, auth *bind.TransactOpts, agentAddr common.Address, receiver common.Address, amount *big.Int, requesterKey *ecdsa.PrivateKey) (*types.Transaction, error)
+	AgentRefreshRoutes(ctx context.Context, auth *bind.TransactOpts, agentAddr common.Address) (*types.Transaction, error)
 
 	// infinity pool actions
-	InfPoolDepositFIL(ctx context.Context, agentAddr common.Address, amount *big.Int, senderWallet accounts.Wallet, senderAccount accounts.Account, senderPassphrase string) (*types.Transaction, error)
+	InfPoolDepositFIL(ctx context.Context, auth *bind.TransactOpts, agentAddr common.Address, amount *big.Int) (*types.Transaction, error)
 
 	// ramp actions
-	RampWithdraw(ctx context.Context, assets *big.Int, receiver common.Address, senderWallet accounts.Wallet, senderAccount accounts.Account, senderPassphrase string) (*types.Transaction, error)
-	RampRedeem(ctx context.Context, shares *big.Int, receiver common.Address, senderWallet accounts.Wallet, senderAccount accounts.Account, senderPassphrase string) (*types.Transaction, error)
+	RampWithdraw(ctx context.Context, auth *bind.TransactOpts, assets *big.Int, sender common.Address, receiver common.Address) (*types.Transaction, error)
+	RampRedeem(ctx context.Context, auth *bind.TransactOpts, shares *big.Int, sender common.Address, receiver common.Address) (*types.Transaction, error)
 
 	// iFIL actions
-	IFILTransfer(ctx context.Context, receiver common.Address, amount *big.Int, senderWallet accounts.Wallet, senderAccount accounts.Account, senderPassphrase string) (*types.Transaction, error)
-	IFILApprove(ctx context.Context, spender common.Address, allowance *big.Int, senderWallet accounts.Wallet, senderAccount accounts.Account, senderPassphrase string) (*types.Transaction, error)
+	IFILTransfer(ctx context.Context, auth *bind.TransactOpts, receiver common.Address, amount *big.Int) (*types.Transaction, error)
+	IFILApprove(ctx context.Context, auth *bind.TransactOpts, spender common.Address, allowance *big.Int) (*types.Transaction, error)
 }
 
 //go:generate mockery --name FEVMExtern

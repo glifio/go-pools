@@ -4,21 +4,14 @@ import (
 	"context"
 	"math/big"
 
-	"github.com/ethereum/go-ethereum/accounts"
+	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/glifio/go-pools/abigen"
 	"github.com/glifio/go-pools/util"
 )
 
-func (a *fevmActions) IFILTransfer(
-	ctx context.Context,
-	receiver common.Address,
-	amount *big.Int,
-	senderWallet accounts.Wallet,
-	senderAccount accounts.Account,
-	senderPassphrase string,
-) (*types.Transaction, error) {
+func (a *fevmActions) IFILTransfer(ctx context.Context, auth *bind.TransactOpts, receiver common.Address, amount *big.Int) (*types.Transaction, error) {
 	client, err := a.extern.ConnectEthClient()
 	if err != nil {
 		return nil, err
@@ -26,28 +19,16 @@ func (a *fevmActions) IFILTransfer(
 	defer client.Close()
 
 	iFILTransactor, err := abigen.NewPoolTokenTransactor(a.queries.IFIL(), client)
-	if err != nil {
-		return nil, err
-	}
-
-	nonce, err := a.queries.ChainGetNonce(ctx, senderAccount.Address)
 	if err != nil {
 		return nil, err
 	}
 
 	args := []interface{}{receiver, amount}
 
-	return util.WriteTx(ctx, senderWallet, senderAccount, senderPassphrase, a.queries.ChainID(), common.Big0, nonce, args, iFILTransactor.Transfer, "Transfer iFIL")
+	return util.WriteTxStaging(ctx, auth, a.queries.ChainID(), common.Big0, nil, args, iFILTransactor.Transfer, "Transfer iFIL")
 }
 
-func (a *fevmActions) IFILApprove(
-	ctx context.Context,
-	spender common.Address,
-	allowance *big.Int,
-	senderWallet accounts.Wallet,
-	senderAccount accounts.Account,
-	senderPassphrase string,
-) (*types.Transaction, error) {
+func (a *fevmActions) IFILApprove(ctx context.Context, auth *bind.TransactOpts, spender common.Address, allowance *big.Int) (*types.Transaction, error) {
 	client, err := a.extern.ConnectEthClient()
 	if err != nil {
 		return nil, err
@@ -59,12 +40,7 @@ func (a *fevmActions) IFILApprove(
 		return nil, err
 	}
 
-	nonce, err := a.queries.ChainGetNonce(ctx, senderAccount.Address)
-	if err != nil {
-		return nil, err
-	}
-
 	args := []interface{}{spender, allowance}
 
-	return util.WriteTx(ctx, senderWallet, senderAccount, senderPassphrase, a.queries.ChainID(), common.Big0, nonce, args, iFILTransactor.Approve, "Approve iFIL")
+	return util.WriteTxStaging(ctx, auth, a.queries.ChainID(), common.Big0, nil, args, iFILTransactor.Approve, "Approve iFIL")
 }

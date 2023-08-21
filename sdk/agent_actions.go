@@ -6,7 +6,6 @@ import (
 	"errors"
 	"math/big"
 
-	"github.com/ethereum/go-ethereum/accounts"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
@@ -19,13 +18,7 @@ import (
 	"github.com/glifio/go-pools/util"
 )
 
-func (a *fevmActions) AgentCreate(
-	ctx context.Context,
-	auth *bind.TransactOpts,
-	owner common.Address,
-	operator common.Address,
-	request common.Address,
-) (*types.Transaction, error) {
+func (a *fevmActions) AgentCreate(ctx context.Context, auth *bind.TransactOpts, owner common.Address, operator common.Address, request common.Address) (*types.Transaction, error) {
 	client, err := a.extern.ConnectEthClient()
 	if err != nil {
 		return nil, err
@@ -39,28 +32,10 @@ func (a *fevmActions) AgentCreate(
 
 	args := []interface{}{owner, operator, request}
 
-	return util.WriteTxStaging(
-		ctx,
-		auth,
-		a.queries.ChainID(),
-		common.Big0,
-		nil,
-		args,
-		agentFactoryTransactor.Create,
-		"Agent Create",
-	)
+	return util.WriteTxStaging(ctx, auth, a.queries.ChainID(), common.Big0, nil, args, agentFactoryTransactor.Create, "Agent Create")
 }
 
-func (a *fevmActions) AgentBorrow(
-	ctx context.Context,
-	agentAddr common.Address,
-	poolID *big.Int,
-	amount *big.Int,
-	ownerWallet accounts.Wallet,
-	ownerAccount accounts.Account,
-	ownerPassphrase string,
-	requesterKey *ecdsa.PrivateKey,
-) (*types.Transaction, error) {
+func (a *fevmActions) AgentBorrow(ctx context.Context, auth *bind.TransactOpts, agentAddr common.Address, poolID *big.Int, amount *big.Int, requesterKey *ecdsa.PrivateKey) (*types.Transaction, error) {
 	client, err := a.extern.ConnectEthClient()
 	if err != nil {
 		return nil, err
@@ -88,26 +63,12 @@ func (a *fevmActions) AgentBorrow(
 		return nil, err
 	}
 
-	nonce, err := a.queries.ChainGetNonce(ctx, ownerAccount.Address)
-	if err != nil {
-		return nil, err
-	}
-
 	args := []interface{}{poolID, sc}
 
-	return util.WriteTx(ctx, ownerWallet, ownerAccount, ownerPassphrase, a.queries.ChainID(), common.Big0, nonce, args, agentTransactor.Borrow, "Agent Borrow")
+	return util.WriteTxStaging(ctx, auth, a.queries.ChainID(), common.Big0, nil, args, agentTransactor.Borrow, "Agent Borrow")
 }
 
-func (a *fevmActions) AgentPay(
-	ctx context.Context,
-	agentAddr common.Address,
-	poolID *big.Int,
-	amount *big.Int,
-	senderWallet accounts.Wallet,
-	senderAccount accounts.Account,
-	senderPassphrase string,
-	requesterKey *ecdsa.PrivateKey,
-) (*types.Transaction, error) {
+func (a *fevmActions) AgentPay(ctx context.Context, auth *bind.TransactOpts, agentAddr common.Address, poolID *big.Int, amount *big.Int, requesterKey *ecdsa.PrivateKey) (*types.Transaction, error) {
 	client, err := a.extern.ConnectEthClient()
 	if err != nil {
 		return nil, err
@@ -125,11 +86,6 @@ func (a *fevmActions) AgentPay(
 	}
 	defer closer()
 
-	nonce, err := a.queries.ChainGetNonce(ctx, senderAccount.Address)
-	if err != nil {
-		return nil, err
-	}
-
 	jws, err := token.SignJWS(ctx, agentAddr, address.Undef, amount, constants.MethodPay, requesterKey, a.queries)
 	if err != nil {
 		return nil, err
@@ -142,16 +98,10 @@ func (a *fevmActions) AgentPay(
 
 	args := []interface{}{poolID, sc}
 
-	return util.WriteTx(ctx, senderWallet, senderAccount, senderPassphrase, a.queries.ChainID(), common.Big0, nonce, args, agentTransactor.Pay, "Agent Pay")
+	return util.WriteTxStaging(ctx, auth, a.queries.ChainID(), common.Big0, nil, args, agentTransactor.Pay, "Agent Pay")
 }
 
-func (a *fevmActions) AgentAddMiner(
-	ctx context.Context,
-	auth *bind.TransactOpts,
-	agentAddr common.Address,
-	minerAddr address.Address,
-	requesterKey *ecdsa.PrivateKey,
-) (*types.Transaction, error) {
+func (a *fevmActions) AgentAddMiner(ctx context.Context, auth *bind.TransactOpts, agentAddr common.Address, minerAddr address.Address, requesterKey *ecdsa.PrivateKey) (*types.Transaction, error) {
 	client, err := a.extern.ConnectEthClient()
 	if err != nil {
 		return nil, err
@@ -181,16 +131,7 @@ func (a *fevmActions) AgentAddMiner(
 
 	args := []interface{}{sc}
 
-	tx, err := util.WriteTxStaging(
-		ctx,
-		auth,
-		a.queries.ChainID(),
-		common.Big0,
-		nil,
-		args,
-		agentTransactor.AddMiner,
-		"Agent Add Miner",
-	)
+	tx, err := util.WriteTxStaging(ctx, auth, a.queries.ChainID(), common.Big0, nil, args, agentTransactor.AddMiner, "Agent Add Miner")
 	if err != nil {
 		return nil, err
 	}
@@ -198,16 +139,7 @@ func (a *fevmActions) AgentAddMiner(
 	return tx, nil
 }
 
-func (a *fevmActions) AgentRemoveMiner(
-	ctx context.Context,
-	agentAddr common.Address,
-	minerAddr address.Address,
-	newOwnerAddr address.Address,
-	ownerWallet accounts.Wallet,
-	ownerAccount accounts.Account,
-	ownerPassphrase string,
-	requesterKey *ecdsa.PrivateKey,
-) (*types.Transaction, error) {
+func (a *fevmActions) AgentRemoveMiner(ctx context.Context, auth *bind.TransactOpts, agentAddr common.Address, minerAddr address.Address, newOwnerAddr address.Address, requesterKey *ecdsa.PrivateKey) (*types.Transaction, error) {
 	if newOwnerAddr.Protocol() != address.ID {
 		lapi, closer, err := a.extern.ConnectLotusClient()
 		if err != nil {
@@ -241,11 +173,6 @@ func (a *fevmActions) AgentRemoveMiner(
 
 	agentTransactor, err := abigen.NewAgentTransactor(agentAddr, client)
 
-	nonce, err := a.queries.ChainGetNonce(ctx, ownerAccount.Address)
-	if err != nil {
-		return nil, err
-	}
-
 	jws, err := token.SignJWS(ctx, agentAddr, minerAddr, common.Big0, constants.MethodRemoveMiner, requesterKey, a.queries)
 	if err != nil {
 		return nil, err
@@ -258,7 +185,7 @@ func (a *fevmActions) AgentRemoveMiner(
 
 	args := []interface{}{newOwner64, sc}
 
-	tx, err := util.WriteTx(ctx, ownerWallet, ownerAccount, ownerPassphrase, a.queries.ChainID(), common.Big0, nonce, args, agentTransactor.RemoveMiner, "Agent Remove Miner")
+	tx, err := util.WriteTxStaging(ctx, auth, a.queries.ChainID(), common.Big0, nil, args, agentTransactor.RemoveMiner, "Agent Remove Miner")
 	if err != nil {
 		return nil, err
 	}
@@ -266,16 +193,7 @@ func (a *fevmActions) AgentRemoveMiner(
 	return tx, nil
 }
 
-func (a *fevmActions) AgentChangeMinerWorker(
-	ctx context.Context,
-	agentAddr common.Address,
-	minerAddr address.Address,
-	workerAddr address.Address,
-	controlAddrs []address.Address,
-	ownerWallet accounts.Wallet,
-	ownerAccount accounts.Account,
-	ownerPassphrase string,
-) (*types.Transaction, error) {
+func (a *fevmActions) AgentChangeMinerWorker(ctx context.Context, auth *bind.TransactOpts, agentAddr common.Address, minerAddr address.Address, workerAddr address.Address, controlAddrs []address.Address) (*types.Transaction, error) {
 	client, err := a.extern.ConnectEthClient()
 	if err != nil {
 		return nil, err
@@ -309,14 +227,9 @@ func (a *fevmActions) AgentChangeMinerWorker(
 		controlIDs = append(controlIDs, controlID)
 	}
 
-	nonce, err := a.queries.ChainGetNonce(ctx, ownerAccount.Address)
-	if err != nil {
-		return nil, err
-	}
-
 	args := []interface{}{minerID, workerID, controlIDs}
 
-	tx, err := util.WriteTx(ctx, ownerWallet, ownerAccount, ownerPassphrase, a.queries.ChainID(), common.Big0, nonce, args, agentTransactor.ChangeMinerWorker, "Agent Change Miner Worker")
+	tx, err := util.WriteTxStaging(ctx, auth, a.queries.ChainID(), common.Big0, nil, args, agentTransactor.ChangeMinerWorker, "Agent Change Miner Worker")
 	if err != nil {
 		return nil, err
 	}
@@ -324,14 +237,7 @@ func (a *fevmActions) AgentChangeMinerWorker(
 	return tx, nil
 }
 
-func (a *fevmActions) AgentConfirmMinerWorkerChange(
-	ctx context.Context,
-	agentAddr common.Address,
-	minerAddr address.Address,
-	ownerWallet accounts.Wallet,
-	ownerAccount accounts.Account,
-	ownerPassphrase string,
-) (*types.Transaction, error) {
+func (a *fevmActions) AgentConfirmMinerWorkerChange(ctx context.Context, auth *bind.TransactOpts, agentAddr common.Address, minerAddr address.Address) (*types.Transaction, error) {
 	client, err := a.extern.ConnectEthClient()
 	if err != nil {
 		return nil, err
@@ -348,14 +254,9 @@ func (a *fevmActions) AgentConfirmMinerWorkerChange(
 		return nil, err
 	}
 
-	nonce, err := a.queries.ChainGetNonce(ctx, ownerAccount.Address)
-	if err != nil {
-		return nil, err
-	}
-
 	args := []interface{}{minerU64}
 
-	tx, err := util.WriteTx(ctx, ownerWallet, ownerAccount, ownerPassphrase, a.queries.ChainID(), common.Big0, nonce, args, agentTransactor.ConfirmChangeMinerWorker, "Agent Confirm Miner Worker Change")
+	tx, err := util.WriteTxStaging(ctx, auth, a.queries.ChainID(), common.Big0, nil, args, agentTransactor.ConfirmChangeMinerWorker, "Agent Confirm Miner Worker Change")
 	if err != nil {
 		return nil, err
 	}
@@ -364,16 +265,7 @@ func (a *fevmActions) AgentConfirmMinerWorkerChange(
 }
 
 // AgentPullFunds pulls funds from the agent to a miner
-func (a *fevmActions) AgentPullFunds(
-	ctx context.Context,
-	agentAddr common.Address,
-	amount *big.Int,
-	minerAddr address.Address,
-	senderWallet accounts.Wallet,
-	senderAccount accounts.Account,
-	senderPassphrase string,
-	requesterKey *ecdsa.PrivateKey,
-) (*types.Transaction, error) {
+func (a *fevmActions) AgentPullFunds(ctx context.Context, auth *bind.TransactOpts, agentAddr common.Address, amount *big.Int, minerAddr address.Address, requesterKey *ecdsa.PrivateKey) (*types.Transaction, error) {
 	client, err := a.extern.ConnectEthClient()
 	if err != nil {
 		return nil, err
@@ -425,27 +317,13 @@ func (a *fevmActions) AgentPullFunds(
 		return nil, err
 	}
 
-	nonce, err := a.queries.ChainGetNonce(ctx, senderAccount.Address)
-	if err != nil {
-		return nil, err
-	}
-
 	args := []interface{}{sc}
 
-	return util.WriteTx(ctx, senderWallet, senderAccount, senderPassphrase, a.queries.ChainID(), common.Big0, nonce, args, agentTransactor.PullFunds, "Agent Pull Funds")
+	return util.WriteTxStaging(ctx, auth, a.queries.ChainID(), common.Big0, nil, args, agentTransactor.PullFunds, "Agent Pull Funds")
 }
 
 // AgentPushFunds pushes funds from the agent to a miner
-func (a *fevmActions) AgentPushFunds(
-	ctx context.Context,
-	agentAddr common.Address,
-	amount *big.Int,
-	minerAddr address.Address,
-	senderWallet accounts.Wallet,
-	senderAccount accounts.Account,
-	senderPassphrase string,
-	requesterKey *ecdsa.PrivateKey,
-) (*types.Transaction, error) {
+func (a *fevmActions) AgentPushFunds(ctx context.Context, auth *bind.TransactOpts, agentAddr common.Address, amount *big.Int, minerAddr address.Address, requesterKey *ecdsa.PrivateKey) (*types.Transaction, error) {
 	client, err := a.extern.ConnectEthClient()
 	if err != nil {
 		return nil, err
@@ -497,26 +375,12 @@ func (a *fevmActions) AgentPushFunds(
 		return nil, err
 	}
 
-	nonce, err := a.queries.ChainGetNonce(ctx, senderAccount.Address)
-	if err != nil {
-		return nil, err
-	}
-
 	args := []interface{}{sc}
 
-	return util.WriteTx(ctx, senderWallet, senderAccount, senderPassphrase, a.queries.ChainID(), common.Big0, nonce, args, agentTransactor.PushFunds, "Agent Push Funds")
+	return util.WriteTxStaging(ctx, auth, a.queries.ChainID(), common.Big0, nil, args, agentTransactor.PushFunds, "Agent Push Funds")
 }
 
-func (a *fevmActions) AgentWithdraw(
-	ctx context.Context,
-	agentAddr common.Address,
-	receiver common.Address,
-	amount *big.Int,
-	ownerWallet accounts.Wallet,
-	ownerAccount accounts.Account,
-	ownerPassphrase string,
-	requesterKey *ecdsa.PrivateKey,
-) (*types.Transaction, error) {
+func (a *fevmActions) AgentWithdraw(ctx context.Context, auth *bind.TransactOpts, agentAddr common.Address, receiver common.Address, amount *big.Int, requesterKey *ecdsa.PrivateKey) (*types.Transaction, error) {
 	client, err := a.extern.ConnectEthClient()
 	if err != nil {
 		return nil, err
@@ -534,11 +398,6 @@ func (a *fevmActions) AgentWithdraw(
 	}
 	defer closer()
 
-	nonce, err := a.queries.ChainGetNonce(ctx, ownerAccount.Address)
-	if err != nil {
-		return nil, err
-	}
-
 	jws, err := token.SignJWS(ctx, agentAddr, address.Undef, amount, constants.MethodWithdraw, requesterKey, a.queries)
 	if err != nil {
 		return nil, err
@@ -551,16 +410,10 @@ func (a *fevmActions) AgentWithdraw(
 
 	args := []interface{}{receiver, sc}
 
-	return util.WriteTx(ctx, ownerWallet, ownerAccount, ownerPassphrase, a.queries.ChainID(), common.Big0, nonce, args, agentTransactor.Withdraw, "Agent Withdraw")
+	return util.WriteTxStaging(ctx, auth, a.queries.ChainID(), common.Big0, nil, args, agentTransactor.Withdraw, "Agent Withdraw")
 }
 
-func (a *fevmActions) AgentRefreshRoutes(
-	ctx context.Context,
-	agentAddr common.Address,
-	senderWallet accounts.Wallet,
-	senderAccount accounts.Account,
-	senderPassphrase string,
-) (*types.Transaction, error) {
+func (a *fevmActions) AgentRefreshRoutes(ctx context.Context, auth *bind.TransactOpts, agentAddr common.Address) (*types.Transaction, error) {
 	client, err := a.extern.ConnectEthClient()
 	if err != nil {
 		return nil, err
@@ -572,10 +425,5 @@ func (a *fevmActions) AgentRefreshRoutes(
 		return nil, err
 	}
 
-	nonce, err := a.queries.ChainGetNonce(ctx, senderAccount.Address)
-	if err != nil {
-		return nil, err
-	}
-
-	return util.WriteTx(ctx, senderWallet, senderAccount, senderPassphrase, a.queries.ChainID(), common.Big0, nonce, []interface{}{}, agentTransactor.RefreshRoutes, "Agent RefreshRoutes")
+	return util.WriteTxStaging(ctx, auth, a.queries.ChainID(), common.Big0, nil, []interface{}{}, agentTransactor.RefreshRoutes, "Agent RefreshRoutes")
 }

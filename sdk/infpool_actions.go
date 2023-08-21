@@ -4,21 +4,14 @@ import (
 	"context"
 	"math/big"
 
-	"github.com/ethereum/go-ethereum/accounts"
+	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/glifio/go-pools/abigen"
 	"github.com/glifio/go-pools/util"
 )
 
-func (a *fevmActions) InfPoolDepositFIL(
-	ctx context.Context,
-	receiver common.Address,
-	amount *big.Int,
-	senderWallet accounts.Wallet,
-	senderAccount accounts.Account,
-	senderPassphrase string,
-) (*types.Transaction, error) {
+func (a *fevmActions) InfPoolDepositFIL(ctx context.Context, auth *bind.TransactOpts, receiver common.Address, amount *big.Int) (*types.Transaction, error) {
 	client, err := a.extern.ConnectEthClient()
 	if err != nil {
 		return nil, err
@@ -30,12 +23,7 @@ func (a *fevmActions) InfPoolDepositFIL(
 		return nil, err
 	}
 
-	nonce, err := a.queries.ChainGetNonce(ctx, senderAccount.Address)
-	if err != nil {
-		return nil, err
-	}
-
 	args := []interface{}{receiver}
 
-	return util.WriteTx(ctx, senderWallet, senderAccount, senderPassphrase, a.queries.ChainID(), amount, nonce, args, poolTransactor.Deposit0, "Deposit FIL")
+	return util.WriteTxStaging(ctx, auth, a.queries.ChainID(), amount, nil, args, poolTransactor.Deposit0, "Deposit FIL")
 }

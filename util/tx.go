@@ -6,15 +6,14 @@ import (
 	"math/big"
 	"reflect"
 
-	"github.com/ethereum/go-ethereum/accounts"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/core/types"
 	lotusapi "github.com/filecoin-project/lotus/api"
 	filtypes "github.com/filecoin-project/lotus/chain/types"
-	walletutils "github.com/glifio/go-wallet-utils"
 	"golang.org/x/xerrors"
 )
 
+/*
 func WriteTx(
 	ctx context.Context,
 	wallet accounts.Wallet,
@@ -61,6 +60,7 @@ func WriteTx(
 
 	return tx, err
 }
+*/
 
 // temporary -- will be removed
 func WriteTxStaging(
