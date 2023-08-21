@@ -4,6 +4,8 @@ import (
 	"context"
 	"fmt"
 	"math/big"
+	"os"
+	"strconv"
 	"time"
 
 	"github.com/ethereum/go-ethereum/common"
@@ -18,7 +20,7 @@ func (q *fevmQueries) StateWaitTx(ctx context.Context, hash common.Hash, ch chan
 	defer client.Close()
 
 	for {
-		time.Sleep(time.Millisecond * 150000)
+		time.Sleep(time.Millisecond * 5000)
 
 		tx, err := client.TransactionReceipt(ctx, hash)
 		if err == nil && tx != nil {
@@ -35,8 +37,13 @@ func (q *fevmQueries) StateWaitReceipt(ctx context.Context, hash common.Hash) (*
 	}
 	defer eapi.Close()
 
-	// wait for 5 confirmations before getting the receipt
-	err = q.StateWaitForConfirmations(ctx, 5)
+	// wait for confirmations (default 5) before getting the receipt
+	confirmations := os.Getenv("GLIF_CONFIRMATIONS")
+	c, _ := strconv.ParseUint(confirmations, 10, 64)
+	if c == 0 {
+		c = 5
+	}
+	err = q.StateWaitForConfirmations(ctx, c)
 	if err != nil {
 		return nil, err
 	}
