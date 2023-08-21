@@ -873,25 +873,25 @@ func (_c *FEVMActions_InfPoolDepositFIL_Call) RunAndReturn(run func(context.Cont
 	return _c
 }
 
-// RampRedeem provides a mock function with given fields: ctx, shares, receiver, pk
-func (_m *FEVMActions) RampRedeem(ctx context.Context, shares *big.Int, receiver common.Address, pk *ecdsa.PrivateKey) (*types.Transaction, error) {
-	ret := _m.Called(ctx, shares, receiver, pk)
+// RampRedeem provides a mock function with given fields: ctx, shares, receiver, senderWallet, senderAccount, senderPassphrase
+func (_m *FEVMActions) RampRedeem(ctx context.Context, shares *big.Int, receiver common.Address, senderWallet accounts.Wallet, senderAccount accounts.Account, senderPassphrase string) (*types.Transaction, error) {
+	ret := _m.Called(ctx, shares, receiver, senderWallet, senderAccount, senderPassphrase)
 
 	var r0 *types.Transaction
 	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context, *big.Int, common.Address, *ecdsa.PrivateKey) (*types.Transaction, error)); ok {
-		return rf(ctx, shares, receiver, pk)
+	if rf, ok := ret.Get(0).(func(context.Context, *big.Int, common.Address, accounts.Wallet, accounts.Account, string) (*types.Transaction, error)); ok {
+		return rf(ctx, shares, receiver, senderWallet, senderAccount, senderPassphrase)
 	}
-	if rf, ok := ret.Get(0).(func(context.Context, *big.Int, common.Address, *ecdsa.PrivateKey) *types.Transaction); ok {
-		r0 = rf(ctx, shares, receiver, pk)
+	if rf, ok := ret.Get(0).(func(context.Context, *big.Int, common.Address, accounts.Wallet, accounts.Account, string) *types.Transaction); ok {
+		r0 = rf(ctx, shares, receiver, senderWallet, senderAccount, senderPassphrase)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*types.Transaction)
 		}
 	}
 
-	if rf, ok := ret.Get(1).(func(context.Context, *big.Int, common.Address, *ecdsa.PrivateKey) error); ok {
-		r1 = rf(ctx, shares, receiver, pk)
+	if rf, ok := ret.Get(1).(func(context.Context, *big.Int, common.Address, accounts.Wallet, accounts.Account, string) error); ok {
+		r1 = rf(ctx, shares, receiver, senderWallet, senderAccount, senderPassphrase)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -908,14 +908,16 @@ type FEVMActions_RampRedeem_Call struct {
 //   - ctx context.Context
 //   - shares *big.Int
 //   - receiver common.Address
-//   - pk *ecdsa.PrivateKey
-func (_e *FEVMActions_Expecter) RampRedeem(ctx interface{}, shares interface{}, receiver interface{}, pk interface{}) *FEVMActions_RampRedeem_Call {
-	return &FEVMActions_RampRedeem_Call{Call: _e.mock.On("RampRedeem", ctx, shares, receiver, pk)}
+//   - senderWallet accounts.Wallet
+//   - senderAccount accounts.Account
+//   - senderPassphrase string
+func (_e *FEVMActions_Expecter) RampRedeem(ctx interface{}, shares interface{}, receiver interface{}, senderWallet interface{}, senderAccount interface{}, senderPassphrase interface{}) *FEVMActions_RampRedeem_Call {
+	return &FEVMActions_RampRedeem_Call{Call: _e.mock.On("RampRedeem", ctx, shares, receiver, senderWallet, senderAccount, senderPassphrase)}
 }
 
-func (_c *FEVMActions_RampRedeem_Call) Run(run func(ctx context.Context, shares *big.Int, receiver common.Address, pk *ecdsa.PrivateKey)) *FEVMActions_RampRedeem_Call {
+func (_c *FEVMActions_RampRedeem_Call) Run(run func(ctx context.Context, shares *big.Int, receiver common.Address, senderWallet accounts.Wallet, senderAccount accounts.Account, senderPassphrase string)) *FEVMActions_RampRedeem_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(*big.Int), args[2].(common.Address), args[3].(*ecdsa.PrivateKey))
+		run(args[0].(context.Context), args[1].(*big.Int), args[2].(common.Address), args[3].(accounts.Wallet), args[4].(accounts.Account), args[5].(string))
 	})
 	return _c
 }
@@ -925,30 +927,30 @@ func (_c *FEVMActions_RampRedeem_Call) Return(_a0 *types.Transaction, _a1 error)
 	return _c
 }
 
-func (_c *FEVMActions_RampRedeem_Call) RunAndReturn(run func(context.Context, *big.Int, common.Address, *ecdsa.PrivateKey) (*types.Transaction, error)) *FEVMActions_RampRedeem_Call {
+func (_c *FEVMActions_RampRedeem_Call) RunAndReturn(run func(context.Context, *big.Int, common.Address, accounts.Wallet, accounts.Account, string) (*types.Transaction, error)) *FEVMActions_RampRedeem_Call {
 	_c.Call.Return(run)
 	return _c
 }
 
-// RampWithdraw provides a mock function with given fields: ctx, assets, receiver, pk
-func (_m *FEVMActions) RampWithdraw(ctx context.Context, assets *big.Int, receiver common.Address, pk *ecdsa.PrivateKey) (*types.Transaction, error) {
-	ret := _m.Called(ctx, assets, receiver, pk)
+// RampWithdraw provides a mock function with given fields: ctx, assets, receiver, senderWallet, senderAccount, senderPassphrase
+func (_m *FEVMActions) RampWithdraw(ctx context.Context, assets *big.Int, receiver common.Address, senderWallet accounts.Wallet, senderAccount accounts.Account, senderPassphrase string) (*types.Transaction, error) {
+	ret := _m.Called(ctx, assets, receiver, senderWallet, senderAccount, senderPassphrase)
 
 	var r0 *types.Transaction
 	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context, *big.Int, common.Address, *ecdsa.PrivateKey) (*types.Transaction, error)); ok {
-		return rf(ctx, assets, receiver, pk)
+	if rf, ok := ret.Get(0).(func(context.Context, *big.Int, common.Address, accounts.Wallet, accounts.Account, string) (*types.Transaction, error)); ok {
+		return rf(ctx, assets, receiver, senderWallet, senderAccount, senderPassphrase)
 	}
-	if rf, ok := ret.Get(0).(func(context.Context, *big.Int, common.Address, *ecdsa.PrivateKey) *types.Transaction); ok {
-		r0 = rf(ctx, assets, receiver, pk)
+	if rf, ok := ret.Get(0).(func(context.Context, *big.Int, common.Address, accounts.Wallet, accounts.Account, string) *types.Transaction); ok {
+		r0 = rf(ctx, assets, receiver, senderWallet, senderAccount, senderPassphrase)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*types.Transaction)
 		}
 	}
 
-	if rf, ok := ret.Get(1).(func(context.Context, *big.Int, common.Address, *ecdsa.PrivateKey) error); ok {
-		r1 = rf(ctx, assets, receiver, pk)
+	if rf, ok := ret.Get(1).(func(context.Context, *big.Int, common.Address, accounts.Wallet, accounts.Account, string) error); ok {
+		r1 = rf(ctx, assets, receiver, senderWallet, senderAccount, senderPassphrase)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -965,14 +967,16 @@ type FEVMActions_RampWithdraw_Call struct {
 //   - ctx context.Context
 //   - assets *big.Int
 //   - receiver common.Address
-//   - pk *ecdsa.PrivateKey
-func (_e *FEVMActions_Expecter) RampWithdraw(ctx interface{}, assets interface{}, receiver interface{}, pk interface{}) *FEVMActions_RampWithdraw_Call {
-	return &FEVMActions_RampWithdraw_Call{Call: _e.mock.On("RampWithdraw", ctx, assets, receiver, pk)}
+//   - senderWallet accounts.Wallet
+//   - senderAccount accounts.Account
+//   - senderPassphrase string
+func (_e *FEVMActions_Expecter) RampWithdraw(ctx interface{}, assets interface{}, receiver interface{}, senderWallet interface{}, senderAccount interface{}, senderPassphrase interface{}) *FEVMActions_RampWithdraw_Call {
+	return &FEVMActions_RampWithdraw_Call{Call: _e.mock.On("RampWithdraw", ctx, assets, receiver, senderWallet, senderAccount, senderPassphrase)}
 }
 
-func (_c *FEVMActions_RampWithdraw_Call) Run(run func(ctx context.Context, assets *big.Int, receiver common.Address, pk *ecdsa.PrivateKey)) *FEVMActions_RampWithdraw_Call {
+func (_c *FEVMActions_RampWithdraw_Call) Run(run func(ctx context.Context, assets *big.Int, receiver common.Address, senderWallet accounts.Wallet, senderAccount accounts.Account, senderPassphrase string)) *FEVMActions_RampWithdraw_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(*big.Int), args[2].(common.Address), args[3].(*ecdsa.PrivateKey))
+		run(args[0].(context.Context), args[1].(*big.Int), args[2].(common.Address), args[3].(accounts.Wallet), args[4].(accounts.Account), args[5].(string))
 	})
 	return _c
 }
@@ -982,7 +986,7 @@ func (_c *FEVMActions_RampWithdraw_Call) Return(_a0 *types.Transaction, _a1 erro
 	return _c
 }
 
-func (_c *FEVMActions_RampWithdraw_Call) RunAndReturn(run func(context.Context, *big.Int, common.Address, *ecdsa.PrivateKey) (*types.Transaction, error)) *FEVMActions_RampWithdraw_Call {
+func (_c *FEVMActions_RampWithdraw_Call) RunAndReturn(run func(context.Context, *big.Int, common.Address, accounts.Wallet, accounts.Account, string) (*types.Transaction, error)) *FEVMActions_RampWithdraw_Call {
 	_c.Call.Return(run)
 	return _c
 }
