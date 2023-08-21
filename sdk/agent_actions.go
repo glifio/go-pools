@@ -37,13 +37,6 @@ func (a *fevmActions) AgentCreate(
 		return nil, err
 	}
 
-	fromAddr := owner
-
-	nonce, err := a.queries.ChainGetNonce(ctx, fromAddr)
-	if err != nil {
-		return nil, err
-	}
-
 	args := []interface{}{owner, operator, request}
 
 	return util.WriteTxStaging(
@@ -51,7 +44,7 @@ func (a *fevmActions) AgentCreate(
 		auth,
 		a.queries.ChainID(),
 		common.Big0,
-		nonce,
+		nil,
 		args,
 		agentFactoryTransactor.Create,
 		"Agent Create",
@@ -154,11 +147,9 @@ func (a *fevmActions) AgentPay(
 
 func (a *fevmActions) AgentAddMiner(
 	ctx context.Context,
+	auth *bind.TransactOpts,
 	agentAddr common.Address,
 	minerAddr address.Address,
-	ownerWallet accounts.Wallet,
-	ownerAccount accounts.Account,
-	ownerPassphrase string,
 	requesterKey *ecdsa.PrivateKey,
 ) (*types.Transaction, error) {
 	client, err := a.extern.ConnectEthClient()
@@ -188,23 +179,14 @@ func (a *fevmActions) AgentAddMiner(
 		return nil, err
 	}
 
-	fromAddr := ownerAccount.Address
-
-	nonce, err := a.queries.ChainGetNonce(ctx, fromAddr)
-	if err != nil {
-		return nil, err
-	}
-
 	args := []interface{}{sc}
 
-	tx, err := util.WriteTx(
+	tx, err := util.WriteTxStaging(
 		ctx,
-		ownerWallet,
-		ownerAccount,
-		ownerPassphrase,
+		auth,
 		a.queries.ChainID(),
 		common.Big0,
-		nonce,
+		nil,
 		args,
 		agentTransactor.AddMiner,
 		"Agent Add Miner",
