@@ -7,6 +7,7 @@ import (
 	"math/big"
 
 	"github.com/ethereum/go-ethereum/accounts"
+	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/filecoin-project/go-address"
@@ -20,12 +21,10 @@ import (
 
 func (a *fevmActions) AgentCreate(
 	ctx context.Context,
+	auth *bind.TransactOpts,
 	owner common.Address,
 	operator common.Address,
 	request common.Address,
-	wallet accounts.Wallet,
-	account accounts.Account,
-	passphrase string,
 ) (*types.Transaction, error) {
 	client, err := a.extern.ConnectEthClient()
 	if err != nil {
@@ -47,11 +46,9 @@ func (a *fevmActions) AgentCreate(
 
 	args := []interface{}{owner, operator, request}
 
-	return util.WriteTx(
+	return util.WriteTxStaging(
 		ctx,
-		wallet,
-		account,
-		passphrase,
+		auth,
 		a.queries.ChainID(),
 		common.Big0,
 		nonce,
