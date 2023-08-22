@@ -116,11 +116,6 @@ func (a *fevmActions) AgentAddMiner(ctx context.Context, auth *bind.TransactOpts
 	}
 	defer closer()
 
-	agentTransactor, err := abigen.NewAgentTransactor(agentAddr, client)
-	if err != nil {
-		return nil, err
-	}
-
 	jws, err := token.SignJWS(ctx, agentAddr, minerAddr, common.Big0, constants.MethodAddMiner, requesterKey, a.queries)
 	if err != nil {
 		return nil, err
@@ -131,14 +126,16 @@ func (a *fevmActions) AgentAddMiner(ctx context.Context, auth *bind.TransactOpts
 		return nil, err
 	}
 
-	args := []interface{}{sc}
+	auth.Value = common.Big0
 
-	tx, err := util.WriteTxStaging(ctx, auth, a.queries.ChainID(), common.Big0, nil, args, agentTransactor.AddMiner, "Agent Add Miner")
+	agent, err := abigen.NewAgentTransactor(agentAddr, client)
 	if err != nil {
 		return nil, err
 	}
 
-	return tx, nil
+	tx, err := agent.AddMiner(auth, sc)
+
+	return util.TxPostProcess(tx, err)
 }
 
 func (a *fevmActions) AgentRemoveMiner(ctx context.Context, auth *bind.TransactOpts, agentAddr common.Address, minerAddr address.Address, newOwnerAddr address.Address, requesterKey *ecdsa.PrivateKey) (*types.Transaction, error) {
