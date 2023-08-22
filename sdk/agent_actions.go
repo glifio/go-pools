@@ -25,8 +25,6 @@ func (a *fevmActions) AgentCreate(ctx context.Context, auth *bind.TransactOpts, 
 	}
 	defer client.Close()
 
-	auth.Value = common.Big0
-
 	agentFactory, err := abigen.NewAgentFactoryTransactor(a.queries.AgentFactory(), client)
 	if err != nil {
 		return nil, err
@@ -44,11 +42,6 @@ func (a *fevmActions) AgentBorrow(ctx context.Context, auth *bind.TransactOpts, 
 	}
 	defer client.Close()
 
-	agentTransactor, err := abigen.NewAgentTransactor(agentAddr, client)
-	if err != nil {
-		return nil, err
-	}
-
 	closer, err := a.extern.ConnectAdoClient(ctx)
 	if err != nil {
 		return nil, err
@@ -65,9 +58,14 @@ func (a *fevmActions) AgentBorrow(ctx context.Context, auth *bind.TransactOpts, 
 		return nil, err
 	}
 
-	args := []interface{}{poolID, sc}
+	agent, err := abigen.NewAgentTransactor(agentAddr, client)
+	if err != nil {
+		return nil, err
+	}
 
-	return util.WriteTxStaging(ctx, auth, a.queries.ChainID(), common.Big0, nil, args, agentTransactor.Borrow, "Agent Borrow")
+	tx, err := agent.Borrow(auth, poolID, sc)
+
+	return util.TxPostProcess(tx, err)
 }
 
 func (a *fevmActions) AgentPay(ctx context.Context, auth *bind.TransactOpts, agentAddr common.Address, poolID *big.Int, amount *big.Int, requesterKey *ecdsa.PrivateKey) (*types.Transaction, error) {
@@ -76,11 +74,6 @@ func (a *fevmActions) AgentPay(ctx context.Context, auth *bind.TransactOpts, age
 		return nil, err
 	}
 	defer client.Close()
-
-	agentTransactor, err := abigen.NewAgentTransactor(agentAddr, client)
-	if err != nil {
-		return nil, err
-	}
 
 	closer, err := a.extern.ConnectAdoClient(ctx)
 	if err != nil {
@@ -98,9 +91,14 @@ func (a *fevmActions) AgentPay(ctx context.Context, auth *bind.TransactOpts, age
 		return nil, err
 	}
 
-	args := []interface{}{poolID, sc}
+	agent, err := abigen.NewAgentTransactor(agentAddr, client)
+	if err != nil {
+		return nil, err
+	}
 
-	return util.WriteTxStaging(ctx, auth, a.queries.ChainID(), common.Big0, nil, args, agentTransactor.Pay, "Agent Pay")
+	tx, err := agent.Pay(auth, poolID, sc)
+
+	return util.TxPostProcess(tx, err)
 }
 
 func (a *fevmActions) AgentAddMiner(ctx context.Context, auth *bind.TransactOpts, agentAddr common.Address, minerAddr address.Address, requesterKey *ecdsa.PrivateKey) (*types.Transaction, error) {
@@ -125,8 +123,6 @@ func (a *fevmActions) AgentAddMiner(ctx context.Context, auth *bind.TransactOpts
 	if err != nil {
 		return nil, err
 	}
-
-	auth.Value = common.Big0
 
 	agent, err := abigen.NewAgentTransactor(agentAddr, client)
 	if err != nil {
@@ -170,8 +166,6 @@ func (a *fevmActions) AgentRemoveMiner(ctx context.Context, auth *bind.TransactO
 	}
 	defer closer()
 
-	agentTransactor, err := abigen.NewAgentTransactor(agentAddr, client)
-
 	jws, err := token.SignJWS(ctx, agentAddr, minerAddr, common.Big0, constants.MethodRemoveMiner, requesterKey, a.queries)
 	if err != nil {
 		return nil, err
@@ -182,14 +176,14 @@ func (a *fevmActions) AgentRemoveMiner(ctx context.Context, auth *bind.TransactO
 		return nil, err
 	}
 
-	args := []interface{}{newOwner64, sc}
-
-	tx, err := util.WriteTxStaging(ctx, auth, a.queries.ChainID(), common.Big0, nil, args, agentTransactor.RemoveMiner, "Agent Remove Miner")
+	agent, err := abigen.NewAgentTransactor(agentAddr, client)
 	if err != nil {
 		return nil, err
 	}
 
-	return tx, nil
+	tx, err := agent.RemoveMiner(auth, newOwner64, sc)
+
+	return util.TxPostProcess(tx, err)
 }
 
 func (a *fevmActions) AgentChangeMinerWorker(ctx context.Context, auth *bind.TransactOpts, agentAddr common.Address, minerAddr address.Address, workerAddr address.Address, controlAddrs []address.Address) (*types.Transaction, error) {
@@ -198,11 +192,6 @@ func (a *fevmActions) AgentChangeMinerWorker(ctx context.Context, auth *bind.Tra
 		return nil, err
 	}
 	defer client.Close()
-
-	agentTransactor, err := abigen.NewAgentTransactor(agentAddr, client)
-	if err != nil {
-		return nil, err
-	}
 
 	// convert miner address to ID address
 	minerID, err := address.IDFromAddress(minerAddr)
@@ -226,14 +215,14 @@ func (a *fevmActions) AgentChangeMinerWorker(ctx context.Context, auth *bind.Tra
 		controlIDs = append(controlIDs, controlID)
 	}
 
-	args := []interface{}{minerID, workerID, controlIDs}
-
-	tx, err := util.WriteTxStaging(ctx, auth, a.queries.ChainID(), common.Big0, nil, args, agentTransactor.ChangeMinerWorker, "Agent Change Miner Worker")
+	agent, err := abigen.NewAgentTransactor(agentAddr, client)
 	if err != nil {
 		return nil, err
 	}
 
-	return tx, nil
+	tx, err := agent.ChangeMinerWorker(auth, minerID, workerID, controlIDs)
+
+	return util.TxPostProcess(tx, err)
 }
 
 func (a *fevmActions) AgentConfirmMinerWorkerChange(ctx context.Context, auth *bind.TransactOpts, agentAddr common.Address, minerAddr address.Address) (*types.Transaction, error) {
@@ -248,19 +237,14 @@ func (a *fevmActions) AgentConfirmMinerWorkerChange(ctx context.Context, auth *b
 		return nil, err
 	}
 
-	agentTransactor, err := abigen.NewAgentTransactor(agentAddr, client)
+	agent, err := abigen.NewAgentTransactor(agentAddr, client)
 	if err != nil {
 		return nil, err
 	}
 
-	args := []interface{}{minerU64}
+	tx, err := agent.ConfirmChangeMinerWorker(auth, minerU64)
 
-	tx, err := util.WriteTxStaging(ctx, auth, a.queries.ChainID(), common.Big0, nil, args, agentTransactor.ConfirmChangeMinerWorker, "Agent Confirm Miner Worker Change")
-	if err != nil {
-		return nil, err
-	}
-
-	return tx, nil
+	return util.TxPostProcess(tx, err)
 }
 
 // AgentPullFunds pulls funds from the agent to a miner
@@ -311,14 +295,14 @@ func (a *fevmActions) AgentPullFunds(ctx context.Context, auth *bind.TransactOpt
 		return nil, err
 	}
 
-	agentTransactor, err := abigen.NewAgentTransactor(agentAddr, client)
+	agent, err := abigen.NewAgentTransactor(agentAddr, client)
 	if err != nil {
 		return nil, err
 	}
 
-	args := []interface{}{sc}
+	tx, err := agent.PullFunds(auth, sc)
 
-	return util.WriteTxStaging(ctx, auth, a.queries.ChainID(), common.Big0, nil, args, agentTransactor.PullFunds, "Agent Pull Funds")
+	return util.TxPostProcess(tx, err)
 }
 
 // AgentPushFunds pushes funds from the agent to a miner
@@ -369,14 +353,14 @@ func (a *fevmActions) AgentPushFunds(ctx context.Context, auth *bind.TransactOpt
 		return nil, err
 	}
 
-	agentTransactor, err := abigen.NewAgentTransactor(agentAddr, client)
+	agent, err := abigen.NewAgentTransactor(agentAddr, client)
 	if err != nil {
 		return nil, err
 	}
 
-	args := []interface{}{sc}
+	tx, err := agent.PushFunds(auth, sc)
 
-	return util.WriteTxStaging(ctx, auth, a.queries.ChainID(), common.Big0, nil, args, agentTransactor.PushFunds, "Agent Push Funds")
+	return util.TxPostProcess(tx, err)
 }
 
 func (a *fevmActions) AgentWithdraw(ctx context.Context, auth *bind.TransactOpts, agentAddr common.Address, receiver common.Address, amount *big.Int, requesterKey *ecdsa.PrivateKey) (*types.Transaction, error) {
@@ -385,11 +369,6 @@ func (a *fevmActions) AgentWithdraw(ctx context.Context, auth *bind.TransactOpts
 		return nil, err
 	}
 	defer client.Close()
-
-	agentTransactor, err := abigen.NewAgentTransactor(agentAddr, client)
-	if err != nil {
-		return nil, err
-	}
 
 	closer, err := a.extern.ConnectAdoClient(ctx)
 	if err != nil {
@@ -407,9 +386,14 @@ func (a *fevmActions) AgentWithdraw(ctx context.Context, auth *bind.TransactOpts
 		return nil, err
 	}
 
-	args := []interface{}{receiver, sc}
+	agent, err := abigen.NewAgentTransactor(agentAddr, client)
+	if err != nil {
+		return nil, err
+	}
 
-	return util.WriteTxStaging(ctx, auth, a.queries.ChainID(), common.Big0, nil, args, agentTransactor.Withdraw, "Agent Withdraw")
+	tx, err := agent.Withdraw(auth, receiver, sc)
+
+	return util.TxPostProcess(tx, err)
 }
 
 func (a *fevmActions) AgentRefreshRoutes(ctx context.Context, auth *bind.TransactOpts, agentAddr common.Address) (*types.Transaction, error) {
@@ -419,10 +403,12 @@ func (a *fevmActions) AgentRefreshRoutes(ctx context.Context, auth *bind.Transac
 	}
 	defer client.Close()
 
-	agentTransactor, err := abigen.NewAgentTransactor(agentAddr, client)
+	agent, err := abigen.NewAgentTransactor(agentAddr, client)
 	if err != nil {
 		return nil, err
 	}
 
-	return util.WriteTxStaging(ctx, auth, a.queries.ChainID(), common.Big0, nil, []interface{}{}, agentTransactor.RefreshRoutes, "Agent RefreshRoutes")
+	tx, err := agent.RefreshRoutes(auth)
+
+	return util.TxPostProcess(tx, err)
 }

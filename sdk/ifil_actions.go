@@ -18,14 +18,14 @@ func (a *fevmActions) IFILTransfer(ctx context.Context, auth *bind.TransactOpts,
 	}
 	defer client.Close()
 
-	iFILTransactor, err := abigen.NewPoolTokenTransactor(a.queries.IFIL(), client)
+	ifil, err := abigen.NewPoolTokenTransactor(a.queries.IFIL(), client)
 	if err != nil {
 		return nil, err
 	}
 
-	args := []interface{}{receiver, amount}
+	tx, err := ifil.Transfer(auth, receiver, amount)
 
-	return util.WriteTxStaging(ctx, auth, a.queries.ChainID(), common.Big0, nil, args, iFILTransactor.Transfer, "Transfer iFIL")
+	return util.TxPostProcess(tx, err)
 }
 
 func (a *fevmActions) IFILApprove(ctx context.Context, auth *bind.TransactOpts, spender common.Address, allowance *big.Int) (*types.Transaction, error) {
@@ -35,12 +35,12 @@ func (a *fevmActions) IFILApprove(ctx context.Context, auth *bind.TransactOpts, 
 	}
 	defer client.Close()
 
-	iFILTransactor, err := abigen.NewPoolTokenTransactor(a.queries.IFIL(), client)
+	ifil, err := abigen.NewPoolTokenTransactor(a.queries.IFIL(), client)
 	if err != nil {
 		return nil, err
 	}
 
-	args := []interface{}{spender, allowance}
+	tx, err := ifil.Approve(auth, spender, allowance)
 
-	return util.WriteTxStaging(ctx, auth, a.queries.ChainID(), common.Big0, nil, args, iFILTransactor.Approve, "Approve iFIL")
+	return util.TxPostProcess(tx, err)
 }

@@ -18,14 +18,14 @@ func (a *fevmActions) RampWithdraw(ctx context.Context, auth *bind.TransactOpts,
 	}
 	defer client.Close()
 
-	rampTransactor, err := abigen.NewSimpleRampTransactor(a.queries.SimpleRamp(), client)
+	ramp, err := abigen.NewSimpleRampTransactor(a.queries.SimpleRamp(), client)
 	if err != nil {
 		return nil, err
 	}
 
-	args := []interface{}{assets, receiver, sender, common.Big0}
+	tx, err := ramp.WithdrawF(auth, assets, receiver, sender, common.Big0)
 
-	return util.WriteTxStaging(ctx, auth, a.queries.ChainID(), common.Big0, nil, args, rampTransactor.WithdrawF, "Withdraw from Ramp")
+	return util.TxPostProcess(tx, err)
 }
 
 func (a *fevmActions) RampRedeem(ctx context.Context, auth *bind.TransactOpts, shares *big.Int, sender common.Address, receiver common.Address) (*types.Transaction, error) {
@@ -35,12 +35,12 @@ func (a *fevmActions) RampRedeem(ctx context.Context, auth *bind.TransactOpts, s
 	}
 	defer client.Close()
 
-	rampTransactor, err := abigen.NewSimpleRampTransactor(a.queries.SimpleRamp(), client)
+	ramp, err := abigen.NewSimpleRampTransactor(a.queries.SimpleRamp(), client)
 	if err != nil {
 		return nil, err
 	}
 
-	args := []interface{}{shares, receiver, sender, common.Big0}
+	tx, err := ramp.RedeemF(auth, shares, receiver, sender, common.Big0)
 
-	return util.WriteTxStaging(ctx, auth, a.queries.ChainID(), common.Big0, nil, args, rampTransactor.RedeemF, "Redeem from Ramp")
+	return util.TxPostProcess(tx, err)
 }

@@ -18,12 +18,12 @@ func (a *fevmActions) InfPoolDepositFIL(ctx context.Context, auth *bind.Transact
 	}
 	defer client.Close()
 
-	poolTransactor, err := abigen.NewInfinityPoolTransactor(a.queries.InfinityPool(), client)
+	infpool, err := abigen.NewInfinityPoolTransactor(a.queries.InfinityPool(), client)
 	if err != nil {
 		return nil, err
 	}
 
-	args := []interface{}{receiver}
+	tx, err := infpool.Deposit0(auth, receiver)
 
-	return util.WriteTxStaging(ctx, auth, a.queries.ChainID(), amount, nil, args, poolTransactor.Deposit0, "Deposit FIL")
+	return util.TxPostProcess(tx, err)
 }
