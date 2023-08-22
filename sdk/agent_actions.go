@@ -25,14 +25,16 @@ func (a *fevmActions) AgentCreate(ctx context.Context, auth *bind.TransactOpts, 
 	}
 	defer client.Close()
 
-	agentFactoryTransactor, err := abigen.NewAgentFactoryTransactor(a.queries.AgentFactory(), client)
+	auth.Value = common.Big0
+
+	agentFactory, err := abigen.NewAgentFactoryTransactor(a.queries.AgentFactory(), client)
 	if err != nil {
 		return nil, err
 	}
 
-	args := []interface{}{owner, operator, request}
+	tx, err := agentFactory.Create(auth, owner, operator, request)
 
-	return util.WriteTxStaging(ctx, auth, a.queries.ChainID(), common.Big0, nil, args, agentFactoryTransactor.Create, "Agent Create")
+	return util.TxPostProcess(tx, err)
 }
 
 func (a *fevmActions) AgentBorrow(ctx context.Context, auth *bind.TransactOpts, agentAddr common.Address, poolID *big.Int, amount *big.Int, requesterKey *ecdsa.PrivateKey) (*types.Transaction, error) {

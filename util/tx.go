@@ -62,6 +62,20 @@ func WriteTx(
 }
 */
 
+func TxPostProcess(tx *types.Transaction, err error) (*types.Transaction, error) {
+	if err != nil {
+		return nil, HumanReadableRevert(err)
+	}
+	if tx == nil {
+		return nil, fmt.Errorf("Transaction is nil")
+	}
+
+	// FIXME: Do we want output to the UI here?
+	fmt.Println("Transaction:", tx.Hash())
+
+	return tx, nil
+}
+
 // temporary -- will be removed
 func WriteTxStaging(
 	ctx context.Context,
