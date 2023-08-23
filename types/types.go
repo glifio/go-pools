@@ -68,6 +68,7 @@ type FEVMQueries interface {
 	CredentialValidityPeriod(ctx context.Context) (*big.Int, *big.Int, error)
 	DefaultEpoch(ctx context.Context) (*big.Int, error)
 	MaxConsecutiveFaultEpochs(ctx context.Context) (*big.Int, error)
+	SectorFaultyTolerance(ctx context.Context) (*big.Int, error)
 	// miner registry methods
 	MinerRegistryAgentMinersCount(ctx context.Context, agentID *big.Int, blockNumber *big.Int) (*big.Int, error)
 	MinerRegistryAgentMinersList(ctx context.Context, agentID *big.Int, blockNumber *big.Int) ([]address.Address, error)

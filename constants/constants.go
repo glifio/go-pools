@@ -62,3 +62,5 @@ var WAD = big.NewInt(1e18)
 var INFINITY_POOL_ID = big.NewInt(0)
 
 var CHUNKSIZE = big.NewInt(50000)
+
+var FAULTY_SECTOR_TOLERANCE = big.NewFloat(0.001)
