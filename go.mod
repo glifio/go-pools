@@ -13,7 +13,6 @@ require (
 	github.com/filecoin-project/go-state-types v0.11.1
 	github.com/filecoin-project/lotus v1.23.0
 	github.com/filecoin-project/specs-actors v0.9.15
-	github.com/glifio/go-wallet-utils v0.0.0-20230719050429-ff6c4bc75533
 	github.com/golang-jwt/jwt/v5 v5.0.0
 	github.com/ipfs/go-ipld-cbor v0.0.6
 	github.com/stretchr/testify v1.8.3
