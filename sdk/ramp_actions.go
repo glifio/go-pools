@@ -2,65 +2,45 @@ package sdk
 
 import (
 	"context"
-	"crypto/ecdsa"
 	"math/big"
 
+	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/glifio/go-pools/abigen"
 	"github.com/glifio/go-pools/util"
 )
 
-func (a *fevmActions) RampWithdraw(ctx context.Context, assets *big.Int, receiver common.Address, pk *ecdsa.PrivateKey) (*types.Transaction, error) {
+func (a *fevmActions) RampWithdraw(ctx context.Context, auth *bind.TransactOpts, assets *big.Int, sender common.Address, receiver common.Address) (*types.Transaction, error) {
 	client, err := a.extern.ConnectEthClient()
 	if err != nil {
 		return nil, err
 	}
 	defer client.Close()
 
-	rampTransactor, err := abigen.NewSimpleRampTransactor(a.queries.SimpleRamp(), client)
+	ramp, err := abigen.NewSimpleRampTransactor(a.queries.SimpleRamp(), client)
 	if err != nil {
 		return nil, err
 	}
 
-	fromAddr, _, err := util.DeriveAddrFromPk(pk)
-	if err != nil {
-		return nil, err
-	}
+	tx, err := ramp.WithdrawF(auth, assets, receiver, sender, common.Big0)
 
-	nonce, err := a.queries.ChainGetNonce(ctx, fromAddr)
-	if err != nil {
-		return nil, err
-	}
-
-	args := []interface{}{assets, receiver, fromAddr, common.Big0}
-
-	return util.WriteTx(ctx, pk, a.queries.ChainID(), common.Big0, nonce, args, rampTransactor.WithdrawF, "Withdraw from Ramp")
+	return util.TxPostProcess(tx, err)
 }
 
-func (a *fevmActions) RampRedeem(ctx context.Context, shares *big.Int, receiver common.Address, pk *ecdsa.PrivateKey) (*types.Transaction, error) {
+func (a *fevmActions) RampRedeem(ctx context.Context, auth *bind.TransactOpts, shares *big.Int, sender common.Address, receiver common.Address) (*types.Transaction, error) {
 	client, err := a.extern.ConnectEthClient()
 	if err != nil {
 		return nil, err
 	}
 	defer client.Close()
 
-	rampTransactor, err := abigen.NewSimpleRampTransactor(a.queries.SimpleRamp(), client)
+	ramp, err := abigen.NewSimpleRampTransactor(a.queries.SimpleRamp(), client)
 	if err != nil {
 		return nil, err
 	}
 
-	fromAddr, _, err := util.DeriveAddrFromPk(pk)
-	if err != nil {
-		return nil, err
-	}
+	tx, err := ramp.RedeemF(auth, shares, receiver, sender, common.Big0)
 
-	nonce, err := a.queries.ChainGetNonce(ctx, fromAddr)
-	if err != nil {
-		return nil, err
-	}
-
-	args := []interface{}{shares, receiver, fromAddr, common.Big0}
-
-	return util.WriteTx(ctx, pk, a.queries.ChainID(), common.Big0, nonce, args, rampTransactor.RedeemF, "Redeem from Ramp")
+	return util.TxPostProcess(tx, err)
 }

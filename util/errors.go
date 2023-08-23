@@ -22,7 +22,7 @@ var humanReadableErrorCodes = []humanReadableErrorCode{
 	},
 }
 
-func humanReadableRevert(errMsg error) error {
+func HumanReadableRevert(errMsg error) error {
 	errStr := errMsg.Error()
 
 	// Check if "revert reason: " exists in the errMsg
