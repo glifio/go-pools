@@ -18,7 +18,6 @@ func TxPostProcess(tx *types.Transaction, err error) (*types.Transaction, error)
 		return nil, fmt.Errorf("Transaction is nil")
 	}
 
-	// FIXME: Do we want output to the UI here?
 	fmt.Println("Transaction:", tx.Hash())
 
 	return tx, nil
