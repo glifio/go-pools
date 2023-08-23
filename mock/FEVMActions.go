@@ -33,6 +33,118 @@ func (_m *FEVMActions) EXPECT() *FEVMActions_Expecter {
 	return &FEVMActions_Expecter{mock: &_m.Mock}
 }
 
+// AgentAcceptOperator provides a mock function with given fields: ctx, auth, agentAddr
+func (_m *FEVMActions) AgentAcceptOperator(ctx context.Context, auth *bind.TransactOpts, agentAddr common.Address) (*types.Transaction, error) {
+	ret := _m.Called(ctx, auth, agentAddr)
+
+	var r0 *types.Transaction
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, *bind.TransactOpts, common.Address) (*types.Transaction, error)); ok {
+		return rf(ctx, auth, agentAddr)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, *bind.TransactOpts, common.Address) *types.Transaction); ok {
+		r0 = rf(ctx, auth, agentAddr)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*types.Transaction)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, *bind.TransactOpts, common.Address) error); ok {
+		r1 = rf(ctx, auth, agentAddr)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// FEVMActions_AgentAcceptOperator_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'AgentAcceptOperator'
+type FEVMActions_AgentAcceptOperator_Call struct {
+	*mock.Call
+}
+
+// AgentAcceptOperator is a helper method to define mock.On call
+//   - ctx context.Context
+//   - auth *bind.TransactOpts
+//   - agentAddr common.Address
+func (_e *FEVMActions_Expecter) AgentAcceptOperator(ctx interface{}, auth interface{}, agentAddr interface{}) *FEVMActions_AgentAcceptOperator_Call {
+	return &FEVMActions_AgentAcceptOperator_Call{Call: _e.mock.On("AgentAcceptOperator", ctx, auth, agentAddr)}
+}
+
+func (_c *FEVMActions_AgentAcceptOperator_Call) Run(run func(ctx context.Context, auth *bind.TransactOpts, agentAddr common.Address)) *FEVMActions_AgentAcceptOperator_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(*bind.TransactOpts), args[2].(common.Address))
+	})
+	return _c
+}
+
+func (_c *FEVMActions_AgentAcceptOperator_Call) Return(_a0 *types.Transaction, _a1 error) *FEVMActions_AgentAcceptOperator_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *FEVMActions_AgentAcceptOperator_Call) RunAndReturn(run func(context.Context, *bind.TransactOpts, common.Address) (*types.Transaction, error)) *FEVMActions_AgentAcceptOperator_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// AgentAcceptOwnership provides a mock function with given fields: ctx, auth, agentAddr
+func (_m *FEVMActions) AgentAcceptOwnership(ctx context.Context, auth *bind.TransactOpts, agentAddr common.Address) (*types.Transaction, error) {
+	ret := _m.Called(ctx, auth, agentAddr)
+
+	var r0 *types.Transaction
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, *bind.TransactOpts, common.Address) (*types.Transaction, error)); ok {
+		return rf(ctx, auth, agentAddr)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, *bind.TransactOpts, common.Address) *types.Transaction); ok {
+		r0 = rf(ctx, auth, agentAddr)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*types.Transaction)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, *bind.TransactOpts, common.Address) error); ok {
+		r1 = rf(ctx, auth, agentAddr)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// FEVMActions_AgentAcceptOwnership_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'AgentAcceptOwnership'
+type FEVMActions_AgentAcceptOwnership_Call struct {
+	*mock.Call
+}
+
+// AgentAcceptOwnership is a helper method to define mock.On call
+//   - ctx context.Context
+//   - auth *bind.TransactOpts
+//   - agentAddr common.Address
+func (_e *FEVMActions_Expecter) AgentAcceptOwnership(ctx interface{}, auth interface{}, agentAddr interface{}) *FEVMActions_AgentAcceptOwnership_Call {
+	return &FEVMActions_AgentAcceptOwnership_Call{Call: _e.mock.On("AgentAcceptOwnership", ctx, auth, agentAddr)}
+}
+
+func (_c *FEVMActions_AgentAcceptOwnership_Call) Run(run func(ctx context.Context, auth *bind.TransactOpts, agentAddr common.Address)) *FEVMActions_AgentAcceptOwnership_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(*bind.TransactOpts), args[2].(common.Address))
+	})
+	return _c
+}
+
+func (_c *FEVMActions_AgentAcceptOwnership_Call) Return(_a0 *types.Transaction, _a1 error) *FEVMActions_AgentAcceptOwnership_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *FEVMActions_AgentAcceptOwnership_Call) RunAndReturn(run func(context.Context, *bind.TransactOpts, common.Address) (*types.Transaction, error)) *FEVMActions_AgentAcceptOwnership_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // AgentAddMiner provides a mock function with given fields: ctx, auth, agentAddr, minerAddr, requesterKey
 func (_m *FEVMActions) AgentAddMiner(ctx context.Context, auth *bind.TransactOpts, agentAddr common.Address, minerAddr address.Address, requesterKey *ecdsa.PrivateKey) (*types.Transaction, error) {
 	ret := _m.Called(ctx, auth, agentAddr, minerAddr, requesterKey)
@@ -205,6 +317,63 @@ func (_c *FEVMActions_AgentChangeMinerWorker_Call) Return(_a0 *types.Transaction
 }
 
 func (_c *FEVMActions_AgentChangeMinerWorker_Call) RunAndReturn(run func(context.Context, *bind.TransactOpts, common.Address, address.Address, address.Address, []address.Address) (*types.Transaction, error)) *FEVMActions_AgentChangeMinerWorker_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// AgentChangeRequester provides a mock function with given fields: ctx, auth, agentAddr, newRequester
+func (_m *FEVMActions) AgentChangeRequester(ctx context.Context, auth *bind.TransactOpts, agentAddr common.Address, newRequester common.Address) (*types.Transaction, error) {
+	ret := _m.Called(ctx, auth, agentAddr, newRequester)
+
+	var r0 *types.Transaction
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, *bind.TransactOpts, common.Address, common.Address) (*types.Transaction, error)); ok {
+		return rf(ctx, auth, agentAddr, newRequester)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, *bind.TransactOpts, common.Address, common.Address) *types.Transaction); ok {
+		r0 = rf(ctx, auth, agentAddr, newRequester)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*types.Transaction)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, *bind.TransactOpts, common.Address, common.Address) error); ok {
+		r1 = rf(ctx, auth, agentAddr, newRequester)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// FEVMActions_AgentChangeRequester_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'AgentChangeRequester'
+type FEVMActions_AgentChangeRequester_Call struct {
+	*mock.Call
+}
+
+// AgentChangeRequester is a helper method to define mock.On call
+//   - ctx context.Context
+//   - auth *bind.TransactOpts
+//   - agentAddr common.Address
+//   - newRequester common.Address
+func (_e *FEVMActions_Expecter) AgentChangeRequester(ctx interface{}, auth interface{}, agentAddr interface{}, newRequester interface{}) *FEVMActions_AgentChangeRequester_Call {
+	return &FEVMActions_AgentChangeRequester_Call{Call: _e.mock.On("AgentChangeRequester", ctx, auth, agentAddr, newRequester)}
+}
+
+func (_c *FEVMActions_AgentChangeRequester_Call) Run(run func(ctx context.Context, auth *bind.TransactOpts, agentAddr common.Address, newRequester common.Address)) *FEVMActions_AgentChangeRequester_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(*bind.TransactOpts), args[2].(common.Address), args[3].(common.Address))
+	})
+	return _c
+}
+
+func (_c *FEVMActions_AgentChangeRequester_Call) Return(_a0 *types.Transaction, _a1 error) *FEVMActions_AgentChangeRequester_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *FEVMActions_AgentChangeRequester_Call) RunAndReturn(run func(context.Context, *bind.TransactOpts, common.Address, common.Address) (*types.Transaction, error)) *FEVMActions_AgentChangeRequester_Call {
 	_c.Call.Return(run)
 	return _c
 }
@@ -669,6 +838,120 @@ func (_c *FEVMActions_AgentSetRecovered_Call) Return(_a0 *types.Transaction, _a1
 }
 
 func (_c *FEVMActions_AgentSetRecovered_Call) RunAndReturn(run func(context.Context, *bind.TransactOpts, common.Address, *ecdsa.PrivateKey) (*types.Transaction, error)) *FEVMActions_AgentSetRecovered_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// AgentTransferOperator provides a mock function with given fields: ctx, auth, agentAddr, newOperator
+func (_m *FEVMActions) AgentTransferOperator(ctx context.Context, auth *bind.TransactOpts, agentAddr common.Address, newOperator common.Address) (*types.Transaction, error) {
+	ret := _m.Called(ctx, auth, agentAddr, newOperator)
+
+	var r0 *types.Transaction
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, *bind.TransactOpts, common.Address, common.Address) (*types.Transaction, error)); ok {
+		return rf(ctx, auth, agentAddr, newOperator)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, *bind.TransactOpts, common.Address, common.Address) *types.Transaction); ok {
+		r0 = rf(ctx, auth, agentAddr, newOperator)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*types.Transaction)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, *bind.TransactOpts, common.Address, common.Address) error); ok {
+		r1 = rf(ctx, auth, agentAddr, newOperator)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// FEVMActions_AgentTransferOperator_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'AgentTransferOperator'
+type FEVMActions_AgentTransferOperator_Call struct {
+	*mock.Call
+}
+
+// AgentTransferOperator is a helper method to define mock.On call
+//   - ctx context.Context
+//   - auth *bind.TransactOpts
+//   - agentAddr common.Address
+//   - newOperator common.Address
+func (_e *FEVMActions_Expecter) AgentTransferOperator(ctx interface{}, auth interface{}, agentAddr interface{}, newOperator interface{}) *FEVMActions_AgentTransferOperator_Call {
+	return &FEVMActions_AgentTransferOperator_Call{Call: _e.mock.On("AgentTransferOperator", ctx, auth, agentAddr, newOperator)}
+}
+
+func (_c *FEVMActions_AgentTransferOperator_Call) Run(run func(ctx context.Context, auth *bind.TransactOpts, agentAddr common.Address, newOperator common.Address)) *FEVMActions_AgentTransferOperator_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(*bind.TransactOpts), args[2].(common.Address), args[3].(common.Address))
+	})
+	return _c
+}
+
+func (_c *FEVMActions_AgentTransferOperator_Call) Return(_a0 *types.Transaction, _a1 error) *FEVMActions_AgentTransferOperator_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *FEVMActions_AgentTransferOperator_Call) RunAndReturn(run func(context.Context, *bind.TransactOpts, common.Address, common.Address) (*types.Transaction, error)) *FEVMActions_AgentTransferOperator_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// AgentTransferOwnership provides a mock function with given fields: ctx, auth, agentAddr, newOwner
+func (_m *FEVMActions) AgentTransferOwnership(ctx context.Context, auth *bind.TransactOpts, agentAddr common.Address, newOwner common.Address) (*types.Transaction, error) {
+	ret := _m.Called(ctx, auth, agentAddr, newOwner)
+
+	var r0 *types.Transaction
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, *bind.TransactOpts, common.Address, common.Address) (*types.Transaction, error)); ok {
+		return rf(ctx, auth, agentAddr, newOwner)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, *bind.TransactOpts, common.Address, common.Address) *types.Transaction); ok {
+		r0 = rf(ctx, auth, agentAddr, newOwner)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*types.Transaction)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, *bind.TransactOpts, common.Address, common.Address) error); ok {
+		r1 = rf(ctx, auth, agentAddr, newOwner)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// FEVMActions_AgentTransferOwnership_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'AgentTransferOwnership'
+type FEVMActions_AgentTransferOwnership_Call struct {
+	*mock.Call
+}
+
+// AgentTransferOwnership is a helper method to define mock.On call
+//   - ctx context.Context
+//   - auth *bind.TransactOpts
+//   - agentAddr common.Address
+//   - newOwner common.Address
+func (_e *FEVMActions_Expecter) AgentTransferOwnership(ctx interface{}, auth interface{}, agentAddr interface{}, newOwner interface{}) *FEVMActions_AgentTransferOwnership_Call {
+	return &FEVMActions_AgentTransferOwnership_Call{Call: _e.mock.On("AgentTransferOwnership", ctx, auth, agentAddr, newOwner)}
+}
+
+func (_c *FEVMActions_AgentTransferOwnership_Call) Run(run func(ctx context.Context, auth *bind.TransactOpts, agentAddr common.Address, newOwner common.Address)) *FEVMActions_AgentTransferOwnership_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(*bind.TransactOpts), args[2].(common.Address), args[3].(common.Address))
+	})
+	return _c
+}
+
+func (_c *FEVMActions_AgentTransferOwnership_Call) Return(_a0 *types.Transaction, _a1 error) *FEVMActions_AgentTransferOwnership_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *FEVMActions_AgentTransferOwnership_Call) RunAndReturn(run func(context.Context, *bind.TransactOpts, common.Address, common.Address) (*types.Transaction, error)) *FEVMActions_AgentTransferOwnership_Call {
 	_c.Call.Return(run)
 	return _c
 }
