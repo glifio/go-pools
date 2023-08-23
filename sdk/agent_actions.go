@@ -412,3 +412,36 @@ func (a *fevmActions) AgentRefreshRoutes(ctx context.Context, auth *bind.Transac
 
 	return util.TxPostProcess(tx, err)
 }
+
+func (a *fevmActions) AgentSetRecovered(ctx context.Context, auth *bind.TransactOpts, agentAddr common.Address, requesterKey *ecdsa.PrivateKey) (*types.Transaction, error) {
+	client, err := a.extern.ConnectEthClient()
+	if err != nil {
+		return nil, err
+	}
+	defer client.Close()
+
+	agent, err := abigen.NewAgentTransactor(agentAddr, client)
+	if err != nil {
+		return nil, err
+	}
+
+	closer, err := a.extern.ConnectAdoClient(ctx)
+	if err != nil {
+		return nil, err
+	}
+	defer closer()
+
+	jws, err := token.SignJWS(ctx, agentAddr, address.Undef, common.Big0, constants.MethodSetRecovered, requesterKey, a.queries)
+	if err != nil {
+		return nil, err
+	}
+
+	sc, err := rpc.ADOClient.SignCredential(ctx, jws)
+	if err != nil {
+		return nil, err
+	}
+
+	tx, err := agent.SetRecovered(auth, sc)
+
+	return util.TxPostProcess(tx, err)
+}

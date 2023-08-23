@@ -112,6 +112,7 @@ type FEVMActions interface {
 	AgentPushFunds(ctx context.Context, auth *bind.TransactOpts, agentAddr common.Address, amount *big.Int, miner address.Address, requesterKey *ecdsa.PrivateKey) (*types.Transaction, error)
 	AgentWithdraw(ctx context.Context, auth *bind.TransactOpts, agentAddr common.Address, receiver common.Address, amount *big.Int, requesterKey *ecdsa.PrivateKey) (*types.Transaction, error)
 	AgentRefreshRoutes(ctx context.Context, auth *bind.TransactOpts, agentAddr common.Address) (*types.Transaction, error)
+	AgentSetRecovered(ctx context.Context, auth *bind.TransactOpts, agentAddr common.Address, requesterKey *ecdsa.PrivateKey) (*types.Transaction, error)
 
 	// infinity pool actions
 	InfPoolDepositFIL(ctx context.Context, auth *bind.TransactOpts, agentAddr common.Address, amount *big.Int) (*types.Transaction, error)

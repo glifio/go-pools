@@ -616,6 +616,63 @@ func (_c *FEVMActions_AgentRemoveMiner_Call) RunAndReturn(run func(context.Conte
 	return _c
 }
 
+// AgentSetRecovered provides a mock function with given fields: ctx, auth, agentAddr, requesterKey
+func (_m *FEVMActions) AgentSetRecovered(ctx context.Context, auth *bind.TransactOpts, agentAddr common.Address, requesterKey *ecdsa.PrivateKey) (*types.Transaction, error) {
+	ret := _m.Called(ctx, auth, agentAddr, requesterKey)
+
+	var r0 *types.Transaction
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, *bind.TransactOpts, common.Address, *ecdsa.PrivateKey) (*types.Transaction, error)); ok {
+		return rf(ctx, auth, agentAddr, requesterKey)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, *bind.TransactOpts, common.Address, *ecdsa.PrivateKey) *types.Transaction); ok {
+		r0 = rf(ctx, auth, agentAddr, requesterKey)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*types.Transaction)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, *bind.TransactOpts, common.Address, *ecdsa.PrivateKey) error); ok {
+		r1 = rf(ctx, auth, agentAddr, requesterKey)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// FEVMActions_AgentSetRecovered_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'AgentSetRecovered'
+type FEVMActions_AgentSetRecovered_Call struct {
+	*mock.Call
+}
+
+// AgentSetRecovered is a helper method to define mock.On call
+//   - ctx context.Context
+//   - auth *bind.TransactOpts
+//   - agentAddr common.Address
+//   - requesterKey *ecdsa.PrivateKey
+func (_e *FEVMActions_Expecter) AgentSetRecovered(ctx interface{}, auth interface{}, agentAddr interface{}, requesterKey interface{}) *FEVMActions_AgentSetRecovered_Call {
+	return &FEVMActions_AgentSetRecovered_Call{Call: _e.mock.On("AgentSetRecovered", ctx, auth, agentAddr, requesterKey)}
+}
+
+func (_c *FEVMActions_AgentSetRecovered_Call) Run(run func(ctx context.Context, auth *bind.TransactOpts, agentAddr common.Address, requesterKey *ecdsa.PrivateKey)) *FEVMActions_AgentSetRecovered_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(*bind.TransactOpts), args[2].(common.Address), args[3].(*ecdsa.PrivateKey))
+	})
+	return _c
+}
+
+func (_c *FEVMActions_AgentSetRecovered_Call) Return(_a0 *types.Transaction, _a1 error) *FEVMActions_AgentSetRecovered_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *FEVMActions_AgentSetRecovered_Call) RunAndReturn(run func(context.Context, *bind.TransactOpts, common.Address, *ecdsa.PrivateKey) (*types.Transaction, error)) *FEVMActions_AgentSetRecovered_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // AgentWithdraw provides a mock function with given fields: ctx, auth, agentAddr, receiver, amount, requesterKey
 func (_m *FEVMActions) AgentWithdraw(ctx context.Context, auth *bind.TransactOpts, agentAddr common.Address, receiver common.Address, amount *big.Int, requesterKey *ecdsa.PrivateKey) (*types.Transaction, error) {
 	ret := _m.Called(ctx, auth, agentAddr, receiver, amount, requesterKey)
