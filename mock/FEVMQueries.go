@@ -3003,6 +3003,60 @@ func (_c *FEVMQueries_RouterOwner_Call) RunAndReturn(run func(context.Context) (
 	return _c
 }
 
+// SectorFaultyTolerance provides a mock function with given fields: ctx
+func (_m *FEVMQueries) SectorFaultyTolerance(ctx context.Context) (*big.Int, error) {
+	ret := _m.Called(ctx)
+
+	var r0 *big.Int
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context) (*big.Int, error)); ok {
+		return rf(ctx)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context) *big.Int); ok {
+		r0 = rf(ctx)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*big.Int)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context) error); ok {
+		r1 = rf(ctx)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// FEVMQueries_SectorFaultyTolerance_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'SectorFaultyTolerance'
+type FEVMQueries_SectorFaultyTolerance_Call struct {
+	*mock.Call
+}
+
+// SectorFaultyTolerance is a helper method to define mock.On call
+//   - ctx context.Context
+func (_e *FEVMQueries_Expecter) SectorFaultyTolerance(ctx interface{}) *FEVMQueries_SectorFaultyTolerance_Call {
+	return &FEVMQueries_SectorFaultyTolerance_Call{Call: _e.mock.On("SectorFaultyTolerance", ctx)}
+}
+
+func (_c *FEVMQueries_SectorFaultyTolerance_Call) Run(run func(ctx context.Context)) *FEVMQueries_SectorFaultyTolerance_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context))
+	})
+	return _c
+}
+
+func (_c *FEVMQueries_SectorFaultyTolerance_Call) Return(_a0 *big.Int, _a1 error) *FEVMQueries_SectorFaultyTolerance_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *FEVMQueries_SectorFaultyTolerance_Call) RunAndReturn(run func(context.Context) (*big.Int, error)) *FEVMQueries_SectorFaultyTolerance_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // SimpleRamp provides a mock function with given fields:
 func (_m *FEVMQueries) SimpleRamp() common.Address {
 	ret := _m.Called()
