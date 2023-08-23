@@ -73,3 +73,18 @@ func (q *fevmQueries) CredentialUsed(ctx context.Context, v uint8, r [32]byte, s
 
 	return policeCaller.CredentialUsed(&bind.CallOpts{Context: ctx}, v, r, s)
 }
+
+func (q *fevmQueries) SectorFaultyTolerance(ctx context.Context) (*big.Int, error) {
+	client, err := q.extern.ConnectEthClient()
+	if err != nil {
+		return nil, err
+	}
+	defer client.Close()
+
+	policeCaller, err := abigen.NewAgentPoliceCaller(q.agentPolice, client)
+	if err != nil {
+		return nil, err
+	}
+
+	return policeCaller.SectorFaultyTolerancePercent(&bind.CallOpts{Context: ctx})
+}
