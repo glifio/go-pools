@@ -23,6 +23,7 @@ func (a *fevmActions) InfPoolDepositFIL(ctx context.Context, auth *bind.Transact
 		return nil, err
 	}
 
+	auth.Value = amount
 	tx, err := infpool.Deposit0(auth, receiver)
 
 	return util.TxPostProcess(tx, err)
