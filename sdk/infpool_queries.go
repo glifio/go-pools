@@ -152,6 +152,15 @@ func (q *fevmQueries) InfPoolExitReserve(ctx context.Context, blockNumber *big.I
 		return nil, err
 	}
 
+	liquidAssets, err := poolCaller.GetLiquidAssets(&bind.CallOpts{Context: ctx, BlockNumber: blockNumber})
+	if err != nil {
+		return nil, err
+	}
+
+	if liquidAssets.Cmp(minLiquidity) == -1 {
+		return util.ToFIL(liquidAssets), nil
+	}
+
 	return util.ToFIL(minLiquidity), nil
 }
 
