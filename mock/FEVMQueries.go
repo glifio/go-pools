@@ -1888,29 +1888,38 @@ func (_c *FEVMQueries_InfPoolBorrowableLiquidity_Call) RunAndReturn(run func(con
 }
 
 // InfPoolExitReserve provides a mock function with given fields: ctx, blockNumber
-func (_m *FEVMQueries) InfPoolExitReserve(ctx context.Context, blockNumber *big.Int) (*big.Float, error) {
+func (_m *FEVMQueries) InfPoolExitReserve(ctx context.Context, blockNumber *big.Int) (*big.Int, *big.Int, error) {
 	ret := _m.Called(ctx, blockNumber)
 
-	var r0 *big.Float
-	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context, *big.Int) (*big.Float, error)); ok {
+	var r0 *big.Int
+	var r1 *big.Int
+	var r2 error
+	if rf, ok := ret.Get(0).(func(context.Context, *big.Int) (*big.Int, *big.Int, error)); ok {
 		return rf(ctx, blockNumber)
 	}
-	if rf, ok := ret.Get(0).(func(context.Context, *big.Int) *big.Float); ok {
+	if rf, ok := ret.Get(0).(func(context.Context, *big.Int) *big.Int); ok {
 		r0 = rf(ctx, blockNumber)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*big.Float)
+			r0 = ret.Get(0).(*big.Int)
 		}
 	}
 
-	if rf, ok := ret.Get(1).(func(context.Context, *big.Int) error); ok {
+	if rf, ok := ret.Get(1).(func(context.Context, *big.Int) *big.Int); ok {
 		r1 = rf(ctx, blockNumber)
 	} else {
-		r1 = ret.Error(1)
+		if ret.Get(1) != nil {
+			r1 = ret.Get(1).(*big.Int)
+		}
 	}
 
-	return r0, r1
+	if rf, ok := ret.Get(2).(func(context.Context, *big.Int) error); ok {
+		r2 = rf(ctx, blockNumber)
+	} else {
+		r2 = ret.Error(2)
+	}
+
+	return r0, r1, r2
 }
 
 // FEVMQueries_InfPoolExitReserve_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'InfPoolExitReserve'
@@ -1932,12 +1941,12 @@ func (_c *FEVMQueries_InfPoolExitReserve_Call) Run(run func(ctx context.Context,
 	return _c
 }
 
-func (_c *FEVMQueries_InfPoolExitReserve_Call) Return(_a0 *big.Float, _a1 error) *FEVMQueries_InfPoolExitReserve_Call {
-	_c.Call.Return(_a0, _a1)
+func (_c *FEVMQueries_InfPoolExitReserve_Call) Return(_a0 *big.Int, _a1 *big.Int, _a2 error) *FEVMQueries_InfPoolExitReserve_Call {
+	_c.Call.Return(_a0, _a1, _a2)
 	return _c
 }
 
-func (_c *FEVMQueries_InfPoolExitReserve_Call) RunAndReturn(run func(context.Context, *big.Int) (*big.Float, error)) *FEVMQueries_InfPoolExitReserve_Call {
+func (_c *FEVMQueries_InfPoolExitReserve_Call) RunAndReturn(run func(context.Context, *big.Int) (*big.Int, *big.Int, error)) *FEVMQueries_InfPoolExitReserve_Call {
 	_c.Call.Return(run)
 	return _c
 }
