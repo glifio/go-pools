@@ -135,24 +135,33 @@ func (q *fevmQueries) InfPoolTotalBorrowed(ctx context.Context, blockNumber *big
 	return util.ToFIL(assets), nil
 }
 
-func (q *fevmQueries) InfPoolExitReserve(ctx context.Context, blockNumber *big.Int) (*big.Float, error) {
+func (q *fevmQueries) InfPoolExitReserve(ctx context.Context, blockNumber *big.Int) (*big.Int, *big.Int, error) {
 	client, err := q.extern.ConnectEthClient()
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 	defer client.Close()
 
 	poolCaller, err := abigen.NewInfinityPoolCaller(q.infinityPool, client)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	minLiquidity, err := poolCaller.GetAbsMinLiquidity(&bind.CallOpts{Context: ctx, BlockNumber: blockNumber})
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
-	return util.ToFIL(minLiquidity), nil
+	liquidAssets, err := poolCaller.GetLiquidAssets(&bind.CallOpts{Context: ctx, BlockNumber: blockNumber})
+	if err != nil {
+		return nil, nil, err
+	}
+
+	if liquidAssets.Cmp(minLiquidity) == -1 {
+		return liquidAssets, minLiquidity, nil
+	}
+
+	return minLiquidity, minLiquidity, nil
 }
 
 // InfPoolIsApprovedWithReason returns whether a request has been approved or not, if

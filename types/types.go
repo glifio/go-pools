@@ -46,7 +46,7 @@ type FEVMQueries interface {
 	InfPoolBorrowableLiquidity(ctx context.Context, blockNumber *big.Int) (*big.Float, error)
 	InfPoolTotalAssets(ctx context.Context, blockNumber *big.Int) (*big.Float, error)
 	InfPoolTotalBorrowed(ctx context.Context, blockNumber *big.Int) (*big.Float, error)
-	InfPoolExitReserve(ctx context.Context, blockNumber *big.Int) (*big.Float, error)
+	InfPoolExitReserve(ctx context.Context, blockNumber *big.Int) (*big.Int, *big.Int, error)
 	InfPoolIsApprovedWithReason(ctx context.Context, agentAddr common.Address, agentData *vc.AgentData) (bool, RejectionReason, error)
 	InfPoolAgentMaxBorrow(ctx context.Context, agentAddr common.Address, agentData *vc.AgentData) (*big.Int, error)
 	InfPoolAgentMaxWithdraw(ctx context.Context, agentAddr common.Address, agentData *vc.AgentData) (*big.Int, error)
