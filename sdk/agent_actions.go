@@ -412,3 +412,109 @@ func (a *fevmActions) AgentRefreshRoutes(ctx context.Context, auth *bind.Transac
 
 	return util.TxPostProcess(tx, err)
 }
+
+func (a *fevmActions) AgentSetRecovered(ctx context.Context, auth *bind.TransactOpts, agentAddr common.Address, requesterKey *ecdsa.PrivateKey) (*types.Transaction, error) {
+	client, err := a.extern.ConnectEthClient()
+	if err != nil {
+		return nil, err
+	}
+	defer client.Close()
+
+	agent, err := abigen.NewAgentTransactor(agentAddr, client)
+	if err != nil {
+		return nil, err
+	}
+
+	closer, err := a.extern.ConnectAdoClient(ctx)
+	if err != nil {
+		return nil, err
+	}
+	defer closer()
+
+	jws, err := token.SignJWS(ctx, agentAddr, address.Undef, common.Big0, constants.MethodSetRecovered, requesterKey, a.queries)
+	if err != nil {
+		return nil, err
+	}
+
+	sc, err := rpc.ADOClient.SignCredential(ctx, jws)
+	if err != nil {
+		return nil, err
+	}
+
+	return util.TxPostProcess(agent.SetRecovered(auth, sc))
+}
+
+func (a *fevmActions) AgentTransferOwnership(ctx context.Context, auth *bind.TransactOpts, agentAddr common.Address, newOwner common.Address) (*types.Transaction, error) {
+	client, err := a.extern.ConnectEthClient()
+	if err != nil {
+		return nil, err
+	}
+	defer client.Close()
+
+	agent, err := abigen.NewAgentTransactor(agentAddr, client)
+	if err != nil {
+		return nil, err
+	}
+
+	return util.TxPostProcess(agent.TransferOwnership(auth, newOwner))
+}
+
+func (a *fevmActions) AgentAcceptOwnership(ctx context.Context, auth *bind.TransactOpts, agentAddr common.Address) (*types.Transaction, error) {
+	client, err := a.extern.ConnectEthClient()
+	if err != nil {
+		return nil, err
+	}
+	defer client.Close()
+
+	agent, err := abigen.NewAgentTransactor(agentAddr, client)
+	if err != nil {
+		return nil, err
+	}
+
+	return util.TxPostProcess(agent.AcceptOwnership(auth))
+}
+
+func (a *fevmActions) AgentTransferOperator(ctx context.Context, auth *bind.TransactOpts, agentAddr common.Address, newOperator common.Address) (*types.Transaction, error) {
+	client, err := a.extern.ConnectEthClient()
+	if err != nil {
+		return nil, err
+	}
+	defer client.Close()
+
+	agent, err := abigen.NewAgentTransactor(agentAddr, client)
+	if err != nil {
+		return nil, err
+	}
+
+	return util.TxPostProcess(agent.TransferOperator(auth, newOperator))
+}
+
+func (a *fevmActions) AgentAcceptOperator(ctx context.Context, auth *bind.TransactOpts, agentAddr common.Address) (*types.Transaction, error) {
+	client, err := a.extern.ConnectEthClient()
+	if err != nil {
+		return nil, err
+	}
+	defer client.Close()
+
+	agent, err := abigen.NewAgentTransactor(agentAddr, client)
+	if err != nil {
+		return nil, err
+	}
+
+	return util.TxPostProcess(agent.AcceptOperator(auth))
+}
+
+func (a *fevmActions) AgentChangeRequester(ctx context.Context, auth *bind.TransactOpts, agentAddr common.Address, newRequester common.Address) (*types.Transaction, error) {
+	client, err := a.extern.ConnectEthClient()
+	if err != nil {
+		return nil, err
+	}
+	defer client.Close()
+
+	agent, err := abigen.NewAgentTransactor(agentAddr, client)
+	if err != nil {
+		return nil, err
+	}
+
+	return util.TxPostProcess(agent.SetAdoRequestKey(auth, newRequester))
+}
