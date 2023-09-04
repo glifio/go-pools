@@ -472,3 +472,77 @@ func (q *fevmQueries) InfPoolFeesAccrued(ctx context.Context, blockNumber *big.I
 
 	return poolCaller.FeesCollected(&bind.CallOpts{Context: ctx, BlockNumber: blockNumber})
 }
+
+func (q *fevmQueries) InfPoolApy(ctx context.Context, blockNumber *big.Int) (*big.Int, error) {
+	client, err := q.extern.ConnectEthClient()
+	if err != nil {
+		return nil, err
+	}
+	defer client.Close()
+
+	rateModule, err := q.RateModule()
+	if err != nil {
+		return nil, err
+	}
+
+	rateModuleCaller, err := abigen.NewRateModuleCaller(rateModule, client)
+	if err != nil {
+		return nil, err
+	}
+
+	agentDataWithGCRED := vc.AgentData{
+		AgentValue:                  common.Big0,
+		CollateralValue:             common.Big0,
+		ExpectedDailyFaultPenalties: common.Big0,
+		ExpectedDailyRewards:        common.Big0,
+		Gcred:                       big.NewInt(100),
+		QaPower:                     common.Big0,
+		Principal:                   common.Big0,
+		FaultySectors:               common.Big0,
+		LiveSectors:                 common.Big0,
+		GreenScore:                  common.Big0,
+	}
+
+	nullishVC, err := vc.NullishVerifiableCredential(agentDataWithGCRED)
+	if err != nil {
+		return nil, err
+	}
+
+	perEpochRate, err := rateModuleCaller.GetRate(&bind.CallOpts{Context: ctx}, *nullishVC)
+	if err != nil {
+		return nil, err
+	}
+
+	baseApr := new(big.Int).Mul(perEpochRate, big.NewInt(constants.EpochsInYear))
+	// take out the treasury fee from the APR
+	tFeeRate, err := q.TreasuryFeeRate(ctx, blockNumber)
+	if err != nil {
+		return nil, err
+	}
+
+	// apr * (1 - tFeeRate)
+	baseApr.Mul(baseApr, new(big.Int).Sub(big.NewInt(1e18), tFeeRate))
+	// div out the WAD precision
+	baseApr.Div(baseApr, big.NewInt(1e18))
+
+	// use the utilization rate to get the current APY
+	borrowed, err := q.InfPoolTotalBorrowed(ctx, nil)
+	if err != nil {
+		return nil, err
+	}
+	assets, err := q.InfPoolTotalAssets(ctx, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	borrowedAtto := util.ToAtto(borrowed)
+	assetsAtto := util.ToAtto(assets)
+
+	borrowedAtto.Mul(borrowedAtto, big.NewInt(1e18))
+	utilizationRate := new(big.Int).Div(borrowedAtto, assetsAtto)
+
+	curApy := new(big.Int).Mul(baseApr, utilizationRate)
+	curApy.Div(curApy, big.NewInt(1e18))
+
+	return curApy, nil
+}
