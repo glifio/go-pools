@@ -542,6 +542,8 @@ func (q *fevmQueries) InfPoolApy(ctx context.Context, blockNumber *big.Int) (*bi
 	utilizationRate := new(big.Int).Div(borrowedAtto, assetsAtto)
 
 	curApy := new(big.Int).Mul(baseApr, utilizationRate)
+	// div out the WAD precision twice to get back to 1e18 = 100% rate
+	curApy.Div(curApy, big.NewInt(1e18))
 	curApy.Div(curApy, big.NewInt(1e18))
 
 	return curApy, nil
