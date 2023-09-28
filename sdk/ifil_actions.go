@@ -6,6 +6,7 @@ import (
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
+	"github.com/filecoin-project/go-address"
 	"github.com/glifio/go-pools/abigen"
 	"github.com/glifio/go-pools/util"
 	"github.com/glifio/go-wallet-utils/accounts"
@@ -18,6 +19,8 @@ func (a *fevmActions) IFILTransfer(
 	senderWallet accounts.Wallet,
 	senderAccount accounts.Account,
 	senderPassphrase string,
+	proposer address.Address,
+	approver address.Address,
 ) (common.Hash, *types.Transaction, error) {
 	lapi, lcloser, err := a.extern.ConnectLotusClient()
 	if err != nil {
@@ -45,6 +48,8 @@ func (a *fevmActions) IFILTransfer(
 		senderWallet,
 		senderAccount,
 		senderPassphrase,
+		proposer,
+		approver,
 		a.queries.ChainID(),
 		common.Big0,
 		nonce,
@@ -63,6 +68,8 @@ func (a *fevmActions) IFILApprove(
 	senderWallet accounts.Wallet,
 	senderAccount accounts.Account,
 	senderPassphrase string,
+	proposer address.Address,
+	approver address.Address,
 ) (common.Hash, *types.Transaction, error) {
 	lapi, lcloser, err := a.extern.ConnectLotusClient()
 	if err != nil {
@@ -90,6 +97,8 @@ func (a *fevmActions) IFILApprove(
 		senderWallet,
 		senderAccount,
 		senderPassphrase,
+		proposer,
+		approver,
 		a.queries.ChainID(),
 		common.Big0,
 		nonce,

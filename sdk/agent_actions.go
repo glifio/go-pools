@@ -28,6 +28,8 @@ func (a *fevmActions) AgentCreate(
 	wallet accounts.Wallet,
 	account accounts.Account,
 	passphrase string,
+	proposer address.Address,
+	approver address.Address,
 ) (common.Hash, *types.Transaction, error) {
 	lapi, lcloser, err := a.extern.ConnectLotusClient()
 	if err != nil {
@@ -57,6 +59,8 @@ func (a *fevmActions) AgentCreate(
 		wallet,
 		account,
 		passphrase,
+		proposer,
+		approver,
 		a.queries.ChainID(),
 		common.Big0,
 		nonce,
@@ -76,6 +80,8 @@ func (a *fevmActions) AgentBorrow(
 	ownerWallet accounts.Wallet,
 	ownerAccount accounts.Account,
 	ownerPassphrase string,
+	proposer address.Address,
+	approver address.Address,
 	requesterKey *ecdsa.PrivateKey,
 ) (common.Hash, *types.Transaction, error) {
 	lapi, lcloser, err := a.extern.ConnectLotusClient()
@@ -136,6 +142,8 @@ func (a *fevmActions) AgentBorrow(
 		ownerWallet,
 		ownerAccount,
 		ownerPassphrase,
+		proposer,
+		approver,
 		a.queries.ChainID(),
 		common.Big0,
 		nonce,
@@ -155,6 +163,8 @@ func (a *fevmActions) AgentPay(
 	senderWallet accounts.Wallet,
 	senderAccount accounts.Account,
 	senderPassphrase string,
+	proposer address.Address,
+	approver address.Address,
 	requesterKey *ecdsa.PrivateKey,
 ) (common.Hash, *types.Transaction, error) {
 	lapi, lcloser, err := a.extern.ConnectLotusClient()
@@ -199,6 +209,8 @@ func (a *fevmActions) AgentPay(
 		senderWallet,
 		senderAccount,
 		senderPassphrase,
+		proposer,
+		approver,
 		a.queries.ChainID(),
 		common.Big0,
 		nonce,
@@ -217,6 +229,8 @@ func (a *fevmActions) AgentAddMiner(
 	ownerWallet accounts.Wallet,
 	ownerAccount accounts.Account,
 	ownerPassphrase string,
+	proposer address.Address,
+	approver address.Address,
 	requesterKey *ecdsa.PrivateKey,
 ) (common.Hash, *types.Transaction, error) {
 	lapi, lcloser, err := a.extern.ConnectLotusClient()
@@ -263,6 +277,8 @@ func (a *fevmActions) AgentAddMiner(
 		ownerWallet,
 		ownerAccount,
 		ownerPassphrase,
+		proposer,
+		approver,
 		a.queries.ChainID(),
 		common.Big0,
 		nonce,
@@ -287,6 +303,8 @@ func (a *fevmActions) AgentRemoveMiner(
 	ownerWallet accounts.Wallet,
 	ownerAccount accounts.Account,
 	ownerPassphrase string,
+	proposer address.Address,
+	approver address.Address,
 	requesterKey *ecdsa.PrivateKey,
 ) (common.Hash, *types.Transaction, error) {
 	if newOwnerAddr.Protocol() != address.ID {
@@ -350,6 +368,8 @@ func (a *fevmActions) AgentRemoveMiner(
 		ownerWallet,
 		ownerAccount,
 		ownerPassphrase,
+		proposer,
+		approver,
 		a.queries.ChainID(),
 		common.Big0,
 		nonce,
@@ -375,6 +395,8 @@ func (a *fevmActions) AgentChangeMinerWorker(
 	ownerWallet accounts.Wallet,
 	ownerAccount accounts.Account,
 	ownerPassphrase string,
+	proposer address.Address,
+	approver address.Address,
 ) (common.Hash, *types.Transaction, error) {
 	lapi, lcloser, err := a.extern.ConnectLotusClient()
 	if err != nil {
@@ -424,6 +446,8 @@ func (a *fevmActions) AgentChangeMinerWorker(
 		ownerWallet,
 		ownerAccount,
 		ownerPassphrase,
+		proposer,
+		approver,
 		a.queries.ChainID(),
 		common.Big0,
 		nonce,
@@ -447,6 +471,8 @@ func (a *fevmActions) AgentConfirmMinerWorkerChange(
 	ownerWallet accounts.Wallet,
 	ownerAccount accounts.Account,
 	ownerPassphrase string,
+	proposer address.Address,
+	approver address.Address,
 ) (common.Hash, *types.Transaction, error) {
 	lapi, lcloser, err := a.extern.ConnectLotusClient()
 	if err != nil {
@@ -479,6 +505,8 @@ func (a *fevmActions) AgentConfirmMinerWorkerChange(
 		ownerWallet,
 		ownerAccount,
 		ownerPassphrase,
+		proposer,
+		approver,
 		a.queries.ChainID(),
 		common.Big0,
 		nonce,
@@ -504,6 +532,8 @@ func (a *fevmActions) AgentPullFunds(
 	senderWallet accounts.Wallet,
 	senderAccount accounts.Account,
 	senderPassphrase string,
+	proposer address.Address,
+	approver address.Address,
 	requesterKey *ecdsa.PrivateKey,
 ) (common.Hash, *types.Transaction, error) {
 	lapi, lcloser, err := a.extern.ConnectLotusClient()
@@ -572,6 +602,8 @@ func (a *fevmActions) AgentPullFunds(
 		senderWallet,
 		senderAccount,
 		senderPassphrase,
+		proposer,
+		approver,
 		a.queries.ChainID(),
 		common.Big0,
 		nonce,
@@ -592,6 +624,8 @@ func (a *fevmActions) AgentPushFunds(
 	senderWallet accounts.Wallet,
 	senderAccount accounts.Account,
 	senderPassphrase string,
+	proposer address.Address,
+	approver address.Address,
 	requesterKey *ecdsa.PrivateKey,
 ) (common.Hash, *types.Transaction, error) {
 	lapi, lcloser, err := a.extern.ConnectLotusClient()
@@ -660,6 +694,8 @@ func (a *fevmActions) AgentPushFunds(
 		senderWallet,
 		senderAccount,
 		senderPassphrase,
+		proposer,
+		approver,
 		a.queries.ChainID(),
 		common.Big0,
 		nonce,
@@ -679,6 +715,8 @@ func (a *fevmActions) AgentWithdraw(
 	ownerWallet accounts.Wallet,
 	ownerAccount accounts.Account,
 	ownerPassphrase string,
+	proposer address.Address,
+	approver address.Address,
 	requesterKey *ecdsa.PrivateKey,
 ) (common.Hash, *types.Transaction, error) {
 	lapi, lcloser, err := a.extern.ConnectLotusClient()
@@ -723,6 +761,8 @@ func (a *fevmActions) AgentWithdraw(
 		ownerWallet,
 		ownerAccount,
 		ownerPassphrase,
+		proposer,
+		approver,
 		a.queries.ChainID(),
 		common.Big0,
 		nonce,
@@ -740,6 +780,8 @@ func (a *fevmActions) AgentRefreshRoutes(
 	senderWallet accounts.Wallet,
 	senderAccount accounts.Account,
 	senderPassphrase string,
+	proposer address.Address,
+	approver address.Address,
 ) (common.Hash, *types.Transaction, error) {
 	lapi, lcloser, err := a.extern.ConnectLotusClient()
 	if err != nil {
@@ -765,6 +807,8 @@ func (a *fevmActions) AgentRefreshRoutes(
 		senderWallet,
 		senderAccount,
 		senderPassphrase,
+		proposer,
+		approver,
 		a.queries.ChainID(),
 		common.Big0,
 		nonce,

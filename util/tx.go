@@ -9,6 +9,7 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/ethclient"
+	"github.com/filecoin-project/go-address"
 	lotusapi "github.com/filecoin-project/lotus/api"
 	filtypes "github.com/filecoin-project/lotus/chain/types"
 	walletutils "github.com/glifio/go-wallet-utils"
@@ -23,6 +24,8 @@ func WriteTx(
 	wallet accounts.Wallet,
 	account accounts.Account,
 	passphrase string,
+	proposer address.Address,
+	approver address.Address,
 	chainID *big.Int,
 	value *big.Int,
 	nonce *big.Int,
@@ -32,7 +35,7 @@ func WriteTx(
 	methodName string,
 	label string,
 ) (common.Hash, *types.Transaction, error) {
-	wrappedClient, auth, err := walletutils.NewWalletTransactor(ctx, lapi, client, wallet, &account, passphrase, chainID)
+	wrappedClient, auth, err := walletutils.NewWalletTransactor(ctx, lapi, client, wallet, &account, passphrase, proposer, approver, chainID)
 	if err != nil {
 		return common.Hash{}, &types.Transaction{}, err
 	}
