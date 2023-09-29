@@ -93,9 +93,9 @@ func MsigProposeFEVMTxWithValue(
 	}
 
 	return &ltypes.Message{
-		To:    msigAddr,
-		From:  senderAddr,
-		Value: filbig.Zero(),
+		To:     msigAddr,
+		From:   senderAddr,
+		Value:  filbig.Zero(),
 		Nonce:  nonce,
 		Method: builtin.MethodsMultisig.Propose,
 		Params: enc,

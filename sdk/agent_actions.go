@@ -43,12 +43,14 @@ func (a *fevmActions) AgentCreate(
 	}
 	defer client.Close()
 
-	fromAddr := owner
+	// fromAddr := owner
 
-	nonce, err := a.queries.ChainGetNonce(ctx, fromAddr)
-	if err != nil {
-		return common.Hash{}, nil, err
-	}
+	/*
+		nonce, err := a.queries.ChainGetNonce(ctx, fromAddr)
+		if err != nil {
+			return common.Hash{}, nil, err
+		}
+	*/
 
 	args := []interface{}{owner, operator, request}
 
@@ -63,7 +65,7 @@ func (a *fevmActions) AgentCreate(
 		approver,
 		a.queries.ChainID(),
 		common.Big0,
-		nonce,
+		nil,
 		args,
 		abigen.NewAgentFactoryTransactor,
 		a.queries.AgentFactory(),
@@ -112,10 +114,12 @@ func (a *fevmActions) AgentBorrow(
 		return common.Hash{}, nil, err
 	}
 
-	nonce, err := a.queries.ChainGetNonce(ctx, ownerAccount.EthAccount.Address)
-	if err != nil {
-		return common.Hash{}, nil, err
-	}
+	/*
+		nonce, err := a.queries.ChainGetNonce(ctx, ownerAccount.EthAccount.Address)
+		if err != nil {
+			return common.Hash{}, nil, err
+		}
+	*/
 
 	args := []interface{}{poolID, sc}
 	// TODO: this isn't great because we'd rather not get the credential if the amount is too high
@@ -146,7 +150,7 @@ func (a *fevmActions) AgentBorrow(
 		approver,
 		a.queries.ChainID(),
 		common.Big0,
-		nonce,
+		nil,
 		args,
 		abigen.NewAgentTransactor,
 		agentAddr,
