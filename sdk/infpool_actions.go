@@ -34,18 +34,6 @@ func (a *fevmActions) InfPoolDepositFIL(
 	}
 	defer client.Close()
 
-	/*
-		poolTransactor, err := abigen.NewInfinityPoolTransactor(a.queries.InfinityPool(), client)
-		if err != nil {
-			return nil, err
-		}
-	*/
-
-	nonce, err := a.queries.ChainGetNonce(ctx, senderAccount.EthAccount.Address)
-	if err != nil {
-		return common.Hash{}, nil, err
-	}
-
 	args := []interface{}{receiver}
 
 	return util.WriteTx(
@@ -59,7 +47,6 @@ func (a *fevmActions) InfPoolDepositFIL(
 		approver,
 		a.queries.ChainID(),
 		amount,
-		nonce,
 		args,
 		abigen.NewInfinityPoolTransactor,
 		a.queries.InfinityPool(),

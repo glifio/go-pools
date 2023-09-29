@@ -28,7 +28,6 @@ func WriteTx(
 	approver address.Address,
 	chainID *big.Int,
 	value *big.Int,
-	nonce *big.Int,
 	args []interface{},
 	abigenTransactor interface{},
 	contractAddress common.Address,
@@ -40,7 +39,6 @@ func WriteTx(
 		return common.Hash{}, &types.Transaction{}, err
 	}
 
-	auth.Nonce = nonce
 	auth.Value = value
 
 	// Get instance using abigenTransactor and wrappedClient

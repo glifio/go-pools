@@ -43,15 +43,6 @@ func (a *fevmActions) AgentCreate(
 	}
 	defer client.Close()
 
-	// fromAddr := owner
-
-	/*
-		nonce, err := a.queries.ChainGetNonce(ctx, fromAddr)
-		if err != nil {
-			return common.Hash{}, nil, err
-		}
-	*/
-
 	args := []interface{}{owner, operator, request}
 
 	return util.WriteTx(
@@ -65,7 +56,6 @@ func (a *fevmActions) AgentCreate(
 		approver,
 		a.queries.ChainID(),
 		common.Big0,
-		nil,
 		args,
 		abigen.NewAgentFactoryTransactor,
 		a.queries.AgentFactory(),
@@ -114,13 +104,6 @@ func (a *fevmActions) AgentBorrow(
 		return common.Hash{}, nil, err
 	}
 
-	/*
-		nonce, err := a.queries.ChainGetNonce(ctx, ownerAccount.EthAccount.Address)
-		if err != nil {
-			return common.Hash{}, nil, err
-		}
-	*/
-
 	args := []interface{}{poolID, sc}
 	// TODO: this isn't great because we'd rather not get the credential if the amount is too high
 	agentData, err := vc.AbiDecodeClaim(sc.Vc.Claim)
@@ -150,7 +133,6 @@ func (a *fevmActions) AgentBorrow(
 		approver,
 		a.queries.ChainID(),
 		common.Big0,
-		nil,
 		args,
 		abigen.NewAgentTransactor,
 		agentAddr,
@@ -189,11 +171,6 @@ func (a *fevmActions) AgentPay(
 	}
 	defer closer()
 
-	nonce, err := a.queries.ChainGetNonce(ctx, senderAccount.EthAccount.Address)
-	if err != nil {
-		return common.Hash{}, nil, err
-	}
-
 	jws, err := token.SignJWS(ctx, agentAddr, address.Undef, amount, constants.MethodPay, requesterKey, a.queries)
 	if err != nil {
 		return common.Hash{}, nil, err
@@ -217,7 +194,6 @@ func (a *fevmActions) AgentPay(
 		approver,
 		a.queries.ChainID(),
 		common.Big0,
-		nonce,
 		args,
 		abigen.NewAgentTransactor,
 		agentAddr,
@@ -265,13 +241,6 @@ func (a *fevmActions) AgentAddMiner(
 		return common.Hash{}, nil, err
 	}
 
-	fromAddr := ownerAccount.EthAccount.Address
-
-	nonce, err := a.queries.ChainGetNonce(ctx, fromAddr)
-	if err != nil {
-		return common.Hash{}, nil, err
-	}
-
 	args := []interface{}{sc}
 
 	txHash, tx, err := util.WriteTx(
@@ -285,7 +254,6 @@ func (a *fevmActions) AgentAddMiner(
 		approver,
 		a.queries.ChainID(),
 		common.Big0,
-		nonce,
 		args,
 		abigen.NewAgentTransactor,
 		agentAddr,
@@ -348,11 +316,6 @@ func (a *fevmActions) AgentRemoveMiner(
 	}
 	defer closer()
 
-	nonce, err := a.queries.ChainGetNonce(ctx, ownerAccount.EthAccount.Address)
-	if err != nil {
-		return common.Hash{}, nil, err
-	}
-
 	jws, err := token.SignJWS(ctx, agentAddr, minerAddr, common.Big0, constants.MethodRemoveMiner, requesterKey, a.queries)
 	if err != nil {
 		return common.Hash{}, nil, err
@@ -376,7 +339,6 @@ func (a *fevmActions) AgentRemoveMiner(
 		approver,
 		a.queries.ChainID(),
 		common.Big0,
-		nonce,
 		args,
 		abigen.NewAgentTransactor,
 		agentAddr,
@@ -436,11 +398,6 @@ func (a *fevmActions) AgentChangeMinerWorker(
 		controlIDs = append(controlIDs, controlID)
 	}
 
-	nonce, err := a.queries.ChainGetNonce(ctx, ownerAccount.EthAccount.Address)
-	if err != nil {
-		return common.Hash{}, nil, err
-	}
-
 	args := []interface{}{minerID, workerID, controlIDs}
 
 	txHash, tx, err := util.WriteTx(
@@ -454,7 +411,6 @@ func (a *fevmActions) AgentChangeMinerWorker(
 		approver,
 		a.queries.ChainID(),
 		common.Big0,
-		nonce,
 		args,
 		abigen.NewAgentTransactor,
 		agentAddr,
@@ -495,11 +451,6 @@ func (a *fevmActions) AgentConfirmMinerWorkerChange(
 		return common.Hash{}, nil, err
 	}
 
-	nonce, err := a.queries.ChainGetNonce(ctx, ownerAccount.EthAccount.Address)
-	if err != nil {
-		return common.Hash{}, nil, err
-	}
-
 	args := []interface{}{minerU64}
 
 	txHash, tx, err := util.WriteTx(
@@ -513,7 +464,6 @@ func (a *fevmActions) AgentConfirmMinerWorkerChange(
 		approver,
 		a.queries.ChainID(),
 		common.Big0,
-		nonce,
 		args,
 		abigen.NewAgentTransactor,
 		agentAddr,
@@ -592,11 +542,6 @@ func (a *fevmActions) AgentPullFunds(
 		return common.Hash{}, nil, err
 	}
 
-	nonce, err := a.queries.ChainGetNonce(ctx, senderAccount.EthAccount.Address)
-	if err != nil {
-		return common.Hash{}, nil, err
-	}
-
 	args := []interface{}{sc}
 
 	return util.WriteTx(
@@ -610,7 +555,6 @@ func (a *fevmActions) AgentPullFunds(
 		approver,
 		a.queries.ChainID(),
 		common.Big0,
-		nonce,
 		args,
 		abigen.NewAgentTransactor,
 		agentAddr,
@@ -684,11 +628,6 @@ func (a *fevmActions) AgentPushFunds(
 		return common.Hash{}, nil, err
 	}
 
-	nonce, err := a.queries.ChainGetNonce(ctx, senderAccount.EthAccount.Address)
-	if err != nil {
-		return common.Hash{}, nil, err
-	}
-
 	args := []interface{}{sc}
 
 	return util.WriteTx(
@@ -702,7 +641,6 @@ func (a *fevmActions) AgentPushFunds(
 		approver,
 		a.queries.ChainID(),
 		common.Big0,
-		nonce,
 		args,
 		abigen.NewAgentTransactor,
 		agentAddr,
@@ -741,11 +679,6 @@ func (a *fevmActions) AgentWithdraw(
 	}
 	defer closer()
 
-	nonce, err := a.queries.ChainGetNonce(ctx, ownerAccount.EthAccount.Address)
-	if err != nil {
-		return common.Hash{}, nil, err
-	}
-
 	jws, err := token.SignJWS(ctx, agentAddr, address.Undef, amount, constants.MethodWithdraw, requesterKey, a.queries)
 	if err != nil {
 		return common.Hash{}, nil, err
@@ -769,7 +702,6 @@ func (a *fevmActions) AgentWithdraw(
 		approver,
 		a.queries.ChainID(),
 		common.Big0,
-		nonce,
 		args,
 		abigen.NewAgentTransactor,
 		agentAddr,
@@ -799,11 +731,6 @@ func (a *fevmActions) AgentRefreshRoutes(
 	}
 	defer client.Close()
 
-	nonce, err := a.queries.ChainGetNonce(ctx, senderAccount.EthAccount.Address)
-	if err != nil {
-		return common.Hash{}, nil, err
-	}
-
 	return util.WriteTx(
 		ctx,
 		lapi,
@@ -815,7 +742,6 @@ func (a *fevmActions) AgentRefreshRoutes(
 		approver,
 		a.queries.ChainID(),
 		common.Big0,
-		nonce,
 		[]interface{}{},
 		abigen.NewAgentTransactor,
 		agentAddr,

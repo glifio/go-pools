@@ -34,11 +34,6 @@ func (a *fevmActions) IFILTransfer(
 	}
 	defer client.Close()
 
-	nonce, err := a.queries.ChainGetNonce(ctx, senderAccount.EthAccount.Address)
-	if err != nil {
-		return common.Hash{}, nil, err
-	}
-
 	args := []interface{}{receiver, amount}
 
 	return util.WriteTx(
@@ -52,7 +47,6 @@ func (a *fevmActions) IFILTransfer(
 		approver,
 		a.queries.ChainID(),
 		common.Big0,
-		nonce,
 		args,
 		abigen.NewPoolTokenTransactor,
 		a.queries.IFIL(),
@@ -83,11 +77,6 @@ func (a *fevmActions) IFILApprove(
 	}
 	defer client.Close()
 
-	nonce, err := a.queries.ChainGetNonce(ctx, senderAccount.EthAccount.Address)
-	if err != nil {
-		return common.Hash{}, nil, err
-	}
-
 	args := []interface{}{spender, allowance}
 
 	return util.WriteTx(
@@ -101,7 +90,6 @@ func (a *fevmActions) IFILApprove(
 		approver,
 		a.queries.ChainID(),
 		common.Big0,
-		nonce,
 		args,
 		abigen.NewPoolTokenTransactor,
 		a.queries.IFIL(),
