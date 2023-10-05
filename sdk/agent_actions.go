@@ -4,6 +4,7 @@ import (
 	"context"
 	"crypto/ecdsa"
 	"errors"
+	"fmt"
 	"math/big"
 
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
@@ -57,6 +58,7 @@ func (a *fevmActions) AgentBorrow(ctx context.Context, auth *bind.TransactOpts, 
 	if err != nil {
 		return nil, err
 	}
+	fmt.Printf("Jim AgentBorrow sc: %+v\n", sc)
 
 	agent, err := abigen.NewAgentTransactor(agentAddr, client)
 	if err != nil {
@@ -123,6 +125,8 @@ func (a *fevmActions) AgentAddMiner(ctx context.Context, auth *bind.TransactOpts
 	if err != nil {
 		return nil, err
 	}
+
+	fmt.Printf("Jim AgentAddMiner sc: %+v\n", sc)
 
 	agent, err := abigen.NewAgentTransactor(agentAddr, client)
 	if err != nil {
