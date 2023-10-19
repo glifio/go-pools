@@ -140,6 +140,7 @@ func TestComputeMinersStats(t *testing.T) {
 	defer teardownSuite(closer)
 
 	minerTest := toAddressType("f0501283")
+	minerTest2 := toAddressType("f01660837")
 
 	// just lookback 5 tipsets from HEAD to see if things look right (don't wanna look too close to head)
 	chainHead, err := lapi.ChainHead(context.Background())
@@ -157,10 +158,14 @@ func TestComputeMinersStats(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	// here we just do 5 of the same miners to see if it works
+	bal2, err := lapi.StateGetActor(context.Background(), minerTest2, ts.Key())
+	if err != nil {
+		t.Fatal(err)
+	}
+
 	minerStats, err := ComputeMinersStats(
 		context.Background(),
-		[]address.Address{minerTest, minerTest, minerTest, minerTest, minerTest},
+		[]address.Address{minerTest, minerTest2},
 		ts,
 		lapi,
 	)
@@ -168,7 +173,7 @@ func TestComputeMinersStats(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	summedBal := new(big.Int).Mul(bal.Balance.Int, big.NewInt(5))
+	summedBal := new(big.Int).Add(bal.Balance.Int, bal2.Balance.Int)
 
 	if minerStats.Balance.Cmp(summedBal) != 0 {
 		t.Errorf("incorrect balance, expected %v got %v\n", bal.Balance.Int, minerStats.Balance)
