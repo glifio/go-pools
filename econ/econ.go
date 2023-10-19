@@ -2,12 +2,10 @@ package econ
 
 import (
 	"context"
-	"log"
 	"math/big"
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/filecoin-project/go-address"
-	biggy "github.com/filecoin-project/go-state-types/big"
 	"github.com/filecoin-project/lotus/chain/types"
 	"github.com/glifio/go-pools/mstat"
 	poolstypes "github.com/glifio/go-pools/types"
@@ -34,35 +32,9 @@ func ComputeAgentData(
 	// TODO: could probably parellize this elegently to speed things up
 	data := &vc.AgentData{}
 
-	aggMinerStats := mstat.NewMinerStats()
-
-	// loop through each miner and add address to MinerData
-	for _, miner := range minerIDs {
-		minerStats, err := mstat.ComputeMinerStats(ctx, miner, tsk, lapi)
-		if err != nil {
-			log.Printf("error getting miner stats: %v", err)
-			return data, err
-		}
-
-		aggMinerStats.Balance = big.NewInt(0).Add(aggMinerStats.Balance, minerStats.Balance)
-		log.Printf("Amount: %v", types.FIL(biggy.NewFromGo(minerStats.Balance)).String())
-		aggMinerStats.PenaltyTermination = big.NewInt(0).Add(aggMinerStats.PenaltyTermination, minerStats.PenaltyTermination)
-		aggMinerStats.PenaltyFaultPerDay = big.NewInt(0).Add(aggMinerStats.PenaltyFaultPerDay, minerStats.PenaltyFaultPerDay)
-		aggMinerStats.ExpectedDailyReward = big.NewInt(0).Add(aggMinerStats.ExpectedDailyReward, minerStats.ExpectedDailyReward)
-		aggMinerStats.PledgedFunds = big.NewInt(0).Add(aggMinerStats.PledgedFunds, minerStats.PledgedFunds)
-		aggMinerStats.VestingFunds = big.NewInt(0).Add(aggMinerStats.VestingFunds, minerStats.VestingFunds)
-
-		// add sector stats
-		aggMinerStats.LiveSectors = big.NewInt(0).Add(aggMinerStats.LiveSectors, minerStats.LiveSectors)
-		aggMinerStats.FaultySectors = big.NewInt(0).Add(aggMinerStats.FaultySectors, minerStats.FaultySectors)
-
-		aggMinerStats.GreenScore = big.NewInt(0).Add(aggMinerStats.GreenScore, minerStats.GreenScore)
-
-		// only add power if miner has min power
-		if minerStats.HasMinPower {
-			aggMinerStats.QualityAdjPower = big.NewInt(0).Add(aggMinerStats.QualityAdjPower, minerStats.QualityAdjPower)
-			aggMinerStats.HasMinPower = true
-		}
+	aggMinerStats, err := mstat.ComputeMinersStats(ctx, minerIDs, tsk, lapi)
+	if err != nil {
+		return nil, err
 	}
 
 	data.QaPower = aggMinerStats.QualityAdjPower
