@@ -18,6 +18,7 @@ import (
 	"github.com/filecoin-project/lotus/chain/actors/builtin/power"
 	"github.com/filecoin-project/lotus/chain/actors/builtin/reward"
 	"github.com/filecoin-project/lotus/chain/types"
+	"github.com/glifio/go-pools/util"
 	cbor "github.com/ipfs/go-ipld-cbor"
 )
 
@@ -61,6 +62,50 @@ func NewMinerStats() *MinerStats {
 		FaultySectors:       big.NewInt(0),
 		HasMinPower:         false,
 	}
+}
+
+func ComputeMinersStats(ctx context.Context, minerAddrs []address.Address, ts *types.TipSet, api api.FullNode) (*MinerStats, error) {
+	aggMinerStats := NewMinerStats()
+
+	minerCount := int64(len(minerAddrs))
+
+	tasks := make([]util.TaskFunc, minerCount)
+	for i := int64(0); i < minerCount; i++ {
+		minerAddr := minerAddrs[i]
+		tasks[i] = func() (interface{}, error) {
+			return ComputeMinerStats(ctx, minerAddr, ts, api)
+		}
+	}
+
+	results, err := util.Multiread(tasks)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, minerStats := range results {
+		minerStats := minerStats.(*MinerStats)
+
+		aggMinerStats.Balance = big.NewInt(0).Add(aggMinerStats.Balance, minerStats.Balance)
+		aggMinerStats.PenaltyTermination = big.NewInt(0).Add(aggMinerStats.PenaltyTermination, minerStats.PenaltyTermination)
+		aggMinerStats.PenaltyFaultPerDay = big.NewInt(0).Add(aggMinerStats.PenaltyFaultPerDay, minerStats.PenaltyFaultPerDay)
+		aggMinerStats.ExpectedDailyReward = big.NewInt(0).Add(aggMinerStats.ExpectedDailyReward, minerStats.ExpectedDailyReward)
+		aggMinerStats.PledgedFunds = big.NewInt(0).Add(aggMinerStats.PledgedFunds, minerStats.PledgedFunds)
+		aggMinerStats.VestingFunds = big.NewInt(0).Add(aggMinerStats.VestingFunds, minerStats.VestingFunds)
+
+		// add sector stats
+		aggMinerStats.LiveSectors = big.NewInt(0).Add(aggMinerStats.LiveSectors, minerStats.LiveSectors)
+		aggMinerStats.FaultySectors = big.NewInt(0).Add(aggMinerStats.FaultySectors, minerStats.FaultySectors)
+
+		aggMinerStats.GreenScore = big.NewInt(0).Add(aggMinerStats.GreenScore, minerStats.GreenScore)
+
+		// only add power if miner has min power
+		if minerStats.HasMinPower {
+			aggMinerStats.QualityAdjPower = big.NewInt(0).Add(aggMinerStats.QualityAdjPower, minerStats.QualityAdjPower)
+			aggMinerStats.HasMinPower = true
+		}
+	}
+
+	return aggMinerStats, nil
 }
 
 func ComputeMinerStats(ctx context.Context, minerAddr address.Address, ts *types.TipSet, api api.FullNode) (*MinerStats, error) {
