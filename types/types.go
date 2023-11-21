@@ -145,12 +145,6 @@ type PoolsSDK interface {
 	Extern() FEVMExtern
 }
 
-type AgentOwed struct {
-	AgentAddr  common.Address `json:"agentAddr"`
-	AmountOwed *big.Int       `json:"amountOwed"`
-	Gcred      *big.Int       `json:"gcred"`
-}
-
 type ProtocolMeta struct {
 	AgentPolice   common.Address `json:"agentPolice"`
 	MinerRegistry common.Address `json:"minerRegistry"`
