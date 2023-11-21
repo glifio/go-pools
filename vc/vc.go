@@ -168,6 +168,21 @@ func NewVerifiableCredential(
 	}, nil
 }
 
+func EmptyAgentData() *AgentData {
+	return &AgentData{
+		AgentValue:                  big.NewInt(0),
+		CollateralValue:             big.NewInt(0),
+		ExpectedDailyFaultPenalties: big.NewInt(0),
+		ExpectedDailyRewards:        big.NewInt(0),
+		Gcred:                       big.NewInt(100),
+		QaPower:                     big.NewInt(0),
+		Principal:                   big.NewInt(0),
+		FaultySectors:               big.NewInt(0),
+		LiveSectors:                 big.NewInt(0),
+		GreenScore:                  big.NewInt(0),
+	}
+}
+
 func NullishVerifiableCredential(claim AgentData) (*abigen.VerifiableCredential, error) {
 	claimBytes, err := AbiEncodeClaim(claim)
 	if err != nil {

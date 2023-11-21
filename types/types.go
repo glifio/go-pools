@@ -34,7 +34,7 @@ type FEVMQueries interface {
 	AgentMiners(ctx context.Context, agentAddr common.Address, blockNumber *big.Int) ([]address.Address, error)
 	AgentLiquidAssets(ctx context.Context, agentAddr common.Address, blockNumber *big.Int) (*big.Int, error)
 	AgentPrincipal(ctx context.Context, agentAddr common.Address, blockNumber *big.Int) (*big.Int, error)
-	AgentOwes(ctx context.Context, agentAddr common.Address) (*big.Int, *big.Int, error)
+	AgentInterestOwed(ctx context.Context, agentAddr common.Address, tsk *filtypes.TipSet) (*big.Int, error)
 	AgentFaultyEpochStart(ctx context.Context, agentAddr common.Address) (*big.Int, error)
 	// agent factory methods
 	AgentFactoryAgentCount(ctx context.Context, blockNumber *big.Int) (*big.Int, error)
