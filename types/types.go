@@ -96,6 +96,8 @@ type FEVMQueries interface {
 	SimpleRamp() common.Address
 	// RateModule gets fetched from InfinityPool
 	RateModule() (common.Address, error)
+	// preview termination methods
+	PreviewTerminateSectors(ctx context.Context) (*filtypes.TipSet, error)
 }
 
 //go:generate mockery --name FEVMActions
