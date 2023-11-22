@@ -97,7 +97,8 @@ type FEVMQueries interface {
 	// RateModule gets fetched from InfinityPool
 	RateModule() (common.Address, error)
 	// preview termination methods
-	PreviewTerminateSectors(ctx context.Context, rpcUrl string, minerID string, tipset string, vmHeight uint64, sectorNumber uint64, allSectors bool, batchSize uint64, gasLimit uint64, quiet bool) (actor *filtypes.ActorV5, totalBurn *big.Int, err error)
+	PreviewTerminateSector(ctx context.Context, rpcUrl string, minerID string, tipset string, vmHeight uint64, sectorNumber uint64, gasLimit uint64, quiet bool) (actor *filtypes.ActorV5, totalBurn *big.Int, err error)
+	PreviewTerminateSectors(ctx context.Context, rpcUrl string, minerID string, tipset string, vmHeight uint64, batchSize uint64, gasLimit uint64, quiet bool) (actor *filtypes.ActorV5, totalBurn *big.Int, err error)
 }
 
 //go:generate mockery --name FEVMActions

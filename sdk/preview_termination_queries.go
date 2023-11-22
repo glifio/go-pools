@@ -25,16 +25,14 @@ import (
 	"github.com/schollz/progressbar/v3"
 )
 
-// PreviewTerminateSectors gets the burnt funds for when the sectors are terminated
-func (q *fevmQueries) PreviewTerminateSectors(
+// PreviewTerminateSector gets the burnt funds for when a single sector is terminated
+func (q *fevmQueries) PreviewTerminateSector(
 	ctx context.Context,
 	rpcUrl string,
 	minerID string,
 	tipset string,
 	vmHeight uint64,
 	sectorNumber uint64,
-	allSectors bool,
-	batchSize uint64,
 	gasLimit uint64,
 	quiet bool,
 ) (actor *types.ActorV5, totalBurn *corebig.Int, err error) {
@@ -44,8 +42,6 @@ func (q *fevmQueries) PreviewTerminateSectors(
 	}
 	defer closer()
 	api := *lClient
-
-	// return lClient.ChainHead(ctx)
 
 	minerAddr, err := address.NewFromString(minerID)
 	if err != nil {
@@ -94,167 +90,234 @@ func (q *fevmQueries) PreviewTerminateSectors(
 
 	totalBurn = new(corebig.Int)
 
-	if allSectors {
-		provingDeadline, err := api.StateMinerProvingDeadline(ctx, minerAddr, ts.Key())
-		if err != nil {
-			return nil, nil, err
+	if gasLimit == 0 {
+		gasLimit = 6000000000
+	}
+
+	sectorPartition, err := api.StateSectorPartition(ctx, minerAddr, abi.SectorNumber(sectorNumber), ts.Key())
+	if err != nil {
+		return nil, nil, err
+	}
+
+	termination := miner.TerminationDeclaration{
+		Deadline:  sectorPartition.Deadline,
+		Partition: sectorPartition.Partition,
+		Sectors:   bitfield.NewFromSet([]uint64{sectorNumber}),
+	}
+	params = miner.TerminateSectorsParams{
+		Terminations: []miner.TerminationDeclaration{termination},
+	}
+	fmt.Printf("Sector: %v\n", sectorNumber)
+	fmt.Printf("Deadline: %v\n", sectorPartition.Deadline)
+	fmt.Printf("Partition: %v\n", sectorPartition.Partition)
+	burn, err := terminateSectors(ctx, *lClient, h, ts, minerAddr, minerInfo,
+		params, int64(gasLimit))
+	if err != nil {
+		return nil, nil, err
+	}
+	totalBurn = totalBurn.Add(totalBurn, burn)
+
+	return actor, totalBurn, nil
+}
+
+// PreviewTerminateSectors gets the burnt funds for when all the sectors are terminated
+func (q *fevmQueries) PreviewTerminateSectors(
+	ctx context.Context,
+	rpcUrl string,
+	minerID string,
+	tipset string,
+	vmHeight uint64,
+	batchSize uint64,
+	gasLimit uint64,
+	quiet bool,
+) (actor *types.ActorV5, totalBurn *corebig.Int, err error) {
+	lClient, closer, err := q.extern.ConnectLotusClient()
+	if err != nil {
+		return nil, nil, err
+	}
+	defer closer()
+	api := *lClient
+
+	minerAddr, err := address.NewFromString(minerID)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	h := abi.ChainEpoch(vmHeight)
+	var ts *types.TipSet
+	if tss := tipset; tss != "" {
+		ts, err = ParseTipSetRef(ctx, api, tss)
+	} else if h > 0 {
+		ts, err = api.ChainGetTipSetByHeight(ctx, h, types.EmptyTSK)
+	} else {
+		ts, err = api.ChainHead(ctx)
+	}
+	if err != nil {
+		return nil, nil, err
+	}
+
+	if h == 0 {
+		h = ts.Height()
+	}
+
+	// Lookup actor balance
+	actor, err = api.StateGetActor(ctx, minerAddr, ts.Key())
+	if err != nil {
+		return nil, nil, err
+	}
+
+	// Lookup current owner / worker
+	minerInfo, err := api.StateMinerInfo(ctx, minerAddr, ts.Key())
+	if err != nil {
+		return nil, nil, err
+	}
+
+	workerActor, err := api.StateGetActor(ctx, minerInfo.Worker, ts.Key())
+	if err != nil {
+		return nil, nil, err
+	}
+
+	fmt.Printf("Miner: %v\n", minerAddr)
+	fmt.Printf("Epoch: %d\n", h)
+	fmt.Printf("Worker: %v (Balance: %v)\n", minerInfo.Worker, util.ToFIL(workerActor.Balance.Int))
+
+	var params miner.TerminateSectorsParams
+
+	totalBurn = new(corebig.Int)
+
+	provingDeadline, err := api.StateMinerProvingDeadline(ctx, minerAddr, ts.Key())
+	if err != nil {
+		return nil, nil, err
+	}
+	// fmt.Printf("Proving deadline: %+v\n", provingDeadline)
+	// fmt.Printf("Proving deadline Index: %+v\n", provingDeadline.Index)
+
+	// prevHeight := provingDeadline.PeriodStart - 120
+	prevHeight := h - 120
+
+	tsPrev, err := api.ChainGetTipSetByHeight(ctx, prevHeight, types.EmptyTSK)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	workerActorPrev, err := api.StateGetActor(ctx, minerInfo.Worker, tsPrev.Key())
+	if err != nil {
+		return nil, nil, err
+	}
+	fmt.Printf("Epoch used for immutable deadlines: %d (Worker balance: %v)\n", prevHeight, util.ToFIL(workerActorPrev.Balance.Int))
+
+	if batchSize == 0 && gasLimit == 0 {
+		batchSize = 2500
+		// gasLimit = 60000000000
+		gasLimit = 90000000000
+
+		workerBal, _ := util.ToFIL(workerActorPrev.Balance.Int).Float64()
+		if workerBal < 1.0 {
+			ratio := workerBal / 1.0
+			batchSize = uint64(float64(batchSize) * ratio)
+			gasLimit = uint64(float64(gasLimit) * ratio)
 		}
-		// fmt.Printf("Proving deadline: %+v\n", provingDeadline)
-		// fmt.Printf("Proving deadline Index: %+v\n", provingDeadline.Index)
 
-		// prevHeight := provingDeadline.PeriodStart - 120
-		prevHeight := h - 120
-
-		tsPrev, err := api.ChainGetTipSetByHeight(ctx, prevHeight, types.EmptyTSK)
-		if err != nil {
-			return nil, nil, err
+		fmt.Printf("Batch Size: %d\n", batchSize)
+		fmt.Printf("Gas Limit: %d\n", gasLimit)
+		if batchSize < 10 {
+			return nil, nil, xerrors.Errorf("Not enough worker funds! Batch size too small!")
 		}
+	}
 
-		workerActorPrev, err := api.StateGetActor(ctx, minerInfo.Worker, tsPrev.Key())
-		if err != nil {
-			return nil, nil, err
+	var bar *progressbar.ProgressBar
+	if quiet {
+		bar = progressbar.NewOptions(48,
+			progressbar.OptionSetDescription("Deadlines"),
+			progressbar.OptionSetWriter(os.Stderr),
+			progressbar.OptionSetWidth(10),
+			progressbar.OptionThrottle(65*time.Millisecond),
+			progressbar.OptionShowCount(),
+			progressbar.OptionShowIts(),
+			/*
+				OptionOnCompletion(func() {
+					fmt.Fprint(os.Stderr, "\n")
+				}),
+			*/
+			progressbar.OptionSpinnerType(14),
+			progressbar.OptionFullWidth(),
+			progressbar.OptionSetRenderBlankState(true),
+			progressbar.OptionClearOnFinish())
+	}
+	defer func() {
+		if bar != nil {
+			bar.Close()
 		}
-		fmt.Printf("Epoch used for immutable deadlines: %d (Worker balance: %v)\n", prevHeight, util.ToFIL(workerActorPrev.Balance.Int))
+	}()
 
-		if batchSize == 0 && gasLimit == 0 {
-			batchSize = 2500
-			// gasLimit = 60000000000
-			gasLimit = 90000000000
-
-			workerBal, _ := util.ToFIL(workerActorPrev.Balance.Int).Float64()
-			if workerBal < 1.0 {
-				ratio := workerBal / 1.0
-				batchSize = uint64(float64(batchSize) * ratio)
-				gasLimit = uint64(float64(gasLimit) * ratio)
-			}
-
-			fmt.Printf("Batch Size: %d\n", batchSize)
-			fmt.Printf("Gas Limit: %d\n", gasLimit)
-			if batchSize < 10 {
-				return nil, nil, xerrors.Errorf("Not enough worker funds! Batch size too small!")
-			}
-		}
-
-		var bar *progressbar.ProgressBar
+	var dlIdx uint64
+	for dlIdx = 0; dlIdx < 48; dlIdx++ {
 		if quiet {
-			bar = progressbar.NewOptions(48,
-				progressbar.OptionSetDescription("Deadlines"),
-				progressbar.OptionSetWriter(os.Stderr),
-				progressbar.OptionSetWidth(10),
-				progressbar.OptionThrottle(65*time.Millisecond),
-				progressbar.OptionShowCount(),
-				progressbar.OptionShowIts(),
-				/*
-					OptionOnCompletion(func() {
-						fmt.Fprint(os.Stderr, "\n")
-					}),
-				*/
-				progressbar.OptionSpinnerType(14),
-				progressbar.OptionFullWidth(),
-				progressbar.OptionSetRenderBlankState(true),
-				progressbar.OptionClearOnFinish())
+			bar.Add(1)
 		}
-		defer func() {
-			if bar != nil {
-				bar.Close()
-			}
-		}()
-
-		var dlIdx uint64
-		for dlIdx = 0; dlIdx < 48; dlIdx++ {
-			if quiet {
-				bar.Add(1)
-			}
-			immutable := ""
-			deadlineTs := ts
-			deadlineHeight := h
-			if dlIdx == provingDeadline.Index || dlIdx == (provingDeadline.Index+1)%48 {
-				// Immutable deadline
-				immutable = " (Immutable)"
-				deadlineTs = tsPrev
-				deadlineHeight = prevHeight
-			}
-			partitions, err := api.StateMinerPartitions(ctx, minerAddr, uint64(dlIdx), deadlineTs.Key())
+		immutable := ""
+		deadlineTs := ts
+		deadlineHeight := h
+		if dlIdx == provingDeadline.Index || dlIdx == (provingDeadline.Index+1)%48 {
+			// Immutable deadline
+			immutable = " (Immutable)"
+			deadlineTs = tsPrev
+			deadlineHeight = prevHeight
+		}
+		partitions, err := api.StateMinerPartitions(ctx, minerAddr, uint64(dlIdx), deadlineTs.Key())
+		if err != nil {
+			return nil, nil, err
+		}
+		for partIdx, partition := range partitions {
+			sc, err := partition.LiveSectors.Count()
 			if err != nil {
 				return nil, nil, err
 			}
-			for partIdx, partition := range partitions {
-				sc, err := partition.LiveSectors.Count()
-				if err != nil {
-					return nil, nil, err
+			if sc > 0 {
+				if !quiet {
+					fmt.Printf("Deadline %d%s Partition %d Sectors %d\n", dlIdx, immutable, partIdx, sc)
 				}
-				if sc > 0 {
+				var i uint64
+				for i = 0; i < sc; i += batchSize {
+					lastIndex := min(sc, i+batchSize)
+					slicedSectors, err := partition.LiveSectors.Slice(i, lastIndex-i)
+					if err != nil {
+						return nil, nil, err
+					}
+					sliceCount, err := slicedSectors.Count()
+					if err != nil {
+						return nil, nil, err
+					}
+
 					if !quiet {
-						fmt.Printf("Deadline %d%s Partition %d Sectors %d\n", dlIdx, immutable, partIdx, sc)
+						fmt.Printf("  Slice: %d to %d (->%d): %d\n", i, lastIndex-1, sc-1, sliceCount)
 					}
-					var i uint64
-					for i = 0; i < sc; i += batchSize {
-						lastIndex := min(sc, i+batchSize)
-						slicedSectors, err := partition.LiveSectors.Slice(i, lastIndex-i)
-						if err != nil {
-							return nil, nil, err
-						}
-						sliceCount, err := slicedSectors.Count()
-						if err != nil {
-							return nil, nil, err
-						}
 
-						if !quiet {
-							fmt.Printf("  Slice: %d to %d (->%d): %d\n", i, lastIndex-1, sc-1, sliceCount)
-						}
-
-						termination := miner.TerminationDeclaration{
-							Deadline:  uint64(dlIdx),
-							Partition: uint64(partIdx),
-							Sectors:   slicedSectors,
-						}
-						params = miner.TerminateSectorsParams{
-							Terminations: []miner.TerminationDeclaration{termination},
-						}
-						burn, err := terminateSectors(ctx, *lClient, deadlineHeight, deadlineTs,
-							minerAddr, minerInfo, params, int64(gasLimit))
-						if err != nil {
-							if quiet {
-								bar.Close()
-							}
-							return nil, nil, err
-						}
-						totalBurn = totalBurn.Add(totalBurn, burn)
+					termination := miner.TerminationDeclaration{
+						Deadline:  uint64(dlIdx),
+						Partition: uint64(partIdx),
+						Sectors:   slicedSectors,
 					}
+					params = miner.TerminateSectorsParams{
+						Terminations: []miner.TerminationDeclaration{termination},
+					}
+					burn, err := terminateSectors(ctx, *lClient, deadlineHeight, deadlineTs,
+						minerAddr, minerInfo, params, int64(gasLimit))
+					if err != nil {
+						if quiet {
+							bar.Close()
+						}
+						return nil, nil, err
+					}
+					totalBurn = totalBurn.Add(totalBurn, burn)
 				}
 			}
 		}
-		if quiet {
-			bar.Close()
-		}
-	} else {
-		if gasLimit == 0 {
-			gasLimit = 6000000000
-		}
-
-		sectorPartition, err := api.StateSectorPartition(ctx, minerAddr, abi.SectorNumber(sectorNumber), ts.Key())
-		if err != nil {
-			return nil, nil, err
-		}
-
-		termination := miner.TerminationDeclaration{
-			Deadline:  sectorPartition.Deadline,
-			Partition: sectorPartition.Partition,
-			Sectors:   bitfield.NewFromSet([]uint64{sectorNumber}),
-		}
-		params = miner.TerminateSectorsParams{
-			Terminations: []miner.TerminationDeclaration{termination},
-		}
-		fmt.Printf("Sector: %v\n", sectorNumber)
-		fmt.Printf("Deadline: %v\n", sectorPartition.Deadline)
-		fmt.Printf("Partition: %v\n", sectorPartition.Partition)
-		burn, err := terminateSectors(ctx, *lClient, h, ts, minerAddr, minerInfo,
-			params, int64(gasLimit))
-		if err != nil {
-			return nil, nil, err
-		}
-		totalBurn = totalBurn.Add(totalBurn, burn)
 	}
+	if quiet {
+		bar.Close()
+	}
+
 	return actor, totalBurn, nil
 }
 
