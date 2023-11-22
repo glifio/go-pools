@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	"log"
 	"os"
 	"strings"
 	"time"
@@ -12,6 +11,7 @@ import (
 	corebig "math/big"
 
 	"github.com/filecoin-project/go-state-types/big"
+	"golang.org/x/xerrors"
 
 	"github.com/filecoin-project/go-address"
 	"github.com/filecoin-project/go-bitfield"
@@ -37,11 +37,10 @@ func (q *fevmQueries) PreviewTerminateSectors(
 	batchSize uint64,
 	gasLimit uint64,
 	quiet bool,
-) {
+) (actor *types.ActorV5, totalBurn *corebig.Int, err error) {
 	lClient, closer, err := q.extern.ConnectLotusClient()
 	if err != nil {
-		// return nil, err
-		return
+		return nil, nil, err
 	}
 	defer closer()
 	api := *lClient
@@ -50,7 +49,7 @@ func (q *fevmQueries) PreviewTerminateSectors(
 
 	minerAddr, err := address.NewFromString(minerID)
 	if err != nil {
-		log.Fatal(err)
+		return nil, nil, err
 	}
 
 	h := abi.ChainEpoch(vmHeight)
@@ -63,7 +62,7 @@ func (q *fevmQueries) PreviewTerminateSectors(
 		ts, err = api.ChainHead(ctx)
 	}
 	if err != nil {
-		log.Fatal(err)
+		return nil, nil, err
 	}
 
 	if h == 0 {
@@ -71,20 +70,20 @@ func (q *fevmQueries) PreviewTerminateSectors(
 	}
 
 	// Lookup actor balance
-	actor, err := api.StateGetActor(ctx, minerAddr, ts.Key())
+	actor, err = api.StateGetActor(ctx, minerAddr, ts.Key())
 	if err != nil {
-		log.Fatal(err)
+		return nil, nil, err
 	}
 
 	// Lookup current owner / worker
 	minerInfo, err := api.StateMinerInfo(ctx, minerAddr, ts.Key())
 	if err != nil {
-		log.Fatal(err)
+		return nil, nil, err
 	}
 
 	workerActor, err := api.StateGetActor(ctx, minerInfo.Worker, ts.Key())
 	if err != nil {
-		log.Fatal(err)
+		return nil, nil, err
 	}
 
 	fmt.Printf("Miner: %v\n", minerAddr)
@@ -93,12 +92,12 @@ func (q *fevmQueries) PreviewTerminateSectors(
 
 	var params miner.TerminateSectorsParams
 
-	totalBurn := new(corebig.Int)
+	totalBurn = new(corebig.Int)
 
 	if allSectors {
 		provingDeadline, err := api.StateMinerProvingDeadline(ctx, minerAddr, ts.Key())
 		if err != nil {
-			log.Fatal(err)
+			return nil, nil, err
 		}
 		// fmt.Printf("Proving deadline: %+v\n", provingDeadline)
 		// fmt.Printf("Proving deadline Index: %+v\n", provingDeadline.Index)
@@ -108,12 +107,12 @@ func (q *fevmQueries) PreviewTerminateSectors(
 
 		tsPrev, err := api.ChainGetTipSetByHeight(ctx, prevHeight, types.EmptyTSK)
 		if err != nil {
-			log.Fatal(err)
+			return nil, nil, err
 		}
 
 		workerActorPrev, err := api.StateGetActor(ctx, minerInfo.Worker, tsPrev.Key())
 		if err != nil {
-			log.Fatal(err)
+			return nil, nil, err
 		}
 		fmt.Printf("Epoch used for immutable deadlines: %d (Worker balance: %v)\n", prevHeight, util.ToFIL(workerActorPrev.Balance.Int))
 
@@ -132,7 +131,7 @@ func (q *fevmQueries) PreviewTerminateSectors(
 			fmt.Printf("Batch Size: %d\n", batchSize)
 			fmt.Printf("Gas Limit: %d\n", gasLimit)
 			if batchSize < 10 {
-				log.Fatal("Not enough worker funds! Batch size too small!")
+				return nil, nil, xerrors.Errorf("Not enough worker funds! Batch size too small!")
 			}
 		}
 
@@ -177,12 +176,12 @@ func (q *fevmQueries) PreviewTerminateSectors(
 			}
 			partitions, err := api.StateMinerPartitions(ctx, minerAddr, uint64(dlIdx), deadlineTs.Key())
 			if err != nil {
-				log.Fatal(err)
+				return nil, nil, err
 			}
 			for partIdx, partition := range partitions {
 				sc, err := partition.LiveSectors.Count()
 				if err != nil {
-					log.Fatal(err)
+					return nil, nil, err
 				}
 				if sc > 0 {
 					if !quiet {
@@ -193,11 +192,11 @@ func (q *fevmQueries) PreviewTerminateSectors(
 						lastIndex := min(sc, i+batchSize)
 						slicedSectors, err := partition.LiveSectors.Slice(i, lastIndex-i)
 						if err != nil {
-							log.Fatal(err)
+							return nil, nil, err
 						}
 						sliceCount, err := slicedSectors.Count()
 						if err != nil {
-							log.Fatal(err)
+							return nil, nil, err
 						}
 
 						if !quiet {
@@ -218,7 +217,7 @@ func (q *fevmQueries) PreviewTerminateSectors(
 							if quiet {
 								bar.Close()
 							}
-							log.Fatal(err)
+							return nil, nil, err
 						}
 						totalBurn = totalBurn.Add(totalBurn, burn)
 					}
@@ -235,7 +234,7 @@ func (q *fevmQueries) PreviewTerminateSectors(
 
 		sectorPartition, err := api.StateSectorPartition(ctx, minerAddr, abi.SectorNumber(sectorNumber), ts.Key())
 		if err != nil {
-			log.Fatal(err)
+			return nil, nil, err
 		}
 
 		termination := miner.TerminationDeclaration{
@@ -252,20 +251,11 @@ func (q *fevmQueries) PreviewTerminateSectors(
 		burn, err := terminateSectors(ctx, *lClient, h, ts, minerAddr, minerInfo,
 			params, int64(gasLimit))
 		if err != nil {
-			log.Fatal(err)
+			return nil, nil, err
 		}
 		totalBurn = totalBurn.Add(totalBurn, burn)
 	}
-	fmt.Printf("\nMiner actor balance (attoFIL): %s\n", actor.Balance)
-	fmt.Printf("Total burn (attoFIL): %s\n", totalBurn)
-	fmt.Printf("Miner actor balance (FIL): %0.03f\n", util.ToFIL(actor.Balance.Int))
-	fmt.Printf("Total burn (FIL): %0.03f\n", util.ToFIL(totalBurn))
-	difference := new(corebig.Int).Sub(actor.Balance.Int, totalBurn)
-	fmt.Printf("Approximate liquidation value (FIL): %0.03f\n", util.ToFIL(difference))
-	diff, _ := util.ToFIL(difference).Float64()
-	balance, _ := util.ToFIL(actor.Balance.Int).Float64()
-	pct := diff / balance * 100
-	fmt.Printf("Approximate recovery percentage: %0.03f%%\n", pct)
+	return actor, totalBurn, nil
 }
 
 func terminateSectors(
@@ -335,14 +325,6 @@ func terminateSectors(
 		return nil, err
 	}
 
-	/*
-		out, err := json.Marshal(result)
-		if err != nil {
-			log.Fatal(err)
-		}
-		fmt.Println(string(out))
-	*/
-
 	burn := big.NewInt(0)
 	burnAddr, _ := address.NewFromString("f099")
 
@@ -371,16 +353,8 @@ func terminateSectors(
 			}
 			//fmt.Printf("Return: %+v\n", ret[0])
 			if !ret[0] {
-				log.Fatal("Error: Not all sectors terminated!")
+				return nil, xerrors.Errorf("Error: Not all sectors terminated!")
 			}
-
-			/*
-				out, err := json.Marshal(trace.MsgRct)
-				if err != nil {
-					log.Fatal(err)
-				}
-				fmt.Println(string(out))
-			*/
 		}
 	}
 	return burn.Int, nil
@@ -394,7 +368,7 @@ func ParseTipSetRef(ctx context.Context, api lotusapi.FullNodeStruct, tss string
 
 		var h uint64
 		if _, err := fmt.Sscanf(tss, "@%d", &h); err != nil {
-			return nil, fmt.Errorf("parsing height tipset ref: %w", err)
+			return nil, xerrors.Errorf("parsing height tipset ref: %w", err)
 		}
 
 		return api.ChainGetTipSetByHeight(ctx, abi.ChainEpoch(h), types.EmptyTSK)
