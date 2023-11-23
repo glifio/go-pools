@@ -131,10 +131,6 @@ func (q *fevmQueries) PreviewTerminateSectors(
 		return
 	}
 
-	fmt.Printf("Miner: %v\n", minerAddr)
-	fmt.Printf("Epoch: %d\n", h)
-	fmt.Printf("Worker: %v (Balance: %v)\n", minerInfo.Worker, util.ToFIL(workerActor.Balance.Int))
-
 	var params miner.TerminateSectorsParams
 
 	totalBurn := new(corebig.Int)
@@ -158,7 +154,6 @@ func (q *fevmQueries) PreviewTerminateSectors(
 		errorCh <- err
 		return
 	}
-	fmt.Printf("Epoch used for immutable deadlines: %d (Worker balance: %v)\n", prevHeight, util.ToFIL(workerActorPrev.Balance.Int))
 
 	if batchSize == 0 && gasLimit == 0 {
 		batchSize = 2500
@@ -171,12 +166,20 @@ func (q *fevmQueries) PreviewTerminateSectors(
 			gasLimit = uint64(float64(gasLimit) * ratio)
 		}
 
-		fmt.Printf("Batch Size: %d\n", batchSize)
-		fmt.Printf("Gas Limit: %d\n", gasLimit)
 		if batchSize < 10 {
 			errorCh <- xerrors.Errorf("Not enough worker funds! Batch size too small!")
 			return
 		}
+	}
+
+	progressCh <- &poolstypes.PreviewTerminateSectorsProgress{
+		Epoch:                  h,
+		MinerInfo:              minerInfo,
+		WorkerActor:            workerActor,
+		PrevHeightForImmutable: prevHeight,
+		WorkerActorPrev:        workerActorPrev,
+		BatchSize:              batchSize,
+		GasLimit:               gasLimit,
 	}
 
 	var dlIdx uint64
@@ -278,9 +281,6 @@ func terminateSectors(
 		return nil, err
 	}
 
-	// fmt.Printf("Miner Owner: %v\n", minerInfo.Owner)
-	// fmt.Printf("Miner Worker: %v\n", minerInfo.Worker)
-	// fmt.Printf("Worker Nonce: %v\n", workerActor.Nonce)
 	nonce := workerActor.Nonce
 
 	workerAddress, err := api.StateAccountKey(ctx, minerInfo.Worker, ts.Key())
@@ -296,7 +296,6 @@ func terminateSectors(
 		if (tMsg.Message.From == minerInfo.Worker ||
 			tMsg.Message.From == workerAddress) &&
 			tMsg.Message.Nonce >= nonce {
-			// fmt.Printf("Jim found nonce %d\n", tMsg.Message.Nonce)
 			nonce = tMsg.Message.Nonce + 1
 		}
 	}
@@ -329,19 +328,16 @@ func terminateSectors(
 
 	for _, trace := range result.Trace {
 		if trace.MsgCid == cid {
-			// fmt.Printf("CID: %v\n", cid)
-
 			if trace.MsgRct.ExitCode != 0 {
-				fmt.Printf("Exit Code: %v\n", trace.MsgRct.ExitCode)
+				return nil, xerrors.Errorf("Exit Code: %v", trace.MsgRct.ExitCode)
 			}
 			for _, subMsg := range trace.ExecutionTrace.Subcalls {
 				if subMsg.Msg.To == burnAddr {
 					burn = subMsg.Msg.Value
-					// fmt.Printf("Burn: %v\n", burn)
 				}
 			}
 			if trace.Error != "" {
-				fmt.Printf("Error: %v\n", trace.Error)
+				return nil, xerrors.Errorf("Error: %v\n", trace.Error)
 			}
 
 			var ret []bool
@@ -350,7 +346,6 @@ func terminateSectors(
 			if err != nil {
 				return nil, err
 			}
-			//fmt.Printf("Return: %+v\n", ret[0])
 			if !ret[0] {
 				return nil, xerrors.Errorf("Error: Not all sectors terminated!")
 			}

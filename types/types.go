@@ -13,6 +13,7 @@ import (
 	"github.com/filecoin-project/go-jsonrpc"
 	"github.com/filecoin-project/go-state-types/abi"
 	"github.com/filecoin-project/lotus/api"
+	lotusapi "github.com/filecoin-project/lotus/api"
 	filtypes "github.com/filecoin-project/lotus/chain/types"
 	"github.com/glifio/go-pools/abigen"
 	"github.com/glifio/go-pools/constants"
@@ -181,11 +182,18 @@ type PreviewTerminateSectorsReturn struct {
 }
 
 type PreviewTerminateSectorsProgress struct {
-	Deadline          uint64
-	DeadlineImmutable bool
-	Partition         int
-	SectorsCount      uint64
-	SliceStart        uint64
-	SliceEnd          uint64
-	SliceCount        uint64
+	Epoch                  abi.ChainEpoch
+	MinerInfo              lotusapi.MinerInfo
+	WorkerActor            *filtypes.ActorV5
+	PrevHeightForImmutable abi.ChainEpoch
+	WorkerActorPrev        *filtypes.ActorV5
+	BatchSize              uint64
+	GasLimit               uint64
+	Deadline               uint64
+	DeadlineImmutable      bool
+	Partition              int
+	SectorsCount           uint64
+	SliceStart             uint64
+	SliceEnd               uint64
+	SliceCount             uint64
 }
