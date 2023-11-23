@@ -4,9 +4,7 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	"os"
 	"strings"
-	"time"
 
 	corebig "math/big"
 
@@ -23,7 +21,6 @@ import (
 	"github.com/glifio/go-pools/util"
 	"github.com/ipfs/go-cid"
 	cbor "github.com/ipfs/go-ipld-cbor"
-	"github.com/schollz/progressbar/v3"
 )
 
 // PreviewTerminateSector gets the burnt funds for when a single sector is terminated
@@ -97,6 +94,7 @@ func (q *fevmQueries) PreviewTerminateSectors(
 	batchSize uint64,
 	gasLimit uint64,
 	errorCh chan error,
+	progressCh chan *poolstypes.PreviewTerminateSectorsProgress,
 	resultCh chan *poolstypes.PreviewTerminateSectorsReturn,
 	quiet bool,
 ) {
@@ -186,35 +184,10 @@ func (q *fevmQueries) PreviewTerminateSectors(
 		}
 	}
 
-	var bar *progressbar.ProgressBar
-	if quiet {
-		bar = progressbar.NewOptions(48,
-			progressbar.OptionSetDescription("Deadlines"),
-			progressbar.OptionSetWriter(os.Stderr),
-			progressbar.OptionSetWidth(10),
-			progressbar.OptionThrottle(65*time.Millisecond),
-			progressbar.OptionShowCount(),
-			progressbar.OptionShowIts(),
-			/*
-				OptionOnCompletion(func() {
-					fmt.Fprint(os.Stderr, "\n")
-				}),
-			*/
-			progressbar.OptionSpinnerType(14),
-			progressbar.OptionFullWidth(),
-			progressbar.OptionSetRenderBlankState(true),
-			progressbar.OptionClearOnFinish())
-	}
-	defer func() {
-		if bar != nil {
-			bar.Close()
-		}
-	}()
-
 	var dlIdx uint64
 	for dlIdx = 0; dlIdx < 48; dlIdx++ {
-		if quiet {
-			bar.Add(1)
+		progressCh <- &poolstypes.PreviewTerminateSectorsProgress{
+			Deadline: dlIdx,
 		}
 		immutable := ""
 		deadlineTs := ts
@@ -269,9 +242,6 @@ func (q *fevmQueries) PreviewTerminateSectors(
 					burn, err := terminateSectors(ctx, *lClient, deadlineHeight, deadlineTs,
 						minerAddr, minerInfo, params, int64(gasLimit))
 					if err != nil {
-						if quiet {
-							bar.Close()
-						}
 						errorCh <- err
 						return
 					}
@@ -279,9 +249,6 @@ func (q *fevmQueries) PreviewTerminateSectors(
 				}
 			}
 		}
-	}
-	if quiet {
-		bar.Close()
 	}
 	resultCh <- &poolstypes.PreviewTerminateSectorsReturn{
 		Actor:     actor,
