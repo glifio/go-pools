@@ -96,7 +96,6 @@ func (q *fevmQueries) PreviewTerminateSectors(
 	errorCh chan error,
 	progressCh chan *poolstypes.PreviewTerminateSectorsProgress,
 	resultCh chan *poolstypes.PreviewTerminateSectorsReturn,
-	quiet bool,
 ) {
 	lClient, closer, err := q.extern.ConnectLotusClient()
 	if err != nil {
@@ -145,10 +144,7 @@ func (q *fevmQueries) PreviewTerminateSectors(
 		errorCh <- err
 		return
 	}
-	// fmt.Printf("Proving deadline: %+v\n", provingDeadline)
-	// fmt.Printf("Proving deadline Index: %+v\n", provingDeadline.Index)
 
-	// prevHeight := provingDeadline.PeriodStart - 120
 	prevHeight := h - 120
 
 	tsPrev, err := api.ChainGetTipSetByHeight(ctx, prevHeight, types.EmptyTSK)
@@ -166,7 +162,6 @@ func (q *fevmQueries) PreviewTerminateSectors(
 
 	if batchSize == 0 && gasLimit == 0 {
 		batchSize = 2500
-		// gasLimit = 60000000000
 		gasLimit = 90000000000
 
 		workerBal, _ := util.ToFIL(workerActorPrev.Balance.Int).Float64()
@@ -186,15 +181,11 @@ func (q *fevmQueries) PreviewTerminateSectors(
 
 	var dlIdx uint64
 	for dlIdx = 0; dlIdx < 48; dlIdx++ {
-		progressCh <- &poolstypes.PreviewTerminateSectorsProgress{
-			Deadline: dlIdx,
-		}
-		immutable := ""
+		dlImmutable := false
 		deadlineTs := ts
 		deadlineHeight := h
 		if dlIdx == provingDeadline.Index || dlIdx == (provingDeadline.Index+1)%48 {
-			// Immutable deadline
-			immutable = " (Immutable)"
+			dlImmutable = true
 			deadlineTs = tsPrev
 			deadlineHeight = prevHeight
 		}
@@ -209,10 +200,13 @@ func (q *fevmQueries) PreviewTerminateSectors(
 				errorCh <- err
 				return
 			}
+			progressCh <- &poolstypes.PreviewTerminateSectorsProgress{
+				Deadline:          dlIdx,
+				DeadlineImmutable: dlImmutable,
+				Partition:         partIdx,
+				SectorsCount:      sc,
+			}
 			if sc > 0 {
-				if !quiet {
-					fmt.Printf("Deadline %d%s Partition %d Sectors %d\n", dlIdx, immutable, partIdx, sc)
-				}
 				var i uint64
 				for i = 0; i < sc; i += batchSize {
 					lastIndex := min(sc, i+batchSize)
@@ -227,8 +221,14 @@ func (q *fevmQueries) PreviewTerminateSectors(
 						return
 					}
 
-					if !quiet {
-						fmt.Printf("  Slice: %d to %d (->%d): %d\n", i, lastIndex-1, sc-1, sliceCount)
+					progressCh <- &poolstypes.PreviewTerminateSectorsProgress{
+						Deadline:          dlIdx,
+						DeadlineImmutable: dlImmutable,
+						Partition:         partIdx,
+						SectorsCount:      sc,
+						SliceStart:        i,
+						SliceEnd:          lastIndex,
+						SliceCount:        sliceCount,
 					}
 
 					termination := miner.TerminationDeclaration{
