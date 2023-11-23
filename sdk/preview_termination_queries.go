@@ -19,6 +19,7 @@ import (
 	"github.com/filecoin-project/go-state-types/builtin/v8/miner"
 	lotusapi "github.com/filecoin-project/lotus/api"
 	"github.com/filecoin-project/lotus/chain/types"
+	poolstypes "github.com/glifio/go-pools/types"
 	"github.com/glifio/go-pools/util"
 	"github.com/ipfs/go-cid"
 	cbor "github.com/ipfs/go-ipld-cbor"
@@ -95,35 +96,42 @@ func (q *fevmQueries) PreviewTerminateSectors(
 	vmHeight uint64,
 	batchSize uint64,
 	gasLimit uint64,
+	errorCh chan error,
+	resultCh chan *poolstypes.PreviewTerminateSectorsReturn,
 	quiet bool,
-) (actor *types.ActorV5, totalBurn *corebig.Int, epoch abi.ChainEpoch, err error) {
+) {
 	lClient, closer, err := q.extern.ConnectLotusClient()
 	if err != nil {
-		return nil, nil, 0, err
+		errorCh <- err
+		return
 	}
 	defer closer()
 	api := *lClient
 
 	h, ts, err := parseTipSetAndHeight(ctx, api, tipset, vmHeight)
 	if err != nil {
-		return nil, nil, 0, err
+		errorCh <- err
+		return
 	}
 
 	// Lookup actor balance
-	actor, err = api.StateGetActor(ctx, minerAddr, ts.Key())
+	actor, err := api.StateGetActor(ctx, minerAddr, ts.Key())
 	if err != nil {
-		return nil, nil, 0, err
+		errorCh <- err
+		return
 	}
 
 	// Lookup current owner / worker
 	minerInfo, err := api.StateMinerInfo(ctx, minerAddr, ts.Key())
 	if err != nil {
-		return nil, nil, 0, err
+		errorCh <- err
+		return
 	}
 
 	workerActor, err := api.StateGetActor(ctx, minerInfo.Worker, ts.Key())
 	if err != nil {
-		return nil, nil, 0, err
+		errorCh <- err
+		return
 	}
 
 	fmt.Printf("Miner: %v\n", minerAddr)
@@ -132,11 +140,12 @@ func (q *fevmQueries) PreviewTerminateSectors(
 
 	var params miner.TerminateSectorsParams
 
-	totalBurn = new(corebig.Int)
+	totalBurn := new(corebig.Int)
 
 	provingDeadline, err := api.StateMinerProvingDeadline(ctx, minerAddr, ts.Key())
 	if err != nil {
-		return nil, nil, 0, err
+		errorCh <- err
+		return
 	}
 	// fmt.Printf("Proving deadline: %+v\n", provingDeadline)
 	// fmt.Printf("Proving deadline Index: %+v\n", provingDeadline.Index)
@@ -146,12 +155,14 @@ func (q *fevmQueries) PreviewTerminateSectors(
 
 	tsPrev, err := api.ChainGetTipSetByHeight(ctx, prevHeight, types.EmptyTSK)
 	if err != nil {
-		return nil, nil, 0, err
+		errorCh <- err
+		return
 	}
 
 	workerActorPrev, err := api.StateGetActor(ctx, minerInfo.Worker, tsPrev.Key())
 	if err != nil {
-		return nil, nil, 0, err
+		errorCh <- err
+		return
 	}
 	fmt.Printf("Epoch used for immutable deadlines: %d (Worker balance: %v)\n", prevHeight, util.ToFIL(workerActorPrev.Balance.Int))
 
@@ -170,7 +181,8 @@ func (q *fevmQueries) PreviewTerminateSectors(
 		fmt.Printf("Batch Size: %d\n", batchSize)
 		fmt.Printf("Gas Limit: %d\n", gasLimit)
 		if batchSize < 10 {
-			return nil, nil, 0, xerrors.Errorf("Not enough worker funds! Batch size too small!")
+			errorCh <- xerrors.Errorf("Not enough worker funds! Batch size too small!")
+			return
 		}
 	}
 
@@ -215,12 +227,14 @@ func (q *fevmQueries) PreviewTerminateSectors(
 		}
 		partitions, err := api.StateMinerPartitions(ctx, minerAddr, uint64(dlIdx), deadlineTs.Key())
 		if err != nil {
-			return nil, nil, 0, err
+			errorCh <- err
+			return
 		}
 		for partIdx, partition := range partitions {
 			sc, err := partition.LiveSectors.Count()
 			if err != nil {
-				return nil, nil, 0, err
+				errorCh <- err
+				return
 			}
 			if sc > 0 {
 				if !quiet {
@@ -231,11 +245,13 @@ func (q *fevmQueries) PreviewTerminateSectors(
 					lastIndex := min(sc, i+batchSize)
 					slicedSectors, err := partition.LiveSectors.Slice(i, lastIndex-i)
 					if err != nil {
-						return nil, nil, 0, err
+						errorCh <- err
+						return
 					}
 					sliceCount, err := slicedSectors.Count()
 					if err != nil {
-						return nil, nil, 0, err
+						errorCh <- err
+						return
 					}
 
 					if !quiet {
@@ -256,7 +272,8 @@ func (q *fevmQueries) PreviewTerminateSectors(
 						if quiet {
 							bar.Close()
 						}
-						return nil, nil, 0, err
+						errorCh <- err
+						return
 					}
 					totalBurn = totalBurn.Add(totalBurn, burn)
 				}
@@ -266,8 +283,11 @@ func (q *fevmQueries) PreviewTerminateSectors(
 	if quiet {
 		bar.Close()
 	}
-
-	return actor, totalBurn, h, nil
+	resultCh <- &poolstypes.PreviewTerminateSectorsReturn{
+		Actor:     actor,
+		TotalBurn: totalBurn,
+		Epoch:     h,
+	}
 }
 
 func terminateSectors(

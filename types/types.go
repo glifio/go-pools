@@ -99,7 +99,7 @@ type FEVMQueries interface {
 	RateModule() (common.Address, error)
 	// preview termination methods
 	PreviewTerminateSector(ctx context.Context, minerAddr address.Address, tipset string, vmHeight uint64, sectorNumber uint64, gasLimit uint64) (actor *filtypes.ActorV5, totalBurn *big.Int, epoch abi.ChainEpoch, err error)
-	PreviewTerminateSectors(ctx context.Context, minerAddr address.Address, tipset string, vmHeight uint64, batchSize uint64, gasLimit uint64, quiet bool) (actor *filtypes.ActorV5, totalBurn *big.Int, epoch abi.ChainEpoch, err error)
+	PreviewTerminateSectors(ctx context.Context, minerAddr address.Address, tipset string, vmHeight uint64, batchSize uint64, gasLimit uint64, errorCh chan error, resultCh chan *PreviewTerminateSectorsReturn, quiet bool)
 }
 
 //go:generate mockery --name FEVMActions
@@ -172,4 +172,10 @@ type Extern struct {
 	AdoAddr       string `json:"adoAddr"`
 	LotusDialAddr string `json:"lotusDialAddr"`
 	LotusToken    string `json:"lotusToken"`
+}
+
+type PreviewTerminateSectorsReturn struct {
+	Actor     *filtypes.ActorV5
+	TotalBurn *big.Int
+	Epoch     abi.ChainEpoch
 }
