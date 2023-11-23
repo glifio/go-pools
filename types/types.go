@@ -11,6 +11,7 @@ import (
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/filecoin-project/go-address"
 	"github.com/filecoin-project/go-jsonrpc"
+	"github.com/filecoin-project/go-state-types/abi"
 	"github.com/filecoin-project/lotus/api"
 	filtypes "github.com/filecoin-project/lotus/chain/types"
 	"github.com/glifio/go-pools/abigen"
@@ -97,8 +98,8 @@ type FEVMQueries interface {
 	// RateModule gets fetched from InfinityPool
 	RateModule() (common.Address, error)
 	// preview termination methods
-	PreviewTerminateSector(ctx context.Context, rpcUrl string, minerID string, tipset string, vmHeight uint64, sectorNumber uint64, gasLimit uint64, quiet bool) (actor *filtypes.ActorV5, totalBurn *big.Int, err error)
-	PreviewTerminateSectors(ctx context.Context, rpcUrl string, minerID string, tipset string, vmHeight uint64, batchSize uint64, gasLimit uint64, quiet bool) (actor *filtypes.ActorV5, totalBurn *big.Int, err error)
+	PreviewTerminateSector(ctx context.Context, minerAddr address.Address, tipset string, vmHeight uint64, sectorNumber uint64, gasLimit uint64) (actor *filtypes.ActorV5, totalBurn *big.Int, epoch abi.ChainEpoch, err error)
+	PreviewTerminateSectors(ctx context.Context, minerAddr address.Address, tipset string, vmHeight uint64, batchSize uint64, gasLimit uint64, quiet bool) (actor *filtypes.ActorV5, totalBurn *big.Int, epoch abi.ChainEpoch, err error)
 }
 
 //go:generate mockery --name FEVMActions
