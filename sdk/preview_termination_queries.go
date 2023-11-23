@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"math"
 	"strings"
 
 	corebig "math/big"
@@ -93,6 +94,7 @@ func (q *fevmQueries) PreviewTerminateSectors(
 	vmHeight uint64,
 	batchSize uint64,
 	gasLimit uint64,
+	useSampling bool,
 	errorCh chan error,
 	progressCh chan *poolstypes.PreviewTerminateSectorsProgress,
 	resultCh chan *poolstypes.PreviewTerminateSectorsReturn,
@@ -210,34 +212,74 @@ func (q *fevmQueries) PreviewTerminateSectors(
 				SectorsCount:      sc,
 			}
 			if sc > 0 {
-				var i uint64
-				for i = 0; i < sc; i += batchSize {
-					lastIndex := min(sc, i+batchSize)
-					slicedSectors, err := partition.LiveSectors.Slice(i, lastIndex-i)
+				if !useSampling {
+					var i uint64
+					for i = 0; i < sc; i += batchSize {
+						lastIndex := min(sc, i+batchSize)
+						slicedSectors, err := partition.LiveSectors.Slice(i, lastIndex-i)
+						if err != nil {
+							errorCh <- err
+							return
+						}
+						sliceCount, err := slicedSectors.Count()
+						if err != nil {
+							errorCh <- err
+							return
+						}
+
+						progressCh <- &poolstypes.PreviewTerminateSectorsProgress{
+							Deadline:          dlIdx,
+							DeadlineImmutable: dlImmutable,
+							Partition:         partIdx,
+							SectorsCount:      sc,
+							SliceStart:        i,
+							SliceEnd:          lastIndex,
+							SliceCount:        sliceCount,
+						}
+
+						termination := miner.TerminationDeclaration{
+							Deadline:  uint64(dlIdx),
+							Partition: uint64(partIdx),
+							Sectors:   slicedSectors,
+						}
+						params = miner.TerminateSectorsParams{
+							Terminations: []miner.TerminationDeclaration{termination},
+						}
+						burn, err := terminateSectors(ctx, *lClient, deadlineHeight, deadlineTs,
+							minerAddr, minerInfo, params, int64(gasLimit))
+						if err != nil {
+							errorCh <- err
+							return
+						}
+						totalBurn = totalBurn.Add(totalBurn, burn)
+					}
+				} else {
+					// useSampling
+					sectors, err := partition.LiveSectors.All(math.MaxUint64)
 					if err != nil {
 						errorCh <- err
 						return
 					}
-					sliceCount, err := slicedSectors.Count()
-					if err != nil {
-						errorCh <- err
-						return
+					sampledSectors := make([]uint64, 0)
+					step := max(float64(len(sectors))/float64(batchSize-1), 1.0)
+					lastIndex := -1
+					for sampleIndex := 0.0; int(sampleIndex) < len(sectors); sampleIndex += step {
+						i := int(sampleIndex)
+						if i > lastIndex {
+							sampledSectors = append(sampledSectors, sectors[i])
+							lastIndex = i
+						}
 					}
-
-					progressCh <- &poolstypes.PreviewTerminateSectorsProgress{
-						Deadline:          dlIdx,
-						DeadlineImmutable: dlImmutable,
-						Partition:         partIdx,
-						SectorsCount:      sc,
-						SliceStart:        i,
-						SliceEnd:          lastIndex,
-						SliceCount:        sliceCount,
+					if lastIndex < len(sectors)-1 {
+						sampledSectors = append(sampledSectors, sectors[len(sectors)-1])
 					}
-
+					// fmt.Printf("Jim sampledSectors len: %v\n", len(sampledSectors))
+					// fmt.Printf("Jim sampledSectors: %v\n", sampledSectors)
+					sampledSectorsBitfield := bitfield.NewFromSet(sampledSectors)
 					termination := miner.TerminationDeclaration{
 						Deadline:  uint64(dlIdx),
 						Partition: uint64(partIdx),
-						Sectors:   slicedSectors,
+						Sectors:   sampledSectorsBitfield,
 					}
 					params = miner.TerminateSectorsParams{
 						Terminations: []miner.TerminationDeclaration{termination},
@@ -248,7 +290,11 @@ func (q *fevmQueries) PreviewTerminateSectors(
 						errorCh <- err
 						return
 					}
-					totalBurn = totalBurn.Add(totalBurn, burn)
+					scaledBurn := new(corebig.Int).Div(
+						new(corebig.Int).Mul(burn, corebig.NewInt(int64(sc))),
+						corebig.NewInt(int64(len(sampledSectors))),
+					)
+					totalBurn = totalBurn.Add(totalBurn, scaledBurn)
 				}
 			}
 		}
