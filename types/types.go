@@ -52,8 +52,10 @@ type FEVMQueries interface {
 	InfPoolAgentMaxWithdraw(ctx context.Context, agentAddr common.Address, agentData *vc.AgentData) (*big.Int, error)
 	InfPoolMaxEpochsOwedTolerance(ctx context.Context, agentAddr common.Address) (*big.Int, error)
 	InfPoolFeesAccrued(ctx context.Context, blockNumber *big.Int) (*big.Int, error)
+	InfPoolApy(ctx context.Context, blockNumber *big.Int) (*big.Int, error)
 	// pool registry methods
 	ListPools(ctx context.Context) ([]common.Address, error)
+	TreasuryFeeRate(ctx context.Context, blockNumber *big.Int) (*big.Int, error)
 	// ifil methods
 	IFILBalanceOf(ctx context.Context, hodler common.Address) (*big.Float, error)
 	IFILPrice(ctx context.Context, blockNumber *big.Int) (*big.Int, error)

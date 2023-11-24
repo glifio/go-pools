@@ -4,6 +4,7 @@ import (
 	"context"
 	"math/big"
 
+	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/glifio/go-pools/abigen"
 )
@@ -36,4 +37,19 @@ func (q *fevmQueries) ListPools(ctx context.Context) ([]common.Address, error) {
 	}
 
 	return pools, nil
+}
+
+func (q *fevmQueries) TreasuryFeeRate(ctx context.Context, blockNumber *big.Int) (*big.Int, error) {
+	client, err := q.extern.ConnectEthClient()
+	if err != nil {
+		return nil, err
+	}
+	defer client.Close()
+
+	poolRegCaller, err := abigen.NewPoolRegistryCaller(q.poolRegistry, client)
+	if err != nil {
+		return nil, err
+	}
+
+	return poolRegCaller.TreasuryFeeRate(&bind.CallOpts{Context: ctx, BlockNumber: blockNumber})
 }
