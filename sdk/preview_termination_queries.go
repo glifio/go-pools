@@ -184,6 +184,8 @@ func (q *fevmQueries) PreviewTerminateSectors(
 		GasLimit:               gasLimit,
 	}
 
+	var sectorsTerminated uint64
+	var sectorsCount uint64
 	var dlIdx uint64
 	for dlIdx = 0; dlIdx < 48; dlIdx++ {
 		dlImmutable := false
@@ -251,6 +253,8 @@ func (q *fevmQueries) PreviewTerminateSectors(
 							errorCh <- err
 							return
 						}
+						sectorsTerminated += sliceCount
+						sectorsCount += sliceCount
 						totalBurn = totalBurn.Add(totalBurn, burn)
 					}
 				} else {
@@ -294,15 +298,19 @@ func (q *fevmQueries) PreviewTerminateSectors(
 						new(corebig.Int).Mul(burn, corebig.NewInt(int64(sc))),
 						corebig.NewInt(int64(len(sampledSectors))),
 					)
+					sectorsTerminated += uint64(len(sampledSectors))
+					sectorsCount += uint64(len(sectors))
 					totalBurn = totalBurn.Add(totalBurn, scaledBurn)
 				}
 			}
 		}
 	}
 	resultCh <- &poolstypes.PreviewTerminateSectorsReturn{
-		Actor:     actor,
-		TotalBurn: totalBurn,
-		Epoch:     h,
+		Actor:             actor,
+		TotalBurn:         totalBurn,
+		SectorsTerminated: sectorsTerminated,
+		SectorsCount:      sectorsCount,
+		Epoch:             h,
 	}
 }
 

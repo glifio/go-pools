@@ -176,9 +176,11 @@ type Extern struct {
 }
 
 type PreviewTerminateSectorsReturn struct {
-	Actor     *filtypes.ActorV5
-	TotalBurn *big.Int
-	Epoch     abi.ChainEpoch
+	Actor             *filtypes.ActorV5
+	TotalBurn         *big.Int
+	SectorsTerminated uint64
+	SectorsCount      uint64
+	Epoch             abi.ChainEpoch
 }
 
 type PreviewTerminateSectorsProgress struct {
