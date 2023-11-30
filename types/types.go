@@ -191,6 +191,8 @@ type PreviewTerminateSectorsProgress struct {
 	WorkerActorPrev        *filtypes.ActorV5
 	BatchSize              uint64
 	GasLimit               uint64
+	DeadlinePartitionCount int
+	DeadlinePartitionIndex int
 	Deadline               uint64
 	DeadlineImmutable      bool
 	Partition              int
