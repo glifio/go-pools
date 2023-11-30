@@ -170,8 +170,8 @@ func (q *fevmQueries) PreviewTerminateSectors(
 		gasLimit = 90000000000 * 3 // 3 deadlines per batch
 
 		workerBal, _ := util.ToFIL(workerActorPrev.Balance.Int).Float64()
-		if workerBal < 1.0 {
-			ratio := workerBal / 1.0
+		if workerBal < 3.0 {
+			ratio := workerBal / 3.0
 			batchSize = uint64(float64(batchSize) * ratio)
 			gasLimit = uint64(float64(gasLimit) * ratio)
 		}
@@ -239,15 +239,17 @@ func (q *fevmQueries) PreviewTerminateSectors(
 			}
 		}
 	}
-	fmt.Printf("Jim deadlinePartitions: %v\n", len(deadlinePartitions))
-	for i, dl := range deadlinePartitions {
-		sc, err := dl.partition.LiveSectors.Count()
-		if err != nil {
-			errorCh <- err
-			return
+	/*
+		fmt.Printf("Jim deadlinePartitions: %v\n", len(deadlinePartitions))
+		for i, dl := range deadlinePartitions {
+			sc, err := dl.partition.LiveSectors.Count()
+			if err != nil {
+				errorCh <- err
+				return
+			}
+			fmt.Printf("  %d: dlIdx: %d partIdx: %d sectors: %d\n", i, dl.dlIdx, dl.partIdx, sc)
 		}
-		fmt.Printf("  %d: dlIdx: %d partIdx: %d sectors: %d\n", i, dl.dlIdx, dl.partIdx, sc)
-	}
+	*/
 
 	terminations := make(chan terminationTask)
 	burns := make(chan *corebig.Int)
@@ -317,21 +319,26 @@ func (q *fevmQueries) PreviewTerminateSectors(
 							sectorsCount:        int64(sc),
 							sampledSectorsCount: int64(sc),
 						}
+						sectorsTerminated += sliceCount
+						sectorsCount += sliceCount
 
 						/*
 							params = miner.TerminateSectorsParams{
 								Terminations: []miner.TerminationDeclaration{termination},
 							}
+							fmt.Printf("Jim old params: %+v\n", params)
+							fmt.Printf("Jim old height: %v\n", deadlineHeight)
+							fmt.Printf("Jim old ts: %v\n", deadlineTs)
+							fmt.Printf("Jim old gasLimit: %v\n", gasLimit)
 							burn, err := terminateSectors(ctx, *lClient, deadlineHeight, deadlineTs,
 								minerAddr, minerInfo, params, int64(gasLimit))
+							fmt.Printf("Jim old result: %v %v\n", burn, err)
 							if err != nil {
 								errorCh <- err
 								return
 							}
+							totalBurn = totalBurn.Add(totalBurn, burn)
 						*/
-						sectorsTerminated += sliceCount
-						sectorsCount += sliceCount
-						// totalBurn = totalBurn.Add(totalBurn, burn)
 					}
 				} else {
 					// useSampling
@@ -401,7 +408,7 @@ func (q *fevmQueries) PreviewTerminateSectors(
 
 	resultCh <- &poolstypes.PreviewTerminateSectorsReturn{
 		Actor: actor,
-		// TotalBurn:         totalBurn,
+		// TotalBurn: totalBurn,
 		TotalBurn:         totalBurn2,
 		SectorsTerminated: sectorsTerminated,
 		SectorsCount:      sectorsCount,
@@ -460,7 +467,7 @@ func runPendingTerminations(
 	burns chan *corebig.Int,
 ) error {
 	if len(tasks) > 0 {
-		fmt.Printf("Terminating: %+v\n", len(tasks))
+		// fmt.Printf("Terminating: %+v\n", len(tasks))
 		height := tasks[0].deadlineHeight
 		ts := tasks[0].deadlineTs
 		var sectorsCount int64
@@ -477,11 +484,19 @@ func runPendingTerminations(
 		params := miner.TerminateSectorsParams{
 			Terminations: terminations,
 		}
-		fmt.Printf("Jim sectorsCount: %v\n", sectorsCount)
-		fmt.Printf("Jim sampledSectorsCount: %v\n", sampledSectorsCount)
-		fmt.Printf("Jim params: %+v\n", params)
+		/*
+			fmt.Printf("Jim sectorsCount: %v\n", sectorsCount)
+			fmt.Printf("Jim sampledSectorsCount: %v\n", sampledSectorsCount)
+			fmt.Printf("Jim params: %+v\n", params)
+			fmt.Printf("Jim height: %v\n", height)
+			fmt.Printf("Jim ts: %v\n", ts)
+			fmt.Printf("Jim gasLimit: %v\n", gasLimit)
+			fmt.Printf("Jim minerAddr: %v\n", minerAddr)
+			fmt.Printf("Jim minerInfo: %v\n", minerInfo)
+		*/
 		burn, err := terminateSectors(ctx, *lClient, height, ts,
 			minerAddr, minerInfo, params, gasLimit)
+		// fmt.Printf("Jim new result: %v %v\n", burn, err)
 		if err != nil {
 			return err
 		}
@@ -490,6 +505,7 @@ func runPendingTerminations(
 			corebig.NewInt(sampledSectorsCount),
 		)
 		burns <- scaledBurn
+		burns <- corebig.NewInt(0)
 	}
 	return nil
 }
@@ -546,6 +562,7 @@ func terminateSectors(
 		Method:     9, // Terminate sectors
 		Params:     enc.Bytes(),
 	}
+	// fmt.Printf("Jim msg: %+v\n", msg)
 	cid := msg.Cid()
 
 	var msgs []*types.Message
