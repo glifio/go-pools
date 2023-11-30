@@ -175,11 +175,6 @@ func (q *fevmQueries) PreviewTerminateSectors(
 			batchSize = uint64(float64(batchSize) * ratio)
 			gasLimit = uint64(float64(gasLimit) * ratio)
 		}
-
-		if batchSize < 10 {
-			errorCh <- xerrors.Errorf("Not enough worker funds! Batch size too small!")
-			return
-		}
 	}
 
 	progressCh <- &poolstypes.PreviewTerminateSectorsProgress{
@@ -190,6 +185,11 @@ func (q *fevmQueries) PreviewTerminateSectors(
 		WorkerActorPrev:        workerActorPrev,
 		BatchSize:              batchSize,
 		GasLimit:               gasLimit,
+	}
+
+	if batchSize < 10 {
+		errorCh <- xerrors.Errorf("Not enough worker funds! Batch size too small!")
+		return
 	}
 
 	type deadlinePartition struct {
