@@ -100,7 +100,7 @@ type FEVMQueries interface {
 	RateModule() (common.Address, error)
 	// preview termination methods
 	PreviewTerminateSector(ctx context.Context, minerAddr address.Address, tipset string, vmHeight uint64, sectorNumber uint64, gasLimit uint64) (actor *filtypes.ActorV5, totalBurn *big.Int, epoch abi.ChainEpoch, err error)
-	PreviewTerminateSectors(ctx context.Context, minerAddr address.Address, tipset string, vmHeight uint64, batchSize uint64, gasLimit uint64, useSampling bool, errorCh chan error, progressCh chan *PreviewTerminateSectorsProgress, resultCh chan *PreviewTerminateSectorsReturn)
+	PreviewTerminateSectors(ctx context.Context, minerAddr address.Address, tipset string, vmHeight uint64, batchSize uint64, gasLimit uint64, useSampling bool, maxPartitions uint64, errorCh chan error, progressCh chan *PreviewTerminateSectorsProgress, resultCh chan *PreviewTerminateSectorsReturn)
 }
 
 //go:generate mockery --name FEVMActions
@@ -176,11 +176,14 @@ type Extern struct {
 }
 
 type PreviewTerminateSectorsReturn struct {
-	Actor             *filtypes.ActorV5
-	TotalBurn         *big.Int
-	SectorsTerminated uint64
-	SectorsCount      uint64
-	Epoch             abi.ChainEpoch
+	Actor                      *filtypes.ActorV5
+	TotalBurn                  *big.Int
+	SectorsTerminated          uint64
+	SectorsCount               uint64
+	SectorsInSkippedPartitions uint64
+	Epoch                      abi.ChainEpoch
+	PartitionsCount            uint64
+	SampledPartitionsCount     uint64
 }
 
 type PreviewTerminateSectorsProgress struct {
