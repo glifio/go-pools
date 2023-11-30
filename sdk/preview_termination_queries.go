@@ -481,19 +481,8 @@ func runPendingTerminations(
 		params := miner.TerminateSectorsParams{
 			Terminations: terminations,
 		}
-		/*
-			fmt.Printf("Jim sectorsCount: %v\n", sectorsCount)
-			fmt.Printf("Jim sampledSectorsCount: %v\n", sampledSectorsCount)
-			fmt.Printf("Jim params: %+v\n", params)
-			fmt.Printf("Jim height: %v\n", height)
-			fmt.Printf("Jim ts: %v\n", ts)
-			fmt.Printf("Jim gasLimit: %v\n", gasLimit)
-			fmt.Printf("Jim minerAddr: %v\n", minerAddr)
-			fmt.Printf("Jim minerInfo: %v\n", minerInfo)
-		*/
 		burn, err := terminateSectors(ctx, *lClient, height, ts,
 			minerAddr, minerInfo, params, gasLimit)
-		// fmt.Printf("Jim new result: %v %v\n", burn, err)
 		if err != nil {
 			return err
 		}
@@ -559,7 +548,6 @@ func terminateSectors(
 		Method:     9, // Terminate sectors
 		Params:     enc.Bytes(),
 	}
-	// fmt.Printf("Jim msg: %+v\n", msg)
 	cid := msg.Cid()
 
 	var msgs []*types.Message
