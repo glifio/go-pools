@@ -86,6 +86,14 @@ func (q *fevmQueries) PreviewTerminateSector(
 	return actor, totalBurn, h, nil
 }
 
+type terminationTask struct {
+	termination         miner.TerminationDeclaration
+	deadlineHeight      abi.ChainEpoch
+	deadlineTs          *types.TipSet
+	sectorsCount        int64
+	sampledSectorsCount int64
+}
+
 // PreviewTerminateSectors gets the burnt funds for when all the sectors are terminated
 func (q *fevmQueries) PreviewTerminateSectors(
 	ctx context.Context,
@@ -214,70 +222,139 @@ func (q *fevmQueries) PreviewTerminateSectors(
 			return
 		}
 		for partIdx, partition := range partitions {
-			deadlinePartitions = append(deadlinePartitions, deadlinePartition{
-				dlIdx:          dlIdx,
-				dlImmutable:    dlImmutable,
-				deadlineTs:     deadlineTs,
-				deadlineHeight: deadlineHeight,
-				partIdx:        partIdx,
-				partition:      partition,
-			})
+			sc, err := partition.LiveSectors.Count()
+			if err != nil {
+				errorCh <- err
+				return
+			}
+			if sc > 0 {
+				deadlinePartitions = append(deadlinePartitions, deadlinePartition{
+					dlIdx:          dlIdx,
+					dlImmutable:    dlImmutable,
+					deadlineTs:     deadlineTs,
+					deadlineHeight: deadlineHeight,
+					partIdx:        partIdx,
+					partition:      partition,
+				})
+			}
 		}
 	}
 
-	for deadlinePartitionIdx, deadlinePartition := range deadlinePartitions {
-		dlIdx := deadlinePartition.dlIdx
-		dlImmutable := deadlinePartition.dlImmutable
-		deadlineTs := deadlinePartition.deadlineTs
-		deadlineHeight := deadlinePartition.deadlineHeight
-		partIdx := deadlinePartition.partIdx
-		partition := deadlinePartition.partition
+	terminations := make(chan terminationTask)
+	burns := make(chan *corebig.Int)
 
-		sc, err := partition.LiveSectors.Count()
-		if err != nil {
-			errorCh <- err
-			return
-		}
-		progressCh <- &poolstypes.PreviewTerminateSectorsProgress{
-			DeadlinePartitionCount: len(deadlinePartitions),
-			DeadlinePartitionIndex: deadlinePartitionIdx,
-			Deadline:               dlIdx,
-			DeadlineImmutable:      dlImmutable,
-			Partition:              partIdx,
-			SectorsCount:           sc,
-		}
-		if sc > 0 {
-			if !useSampling {
-				var i uint64
-				for i = 0; i < sc; i += batchSize {
-					lastIndex := min(sc, i+batchSize)
-					slicedSectors, err := partition.LiveSectors.Slice(i, lastIndex-i)
+	go runTerminationsInBatches(terminations, burns)
+
+	go func() {
+		for deadlinePartitionIdx, deadlinePartition := range deadlinePartitions {
+			dlIdx := deadlinePartition.dlIdx
+			dlImmutable := deadlinePartition.dlImmutable
+			deadlineTs := deadlinePartition.deadlineTs
+			deadlineHeight := deadlinePartition.deadlineHeight
+			partIdx := deadlinePartition.partIdx
+			partition := deadlinePartition.partition
+
+			sc, err := partition.LiveSectors.Count()
+			if err != nil {
+				errorCh <- err
+				return
+			}
+			progressCh <- &poolstypes.PreviewTerminateSectorsProgress{
+				DeadlinePartitionCount: len(deadlinePartitions),
+				DeadlinePartitionIndex: deadlinePartitionIdx,
+				Deadline:               dlIdx,
+				DeadlineImmutable:      dlImmutable,
+				Partition:              partIdx,
+				SectorsCount:           sc,
+			}
+			if sc > 0 {
+				if !useSampling {
+					var i uint64
+					for i = 0; i < sc; i += batchSize {
+						lastIndex := min(sc, i+batchSize)
+						slicedSectors, err := partition.LiveSectors.Slice(i, lastIndex-i)
+						if err != nil {
+							errorCh <- err
+							return
+						}
+						sliceCount, err := slicedSectors.Count()
+						if err != nil {
+							errorCh <- err
+							return
+						}
+
+						progressCh <- &poolstypes.PreviewTerminateSectorsProgress{
+							DeadlinePartitionCount: len(deadlinePartitions),
+							DeadlinePartitionIndex: deadlinePartitionIdx,
+							Deadline:               dlIdx,
+							DeadlineImmutable:      dlImmutable,
+							Partition:              partIdx,
+							SectorsCount:           sc,
+							SliceStart:             i,
+							SliceEnd:               lastIndex,
+							SliceCount:             sliceCount,
+						}
+
+						termination := miner.TerminationDeclaration{
+							Deadline:  uint64(dlIdx),
+							Partition: uint64(partIdx),
+							Sectors:   slicedSectors,
+						}
+						terminations <- terminationTask{
+							termination:         termination,
+							deadlineHeight:      deadlineHeight,
+							deadlineTs:          deadlineTs,
+							sectorsCount:        int64(sc),
+							sampledSectorsCount: int64(sc),
+						}
+
+						params = miner.TerminateSectorsParams{
+							Terminations: []miner.TerminationDeclaration{termination},
+						}
+						burn, err := terminateSectors(ctx, *lClient, deadlineHeight, deadlineTs,
+							minerAddr, minerInfo, params, int64(gasLimit))
+						if err != nil {
+							errorCh <- err
+							return
+						}
+						sectorsTerminated += sliceCount
+						sectorsCount += sliceCount
+						totalBurn = totalBurn.Add(totalBurn, burn)
+					}
+				} else {
+					// useSampling
+					sectors, err := partition.LiveSectors.All(math.MaxUint64)
 					if err != nil {
 						errorCh <- err
 						return
 					}
-					sliceCount, err := slicedSectors.Count()
-					if err != nil {
-						errorCh <- err
-						return
+					sampledSectors := make([]uint64, 0)
+					step := max(float64(len(sectors))/float64(batchSize-1), 1.0)
+					lastIndex := -1
+					for sampleIndex := 0.0; int(sampleIndex) < len(sectors); sampleIndex += step {
+						i := int(sampleIndex)
+						if i > lastIndex {
+							sampledSectors = append(sampledSectors, sectors[i])
+							lastIndex = i
+						}
 					}
-
-					progressCh <- &poolstypes.PreviewTerminateSectorsProgress{
-						DeadlinePartitionCount: len(deadlinePartitions),
-						DeadlinePartitionIndex: deadlinePartitionIdx,
-						Deadline:               dlIdx,
-						DeadlineImmutable:      dlImmutable,
-						Partition:              partIdx,
-						SectorsCount:           sc,
-						SliceStart:             i,
-						SliceEnd:               lastIndex,
-						SliceCount:             sliceCount,
+					if lastIndex < len(sectors)-1 {
+						sampledSectors = append(sampledSectors, sectors[len(sectors)-1])
 					}
-
+					// fmt.Printf("Jim sampledSectors len: %v\n", len(sampledSectors))
+					// fmt.Printf("Jim sampledSectors: %v\n", sampledSectors)
+					sampledSectorsBitfield := bitfield.NewFromSet(sampledSectors)
 					termination := miner.TerminationDeclaration{
 						Deadline:  uint64(dlIdx),
 						Partition: uint64(partIdx),
-						Sectors:   slicedSectors,
+						Sectors:   sampledSectorsBitfield,
+					}
+					terminations <- terminationTask{
+						termination:         termination,
+						deadlineHeight:      deadlineHeight,
+						deadlineTs:          deadlineTs,
+						sectorsCount:        int64(sc),
+						sampledSectorsCount: int64(len(sampledSectors)),
 					}
 					params = miner.TerminateSectorsParams{
 						Terminations: []miner.TerminationDeclaration{termination},
@@ -288,63 +365,79 @@ func (q *fevmQueries) PreviewTerminateSectors(
 						errorCh <- err
 						return
 					}
-					sectorsTerminated += sliceCount
-					sectorsCount += sliceCount
-					totalBurn = totalBurn.Add(totalBurn, burn)
+					scaledBurn := new(corebig.Int).Div(
+						new(corebig.Int).Mul(burn, corebig.NewInt(int64(sc))),
+						corebig.NewInt(int64(len(sampledSectors))),
+					)
+					sectorsTerminated += uint64(len(sampledSectors))
+					sectorsCount += uint64(len(sectors))
+					totalBurn = totalBurn.Add(totalBurn, scaledBurn)
 				}
-			} else {
-				// useSampling
-				sectors, err := partition.LiveSectors.All(math.MaxUint64)
-				if err != nil {
-					errorCh <- err
-					return
-				}
-				sampledSectors := make([]uint64, 0)
-				step := max(float64(len(sectors))/float64(batchSize-1), 1.0)
-				lastIndex := -1
-				for sampleIndex := 0.0; int(sampleIndex) < len(sectors); sampleIndex += step {
-					i := int(sampleIndex)
-					if i > lastIndex {
-						sampledSectors = append(sampledSectors, sectors[i])
-						lastIndex = i
-					}
-				}
-				if lastIndex < len(sectors)-1 {
-					sampledSectors = append(sampledSectors, sectors[len(sectors)-1])
-				}
-				// fmt.Printf("Jim sampledSectors len: %v\n", len(sampledSectors))
-				// fmt.Printf("Jim sampledSectors: %v\n", sampledSectors)
-				sampledSectorsBitfield := bitfield.NewFromSet(sampledSectors)
-				termination := miner.TerminationDeclaration{
-					Deadline:  uint64(dlIdx),
-					Partition: uint64(partIdx),
-					Sectors:   sampledSectorsBitfield,
-				}
-				params = miner.TerminateSectorsParams{
-					Terminations: []miner.TerminationDeclaration{termination},
-				}
-				burn, err := terminateSectors(ctx, *lClient, deadlineHeight, deadlineTs,
-					minerAddr, minerInfo, params, int64(gasLimit))
-				if err != nil {
-					errorCh <- err
-					return
-				}
-				scaledBurn := new(corebig.Int).Div(
-					new(corebig.Int).Mul(burn, corebig.NewInt(int64(sc))),
-					corebig.NewInt(int64(len(sampledSectors))),
-				)
-				sectorsTerminated += uint64(len(sampledSectors))
-				sectorsCount += uint64(len(sectors))
-				totalBurn = totalBurn.Add(totalBurn, scaledBurn)
 			}
 		}
+		close(terminations)
+	}()
+
+	for burn := range burns {
+		fmt.Printf("Jim burn2: %v\n", burn)
 	}
+
 	resultCh <- &poolstypes.PreviewTerminateSectorsReturn{
 		Actor:             actor,
 		TotalBurn:         totalBurn,
 		SectorsTerminated: sectorsTerminated,
 		SectorsCount:      sectorsCount,
 		Epoch:             h,
+	}
+}
+
+const maxPartitions = 3
+
+func runTerminationsInBatches(tasks chan terminationTask, burns chan *corebig.Int) {
+	pending := make([]terminationTask, 0, maxPartitions)
+	var pendingDeadlineHeight abi.ChainEpoch
+	for task := range tasks {
+		if pendingDeadlineHeight != 0 && task.deadlineHeight != pendingDeadlineHeight {
+			runPendingTerminations(pending, burns)
+			pending = pending[:0]
+			pendingDeadlineHeight = 0
+		}
+		pending = append(pending, task)
+		pendingDeadlineHeight = task.deadlineHeight
+		if len(pending) == maxPartitions {
+			runPendingTerminations(pending, burns)
+			pending = pending[:0]
+			pendingDeadlineHeight = 0
+		}
+	}
+	runPendingTerminations(pending, burns)
+	close(burns)
+}
+
+func runPendingTerminations(tasks []terminationTask, burns chan *corebig.Int) {
+	if len(tasks) > 0 {
+		fmt.Printf("Terminating: %+v\n", tasks)
+		height := tasks[0].deadlineHeight
+		var sectorsCount int64
+		var sampledSectorsCount int64
+		// ts := tasks[0].deadlineTs
+		terminations := make([]miner.TerminationDeclaration, 0)
+		for _, task := range tasks {
+			if task.deadlineHeight != height {
+				panic("Bad height") // Should never happen
+			}
+			terminations = append(terminations, task.termination)
+			sectorsCount += task.sectorsCount
+			sampledSectorsCount += task.sampledSectorsCount
+		}
+		params := miner.TerminateSectorsParams{
+			Terminations: terminations,
+		}
+		fmt.Printf("Jim sectorsCount: %v\n", sectorsCount)
+		fmt.Printf("Jim sampledSectorsCount: %v\n", sampledSectorsCount)
+		fmt.Printf("Jim params: %+v\n", params)
+		burns <- corebig.NewInt(0)
+
 	}
 }
 
