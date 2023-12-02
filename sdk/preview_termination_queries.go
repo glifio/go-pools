@@ -103,6 +103,7 @@ func (q *fevmQueries) PreviewTerminateSectors(
 	batchSize uint64,
 	gasLimit uint64,
 	useSampling bool,
+	optimize bool,
 	maxPartitions uint64,
 	errorCh chan error,
 	progressCh chan *poolstypes.PreviewTerminateSectorsProgress,
@@ -205,6 +206,8 @@ func (q *fevmQueries) PreviewTerminateSectors(
 
 	deadlinePartitions := make([]deadlinePartition, 0)
 
+	allLiveSectors := make([]bitfield.BitField, 0)
+
 	for dlIdx = 0; dlIdx < 48; dlIdx++ {
 		dlImmutable := false
 		deadlineTs := ts
@@ -220,6 +223,9 @@ func (q *fevmQueries) PreviewTerminateSectors(
 			return
 		}
 		for partIdx, partition := range partitions {
+			if optimize {
+				allLiveSectors = append(allLiveSectors, partition.LiveSectors)
+			}
 			sc, err := partition.LiveSectors.Count()
 			if err != nil {
 				errorCh <- err
@@ -239,18 +245,60 @@ func (q *fevmQueries) PreviewTerminateSectors(
 	}
 
 	sampledDeadlinePartitions := make([]bool, len(deadlinePartitions))
-	var step float64
-	if maxPartitions > 0 {
-		step = max(float64(len(deadlinePartitions))/float64(maxPartitions), 1.0)
+	if optimize {
+		maxSectorsToSample := max(maxPartitions, 3)
+		allSectors, err := bitfield.MultiMerge(allLiveSectors...)
+		if err != nil {
+			errorCh <- err
+			return
+		}
+		sectors, err := allSectors.All(math.MaxUint64)
+		if err != nil {
+			errorCh <- err
+			return
+		}
+		sampledSectors := make([]uint64, 0)
+		step := max(float64(len(sectors))/float64(maxSectorsToSample-1), 1.0)
+		lastIndex := -1
+		for sampleIndex := 0.0; int(sampleIndex) < len(sectors); sampleIndex += step {
+			i := int(sampleIndex)
+			if i > lastIndex {
+				sampledSectors = append(sampledSectors, sectors[i])
+				lastIndex = i
+			}
+		}
+		if lastIndex < len(sectors)-1 {
+			sampledSectors = append(sampledSectors, sectors[len(sectors)-1])
+		}
+		for _, sectorNumber := range sampledSectors {
+			sectorPartition, err := api.StateSectorPartition(ctx, minerAddr, abi.SectorNumber(sectorNumber), ts.Key())
+			if err != nil {
+				errorCh <- err
+				return
+			}
+			for i, deadlinePartition := range deadlinePartitions {
+				if deadlinePartition.dlIdx == sectorPartition.Deadline &&
+					deadlinePartition.partIdx == int(sectorPartition.Partition) {
+					sampledDeadlinePartitions[i] = true
+				}
+			}
+		}
 	} else {
-		step = 1
-	}
-	for sampleIndex := 0.0; int(sampleIndex) < len(deadlinePartitions); sampleIndex += step {
-		i := int(sampleIndex)
-		sampledDeadlinePartitions[i] = true
+		var step float64
+		if maxPartitions > 0 {
+			step = max(float64(len(deadlinePartitions))/float64(maxPartitions), 1.0)
+		} else {
+			step = 1
+		}
+		for sampleIndex := 0.0; int(sampleIndex) < len(deadlinePartitions); sampleIndex += step {
+			i := int(sampleIndex)
+			sampledDeadlinePartitions[i] = true
+		}
 	}
 
-	// fmt.Printf("DeadlinePartitions: %v\n", len(deadlinePartitions))
+	// FIXME: Send debug output via progressCh
+
+	fmt.Printf("DeadlinePartitions: %v\n", len(deadlinePartitions))
 	sampledDeadlinePartitionCount := uint64(0)
 	for i, _ := range deadlinePartitions {
 		/*
