@@ -1,8 +1,6 @@
 module github.com/glifio/go-pools
 
-go 1.21
-
-toolchain go1.21.1
+go 1.20
 
 replace github.com/ipsn/go-secp256k1 v0.0.0-20180726113642-9d62b9f0bc52 => github.com/glifio/go-secp256k1 v0.0.1
 

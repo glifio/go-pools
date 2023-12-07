@@ -11,6 +11,7 @@ import (
 
 	"github.com/filecoin-project/go-state-types/big"
 	"github.com/filecoin-project/go-state-types/builtin/v9/miner"
+	"golang.org/x/exp/constraints"
 	"golang.org/x/xerrors"
 
 	"github.com/filecoin-project/go-address"
@@ -781,4 +782,19 @@ func parseTipSetAndHeight(ctx context.Context, api lotusapi.FullNodeStruct, tips
 	}
 
 	return h, ts, nil
+}
+
+// https://stackoverflow.com/questions/27516387/what-is-the-correct-way-to-find-the-min-between-two-integers-in-go
+func min[T constraints.Ordered](a, b T) T {
+	if a < b {
+		return a
+	}
+	return b
+}
+
+func max[T constraints.Ordered](a, b T) T {
+	if a > b {
+		return a
+	}
+	return b
 }
