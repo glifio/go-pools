@@ -265,7 +265,7 @@ func Init(
 	dialAddr string,
 	token string,
 ) error {
-	client, err := ethclient.Dial(dialAddr)
+	client, err := connectEthClient(dialAddr, token)
 	if err != nil {
 		return err
 	}
