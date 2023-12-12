@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"math"
 	"strings"
+	"time"
 
 	corebig "math/big"
 
@@ -569,13 +570,11 @@ func terminateSectors(
 		if err != nil {
 			return nil, err
 		}
-		// fmt.Printf("Jim smoothedPow: %v\n", smoothedPow)
 
 		smoothedRew, err := util.ThisEpochRewardsSmoothed(ctx, api, ts)
 		if err != nil {
 			return nil, err
 		}
-		// fmt.Printf("Jim smoothedRew: %v\n", smoothedRew)
 
 		allTermSectors := make([]bitfield.BitField, 0)
 		for _, term := range params.Terminations {
@@ -585,13 +584,6 @@ func terminateSectors(
 		if err != nil {
 			return nil, err
 		}
-		/*
-			sectorNums, err := allSectorsBitfield.All(math.MaxUint64)
-			if err != nil {
-				return nil, err
-			}
-			fmt.Printf("Jim sectorNums: %v\n", sectorNums)
-		*/
 
 		sectors, err := api.StateMinerSectors(context.Background(), minerAddr, &allSectorsBitfield, ts.Key())
 		if err != nil {
@@ -602,7 +594,6 @@ func terminateSectors(
 
 		totalFee := corebig.NewInt(0)
 		for _, s := range sectors {
-			// fmt.Printf("Jim sector: %+v\n", s)
 			sectorPower := miner8.QAPowerForSector(minerInfo.SectorSize, util.ConvertSectorType(s))
 
 			// the termination penalty calculation
@@ -729,7 +720,9 @@ func ParseTipSetRef(ctx context.Context, api lotusapi.FullNodeStruct, tss string
 			return nil, xerrors.Errorf("parsing height tipset ref: %w", err)
 		}
 
-		return api.ChainGetTipSetByHeight(ctx, abi.ChainEpoch(h), types.EmptyTSK)
+		ctxTimeout, cancel := context.WithTimeout(ctx, time.Second*10)
+		defer cancel()
+		return api.ChainGetTipSetByHeight(ctxTimeout, abi.ChainEpoch(h), types.EmptyTSK)
 	}
 
 	cids, err := ParseTipSetString(tss)
