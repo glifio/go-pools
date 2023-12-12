@@ -184,6 +184,7 @@ type PreviewTerminateSectorsReturn struct {
 	Epoch                      abi.ChainEpoch
 	PartitionsCount            uint64
 	SampledPartitionsCount     uint64
+	Tipset                     *filtypes.TipSet
 }
 
 type PreviewTerminateSectorsProgress struct {

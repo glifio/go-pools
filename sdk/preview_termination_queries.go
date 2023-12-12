@@ -464,6 +464,7 @@ func (q *fevmQueries) PreviewTerminateSectors(
 		Epoch:                      h,
 		PartitionsCount:            uint64(len(deadlinePartitions)),
 		SampledPartitionsCount:     sampledDeadlinePartitionCount,
+		Tipset:                     ts,
 	}
 }
 
