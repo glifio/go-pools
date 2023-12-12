@@ -11,9 +11,7 @@ import (
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/filecoin-project/go-address"
 	"github.com/filecoin-project/go-jsonrpc"
-	"github.com/filecoin-project/go-state-types/abi"
 	"github.com/filecoin-project/lotus/api"
-	lotusapi "github.com/filecoin-project/lotus/api"
 	filtypes "github.com/filecoin-project/lotus/chain/types"
 	"github.com/glifio/go-pools/abigen"
 	"github.com/glifio/go-pools/constants"
@@ -98,9 +96,6 @@ type FEVMQueries interface {
 	SimpleRamp() common.Address
 	// RateModule gets fetched from InfinityPool
 	RateModule() (common.Address, error)
-	// preview termination methods
-	PreviewTerminateSector(ctx context.Context, minerAddr address.Address, tipset string, vmHeight uint64, sectorNumber uint64, gasLimit uint64, offchain bool) (actor *filtypes.ActorV5, totalBurn *big.Int, epoch abi.ChainEpoch, err error)
-	PreviewTerminateSectors(ctx context.Context, minerAddr address.Address, tipset string, vmHeight uint64, batchSize uint64, gasLimit uint64, useSampling bool, optimize bool, offchain bool, maxPartitions uint64, errorCh chan error, progressCh chan *PreviewTerminateSectorsProgress, resultCh chan *PreviewTerminateSectorsReturn)
 }
 
 //go:generate mockery --name FEVMActions
@@ -173,35 +168,4 @@ type Extern struct {
 	AdoAddr       string `json:"adoAddr"`
 	LotusDialAddr string `json:"lotusDialAddr"`
 	LotusToken    string `json:"lotusToken"`
-}
-
-type PreviewTerminateSectorsReturn struct {
-	Actor                      *filtypes.ActorV5
-	TotalBurn                  *big.Int
-	SectorsTerminated          uint64
-	SectorsCount               uint64
-	SectorsInSkippedPartitions uint64
-	Epoch                      abi.ChainEpoch
-	PartitionsCount            uint64
-	SampledPartitionsCount     uint64
-	Tipset                     *filtypes.TipSet
-}
-
-type PreviewTerminateSectorsProgress struct {
-	Epoch                  abi.ChainEpoch
-	MinerInfo              lotusapi.MinerInfo
-	WorkerActor            *filtypes.ActorV5
-	PrevHeightForImmutable abi.ChainEpoch
-	WorkerActorPrev        *filtypes.ActorV5
-	BatchSize              uint64
-	GasLimit               uint64
-	DeadlinePartitionCount int
-	DeadlinePartitionIndex int
-	Deadline               uint64
-	DeadlineImmutable      bool
-	Partition              int
-	SectorsCount           uint64
-	SliceStart             uint64
-	SliceEnd               uint64
-	SliceCount             uint64
 }

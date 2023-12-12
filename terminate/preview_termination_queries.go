@@ -1,4 +1,4 @@
-package sdk
+package terminate
 
 import (
 	"bytes"
@@ -21,15 +21,15 @@ import (
 	lotusapi "github.com/filecoin-project/lotus/api"
 	"github.com/filecoin-project/lotus/chain/types"
 	miner8 "github.com/filecoin-project/specs-actors/v8/actors/builtin/miner"
-	poolstypes "github.com/glifio/go-pools/types"
 	"github.com/glifio/go-pools/util"
 	"github.com/ipfs/go-cid"
 	cbor "github.com/ipfs/go-ipld-cbor"
 )
 
 // PreviewTerminateSector gets the burnt funds for when a single sector is terminated
-func (q *fevmQueries) PreviewTerminateSector(
+func PreviewTerminateSector(
 	ctx context.Context,
+	api lotusapi.FullNodeStruct,
 	minerAddr address.Address,
 	tipset string,
 	vmHeight uint64,
@@ -37,13 +37,6 @@ func (q *fevmQueries) PreviewTerminateSector(
 	gasLimit uint64,
 	offchain bool,
 ) (actor *types.ActorV5, totalBurn *corebig.Int, epoch abi.ChainEpoch, err error) {
-	lClient, closer, err := q.extern.ConnectLotusClient()
-	if err != nil {
-		return nil, nil, 0, err
-	}
-	defer closer()
-	api := *lClient
-
 	h, ts, err := parseTipSetAndHeight(ctx, api, tipset, vmHeight)
 	if err != nil {
 		return nil, nil, 0, err
@@ -81,7 +74,7 @@ func (q *fevmQueries) PreviewTerminateSector(
 		Terminations: []miner.TerminationDeclaration{termination},
 	}
 
-	totalBurn, err = terminateSectors(ctx, *lClient, h, ts, minerAddr, minerInfo,
+	totalBurn, err = terminateSectors(ctx, api, h, ts, minerAddr, minerInfo,
 		params, int64(gasLimit), offchain)
 	if err != nil {
 		return nil, nil, 0, err
@@ -99,8 +92,9 @@ type terminationTask struct {
 }
 
 // PreviewTerminateSectors gets the burnt funds for when all the sectors are terminated
-func (q *fevmQueries) PreviewTerminateSectors(
+func PreviewTerminateSectors(
 	ctx context.Context,
+	api lotusapi.FullNodeStruct,
 	minerAddr address.Address,
 	tipset string,
 	vmHeight uint64,
@@ -111,17 +105,9 @@ func (q *fevmQueries) PreviewTerminateSectors(
 	offchain bool,
 	maxPartitions uint64,
 	errorCh chan error,
-	progressCh chan *poolstypes.PreviewTerminateSectorsProgress,
-	resultCh chan *poolstypes.PreviewTerminateSectorsReturn,
+	progressCh chan *PreviewTerminateSectorsProgress,
+	resultCh chan *PreviewTerminateSectorsReturn,
 ) {
-	lClient, closer, err := q.extern.ConnectLotusClient()
-	if err != nil {
-		errorCh <- err
-		return
-	}
-	defer closer()
-	api := *lClient
-
 	h, ts, err := parseTipSetAndHeight(ctx, api, tipset, vmHeight)
 	if err != nil {
 		errorCh <- err
@@ -182,7 +168,7 @@ func (q *fevmQueries) PreviewTerminateSectors(
 		}
 	}
 
-	progressCh <- &poolstypes.PreviewTerminateSectorsProgress{
+	progressCh <- &PreviewTerminateSectorsProgress{
 		Epoch:                  h,
 		MinerInfo:              minerInfo,
 		WorkerActor:            workerActor,
@@ -328,7 +314,7 @@ func (q *fevmQueries) PreviewTerminateSectors(
 	terminations := make(chan terminationTask)
 	burns := make(chan *corebig.Int)
 
-	go runTerminationsInBatches(ctx, lClient, minerAddr, minerInfo,
+	go runTerminationsInBatches(ctx, api, minerAddr, minerInfo,
 		int64(gasLimit), offchain, terminations, burns, errorCh)
 
 	go func() {
@@ -345,7 +331,7 @@ func (q *fevmQueries) PreviewTerminateSectors(
 				errorCh <- err
 				return
 			}
-			progressCh <- &poolstypes.PreviewTerminateSectorsProgress{
+			progressCh <- &PreviewTerminateSectorsProgress{
 				DeadlinePartitionCount: len(deadlinePartitions),
 				DeadlinePartitionIndex: deadlinePartitionIdx,
 				Deadline:               dlIdx,
@@ -371,7 +357,7 @@ func (q *fevmQueries) PreviewTerminateSectors(
 								return
 							}
 
-							progressCh <- &poolstypes.PreviewTerminateSectorsProgress{
+							progressCh <- &PreviewTerminateSectorsProgress{
 								DeadlinePartitionCount: len(deadlinePartitions),
 								DeadlinePartitionIndex: deadlinePartitionIdx,
 								Deadline:               dlIdx,
@@ -456,7 +442,7 @@ func (q *fevmQueries) PreviewTerminateSectors(
 		)
 	}
 
-	resultCh <- &poolstypes.PreviewTerminateSectorsReturn{
+	resultCh <- &PreviewTerminateSectorsReturn{
 		Actor:                      actor,
 		TotalBurn:                  scaledBurn,
 		SectorsTerminated:          sectorsTerminated,
@@ -473,7 +459,7 @@ const maxPartitionsPerTx = 3
 
 func runTerminationsInBatches(
 	ctx context.Context,
-	lClient *lotusapi.FullNodeStruct,
+	api lotusapi.FullNodeStruct,
 	minerAddr address.Address,
 	minerInfo lotusapi.MinerInfo,
 	gasLimit int64,
@@ -487,7 +473,7 @@ func runTerminationsInBatches(
 	}()
 	pending := make([]terminationTask, 0, maxPartitionsPerTx)
 	flush := func() {
-		err := runPendingTerminations(ctx, lClient, minerAddr, minerInfo, gasLimit, pending, offchain, burns)
+		err := runPendingTerminations(ctx, api, minerAddr, minerInfo, gasLimit, pending, offchain, burns)
 		if err != nil {
 			errorCh <- err
 			return
@@ -513,7 +499,7 @@ func runTerminationsInBatches(
 
 func runPendingTerminations(
 	ctx context.Context,
-	lClient *lotusapi.FullNodeStruct,
+	api lotusapi.FullNodeStruct,
 	minerAddr address.Address,
 	minerInfo lotusapi.MinerInfo,
 	gasLimit int64,
@@ -539,7 +525,7 @@ func runPendingTerminations(
 		params := miner.TerminateSectorsParams{
 			Terminations: terminations,
 		}
-		burn, err := terminateSectors(ctx, *lClient, height, ts,
+		burn, err := terminateSectors(ctx, api, height, ts,
 			minerAddr, minerInfo, params, gasLimit, offchain)
 		if err != nil {
 			return err
