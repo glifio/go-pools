@@ -2,15 +2,18 @@ package sdk
 
 import (
 	"context"
+	"log"
 	"math/big"
 
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/filecoin-project/go-address"
+	filtypes "github.com/filecoin-project/lotus/chain/types"
 	"github.com/glifio/go-pools/abigen"
 	"github.com/glifio/go-pools/constants"
-	"github.com/glifio/go-pools/rpc"
+	"github.com/glifio/go-pools/econ"
+	"github.com/glifio/go-pools/vc"
 )
 
 func (q *fevmQueries) AgentID(ctx context.Context, address common.Address) (*big.Int, error) {
@@ -286,19 +289,36 @@ func (q *fevmQueries) AgentAddrIDFromRcpt(ctx context.Context, receipt *types.Re
 	return agentAddr, agentID, nil
 }
 
-func (q *fevmQueries) AgentOwes(ctx context.Context, agentAddr common.Address) (*big.Int, *big.Int, error) {
-	closer, err := q.extern.ConnectAdoClient(ctx)
+func (q *fevmQueries) AgentInterestOwed(ctx context.Context, agentAddr common.Address, tsk *filtypes.TipSet) (*big.Int, error) {
+	account, err := q.AgentAccount(ctx, agentAddr, constants.INFINITY_POOL_ID, nil)
 	if err != nil {
-		return nil, nil, err
-	}
-	defer closer()
-
-	agentOwed, err := rpc.ADOClient.AgentAmountOwed(ctx, agentAddr, constants.INFINITY_POOL_ID)
-	if err != nil {
-		return nil, nil, err
+		log.Printf("Error getting agent account: %v", err)
+		return nil, err
 	}
 
-	return agentOwed.AmountOwed, agentOwed.Gcred, nil
+	nullishVC, err := vc.NullishVerifiableCredential(*vc.EmptyAgentData())
+	if err != nil {
+		log.Printf("Error getting nullish VC: %v", err)
+		return nil, err
+	}
+
+	rate, err := q.InfPoolGetRate(ctx, *nullishVC)
+	if err != nil {
+		log.Printf("Error getting rate: %v", err)
+		return nil, err
+	}
+
+	if tsk == nil {
+		tsk, err = q.ChainHead(ctx)
+		if err != nil {
+			log.Printf("Error getting chain head: %v", err)
+			return nil, err
+		}
+	}
+
+	owed := econ.InterestOwed(ctx, account, rate, tsk.Height())
+
+	return owed, nil
 }
 
 func (q *fevmQueries) AgentFaultyEpochStart(ctx context.Context, agentAddr common.Address) (*big.Int, error) {

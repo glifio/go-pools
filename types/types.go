@@ -34,7 +34,7 @@ type FEVMQueries interface {
 	AgentMiners(ctx context.Context, agentAddr common.Address, blockNumber *big.Int) ([]address.Address, error)
 	AgentLiquidAssets(ctx context.Context, agentAddr common.Address, blockNumber *big.Int) (*big.Int, error)
 	AgentPrincipal(ctx context.Context, agentAddr common.Address, blockNumber *big.Int) (*big.Int, error)
-	AgentOwes(ctx context.Context, agentAddr common.Address) (*big.Int, *big.Int, error)
+	AgentInterestOwed(ctx context.Context, agentAddr common.Address, tsk *filtypes.TipSet) (*big.Int, error)
 	AgentFaultyEpochStart(ctx context.Context, agentAddr common.Address) (*big.Int, error)
 	// agent factory methods
 	AgentFactoryAgentCount(ctx context.Context, blockNumber *big.Int) (*big.Int, error)
@@ -52,8 +52,10 @@ type FEVMQueries interface {
 	InfPoolAgentMaxWithdraw(ctx context.Context, agentAddr common.Address, agentData *vc.AgentData) (*big.Int, error)
 	InfPoolMaxEpochsOwedTolerance(ctx context.Context, agentAddr common.Address) (*big.Int, error)
 	InfPoolFeesAccrued(ctx context.Context, blockNumber *big.Int) (*big.Int, error)
+	InfPoolApy(ctx context.Context, blockNumber *big.Int) (*big.Int, error)
 	// pool registry methods
 	ListPools(ctx context.Context) ([]common.Address, error)
+	TreasuryFeeRate(ctx context.Context, blockNumber *big.Int) (*big.Int, error)
 	// ifil methods
 	IFILBalanceOf(ctx context.Context, hodler common.Address) (*big.Float, error)
 	IFILPrice(ctx context.Context, blockNumber *big.Int) (*big.Int, error)
@@ -143,12 +145,6 @@ type PoolsSDK interface {
 	Query() FEVMQueries
 	Act() FEVMActions
 	Extern() FEVMExtern
-}
-
-type AgentOwed struct {
-	AgentAddr  common.Address `json:"agentAddr"`
-	AmountOwed *big.Int       `json:"amountOwed"`
-	Gcred      *big.Int       `json:"gcred"`
 }
 
 type ProtocolMeta struct {
