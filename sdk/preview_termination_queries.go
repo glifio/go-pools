@@ -305,7 +305,7 @@ func (q *fevmQueries) PreviewTerminateSectors(
 
 	// FIXME: Send debug output via progressCh
 
-	fmt.Printf("DeadlinePartitions: %v\n", len(deadlinePartitions))
+	// fmt.Printf("DeadlinePartitions: %v\n", len(deadlinePartitions))
 	sampledDeadlinePartitionCount := uint64(0)
 	for i, _ := range deadlinePartitions {
 		/*
