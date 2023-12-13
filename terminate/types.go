@@ -1,8 +1,6 @@
 package terminate
 
 import (
-	"math/big"
-
 	"github.com/filecoin-project/go-state-types/abi"
 	lotusapi "github.com/filecoin-project/lotus/api"
 	"github.com/filecoin-project/lotus/chain/types"
@@ -10,7 +8,7 @@ import (
 
 type PreviewTerminateSectorsReturn struct {
 	Actor                      *types.ActorV5
-	TotalBurn                  *big.Int
+	SectorStats                *SectorStats
 	SectorsTerminated          uint64
 	SectorsCount               uint64
 	SectorsInSkippedPartitions uint64
@@ -37,25 +35,4 @@ type PreviewTerminateSectorsProgress struct {
 	SliceStart             uint64
 	SliceEnd               uint64
 	SliceCount             uint64
-}
-
-type SectorStats struct {
-	TerminationPenalty    *big.Int
-	SectorFeePenalty      *big.Int
-	Activation            *big.Int
-	MinActivation         abi.ChainEpoch
-	MaxActivation         abi.ChainEpoch
-	Age                   *big.Int
-	MinAge                abi.ChainEpoch
-	MaxAge                abi.ChainEpoch
-	Expiration            *big.Int
-	MinExpiration         abi.ChainEpoch
-	MaxExpiration         abi.ChainEpoch
-	DealWeight            *big.Int
-	VerifiedDealWeight    *big.Int
-	InitialPledge         *big.Int
-	ExpectedDayReward     *big.Int
-	ExpectedStoragePledge *big.Int
-	ReplacedSectorAge     *big.Int
-	ReplacedDayReward     *big.Int
 }
