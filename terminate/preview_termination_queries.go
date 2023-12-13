@@ -551,6 +551,9 @@ func terminateSectors(
 	gasLimit int64,
 	offchain bool,
 ) (*corebig.Int, error) {
+	stats := &SectorStats{
+		TerminationPenalty: corebig.NewInt(0),
+	}
 	if offchain {
 		smoothedPow, err := util.TotalPowerSmoothed(ctx, api, ts)
 		if err != nil {
@@ -578,8 +581,8 @@ func terminateSectors(
 
 		currEpoch := height
 
-		totalFee := corebig.NewInt(0)
 		for _, s := range sectors {
+			fmt.Printf("Jim sector: %+v\n", s)
 			sectorPower := miner8.QAPowerForSector(minerInfo.SectorSize, util.ConvertSectorType(s))
 
 			// the termination penalty calculation
@@ -603,11 +606,12 @@ func terminateSectors(
 			// sectorFeeDaysIncurred := int64(math.Min(41, daysUntilTerm))
 			// sectorFeesUntilTerm := sectorFee.Mul(sectorFee.Int, corebig.NewInt(sectorFeeDaysIncurred))
 			// add the term fee and sector fees to the total fee
-			totalFee = new(corebig.Int).Add(totalFee, termFee.Int)
+
+			stats.TerminationPenalty = new(corebig.Int).Add(stats.TerminationPenalty, termFee.Int)
 			// totalFee = new(corebig.Int).Add(totalFee, sectorFeesUntilTerm)
 		}
 
-		return totalFee, nil
+		return stats.TerminationPenalty, nil
 	} else {
 		enc := new(bytes.Buffer)
 		err := params.MarshalCBOR(enc)
@@ -662,7 +666,6 @@ func terminateSectors(
 			return nil, err
 		}
 
-		burn := big.NewInt(0)
 		burnAddr, _ := address.NewFromString("f099")
 
 		for _, trace := range result.Trace {
@@ -672,7 +675,8 @@ func terminateSectors(
 				}
 				for _, subMsg := range trace.ExecutionTrace.Subcalls {
 					if subMsg.Msg.To == burnAddr {
-						burn = subMsg.Msg.Value
+						stats.TerminationPenalty = new(corebig.Int).Add(stats.TerminationPenalty,
+							subMsg.Msg.Value.Int)
 					}
 				}
 				if trace.Error != "" {
@@ -690,8 +694,7 @@ func terminateSectors(
 				}
 			}
 		}
-		return burn.Int, nil
-
+		return stats.TerminationPenalty, nil
 	}
 }
 

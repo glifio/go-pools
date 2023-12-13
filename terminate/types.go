@@ -38,3 +38,24 @@ type PreviewTerminateSectorsProgress struct {
 	SliceEnd               uint64
 	SliceCount             uint64
 }
+
+type SectorStats struct {
+	TerminationPenalty    *big.Int
+	SectorFeePenalty      *big.Int
+	Activation            *big.Int
+	MinActivation         abi.ChainEpoch
+	MaxActivation         abi.ChainEpoch
+	Age                   *big.Int
+	MinAge                abi.ChainEpoch
+	MaxAge                abi.ChainEpoch
+	Expiration            *big.Int
+	MinExpiration         abi.ChainEpoch
+	MaxExpiration         abi.ChainEpoch
+	DealWeight            *big.Int
+	VerifiedDealWeight    *big.Int
+	InitialPledge         *big.Int
+	ExpectedDayReward     *big.Int
+	ExpectedStoragePledge *big.Int
+	ReplacedSectorAge     *big.Int
+	ReplacedDayReward     *big.Int
+}
