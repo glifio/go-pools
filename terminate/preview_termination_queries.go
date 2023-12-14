@@ -11,6 +11,7 @@ import (
 	corebig "math/big"
 
 	"github.com/filecoin-project/go-state-types/big"
+	"github.com/filecoin-project/go-state-types/builtin"
 	"github.com/filecoin-project/go-state-types/builtin/v9/miner"
 	"golang.org/x/exp/constraints"
 	"golang.org/x/xerrors"
@@ -569,15 +570,13 @@ func terminateSectors(
 			return nil, err
 		}
 
-		currEpoch := height
-
 		for _, s := range sectors {
 			sectorPower := miner8.QAPowerForSector(minerInfo.SectorSize, util.ConvertSectorType(s))
 
 			// the termination penalty calculation
 			termFee := miner8.PledgePenaltyForTermination(
 				s.ExpectedDayReward,
-				currEpoch-s.Activation,
+				height-s.Activation,
 				s.ExpectedStoragePledge,
 				smoothedPow,
 				sectorPower,
@@ -587,17 +586,16 @@ func terminateSectors(
 			)
 
 			// the daily sector fee calculation
-			// sectorFee := miner8.PledgePenaltyForContinuedFault(smoothedRew, smoothedPow, sectorPower)
+			sectorFee := miner8.PledgePenaltyForContinuedFault(smoothedRew, smoothedPow, sectorPower)
 
 			// incur the sector fee of Min(41 days, remaining days b4 sector expiry)
-			// epochsUntilTerm := s.Expiration - currEpoch
-			// daysUntilTerm := float64(epochsUntilTerm / builtin.EpochsInDay)
-			// sectorFeeDaysIncurred := int64(math.Min(41, daysUntilTerm))
-			// sectorFeesUntilTerm := sectorFee.Mul(sectorFee.Int, corebig.NewInt(sectorFeeDaysIncurred))
+			epochsUntilTerm := s.Expiration - height
+			daysUntilTerm := float64(epochsUntilTerm / builtin.EpochsInDay)
+			sectorFeeDaysIncurred := int64(math.Min(41, daysUntilTerm))
+			sectorFeesUntilTerm := sectorFee.Mul(sectorFee.Int, corebig.NewInt(sectorFeeDaysIncurred))
 			// add the term fee and sector fees to the total fee
 
-			stats = stats.AddSector(s, termFee.Int)
-			// totalFee = new(corebig.Int).Add(totalFee, sectorFeesUntilTerm)
+			stats = stats.AddSector(s, height, termFee.Int, sectorFeesUntilTerm)
 		}
 
 		return stats, nil

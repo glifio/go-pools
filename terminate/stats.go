@@ -27,6 +27,7 @@ type SectorStats struct {
 	ExpectedStoragePledge *big.Int
 	ReplacedSectorAge     *big.Int
 	ReplacedDayReward     *big.Int
+	SectorCount           int64
 }
 
 func NewSectorStats() *SectorStats {
@@ -49,79 +50,90 @@ func NewSectorStats() *SectorStats {
 		ExpectedStoragePledge: big.NewInt(0),
 		ReplacedSectorAge:     big.NewInt(0),
 		ReplacedDayReward:     big.NewInt(0),
+		SectorCount:           0,
 	}
 }
 
-func (st *SectorStats) AddSector(s *miner.SectorOnChainInfo, termFee *big.Int) *SectorStats {
+func (st *SectorStats) AddSector(
+	s *miner.SectorOnChainInfo,
+	height abi.ChainEpoch,
+	termFee *big.Int,
+	sectorFeePenalty *big.Int,
+) *SectorStats {
+	age := height - s.Activation
 	return &SectorStats{
-		TerminationPenalty: st.TerminationPenalty.Add(st.TerminationPenalty,
-			termFee),
-		SectorFeePenalty:      big.NewInt(0),                 // FIXME
-		Activation:            big.NewInt(0),                 // FIXME
-		MinActivation:         abi.ChainEpoch(math.MaxInt64), // FIXME
-		MaxActivation:         abi.ChainEpoch(0),             // FIXME
-		Age:                   big.NewInt(0),                 // FIXME
-		MinAge:                abi.ChainEpoch(math.MaxInt64), // FIXME
-		MaxAge:                abi.ChainEpoch(0),             // FIXME
-		Expiration:            big.NewInt(0),                 // FIXME
-		MinExpiration:         abi.ChainEpoch(math.MaxInt64), // FIXME
-		MaxExpiration:         abi.ChainEpoch(0),             // FIXME
-		DealWeight:            big.NewInt(0),                 // FIXME
-		VerifiedDealWeight:    big.NewInt(0),                 // FIXME
-		InitialPledge:         big.NewInt(0),                 // FIXME
-		ExpectedDayReward:     big.NewInt(0),                 // FIXME
-		ExpectedStoragePledge: big.NewInt(0),                 // FIXME
-		ReplacedSectorAge:     big.NewInt(0),                 // FIXME
-		ReplacedDayReward:     big.NewInt(0),                 // FIXME
+		TerminationPenalty:    st.TerminationPenalty.Add(st.TerminationPenalty, termFee),
+		SectorFeePenalty:      st.SectorFeePenalty.Add(st.SectorFeePenalty, sectorFeePenalty),
+		Activation:            st.Activation.Add(st.Activation, big.NewInt(int64(s.Activation))),
+		MinActivation:         min(st.MinActivation, s.Activation),
+		MaxActivation:         max(st.MaxActivation, s.Activation),
+		Age:                   st.Age.Add(st.Age, big.NewInt(int64(age))),
+		MinAge:                min(st.MinAge, age),
+		MaxAge:                max(st.MaxAge, age),
+		Expiration:            st.Expiration.Add(st.Expiration, big.NewInt(int64(s.Expiration))),
+		MinExpiration:         min(st.MinExpiration, s.Expiration),
+		MaxExpiration:         max(st.MaxExpiration, s.Expiration),
+		DealWeight:            st.DealWeight.Add(st.DealWeight, s.DealWeight.Int),
+		VerifiedDealWeight:    st.VerifiedDealWeight.Add(st.VerifiedDealWeight, s.VerifiedDealWeight.Int),
+		InitialPledge:         st.InitialPledge.Add(st.InitialPledge, s.InitialPledge.Int),
+		ExpectedDayReward:     st.ExpectedDayReward.Add(st.ExpectedDayReward, s.ExpectedDayReward.Int),
+		ExpectedStoragePledge: st.ExpectedStoragePledge.Add(st.ExpectedStoragePledge, s.ExpectedStoragePledge.Int),
+		ReplacedSectorAge:     st.ReplacedSectorAge.Add(st.ReplacedSectorAge, big.NewInt(int64(s.ReplacedSectorAge))),
+		ReplacedDayReward:     st.ReplacedDayReward.Add(st.ReplacedDayReward, s.ReplacedDayReward.Int),
+		SectorCount:           st.SectorCount + 1,
 	}
 }
 
 func (st *SectorStats) Accumulate(addStats *SectorStats) *SectorStats {
 	return &SectorStats{
-		TerminationPenalty: st.TerminationPenalty.Add(st.TerminationPenalty,
-			addStats.TerminationPenalty),
-		SectorFeePenalty:      big.NewInt(0),                 // FIXME
-		Activation:            big.NewInt(0),                 // FIXME
-		MinActivation:         abi.ChainEpoch(math.MaxInt64), // FIXME
-		MaxActivation:         abi.ChainEpoch(0),             // FIXME
-		Age:                   big.NewInt(0),                 // FIXME
-		MinAge:                abi.ChainEpoch(math.MaxInt64), // FIXME
-		MaxAge:                abi.ChainEpoch(0),             // FIXME
-		Expiration:            big.NewInt(0),                 // FIXME
-		MinExpiration:         abi.ChainEpoch(math.MaxInt64), // FIXME
-		MaxExpiration:         abi.ChainEpoch(0),             // FIXME
-		DealWeight:            big.NewInt(0),                 // FIXME
-		VerifiedDealWeight:    big.NewInt(0),                 // FIXME
-		InitialPledge:         big.NewInt(0),                 // FIXME
-		ExpectedDayReward:     big.NewInt(0),                 // FIXME
-		ExpectedStoragePledge: big.NewInt(0),                 // FIXME
-		ReplacedSectorAge:     big.NewInt(0),                 // FIXME
-		ReplacedDayReward:     big.NewInt(0),                 // FIXME
+		TerminationPenalty:    st.TerminationPenalty.Add(st.TerminationPenalty, addStats.TerminationPenalty),
+		SectorFeePenalty:      st.SectorFeePenalty.Add(st.SectorFeePenalty, addStats.SectorFeePenalty),
+		Activation:            st.Activation.Add(st.Activation, addStats.Activation),
+		MinActivation:         min(st.MinActivation, addStats.MinActivation),
+		MaxActivation:         max(st.MaxActivation, addStats.MaxActivation),
+		Age:                   st.Age.Add(st.Age, addStats.Age),
+		MinAge:                min(st.MinAge, addStats.MinAge),
+		MaxAge:                max(st.MaxAge, addStats.MaxAge),
+		Expiration:            st.Expiration.Add(st.Expiration, addStats.Expiration),
+		MinExpiration:         min(st.MinExpiration, addStats.MinExpiration),
+		MaxExpiration:         max(st.MaxExpiration, addStats.MaxExpiration),
+		DealWeight:            st.DealWeight.Add(st.DealWeight, addStats.DealWeight),
+		VerifiedDealWeight:    st.VerifiedDealWeight.Add(st.VerifiedDealWeight, addStats.VerifiedDealWeight),
+		InitialPledge:         st.InitialPledge.Add(st.InitialPledge, addStats.InitialPledge),
+		ExpectedDayReward:     st.ExpectedDayReward.Add(st.ExpectedDayReward, addStats.ExpectedDayReward),
+		ExpectedStoragePledge: st.ExpectedStoragePledge.Add(st.ExpectedStoragePledge, addStats.ExpectedStoragePledge),
+		ReplacedSectorAge:     st.ReplacedSectorAge.Add(st.ReplacedSectorAge, addStats.ReplacedSectorAge),
+		ReplacedDayReward:     st.ReplacedDayReward.Add(st.ReplacedDayReward, addStats.ReplacedDayReward),
+		SectorCount:           st.SectorCount + addStats.SectorCount,
 	}
 }
 
 func (st *SectorStats) ScaleUp(sectorsCount int64, sampledSectorsCount int64) *SectorStats {
-	return &SectorStats{
-		TerminationPenalty: new(big.Int).Div(
-			new(big.Int).Mul(st.TerminationPenalty, big.NewInt(sectorsCount)),
+	scaleBigInt := func(val *big.Int) *big.Int {
+		return new(big.Int).Div(
+			new(big.Int).Mul(val, big.NewInt(sectorsCount)),
 			big.NewInt(sampledSectorsCount),
-		),
-		SectorFeePenalty:      big.NewInt(0),                 // FIXME
-		Activation:            big.NewInt(0),                 // FIXME
-		MinActivation:         abi.ChainEpoch(math.MaxInt64), // FIXME
-		MaxActivation:         abi.ChainEpoch(0),             // FIXME
-		Age:                   big.NewInt(0),                 // FIXME
-		MinAge:                abi.ChainEpoch(math.MaxInt64), // FIXME
-		MaxAge:                abi.ChainEpoch(0),             // FIXME
-		Expiration:            big.NewInt(0),                 // FIXME
-		MinExpiration:         abi.ChainEpoch(math.MaxInt64), // FIXME
-		MaxExpiration:         abi.ChainEpoch(0),             // FIXME
-		DealWeight:            big.NewInt(0),                 // FIXME
-		VerifiedDealWeight:    big.NewInt(0),                 // FIXME
-		InitialPledge:         big.NewInt(0),                 // FIXME
-		ExpectedDayReward:     big.NewInt(0),                 // FIXME
-		ExpectedStoragePledge: big.NewInt(0),                 // FIXME
-		ReplacedSectorAge:     big.NewInt(0),                 // FIXME
-		ReplacedDayReward:     big.NewInt(0),                 // FIXME
+		)
+	}
+	return &SectorStats{
+		TerminationPenalty:    scaleBigInt(st.TerminationPenalty),
+		SectorFeePenalty:      scaleBigInt(st.SectorFeePenalty),
+		Activation:            scaleBigInt(st.Activation),
+		MinActivation:         st.MinActivation,
+		MaxActivation:         st.MaxActivation,
+		Age:                   scaleBigInt(st.Age),
+		MinAge:                st.MinAge,
+		MaxAge:                st.MaxAge,
+		Expiration:            scaleBigInt(st.Expiration),
+		MinExpiration:         st.MinExpiration,
+		MaxExpiration:         st.MaxExpiration,
+		DealWeight:            scaleBigInt(st.DealWeight),
+		VerifiedDealWeight:    scaleBigInt(st.VerifiedDealWeight),
+		InitialPledge:         scaleBigInt(st.InitialPledge),
+		ExpectedDayReward:     scaleBigInt(st.ExpectedDayReward),
+		ExpectedStoragePledge: scaleBigInt(st.ExpectedStoragePledge),
+		ReplacedSectorAge:     scaleBigInt(st.ReplacedSectorAge),
+		ReplacedDayReward:     scaleBigInt(st.ReplacedDayReward),
+		SectorCount:           int64(float64(st.SectorCount) * float64(sectorsCount) / float64(sampledSectorsCount)),
 	}
 }
