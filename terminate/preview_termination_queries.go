@@ -596,7 +596,7 @@ func terminateSectors(
 			// sectorFeesUntilTerm := sectorFee.Mul(sectorFee.Int, corebig.NewInt(sectorFeeDaysIncurred))
 			// add the term fee and sector fees to the total fee
 
-			stats.TerminationPenalty = new(corebig.Int).Add(stats.TerminationPenalty, termFee.Int)
+			stats = stats.AddSector(s, termFee.Int)
 			// totalFee = new(corebig.Int).Add(totalFee, sectorFeesUntilTerm)
 		}
 

@@ -5,6 +5,7 @@ import (
 	"math/big"
 
 	"github.com/filecoin-project/go-state-types/abi"
+	"github.com/filecoin-project/go-state-types/builtin/v9/miner"
 )
 
 type SectorStats struct {
@@ -48,6 +49,30 @@ func NewSectorStats() *SectorStats {
 		ExpectedStoragePledge: big.NewInt(0),
 		ReplacedSectorAge:     big.NewInt(0),
 		ReplacedDayReward:     big.NewInt(0),
+	}
+}
+
+func (st *SectorStats) AddSector(s *miner.SectorOnChainInfo, termFee *big.Int) *SectorStats {
+	return &SectorStats{
+		TerminationPenalty: st.TerminationPenalty.Add(st.TerminationPenalty,
+			termFee),
+		SectorFeePenalty:      big.NewInt(0),                 // FIXME
+		Activation:            big.NewInt(0),                 // FIXME
+		MinActivation:         abi.ChainEpoch(math.MaxInt64), // FIXME
+		MaxActivation:         abi.ChainEpoch(0),             // FIXME
+		Age:                   big.NewInt(0),                 // FIXME
+		MinAge:                abi.ChainEpoch(math.MaxInt64), // FIXME
+		MaxAge:                abi.ChainEpoch(0),             // FIXME
+		Expiration:            big.NewInt(0),                 // FIXME
+		MinExpiration:         abi.ChainEpoch(math.MaxInt64), // FIXME
+		MaxExpiration:         abi.ChainEpoch(0),             // FIXME
+		DealWeight:            big.NewInt(0),                 // FIXME
+		VerifiedDealWeight:    big.NewInt(0),                 // FIXME
+		InitialPledge:         big.NewInt(0),                 // FIXME
+		ExpectedDayReward:     big.NewInt(0),                 // FIXME
+		ExpectedStoragePledge: big.NewInt(0),                 // FIXME
+		ReplacedSectorAge:     big.NewInt(0),                 // FIXME
+		ReplacedDayReward:     big.NewInt(0),                 // FIXME
 	}
 }
 
