@@ -8,6 +8,7 @@ import (
 
 type PreviewTerminateSectorsReturn struct {
 	Actor                      *types.ActorV5
+	MinerInfo                  lotusapi.MinerInfo
 	SectorStats                *SectorStats
 	SectorsTerminated          uint64
 	SectorsCount               uint64

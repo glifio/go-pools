@@ -442,6 +442,7 @@ func PreviewTerminateSectors(
 
 	resultCh <- &PreviewTerminateSectorsReturn{
 		Actor:                      actor,
+		MinerInfo:                  minerInfo,
 		SectorStats:                allStats,
 		SectorsTerminated:          sectorsTerminated,
 		SectorsCount:               sectorsCount,
