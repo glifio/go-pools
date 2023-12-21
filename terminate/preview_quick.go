@@ -5,7 +5,6 @@ import (
 	"math"
 
 	"github.com/filecoin-project/go-state-types/builtin/v9/miner"
-	"golang.org/x/xerrors"
 
 	"github.com/filecoin-project/go-address"
 	"github.com/filecoin-project/go-bitfield"
@@ -20,53 +19,41 @@ func PreviewTerminateSectorsQuick(
 	ctx context.Context,
 	api lotusapi.FullNodeStruct,
 	minerAddr address.Address,
-	tipset string,
-	vmHeight uint64,
-	errorCh chan error,
-	resultCh chan *PreviewTerminateSectorsReturn,
-) {
+	ts *types.TipSet,
+) (*PreviewTerminateSectorsReturn, error) {
 	var batchSize uint64 = 40
 	var gasLimit uint64 = 270000000000
 	var maxPartitions uint64 = 21
 
-	h, ts, err := parseTipSetAndHeight(ctx, api, tipset, vmHeight)
-	if err != nil {
-		errorCh <- err
-		return
-	}
+	h := ts.Height()
 
 	// Lookup actor balance
 	actor, err := api.StateGetActor(ctx, minerAddr, ts.Key())
 	if err != nil {
-		errorCh <- err
-		return
+		return nil, err
 	}
 
 	// Lookup current owner / worker
 	minerInfo, err := api.StateMinerInfo(ctx, minerAddr, ts.Key())
 	if err != nil {
-		errorCh <- err
-		return
+		return nil, err
 	}
 
 	provingDeadline, err := api.StateMinerProvingDeadline(ctx, minerAddr, ts.Key())
 	if err != nil {
-		errorCh <- err
-		return
+		return nil, err
 	}
 
 	prevHeight := h - 120
 
 	tsPrev, err := api.ChainGetTipSetByHeight(ctx, prevHeight, types.EmptyTSK)
 	if err != nil {
-		errorCh <- err
-		return
+		return nil, err
 	}
 
 	workerActorPrev, err := api.StateGetActor(ctx, minerInfo.Worker, tsPrev.Key())
 	if err != nil {
-		errorCh <- err
-		return
+		return nil, err
 	}
 
 	autoBatchSize := false
@@ -84,8 +71,7 @@ func PreviewTerminateSectorsQuick(
 	}
 
 	if autoBatchSize && batchSize < 10 {
-		errorCh <- xerrors.Errorf("Not enough worker funds! Batch size too small!")
-		return
+		return nil, err
 	}
 
 	type deadlinePartition struct {
@@ -117,15 +103,13 @@ func PreviewTerminateSectorsQuick(
 		}
 		partitions, err := api.StateMinerPartitions(ctx, minerAddr, uint64(dlIdx), deadlineTs.Key())
 		if err != nil {
-			errorCh <- err
-			return
+			return nil, err
 		}
 		for partIdx, partition := range partitions {
 			allLiveSectors = append(allLiveSectors, partition.LiveSectors)
 			sc, err := partition.LiveSectors.Count()
 			if err != nil {
-				errorCh <- err
-				return
+				return nil, err
 			}
 			if sc > 0 {
 				deadlinePartitions = append(deadlinePartitions, deadlinePartition{
@@ -144,13 +128,11 @@ func PreviewTerminateSectorsQuick(
 	maxSectorsToSample := max(maxPartitions, 3)
 	allSectors, err := bitfield.MultiMerge(allLiveSectors...)
 	if err != nil {
-		errorCh <- err
-		return
+		return nil, err
 	}
 	sectors, err := allSectors.All(math.MaxUint64)
 	if err != nil {
-		errorCh <- err
-		return
+		return nil, err
 	}
 	sampledSectors := make([]uint64, 0)
 	step := max(float64(len(sectors))/float64(maxSectorsToSample-1), 1.0)
@@ -168,8 +150,7 @@ func PreviewTerminateSectorsQuick(
 	for _, sectorNumber := range sampledSectors {
 		sectorPartition, err := api.StateSectorPartition(ctx, minerAddr, abi.SectorNumber(sectorNumber), ts.Key())
 		if err != nil {
-			errorCh <- err
-			return
+			return nil, err
 		}
 		for i, deadlinePartition := range deadlinePartitions {
 			if deadlinePartition.dlIdx == sectorPartition.Deadline &&
@@ -189,6 +170,7 @@ func PreviewTerminateSectorsQuick(
 
 	terminationsCh := make(chan terminationTask)
 	statsCh := make(chan *SectorStats)
+	errorCh := make(chan error)
 
 	offchain := true
 	go runTerminationsInBatches(ctx, api, minerAddr, minerInfo,
@@ -253,15 +235,26 @@ func PreviewTerminateSectorsQuick(
 	}()
 
 	allStats := NewSectorStats()
-	for stats := range statsCh {
-		allStats = allStats.Accumulate(stats)
+
+loop:
+	for {
+		select {
+		case stats := <-statsCh:
+			if stats == nil {
+				break loop
+			}
+			allStats = allStats.Accumulate(stats)
+		case err := <-errorCh:
+			return nil, err
+		}
 	}
+
 	if sectorsCount > 0 {
 		allStats = allStats.ScaleUp(int64(sectorsCount),
 			int64(sectorsCount-sectorsInSkippedPartitions))
 	}
 
-	resultCh <- &PreviewTerminateSectorsReturn{
+	return &PreviewTerminateSectorsReturn{
 		Actor:                      actor,
 		MinerInfo:                  minerInfo,
 		SectorStats:                allStats,
@@ -272,5 +265,5 @@ func PreviewTerminateSectorsQuick(
 		PartitionsCount:            uint64(len(deadlinePartitions)),
 		SampledPartitionsCount:     sampledDeadlinePartitionCount,
 		Tipset:                     ts,
-	}
+	}, nil
 }
