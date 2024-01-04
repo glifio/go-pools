@@ -11,6 +11,7 @@ import (
 	corebig "math/big"
 
 	"github.com/filecoin-project/go-state-types/big"
+	"github.com/filecoin-project/go-state-types/builtin"
 	"github.com/filecoin-project/go-state-types/builtin/v9/miner"
 	"golang.org/x/exp/constraints"
 	"golang.org/x/xerrors"
@@ -36,7 +37,7 @@ func PreviewTerminateSector(
 	sectorNumber uint64,
 	gasLimit uint64,
 	offchain bool,
-) (actor *types.ActorV5, totalBurn *corebig.Int, epoch abi.ChainEpoch, err error) {
+) (actor *types.ActorV5, sectorStats *SectorStats, epoch abi.ChainEpoch, err error) {
 	h, ts, err := parseTipSetAndHeight(ctx, api, tipset, vmHeight)
 	if err != nil {
 		return nil, nil, 0, err
@@ -74,13 +75,13 @@ func PreviewTerminateSector(
 		Terminations: []miner.TerminationDeclaration{termination},
 	}
 
-	totalBurn, err = terminateSectors(ctx, api, h, ts, minerAddr, minerInfo,
+	stats, err := terminateSectors(ctx, api, h, ts, minerAddr, minerInfo,
 		params, int64(gasLimit), offchain)
 	if err != nil {
 		return nil, nil, 0, err
 	}
 
-	return actor, totalBurn, h, nil
+	return actor, stats, h, nil
 }
 
 type terminationTask struct {
@@ -311,11 +312,11 @@ func PreviewTerminateSectors(
 		// fmt.Printf("  %d%s: dlIdx: %d partIdx: %d sectors: %d\n", i, sampled, dl.dlIdx, dl.partIdx, sc)
 	}
 
-	terminations := make(chan terminationTask)
-	burns := make(chan *corebig.Int)
+	terminationsCh := make(chan terminationTask)
+	statsCh := make(chan *SectorStats)
 
 	go runTerminationsInBatches(ctx, api, minerAddr, minerInfo,
-		int64(gasLimit), offchain, terminations, burns, errorCh)
+		int64(gasLimit), offchain, terminationsCh, statsCh, errorCh)
 
 	go func() {
 		for deadlinePartitionIdx, deadlinePartition := range deadlinePartitions {
@@ -374,7 +375,7 @@ func PreviewTerminateSectors(
 								Partition: uint64(partIdx),
 								Sectors:   slicedSectors,
 							}
-							terminations <- terminationTask{
+							terminationsCh <- terminationTask{
 								termination:         termination,
 								deadlineHeight:      deadlineHeight,
 								deadlineTs:          deadlineTs,
@@ -410,7 +411,7 @@ func PreviewTerminateSectors(
 							Partition: uint64(partIdx),
 							Sectors:   sampledSectorsBitfield,
 						}
-						terminations <- terminationTask{
+						terminationsCh <- terminationTask{
 							termination:         termination,
 							deadlineHeight:      deadlineHeight,
 							deadlineTs:          deadlineTs,
@@ -427,24 +428,22 @@ func PreviewTerminateSectors(
 				}
 			}
 		}
-		close(terminations)
+		close(terminationsCh)
 	}()
 
-	totalBurn := corebig.NewInt(0)
-	for burn := range burns {
-		totalBurn = totalBurn.Add(totalBurn, burn)
+	allStats := NewSectorStats()
+	for stats := range statsCh {
+		allStats = allStats.Accumulate(stats)
 	}
-	scaledBurn := totalBurn
 	if sectorsCount > 0 {
-		scaledBurn = new(corebig.Int).Div(
-			new(corebig.Int).Mul(totalBurn, corebig.NewInt(int64(sectorsCount))),
-			corebig.NewInt(int64(sectorsCount-sectorsInSkippedPartitions)),
-		)
+		allStats = allStats.ScaleUp(int64(sectorsCount),
+			int64(sectorsCount-sectorsInSkippedPartitions))
 	}
 
 	resultCh <- &PreviewTerminateSectorsReturn{
 		Actor:                      actor,
-		TotalBurn:                  scaledBurn,
+		MinerInfo:                  minerInfo,
+		SectorStats:                allStats,
 		SectorsTerminated:          sectorsTerminated,
 		SectorsCount:               sectorsCount,
 		SectorsInSkippedPartitions: sectorsInSkippedPartitions,
@@ -465,15 +464,15 @@ func runTerminationsInBatches(
 	gasLimit int64,
 	offchain bool,
 	tasks chan terminationTask,
-	burns chan *corebig.Int,
+	statsCh chan *SectorStats,
 	errorCh chan error,
 ) {
 	defer func() {
-		close(burns)
+		close(statsCh)
 	}()
 	pending := make([]terminationTask, 0, maxPartitionsPerTx)
 	flush := func() {
-		err := runPendingTerminations(ctx, api, minerAddr, minerInfo, gasLimit, pending, offchain, burns)
+		err := runPendingTerminations(ctx, api, minerAddr, minerInfo, gasLimit, pending, offchain, statsCh)
 		if err != nil {
 			errorCh <- err
 			return
@@ -505,7 +504,7 @@ func runPendingTerminations(
 	gasLimit int64,
 	tasks []terminationTask,
 	offchain bool,
-	burns chan *corebig.Int,
+	statsCh chan *SectorStats,
 ) error {
 	if len(tasks) > 0 {
 		// fmt.Printf("Terminating: %+v\n", len(tasks))
@@ -525,17 +524,12 @@ func runPendingTerminations(
 		params := miner.TerminateSectorsParams{
 			Terminations: terminations,
 		}
-		burn, err := terminateSectors(ctx, api, height, ts,
+		stats, err := terminateSectors(ctx, api, height, ts,
 			minerAddr, minerInfo, params, gasLimit, offchain)
 		if err != nil {
 			return err
 		}
-		scaledBurn := new(corebig.Int).Div(
-			new(corebig.Int).Mul(burn, corebig.NewInt(sectorsCount)),
-			corebig.NewInt(sampledSectorsCount),
-		)
-		burns <- scaledBurn
-		burns <- corebig.NewInt(0)
+		statsCh <- stats.ScaleUp(sectorsCount, sampledSectorsCount)
 	}
 	return nil
 }
@@ -550,7 +544,8 @@ func terminateSectors(
 	params miner.TerminateSectorsParams,
 	gasLimit int64,
 	offchain bool,
-) (*corebig.Int, error) {
+) (*SectorStats, error) {
+	stats := NewSectorStats()
 	if offchain {
 		smoothedPow, err := util.TotalPowerSmoothed(ctx, api, ts)
 		if err != nil {
@@ -576,16 +571,13 @@ func terminateSectors(
 			return nil, err
 		}
 
-		currEpoch := height
-
-		totalFee := corebig.NewInt(0)
 		for _, s := range sectors {
 			sectorPower := miner8.QAPowerForSector(minerInfo.SectorSize, util.ConvertSectorType(s))
 
 			// the termination penalty calculation
 			termFee := miner8.PledgePenaltyForTermination(
 				s.ExpectedDayReward,
-				currEpoch-s.Activation,
+				height-s.Activation,
 				s.ExpectedStoragePledge,
 				smoothedPow,
 				sectorPower,
@@ -595,19 +587,19 @@ func terminateSectors(
 			)
 
 			// the daily sector fee calculation
-			// sectorFee := miner8.PledgePenaltyForContinuedFault(smoothedRew, smoothedPow, sectorPower)
+			sectorFee := miner8.PledgePenaltyForContinuedFault(smoothedRew, smoothedPow, sectorPower)
 
 			// incur the sector fee of Min(41 days, remaining days b4 sector expiry)
-			// epochsUntilTerm := s.Expiration - currEpoch
-			// daysUntilTerm := float64(epochsUntilTerm / builtin.EpochsInDay)
-			// sectorFeeDaysIncurred := int64(math.Min(41, daysUntilTerm))
-			// sectorFeesUntilTerm := sectorFee.Mul(sectorFee.Int, corebig.NewInt(sectorFeeDaysIncurred))
+			epochsUntilTerm := s.Expiration - height
+			daysUntilTerm := float64(epochsUntilTerm / builtin.EpochsInDay)
+			sectorFeeDaysIncurred := int64(math.Min(41, daysUntilTerm))
+			sectorFeesUntilTerm := sectorFee.Mul(sectorFee.Int, corebig.NewInt(sectorFeeDaysIncurred))
 			// add the term fee and sector fees to the total fee
-			totalFee = new(corebig.Int).Add(totalFee, termFee.Int)
-			// totalFee = new(corebig.Int).Add(totalFee, sectorFeesUntilTerm)
+
+			stats = stats.AddSector(s, height, termFee.Int, sectorFeesUntilTerm)
 		}
 
-		return totalFee, nil
+		return stats, nil
 	} else {
 		enc := new(bytes.Buffer)
 		err := params.MarshalCBOR(enc)
@@ -662,7 +654,6 @@ func terminateSectors(
 			return nil, err
 		}
 
-		burn := big.NewInt(0)
 		burnAddr, _ := address.NewFromString("f099")
 
 		for _, trace := range result.Trace {
@@ -672,7 +663,8 @@ func terminateSectors(
 				}
 				for _, subMsg := range trace.ExecutionTrace.Subcalls {
 					if subMsg.Msg.To == burnAddr {
-						burn = subMsg.Msg.Value
+						stats.TerminationPenalty = new(corebig.Int).Add(stats.TerminationPenalty,
+							subMsg.Msg.Value.Int)
 					}
 				}
 				if trace.Error != "" {
@@ -690,8 +682,7 @@ func terminateSectors(
 				}
 			}
 		}
-		return burn.Int, nil
-
+		return stats, nil
 	}
 }
 

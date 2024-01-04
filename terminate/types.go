@@ -1,8 +1,6 @@
 package terminate
 
 import (
-	"math/big"
-
 	"github.com/filecoin-project/go-state-types/abi"
 	lotusapi "github.com/filecoin-project/lotus/api"
 	"github.com/filecoin-project/lotus/chain/types"
@@ -10,7 +8,8 @@ import (
 
 type PreviewTerminateSectorsReturn struct {
 	Actor                      *types.ActorV5
-	TotalBurn                  *big.Int
+	MinerInfo                  lotusapi.MinerInfo
+	SectorStats                *SectorStats
 	SectorsTerminated          uint64
 	SectorsCount               uint64
 	SectorsInSkippedPartitions uint64
