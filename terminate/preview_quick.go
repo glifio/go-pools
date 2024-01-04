@@ -33,6 +33,8 @@ func PreviewTerminateSectorsQuick(
 		return nil, err
 	}
 
+	actor.Address = &minerAddr
+
 	// Lookup current owner / worker
 	minerInfo, err := api.StateMinerInfo(ctx, minerAddr, ts.Key())
 	if err != nil {
