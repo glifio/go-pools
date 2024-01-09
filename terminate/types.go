@@ -37,3 +37,24 @@ type PreviewTerminateSectorsProgress struct {
 	SliceEnd               uint64
 	SliceCount             uint64
 }
+
+type TerminateSectorsSummary struct {
+	MinerAddr          string         `json:"minerAddr"`
+	MinerBal           string         `json:"minerBal"`
+	TerminationPenalty string         `json:"terminationPenalty"`
+	SectorsTerminated  uint64         `json:"sectorsTerminated"`
+	SectorsCount       uint64         `json:"sectorCount"`
+	MinExpiration      abi.ChainEpoch `json:"minExpiration"`
+	MaxExpiration      abi.ChainEpoch `json:"maxExpiration"`
+	MaxAge             abi.ChainEpoch `json:"maxAge"`
+	MinAge             abi.ChainEpoch `json:"minAge"`
+}
+
+type AgentCollateralStats struct {
+	LiquidationValue string `json:"liquidationValue"`
+
+	AggTerminationPenalty  string                     `json:"aggTerminationPenalty"`
+	AgentLiquidCollateral  string                     `json:"agentLiquidCollateral"`
+	MinersTerminationStats []*TerminateSectorsSummary `json:"minersTerminationStats"`
+	Epoch                  abi.ChainEpoch             `json:"epoch"`
+}
