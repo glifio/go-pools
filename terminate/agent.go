@@ -11,6 +11,9 @@ import (
 	"github.com/glifio/go-pools/util"
 )
 
+// PreviewAgentTermination preview terminating all the
+// sectors on all the miners for an agent (using sampling and "off-chain"
+// calculation) and will return aggregated stats.
 func PreviewAgentTermination(ctx context.Context, sdk types.PoolsSDK, agentAddr common.Address, tipset *ltypes.TipSet) (*AgentCollateralStats, error) {
 	lapi, closer, err := sdk.Extern().ConnectLotusClient()
 	if err != nil {

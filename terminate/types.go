@@ -6,6 +6,7 @@ import (
 	"github.com/filecoin-project/lotus/chain/types"
 )
 
+// PreviewTerminateSectorsReturn contains the aggregated results from a query.
 type PreviewTerminateSectorsReturn struct {
 	Actor                      *types.ActorV5
 	MinerInfo                  lotusapi.MinerInfo
@@ -19,6 +20,8 @@ type PreviewTerminateSectorsReturn struct {
 	Tipset                     *types.TipSet
 }
 
+// PreviewTerminateSectorsProgress is returned multiple times during a streaming
+// query to report progress.
 type PreviewTerminateSectorsProgress struct {
 	Epoch                  abi.ChainEpoch
 	MinerInfo              lotusapi.MinerInfo
