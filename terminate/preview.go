@@ -1,19 +1,10 @@
 package terminate
 
 import (
-	"bytes"
 	"context"
-	"fmt"
 	"math"
-	"strings"
-	"time"
 
-	corebig "math/big"
-
-	"github.com/filecoin-project/go-state-types/big"
-	"github.com/filecoin-project/go-state-types/builtin"
 	"github.com/filecoin-project/go-state-types/builtin/v9/miner"
-	"golang.org/x/exp/constraints"
 	"golang.org/x/xerrors"
 
 	"github.com/filecoin-project/go-address"
@@ -21,13 +12,15 @@ import (
 	"github.com/filecoin-project/go-state-types/abi"
 	lotusapi "github.com/filecoin-project/lotus/api"
 	"github.com/filecoin-project/lotus/chain/types"
-	miner8 "github.com/filecoin-project/specs-actors/v8/actors/builtin/miner"
 	"github.com/glifio/go-pools/util"
-	"github.com/ipfs/go-cid"
-	cbor "github.com/ipfs/go-ipld-cbor"
 )
 
-// PreviewTerminateSector gets the burnt funds for when a single sector is terminated
+// PreviewTerminateSector will preview the cost of terminating a single sector
+// on a miner.
+//
+//   - tipset takes a string selector, similar to Lotus, eg. "@1234", or "cid,cid,cid"
+//   - offchain controls whether or not to use the "on-chain" or "off-chain"
+//     calculation method.
 func PreviewTerminateSector(
 	ctx context.Context,
 	api lotusapi.FullNodeStruct,
@@ -84,15 +77,27 @@ func PreviewTerminateSector(
 	return actor, stats, h, nil
 }
 
-type terminationTask struct {
-	termination         miner.TerminationDeclaration
-	deadlineHeight      abi.ChainEpoch
-	deadlineTs          *types.TipSet
-	sectorsCount        int64
-	sampledSectorsCount int64
-}
-
-// PreviewTerminateSectors gets the burnt funds for when all the sectors are terminated
+// PreviewTerminateSectors will preview the cost of terminating all the sectors
+// for a miner.
+//
+// This function is intended to be run as a goroutine. Channels are used to
+// stream back progress and results/errors, so clients can report progress as
+// the query progresses.
+//
+//   - tipset takes a string selector, similar to Lotus, eg. "@1234", or "cid,cid,cid"
+//   - batchSize is the number of sectors to query per message. If set to zero,
+//     and gasLimit is also zero, a default batch size will be calculated based
+//     on the miner's worker balance.
+//   - offchain controls whether or not to use the "on-chain" or "off-chain"
+//     calculation method.
+//   - optimize will make additional queries to try to select deadlines to
+//     sample that are evenly distributed over historical time.
+//   - maxPartitions controls how many partitions to sample. If set to zero,
+//     all partitions will be sampled.
+//
+// Use the simpler, more opinionated [PreviewTerminateSectorsQuick] function
+// for quick results using sampling, "off-chain" calcuation, and a simpler
+// API (no channels for streaming progress)
 func PreviewTerminateSectors(
 	ctx context.Context,
 	api lotusapi.FullNodeStruct,
@@ -101,7 +106,7 @@ func PreviewTerminateSectors(
 	vmHeight uint64,
 	batchSize uint64,
 	gasLimit uint64,
-	useSampling bool,
+	useSampling bool, // if set, not all sectors will be sampled
 	optimize bool,
 	offchain bool,
 	maxPartitions uint64,
@@ -290,26 +295,12 @@ func PreviewTerminateSectors(
 		}
 	}
 
-	// FIXME: Send debug output via progressCh
-
-	// fmt.Printf("DeadlinePartitions: %v\n", len(deadlinePartitions))
 	sampledDeadlinePartitionCount := uint64(0)
-	for i, _ := range deadlinePartitions {
-		/*
-			sc, err := dl.partition.LiveSectors.Count()
-			if err != nil {
-				errorCh <- err
-				return
-			}
-			sampled := " "
-		*/
+	for i := range deadlinePartitions {
 		if sampledDeadlinePartitions[i] &&
 			(maxPartitions == 0 || sampledDeadlinePartitionCount < maxPartitions) {
-			// sampled = "*"
 			sampledDeadlinePartitionCount++
 		}
-
-		// fmt.Printf("  %d%s: dlIdx: %d partIdx: %d sectors: %d\n", i, sampled, dl.dlIdx, dl.partIdx, sc)
 	}
 
 	terminationsCh := make(chan terminationTask)
@@ -452,320 +443,4 @@ func PreviewTerminateSectors(
 		SampledPartitionsCount:     sampledDeadlinePartitionCount,
 		Tipset:                     ts,
 	}
-}
-
-const maxPartitionsPerTx = 3
-
-func runTerminationsInBatches(
-	ctx context.Context,
-	api lotusapi.FullNodeStruct,
-	minerAddr address.Address,
-	minerInfo lotusapi.MinerInfo,
-	gasLimit int64,
-	offchain bool,
-	tasks chan terminationTask,
-	statsCh chan *SectorStats,
-	errorCh chan error,
-) {
-	defer func() {
-		close(statsCh)
-	}()
-	pending := make([]terminationTask, 0, maxPartitionsPerTx)
-	flush := func() {
-		err := runPendingTerminations(ctx, api, minerAddr, minerInfo, gasLimit, pending, offchain, statsCh)
-		if err != nil {
-			errorCh <- err
-			return
-		}
-	}
-	var pendingDeadlineHeight abi.ChainEpoch
-	for task := range tasks {
-		if pendingDeadlineHeight != 0 && task.deadlineHeight != pendingDeadlineHeight {
-			flush()
-			pending = pending[:0]
-			pendingDeadlineHeight = 0
-		}
-		pending = append(pending, task)
-		pendingDeadlineHeight = task.deadlineHeight
-		if len(pending) == maxPartitionsPerTx {
-			flush()
-			pending = pending[:0]
-			pendingDeadlineHeight = 0
-		}
-	}
-	flush()
-}
-
-func runPendingTerminations(
-	ctx context.Context,
-	api lotusapi.FullNodeStruct,
-	minerAddr address.Address,
-	minerInfo lotusapi.MinerInfo,
-	gasLimit int64,
-	tasks []terminationTask,
-	offchain bool,
-	statsCh chan *SectorStats,
-) error {
-	if len(tasks) > 0 {
-		// fmt.Printf("Terminating: %+v\n", len(tasks))
-		height := tasks[0].deadlineHeight
-		ts := tasks[0].deadlineTs
-		var sectorsCount int64
-		var sampledSectorsCount int64
-		terminations := make([]miner.TerminationDeclaration, 0)
-		for _, task := range tasks {
-			if task.deadlineHeight != height {
-				panic("Bad height") // Should never happen
-			}
-			terminations = append(terminations, task.termination)
-			sectorsCount += task.sectorsCount
-			sampledSectorsCount += task.sampledSectorsCount
-		}
-		params := miner.TerminateSectorsParams{
-			Terminations: terminations,
-		}
-		stats, err := terminateSectors(ctx, api, height, ts,
-			minerAddr, minerInfo, params, gasLimit, offchain)
-		if err != nil {
-			return err
-		}
-		statsCh <- stats.ScaleUp(sectorsCount, sampledSectorsCount)
-	}
-	return nil
-}
-
-func terminateSectors(
-	ctx context.Context,
-	api lotusapi.FullNodeStruct,
-	height abi.ChainEpoch,
-	ts *types.TipSet,
-	minerAddr address.Address,
-	minerInfo lotusapi.MinerInfo,
-	params miner.TerminateSectorsParams,
-	gasLimit int64,
-	offchain bool,
-) (*SectorStats, error) {
-	stats := NewSectorStats()
-	if offchain {
-		smoothedPow, err := util.TotalPowerSmoothed(ctx, api, ts)
-		if err != nil {
-			return nil, err
-		}
-
-		smoothedRew, err := util.ThisEpochRewardsSmoothed(ctx, api, ts)
-		if err != nil {
-			return nil, err
-		}
-
-		allTermSectors := make([]bitfield.BitField, 0)
-		for _, term := range params.Terminations {
-			allTermSectors = append(allTermSectors, term.Sectors)
-		}
-		allSectorsBitfield, err := bitfield.MultiMerge(allTermSectors...)
-		if err != nil {
-			return nil, err
-		}
-
-		sectors, err := api.StateMinerSectors(context.Background(), minerAddr, &allSectorsBitfield, ts.Key())
-		if err != nil {
-			return nil, err
-		}
-
-		for _, s := range sectors {
-			sectorPower := miner8.QAPowerForSector(minerInfo.SectorSize, util.ConvertSectorType(s))
-
-			// the termination penalty calculation
-			termFee := miner8.PledgePenaltyForTermination(
-				s.ExpectedDayReward,
-				height-s.Activation,
-				s.ExpectedStoragePledge,
-				smoothedPow,
-				sectorPower,
-				smoothedRew,
-				s.ReplacedDayReward,
-				s.ReplacedSectorAge,
-			)
-
-			// the daily sector fee calculation
-			sectorFee := miner8.PledgePenaltyForContinuedFault(smoothedRew, smoothedPow, sectorPower)
-
-			// incur the sector fee of Min(41 days, remaining days b4 sector expiry)
-			epochsUntilTerm := s.Expiration - height
-			daysUntilTerm := float64(epochsUntilTerm / builtin.EpochsInDay)
-			sectorFeeDaysIncurred := int64(math.Min(41, daysUntilTerm))
-			sectorFeesUntilTerm := sectorFee.Mul(sectorFee.Int, corebig.NewInt(sectorFeeDaysIncurred))
-			// add the term fee and sector fees to the total fee
-
-			stats = stats.AddSector(s, height, termFee.Int, sectorFeesUntilTerm)
-		}
-
-		return stats, nil
-	} else {
-		enc := new(bytes.Buffer)
-		err := params.MarshalCBOR(enc)
-		if err != nil {
-			return nil, err
-		}
-
-		workerActor, err := api.StateGetActor(ctx, minerInfo.Worker, ts.Key())
-		if err != nil {
-			return nil, err
-		}
-
-		nonce := workerActor.Nonce
-
-		workerAddress, err := api.StateAccountKey(ctx, minerInfo.Worker, ts.Key())
-		if err != nil {
-			return nil, err
-		}
-
-		tipsetMsgs, err := api.ChainGetMessagesInTipset(ctx, ts.Key())
-		if err != nil {
-			return nil, err
-		}
-		for _, tMsg := range tipsetMsgs {
-			if (tMsg.Message.From == minerInfo.Worker ||
-				tMsg.Message.From == workerAddress) &&
-				tMsg.Message.Nonce >= nonce {
-				nonce = tMsg.Message.Nonce + 1
-			}
-		}
-
-		msg := &types.Message{
-			Version:    0,
-			To:         minerAddr,
-			From:       minerInfo.Worker,
-			Nonce:      nonce,
-			Value:      big.NewInt(0),
-			GasLimit:   gasLimit,
-			GasFeeCap:  big.NewInt(10135200),
-			GasPremium: big.NewInt(0),
-			Method:     9, // Terminate sectors
-			Params:     enc.Bytes(),
-		}
-		cid := msg.Cid()
-
-		var msgs []*types.Message
-
-		msgs = append(msgs, msg)
-
-		result, err := api.StateCompute(context.Background(), height, msgs, ts.Key())
-		if err != nil {
-			return nil, err
-		}
-
-		burnAddr, _ := address.NewFromString("f099")
-
-		for _, trace := range result.Trace {
-			if trace.MsgCid == cid {
-				if trace.MsgRct.ExitCode != 0 {
-					return nil, xerrors.Errorf("Exit Code: %v", trace.MsgRct.ExitCode)
-				}
-				for _, subMsg := range trace.ExecutionTrace.Subcalls {
-					if subMsg.Msg.To == burnAddr {
-						stats.TerminationPenalty = new(corebig.Int).Add(stats.TerminationPenalty,
-							subMsg.Msg.Value.Int)
-					}
-				}
-				if trace.Error != "" {
-					return nil, xerrors.Errorf("Error: %v\n", trace.Error)
-				}
-
-				var ret []bool
-
-				err = cbor.DecodeReader(bytes.NewReader(trace.MsgRct.Return), &ret)
-				if err != nil {
-					return nil, err
-				}
-				if !ret[0] {
-					return nil, xerrors.Errorf("Error: Not all sectors terminated!")
-				}
-			}
-		}
-		return stats, nil
-	}
-}
-
-func ParseTipSetRef(ctx context.Context, api lotusapi.FullNodeStruct, tss string) (*types.TipSet, error) {
-	if tss[0] == '@' {
-		if tss == "@head" {
-			return api.ChainHead(ctx)
-		}
-
-		var h uint64
-		if _, err := fmt.Sscanf(tss, "@%d", &h); err != nil {
-			return nil, xerrors.Errorf("parsing height tipset ref: %w", err)
-		}
-
-		ctxTimeout, cancel := context.WithTimeout(ctx, time.Second*10)
-		defer cancel()
-		return api.ChainGetTipSetByHeight(ctxTimeout, abi.ChainEpoch(h), types.EmptyTSK)
-	}
-
-	cids, err := ParseTipSetString(tss)
-	if err != nil {
-		return nil, err
-	}
-
-	if len(cids) == 0 {
-		return nil, nil
-	}
-
-	k := types.NewTipSetKey(cids...)
-	ts, err := api.ChainGetTipSet(ctx, k)
-	if err != nil {
-		return nil, err
-	}
-
-	return ts, nil
-}
-
-func ParseTipSetString(ts string) ([]cid.Cid, error) {
-	strs := strings.Split(ts, ",")
-
-	var cids []cid.Cid
-	for _, s := range strs {
-		c, err := cid.Parse(strings.TrimSpace(s))
-		if err != nil {
-			return nil, err
-		}
-		cids = append(cids, c)
-	}
-
-	return cids, nil
-}
-
-func parseTipSetAndHeight(ctx context.Context, api lotusapi.FullNodeStruct, tipset string, vmHeight uint64) (h abi.ChainEpoch, ts *types.TipSet, err error) {
-	h = abi.ChainEpoch(vmHeight)
-	if tss := tipset; tss != "" {
-		ts, err = ParseTipSetRef(ctx, api, tss)
-	} else if h > 0 {
-		ts, err = api.ChainGetTipSetByHeight(ctx, h, types.EmptyTSK)
-	} else {
-		ts, err = api.ChainHead(ctx)
-	}
-	if err != nil {
-		return 0, nil, err
-	}
-
-	if h == 0 {
-		h = ts.Height()
-	}
-
-	return h, ts, nil
-}
-
-// https://stackoverflow.com/questions/27516387/what-is-the-correct-way-to-find-the-min-between-two-integers-in-go
-func min[T constraints.Ordered](a, b T) T {
-	if a < b {
-		return a
-	}
-	return b
-}
-
-func max[T constraints.Ordered](a, b T) T {
-	if a > b {
-		return a
-	}
-	return b
 }

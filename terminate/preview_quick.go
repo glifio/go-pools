@@ -14,7 +14,17 @@ import (
 	"github.com/glifio/go-pools/util"
 )
 
-// PreviewTerminateSectorsQuick gets the burnt funds for when all the sectors are terminated using sampling and offchain calculations
+// PreviewTerminateSectorsQuick will preview the cost of terminating all
+// the sectors for a miner
+//
+// It samples a subset of sectors and uses the "off-chain" calculation method.
+//
+// It has been "tuned" to provide reasonably accurate results (typically <1% error)
+// while executing in a fair quick constant amount of time.
+
+// Use the more complex [PreviewTerminateSectors] function for more control over the number of
+// sectors to sample, or to use the "on-chain" calculation method, and also
+// to stream results.
 func PreviewTerminateSectorsQuick(
 	ctx context.Context,
 	api lotusapi.FullNodeStruct,
@@ -163,7 +173,7 @@ func PreviewTerminateSectorsQuick(
 	}
 
 	sampledDeadlinePartitionCount := uint64(0)
-	for i, _ := range deadlinePartitions {
+	for i := range deadlinePartitions {
 		if sampledDeadlinePartitions[i] &&
 			(maxPartitions == 0 || sampledDeadlinePartitionCount < maxPartitions) {
 			sampledDeadlinePartitionCount++
