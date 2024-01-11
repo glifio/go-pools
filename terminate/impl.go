@@ -151,13 +151,15 @@ func terminateSectors(
 			// the termination penalty calculation
 			termFee := miner8.PledgePenaltyForTermination(
 				s.ExpectedDayReward,
-				height-s.Activation,
+				// height-s.Activation,
+				height-s.PowerBaseEpoch,
 				s.ExpectedStoragePledge,
 				smoothedPow,
 				sectorPower,
 				smoothedRew,
 				s.ReplacedDayReward,
-				s.ReplacedSectorAge,
+				// s.ReplacedSectorAge,
+				s.PowerBaseEpoch-s.Activation,
 			)
 
 			// the daily sector fee calculation

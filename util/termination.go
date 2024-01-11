@@ -3,7 +3,7 @@ package util
 import (
 	"context"
 
-	"github.com/filecoin-project/go-state-types/builtin/v9/miner"
+	"github.com/filecoin-project/go-state-types/builtin/v12/miner"
 	lotusapi "github.com/filecoin-project/lotus/api"
 	"github.com/filecoin-project/lotus/blockstore"
 	"github.com/filecoin-project/lotus/chain/actors/adt"
@@ -29,7 +29,6 @@ func ConvertSectorType(sector *miner.SectorOnChainInfo) *miner8.SectorOnChainInf
 		InitialPledge:         sector.InitialPledge,
 		ExpectedDayReward:     sector.ExpectedDayReward,
 		ExpectedStoragePledge: sector.ExpectedStoragePledge,
-		ReplacedSectorAge:     sector.ReplacedSectorAge,
 		ReplacedDayReward:     sector.ReplacedDayReward,
 		SectorKeyCID:          sector.SectorKeyCID,
 	}
