@@ -12,6 +12,7 @@ import (
 	"github.com/filecoin-project/go-state-types/big"
 	"github.com/filecoin-project/go-state-types/builtin"
 	"github.com/filecoin-project/go-state-types/builtin/v9/miner"
+	minertypes "github.com/filecoin-project/go-state-types/builtin/v9/miner"
 	lotusapi "github.com/filecoin-project/lotus/api"
 	"github.com/filecoin-project/lotus/chain/types"
 	miner8 "github.com/filecoin-project/specs-actors/v8/actors/builtin/miner"
@@ -34,7 +35,7 @@ func runTerminationsInBatches(
 	ctx context.Context,
 	api *lotusapi.FullNodeStruct,
 	minerAddr address.Address,
-	minerInfo lotusapi.MinerInfo,
+	minerInfo minertypes.MinerInfo,
 	gasLimit int64,
 	offchain bool,
 	tasks chan terminationTask,
@@ -74,7 +75,7 @@ func runPendingTerminations(
 	ctx context.Context,
 	api *lotusapi.FullNodeStruct,
 	minerAddr address.Address,
-	minerInfo lotusapi.MinerInfo,
+	minerInfo minertypes.MinerInfo,
 	gasLimit int64,
 	tasks []terminationTask,
 	offchain bool,
@@ -114,7 +115,7 @@ func terminateSectors(
 	height abi.ChainEpoch,
 	ts *types.TipSet,
 	minerAddr address.Address,
-	minerInfo lotusapi.MinerInfo,
+	minerInfo minertypes.MinerInfo,
 	params miner.TerminateSectorsParams,
 	gasLimit int64,
 	offchain bool,

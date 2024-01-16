@@ -2,6 +2,7 @@ package terminate
 
 import (
 	"github.com/filecoin-project/go-state-types/abi"
+	minertypes "github.com/filecoin-project/go-state-types/builtin/v9/miner"
 	lotusapi "github.com/filecoin-project/lotus/api"
 	"github.com/filecoin-project/lotus/chain/types"
 )
@@ -9,7 +10,10 @@ import (
 // PreviewTerminateSectorsReturn contains the aggregated results from a query.
 type PreviewTerminateSectorsReturn struct {
 	Actor                      *types.ActorV5
-	MinerInfo                  lotusapi.MinerInfo
+	MinerInfo                  minertypes.MinerInfo
+	AvailableBalance           abi.TokenAmount
+	VestingBalance             abi.TokenAmount
+	InitialPledge              abi.TokenAmount
 	SectorStats                *SectorStats
 	SectorsTerminated          uint64
 	SectorsCount               uint64
