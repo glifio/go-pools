@@ -87,3 +87,34 @@ func PreviewAgentTermination(ctx context.Context, sdk types.PoolsSDK, agentAddr 
 		AvailableBalance:   availableBalanceAgg,
 	}, nil
 }
+
+func (term PreviewAgentTerminationSummary) LiquidationValue() *big.Int {
+	// first we multiply the available balance by the recovery rate
+	// recovery rate = (initial pledge - termination penalty) / initial pledge
+	// discounted avail = (available * initial pledge - available * termination penalty) / initial pledge
+	availTimesPledge := new(big.Int).Mul(term.AvailableBalance, term.InitialPledge)
+	availTimesTermPenalty := new(big.Int).Mul(term.AvailableBalance, term.TerminationPenalty)
+
+	discountedAvail := new(big.Int).Sub(availTimesPledge, availTimesTermPenalty)
+	// mul the discountedAvail by WAD math before the division for precision
+	discountedAvail.Mul(discountedAvail, util.WAD)
+	discountedAvail.Div(discountedAvail, term.InitialPledge)
+
+	// we add the discounted available balance to the vesting balance and initial pledge, subtract the termination penalty to get the liquidation value
+	liquidationValue := new(big.Int).Add(discountedAvail, term.VestingBalance)
+	liquidationValue.Add(liquidationValue, term.InitialPledge)
+	liquidationValue.Sub(liquidationValue, term.TerminationPenalty)
+
+	return liquidationValue
+}
+
+func (term PreviewAgentTerminationSummary) RecoveryRate() *big.Float {
+	initialPledgeFloat := new(big.Float).SetInt(term.InitialPledge)
+	terminationPenaltyFloat := new(big.Float).SetInt(term.TerminationPenalty)
+	// recovery rate = (initial pledge - termination penalty) / initial pledge
+	recoveryRate := new(big.Float).Sub(initialPledgeFloat, terminationPenaltyFloat)
+	recoveryRate.Quo(recoveryRate, initialPledgeFloat)
+	recoveryRate.Mul(recoveryRate, big.NewFloat(100))
+
+	return recoveryRate
+}
