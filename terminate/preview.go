@@ -12,6 +12,7 @@ import (
 	"github.com/filecoin-project/go-state-types/abi"
 	lotusapi "github.com/filecoin-project/lotus/api"
 	"github.com/filecoin-project/lotus/chain/types"
+	"github.com/glifio/go-pools/mstat"
 	"github.com/glifio/go-pools/util"
 )
 
@@ -37,13 +38,14 @@ func PreviewTerminateSector(
 	}
 
 	// Lookup actor balance
-	actor, err = api.StateGetActor(ctx, minerAddr, ts.Key())
+	mactor, mstate, err := mstat.LoadMinerActor(ctx, api, minerAddr, ts)
 	if err != nil {
 		return nil, nil, 0, err
 	}
+	actor = mactor
 
 	// Lookup current owner / worker
-	minerInfo, err := api.StateMinerInfo(ctx, minerAddr, ts.Key())
+	minerInfo, err := mstate.Info()
 	if err != nil {
 		return nil, nil, 0, err
 	}
@@ -121,14 +123,10 @@ func PreviewTerminateSectors(
 	}
 
 	// Lookup actor balance
-	actor, err := api.StateGetActor(ctx, minerAddr, ts.Key())
-	if err != nil {
-		errorCh <- err
-		return
-	}
+	actor, mstate, err := mstat.LoadMinerActor(ctx, api, minerAddr, ts)
 
 	// Lookup current owner / worker
-	minerInfo, err := api.StateMinerInfo(ctx, minerAddr, ts.Key())
+	minerInfo, err := mstate.Info()
 	if err != nil {
 		errorCh <- err
 		return

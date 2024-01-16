@@ -3,7 +3,6 @@ package terminate
 import (
 	"github.com/filecoin-project/go-state-types/abi"
 	minertypes "github.com/filecoin-project/go-state-types/builtin/v9/miner"
-	lotusapi "github.com/filecoin-project/lotus/api"
 	"github.com/filecoin-project/lotus/chain/types"
 )
 
@@ -28,7 +27,7 @@ type PreviewTerminateSectorsReturn struct {
 // query to report progress.
 type PreviewTerminateSectorsProgress struct {
 	Epoch                  abi.ChainEpoch
-	MinerInfo              lotusapi.MinerInfo
+	MinerInfo              minertypes.MinerInfo
 	WorkerActor            *types.ActorV5
 	PrevHeightForImmutable abi.ChainEpoch
 	WorkerActorPrev        *types.ActorV5
