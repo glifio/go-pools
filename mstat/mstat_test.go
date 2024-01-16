@@ -16,7 +16,7 @@ import (
 var DIAL_ADDR = ""
 var TOKEN = ""
 
-func setupSuite(t *testing.T) (api.FullNode, jsonrpc.ClientCloser) {
+func setupSuite(t *testing.T) (*api.FullNodeStruct, jsonrpc.ClientCloser) {
 	var lcli api.FullNodeStruct = api.FullNodeStruct{}
 	head := http.Header{}
 

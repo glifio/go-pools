@@ -52,12 +52,3 @@ type TerminateSectorsSummary struct {
 	MaxAge             abi.ChainEpoch `json:"maxAge"`
 	MinAge             abi.ChainEpoch `json:"minAge"`
 }
-
-type AgentCollateralStats struct {
-	LiquidationValue string `json:"liquidationValue"`
-
-	AggTerminationPenalty  string                     `json:"aggTerminationPenalty"`
-	AgentLiquidCollateral  string                     `json:"agentLiquidCollateral"`
-	MinersTerminationStats []*TerminateSectorsSummary `json:"minersTerminationStats"`
-	Epoch                  abi.ChainEpoch             `json:"epoch"`
-}

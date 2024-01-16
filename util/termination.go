@@ -35,13 +35,13 @@ func ConvertSectorType(sector *miner.SectorOnChainInfo) *miner8.SectorOnChainInf
 	}
 }
 
-func TotalPowerSmoothed(ctx context.Context, api lotusapi.FullNodeStruct, tsk *types.TipSet) (smoothing.FilterEstimate, error) {
+func TotalPowerSmoothed(ctx context.Context, api *lotusapi.FullNodeStruct, tsk *types.TipSet) (smoothing.FilterEstimate, error) {
 	pact, err := api.StateGetActor(ctx, power.Address, tsk.Key())
 	if err != nil {
 		return smoothing.FilterEstimate{}, err
 	}
 
-	tbsPow := blockstore.NewTieredBstore(blockstore.NewAPIBlockstore(&api), blockstore.NewMemory())
+	tbsPow := blockstore.NewTieredBstore(blockstore.NewAPIBlockstore(api), blockstore.NewMemory())
 
 	pas, err := power.Load(adt.WrapStore(ctx, cbor.NewCborStore(tbsPow)), pact)
 	if err != nil {
@@ -59,13 +59,13 @@ func TotalPowerSmoothed(ctx context.Context, api lotusapi.FullNodeStruct, tsk *t
 	), nil
 }
 
-func ThisEpochRewardsSmoothed(ctx context.Context, api lotusapi.FullNodeStruct, tsk *types.TipSet) (smoothing.FilterEstimate, error) {
+func ThisEpochRewardsSmoothed(ctx context.Context, api *lotusapi.FullNodeStruct, tsk *types.TipSet) (smoothing.FilterEstimate, error) {
 	ract, err := api.StateGetActor(ctx, reward.Address, tsk.Key())
 	if err != nil {
 		return smoothing.FilterEstimate{}, err
 	}
 
-	tbsRew := blockstore.NewTieredBstore(blockstore.NewAPIBlockstore(&api), blockstore.NewMemory())
+	tbsRew := blockstore.NewTieredBstore(blockstore.NewAPIBlockstore(api), blockstore.NewMemory())
 
 	ras, err := reward.Load(adt.WrapStore(ctx, cbor.NewCborStore(tbsRew)), ract)
 	if err != nil {

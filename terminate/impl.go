@@ -32,7 +32,7 @@ const maxPartitionsPerTx = 3
 
 func runTerminationsInBatches(
 	ctx context.Context,
-	api lotusapi.FullNodeStruct,
+	api *lotusapi.FullNodeStruct,
 	minerAddr address.Address,
 	minerInfo lotusapi.MinerInfo,
 	gasLimit int64,
@@ -72,7 +72,7 @@ func runTerminationsInBatches(
 
 func runPendingTerminations(
 	ctx context.Context,
-	api lotusapi.FullNodeStruct,
+	api *lotusapi.FullNodeStruct,
 	minerAddr address.Address,
 	minerInfo lotusapi.MinerInfo,
 	gasLimit int64,
@@ -110,7 +110,7 @@ func runPendingTerminations(
 
 func terminateSectors(
 	ctx context.Context,
-	api lotusapi.FullNodeStruct,
+	api *lotusapi.FullNodeStruct,
 	height abi.ChainEpoch,
 	ts *types.TipSet,
 	minerAddr address.Address,

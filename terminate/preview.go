@@ -23,7 +23,7 @@ import (
 //     calculation method.
 func PreviewTerminateSector(
 	ctx context.Context,
-	api lotusapi.FullNodeStruct,
+	api *lotusapi.FullNodeStruct,
 	minerAddr address.Address,
 	tipset string,
 	vmHeight uint64,
@@ -100,7 +100,7 @@ func PreviewTerminateSector(
 // API (no channels for streaming progress)
 func PreviewTerminateSectors(
 	ctx context.Context,
-	api lotusapi.FullNodeStruct,
+	api *lotusapi.FullNodeStruct,
 	minerAddr address.Address,
 	tipset string,
 	vmHeight uint64,

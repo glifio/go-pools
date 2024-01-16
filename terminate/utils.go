@@ -16,7 +16,7 @@ import (
 
 // From Lotus
 
-func parseTipSetRef(ctx context.Context, api lotusapi.FullNodeStruct, tss string) (*types.TipSet, error) {
+func parseTipSetRef(ctx context.Context, api *lotusapi.FullNodeStruct, tss string) (*types.TipSet, error) {
 	if tss[0] == '@' {
 		if tss == "@head" {
 			return api.ChainHead(ctx)
@@ -65,7 +65,7 @@ func parseTipSetString(ts string) ([]cid.Cid, error) {
 	return cids, nil
 }
 
-func parseTipSetAndHeight(ctx context.Context, api lotusapi.FullNodeStruct, tipset string, vmHeight uint64) (h abi.ChainEpoch, ts *types.TipSet, err error) {
+func parseTipSetAndHeight(ctx context.Context, api *lotusapi.FullNodeStruct, tipset string, vmHeight uint64) (h abi.ChainEpoch, ts *types.TipSet, err error) {
 	h = abi.ChainEpoch(vmHeight)
 	if tss := tipset; tss != "" {
 		ts, err = parseTipSetRef(ctx, api, tss)

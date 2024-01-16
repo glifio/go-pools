@@ -8,14 +8,12 @@ import (
 
 	"github.com/filecoin-project/go-address"
 	"github.com/filecoin-project/go-state-types/abi"
-	"github.com/filecoin-project/go-state-types/builtin/v11/util/smoothing"
 	"github.com/filecoin-project/lotus/api"
 	"github.com/filecoin-project/lotus/blockstore"
 	"github.com/filecoin-project/lotus/build"
 	"github.com/filecoin-project/lotus/chain/actors/adt"
 	"github.com/filecoin-project/lotus/chain/actors/builtin"
 	"github.com/filecoin-project/lotus/chain/actors/builtin/miner"
-	"github.com/filecoin-project/lotus/chain/actors/builtin/power"
 	"github.com/filecoin-project/lotus/chain/actors/builtin/reward"
 	"github.com/filecoin-project/lotus/chain/types"
 	"github.com/glifio/go-pools/util"
@@ -64,7 +62,7 @@ func NewMinerStats() *MinerStats {
 	}
 }
 
-func ComputeMinersStats(ctx context.Context, minerAddrs []address.Address, ts *types.TipSet, api api.FullNode) (*MinerStats, error) {
+func ComputeMinersStats(ctx context.Context, minerAddrs []address.Address, ts *types.TipSet, api *api.FullNodeStruct) (*MinerStats, error) {
 	aggMinerStats := NewMinerStats()
 
 	minerCount := int64(len(minerAddrs))
@@ -108,7 +106,7 @@ func ComputeMinersStats(ctx context.Context, minerAddrs []address.Address, ts *t
 	return aggMinerStats, nil
 }
 
-func ComputeMinerStats(ctx context.Context, minerAddr address.Address, ts *types.TipSet, api api.FullNode) (*MinerStats, error) {
+func ComputeMinerStats(ctx context.Context, minerAddr address.Address, ts *types.TipSet, api *api.FullNodeStruct) (*MinerStats, error) {
 	minerStats := &MinerStats{}
 
 	mi, err := api.StateMinerInfo(ctx, minerAddr, ts.Key())
@@ -117,7 +115,7 @@ func ComputeMinerStats(ctx context.Context, minerAddr address.Address, ts *types
 	}
 	minerStats.MinerInfo = &mi
 
-	actor, minerState, err := loadMinerActor(ctx, api, minerAddr, ts)
+	actor, minerState, err := LoadMinerActor(ctx, api, minerAddr, ts)
 	if err != nil {
 		return nil, err
 	}
@@ -171,7 +169,7 @@ func ComputeMinerStats(ctx context.Context, minerAddr address.Address, ts *types
 	return minerStats, nil
 }
 
-func ComputeFilPerTiB(ctx context.Context, ts *types.TipSet, api api.FullNode) (*float64, error) {
+func ComputeFilPerTiB(ctx context.Context, ts *types.TipSet, api *api.FullNodeStruct) (*float64, error) {
 	// get the block rewards for this epoch
 	reward, err := getBlockReward(ctx, api, ts)
 	if err != nil {
@@ -196,7 +194,7 @@ func ComputeFilPerTiB(ctx context.Context, ts *types.TipSet, api api.FullNode) (
 	return &ratio, nil
 }
 
-func ComputeEDRLazy1(ctx context.Context, minerAddr address.Address, ts *types.TipSet, api api.FullNode) (*big.Int, error) {
+func ComputeEDRLazy1(ctx context.Context, minerAddr address.Address, ts *types.TipSet, api *api.FullNodeStruct) (*big.Int, error) {
 	pow, err := api.StateMinerPower(ctx, minerAddr, ts.Key())
 	if err != nil {
 		return nil, err
@@ -244,31 +242,7 @@ func ComputeEDRLazy1(ctx context.Context, minerAddr address.Address, ts *types.T
 	return big.NewInt(0), nil
 }
 
-func getSmoothedRew(ctx context.Context, api api.FullNode, ts *types.TipSet) (smoothing.FilterEstimate, error) {
-	ract, err := api.StateGetActor(ctx, reward.Address, ts.Key())
-	if err != nil {
-		return smoothing.FilterEstimate{}, err
-	}
-
-	tbsRew := newTieredBlockstore(api)
-
-	rst, err := reward.Load(adt.WrapStore(ctx, cbor.NewCborStore(tbsRew)), ract)
-	if err != nil {
-		return smoothing.FilterEstimate{}, err
-	}
-
-	smoothedRew, err := rst.ThisEpochRewardSmoothed()
-	if err != nil {
-		return smoothing.FilterEstimate{}, err
-	}
-
-	return smoothing.NewEstimate(
-		smoothedRew.PositionEstimate,
-		smoothedRew.VelocityEstimate,
-	), nil
-}
-
-func getBlockReward(ctx context.Context, api api.FullNode, ts *types.TipSet) (*big.Int, error) {
+func getBlockReward(ctx context.Context, api *api.FullNodeStruct, ts *types.TipSet) (*big.Int, error) {
 	ract, err := api.StateGetActor(ctx, reward.Address, ts.Key())
 	if err != nil {
 		return big.NewInt(0), err
@@ -292,31 +266,7 @@ func getBlockReward(ctx context.Context, api api.FullNode, ts *types.TipSet) (*b
 	return blockReward.Int, nil
 }
 
-func getSmoothedPow(ctx context.Context, api api.FullNode, ts *types.TipSet) (smoothing.FilterEstimate, error) {
-	pact, err := api.StateGetActor(ctx, power.Address, ts.Key())
-	if err != nil {
-		return smoothing.FilterEstimate{}, err
-	}
-
-	tbsPow := newTieredBlockstore(api)
-
-	pst, err := power.Load(adt.WrapStore(ctx, cbor.NewCborStore(tbsPow)), pact)
-	if err != nil {
-		return smoothing.FilterEstimate{}, err
-	}
-
-	smoothedPow, err := pst.TotalPowerSmoothed()
-	if err != nil {
-		return smoothing.FilterEstimate{}, err
-	}
-
-	return smoothing.NewEstimate(
-		smoothedPow.PositionEstimate,
-		smoothedPow.VelocityEstimate,
-	), nil
-}
-
-func loadMinerActor(ctx context.Context, api api.FullNode, minerAddr address.Address, ts *types.TipSet) (*types.ActorV5, miner.State, error) {
+func LoadMinerActor(ctx context.Context, api *api.FullNodeStruct, minerAddr address.Address, ts *types.TipSet) (*types.ActorV5, miner.State, error) {
 	mact, err := api.StateGetActor(ctx, minerAddr, ts.Key())
 	if err != nil {
 		return nil, nil, err
@@ -329,9 +279,9 @@ func loadMinerActor(ctx context.Context, api api.FullNode, minerAddr address.Add
 	return mact, state, err
 }
 
-func newTieredBlockstore(api api.FullNode) blockstore.Blockstore {
+func newTieredBlockstore(lapi *api.FullNodeStruct) blockstore.Blockstore {
 	return blockstore.NewTieredBstore(
-		blockstore.NewAPIBlockstore(api),
+		blockstore.NewAPIBlockstore(lapi),
 		blockstore.NewMemory(),
 	)
 }
@@ -345,7 +295,7 @@ func computePercentOf(x *big.Int) *big.Int {
 	return result.Div(result, r.Denom())
 }
 
-func computeSectorStatus(ctx context.Context, lotus api.FullNode, miner address.Address, tsk *types.TipSet) (*api.MinerSectors, error) {
+func computeSectorStatus(ctx context.Context, lotus *api.FullNodeStruct, miner address.Address, tsk *types.TipSet) (*api.MinerSectors, error) {
 
 	sectorStatus := api.MinerSectors{}
 
