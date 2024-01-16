@@ -3,6 +3,7 @@ package terminate
 import (
 	"context"
 	"math"
+	"math/big"
 
 	"github.com/filecoin-project/go-state-types/builtin/v9/miner"
 	"golang.org/x/xerrors"
@@ -127,6 +128,12 @@ func PreviewTerminateSectors(
 
 	// Lookup current owner / worker
 	minerInfo, err := mstate.Info()
+	if err != nil {
+		errorCh <- err
+		return
+	}
+
+	lf, err := mstate.LockedFunds()
 	if err != nil {
 		errorCh <- err
 		return
@@ -432,6 +439,8 @@ func PreviewTerminateSectors(
 	resultCh <- &PreviewTerminateSectorsReturn{
 		Actor:                      actor,
 		MinerInfo:                  minerInfo,
+		VestingBalance:             lf.VestingFunds.Int,
+		InitialPledge:              new(big.Int).Add(lf.InitialPledgeRequirement.Int, lf.PreCommitDeposits.Int),
 		SectorStats:                allStats,
 		SectorsTerminated:          sectorsTerminated,
 		SectorsCount:               sectorsCount,

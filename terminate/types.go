@@ -1,6 +1,8 @@
 package terminate
 
 import (
+	"math/big"
+
 	"github.com/filecoin-project/go-state-types/abi"
 	minertypes "github.com/filecoin-project/go-state-types/builtin/v9/miner"
 	"github.com/filecoin-project/lotus/chain/types"
@@ -10,9 +12,8 @@ import (
 type PreviewTerminateSectorsReturn struct {
 	Actor                      *types.ActorV5
 	MinerInfo                  minertypes.MinerInfo
-	AvailableBalance           abi.TokenAmount
-	VestingBalance             abi.TokenAmount
-	InitialPledge              abi.TokenAmount
+	VestingBalance             *big.Int
+	InitialPledge              *big.Int
 	SectorStats                *SectorStats
 	SectorsTerminated          uint64
 	SectorsCount               uint64

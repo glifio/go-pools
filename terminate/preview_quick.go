@@ -3,6 +3,7 @@ package terminate
 import (
 	"context"
 	"math"
+	"math/big"
 
 	"github.com/filecoin-project/go-state-types/builtin/v9/miner"
 
@@ -11,6 +12,7 @@ import (
 	"github.com/filecoin-project/go-state-types/abi"
 	lotusapi "github.com/filecoin-project/lotus/api"
 	"github.com/filecoin-project/lotus/chain/types"
+	"github.com/glifio/go-pools/mstat"
 	"github.com/glifio/go-pools/util"
 )
 
@@ -27,7 +29,7 @@ import (
 // to stream results.
 func PreviewTerminateSectorsQuick(
 	ctx context.Context,
-	api lotusapi.FullNodeStruct,
+	api *lotusapi.FullNodeStruct,
 	minerAddr address.Address,
 	ts *types.TipSet,
 ) (*PreviewTerminateSectorsReturn, error) {
@@ -38,7 +40,7 @@ func PreviewTerminateSectorsQuick(
 	h := ts.Height()
 
 	// Lookup actor balance
-	actor, err := api.StateGetActor(ctx, minerAddr, ts.Key())
+	actor, mstate, err := mstat.LoadMinerActor(ctx, api, minerAddr, ts)
 	if err != nil {
 		return nil, err
 	}
@@ -46,7 +48,12 @@ func PreviewTerminateSectorsQuick(
 	actor.Address = &minerAddr
 
 	// Lookup current owner / worker
-	minerInfo, err := api.StateMinerInfo(ctx, minerAddr, ts.Key())
+	minerInfo, err := mstate.Info()
+	if err != nil {
+		return nil, err
+	}
+
+	lf, err := mstate.LockedFunds()
 	if err != nil {
 		return nil, err
 	}
@@ -63,16 +70,16 @@ func PreviewTerminateSectorsQuick(
 		return nil, err
 	}
 
-	workerActorPrev, err := api.StateGetActor(ctx, minerInfo.Worker, tsPrev.Key())
-	if err != nil {
-		return nil, err
-	}
-
 	autoBatchSize := false
 	if batchSize == 0 && gasLimit == 0 {
 		autoBatchSize = true
 		batchSize = 2500
 		gasLimit = 90000000000 * 3 // 3 deadlines per batch
+
+		workerActorPrev, err := api.StateGetActor(ctx, minerInfo.Worker, tsPrev.Key())
+		if err != nil {
+			return nil, err
+		}
 
 		workerBal, _ := util.ToFIL(workerActorPrev.Balance.Int).Float64()
 		if workerBal < 3.0 {
@@ -269,6 +276,8 @@ loop:
 	return &PreviewTerminateSectorsReturn{
 		Actor:                      actor,
 		MinerInfo:                  minerInfo,
+		VestingBalance:             lf.VestingFunds.Int,
+		InitialPledge:              new(big.Int).Add(lf.InitialPledgeRequirement.Int, lf.PreCommitDeposits.Int),
 		SectorStats:                allStats,
 		SectorsTerminated:          sectorsTerminated,
 		SectorsCount:               sectorsCount,
