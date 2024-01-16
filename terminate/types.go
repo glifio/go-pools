@@ -45,14 +45,9 @@ type PreviewTerminateSectorsProgress struct {
 	SliceCount             uint64
 }
 
-type TerminateSectorsSummary struct {
-	MinerAddr          string         `json:"minerAddr"`
-	MinerBal           string         `json:"minerBal"`
-	TerminationPenalty string         `json:"terminationPenalty"`
-	SectorsTerminated  uint64         `json:"sectorsTerminated"`
-	SectorsCount       uint64         `json:"sectorCount"`
-	MinExpiration      abi.ChainEpoch `json:"minExpiration"`
-	MaxExpiration      abi.ChainEpoch `json:"maxExpiration"`
-	MaxAge             abi.ChainEpoch `json:"maxAge"`
-	MinAge             abi.ChainEpoch `json:"minAge"`
+type PreviewAgentTerminationSummary struct {
+	TerminationPenalty *big.Int
+	InitialPledge      *big.Int
+	VestingBalance     *big.Int
+	AvailableBalance   *big.Int
 }
