@@ -85,6 +85,7 @@ func PreviewAgentTermination(ctx context.Context, sdk types.PoolsSDK, agentAddr 
 		InitialPledge:      initialPledgeAgg,
 		VestingBalance:     vestingBalanceAgg,
 		AvailableBalance:   availableBalanceAgg,
+		AgentLiquidBalance: agentLiquidFIL,
 	}, nil
 }
 

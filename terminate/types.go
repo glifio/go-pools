@@ -50,4 +50,5 @@ type PreviewAgentTerminationSummary struct {
 	InitialPledge      *big.Int
 	VestingBalance     *big.Int
 	AvailableBalance   *big.Int
+	AgentLiquidBalance *big.Int
 }
