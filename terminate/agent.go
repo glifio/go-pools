@@ -89,6 +89,12 @@ func PreviewAgentTermination(ctx context.Context, sdk types.PoolsSDK, agentAddr 
 }
 
 func (term PreviewAgentTerminationSummary) LiquidationValue() *big.Int {
+	// if the termination penalty is greater than the initial pledge,
+	// OR if the initial pledge is 0,
+	// we report liquidation value as 0
+	if term.InitialPledge.Cmp(term.TerminationPenalty) < 0 || term.InitialPledge.Cmp(big.NewInt(0)) == 0 {
+		return big.NewInt(0)
+	}
 	// first we multiply the available balance by the recovery rate
 	// recovery rate = (initial pledge - termination penalty) / initial pledge
 	// discounted avail = (available * initial pledge - available * termination penalty) / initial pledge
@@ -96,8 +102,6 @@ func (term PreviewAgentTerminationSummary) LiquidationValue() *big.Int {
 	availTimesTermPenalty := new(big.Int).Mul(term.AvailableBalance, term.TerminationPenalty)
 
 	discountedAvail := new(big.Int).Sub(availTimesPledge, availTimesTermPenalty)
-	// mul the discountedAvail by WAD math before the division for precision
-	discountedAvail.Mul(discountedAvail, util.WAD)
 	discountedAvail.Div(discountedAvail, term.InitialPledge)
 
 	// we add the discounted available balance to the vesting balance and initial pledge, subtract the termination penalty to get the liquidation value
@@ -109,6 +113,10 @@ func (term PreviewAgentTerminationSummary) LiquidationValue() *big.Int {
 }
 
 func (term PreviewAgentTerminationSummary) RecoveryRate() *big.Float {
+	if term.InitialPledge.Cmp(term.TerminationPenalty) == -1 || term.InitialPledge.Cmp(big.NewInt(0)) == 0 {
+		return big.NewFloat(0)
+	}
+
 	initialPledgeFloat := new(big.Float).SetInt(term.InitialPledge)
 	terminationPenaltyFloat := new(big.Float).SetInt(term.TerminationPenalty)
 	// recovery rate = (initial pledge - termination penalty) / initial pledge
