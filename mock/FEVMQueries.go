@@ -20,8 +20,6 @@ import (
 
 	mock "github.com/stretchr/testify/mock"
 
-	types "github.com/glifio/go-pools/types"
-
 	vc "github.com/glifio/go-pools/vc"
 )
 
@@ -1768,62 +1766,6 @@ func (_c *FEVMQueries_InfPoolAgentMaxBorrow_Call) RunAndReturn(run func(context.
 	return _c
 }
 
-// InfPoolAgentMaxWithdraw provides a mock function with given fields: ctx, agentAddr, agentData
-func (_m *FEVMQueries) InfPoolAgentMaxWithdraw(ctx context.Context, agentAddr common.Address, agentData *vc.AgentData) (*big.Int, error) {
-	ret := _m.Called(ctx, agentAddr, agentData)
-
-	var r0 *big.Int
-	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context, common.Address, *vc.AgentData) (*big.Int, error)); ok {
-		return rf(ctx, agentAddr, agentData)
-	}
-	if rf, ok := ret.Get(0).(func(context.Context, common.Address, *vc.AgentData) *big.Int); ok {
-		r0 = rf(ctx, agentAddr, agentData)
-	} else {
-		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*big.Int)
-		}
-	}
-
-	if rf, ok := ret.Get(1).(func(context.Context, common.Address, *vc.AgentData) error); ok {
-		r1 = rf(ctx, agentAddr, agentData)
-	} else {
-		r1 = ret.Error(1)
-	}
-
-	return r0, r1
-}
-
-// FEVMQueries_InfPoolAgentMaxWithdraw_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'InfPoolAgentMaxWithdraw'
-type FEVMQueries_InfPoolAgentMaxWithdraw_Call struct {
-	*mock.Call
-}
-
-// InfPoolAgentMaxWithdraw is a helper method to define mock.On call
-//   - ctx context.Context
-//   - agentAddr common.Address
-//   - agentData *vc.AgentData
-func (_e *FEVMQueries_Expecter) InfPoolAgentMaxWithdraw(ctx interface{}, agentAddr interface{}, agentData interface{}) *FEVMQueries_InfPoolAgentMaxWithdraw_Call {
-	return &FEVMQueries_InfPoolAgentMaxWithdraw_Call{Call: _e.mock.On("InfPoolAgentMaxWithdraw", ctx, agentAddr, agentData)}
-}
-
-func (_c *FEVMQueries_InfPoolAgentMaxWithdraw_Call) Run(run func(ctx context.Context, agentAddr common.Address, agentData *vc.AgentData)) *FEVMQueries_InfPoolAgentMaxWithdraw_Call {
-	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(common.Address), args[2].(*vc.AgentData))
-	})
-	return _c
-}
-
-func (_c *FEVMQueries_InfPoolAgentMaxWithdraw_Call) Return(_a0 *big.Int, _a1 error) *FEVMQueries_InfPoolAgentMaxWithdraw_Call {
-	_c.Call.Return(_a0, _a1)
-	return _c
-}
-
-func (_c *FEVMQueries_InfPoolAgentMaxWithdraw_Call) RunAndReturn(run func(context.Context, common.Address, *vc.AgentData) (*big.Int, error)) *FEVMQueries_InfPoolAgentMaxWithdraw_Call {
-	_c.Call.Return(run)
-	return _c
-}
-
 // InfPoolApy provides a mock function with given fields: ctx, blockNumber
 func (_m *FEVMQueries) InfPoolApy(ctx context.Context, blockNumber *big.Int) (*big.Int, error) {
 	ret := _m.Called(ctx, blockNumber)
@@ -2220,67 +2162,6 @@ func (_c *FEVMQueries_InfPoolGetRate_Call) Return(_a0 *big.Int, _a1 error) *FEVM
 }
 
 func (_c *FEVMQueries_InfPoolGetRate_Call) RunAndReturn(run func(context.Context, abigen.VerifiableCredential) (*big.Int, error)) *FEVMQueries_InfPoolGetRate_Call {
-	_c.Call.Return(run)
-	return _c
-}
-
-// InfPoolIsApprovedWithReason provides a mock function with given fields: ctx, agentAddr, agentData
-func (_m *FEVMQueries) InfPoolIsApprovedWithReason(ctx context.Context, agentAddr common.Address, agentData *vc.AgentData) (bool, types.RejectionReason, error) {
-	ret := _m.Called(ctx, agentAddr, agentData)
-
-	var r0 bool
-	var r1 types.RejectionReason
-	var r2 error
-	if rf, ok := ret.Get(0).(func(context.Context, common.Address, *vc.AgentData) (bool, types.RejectionReason, error)); ok {
-		return rf(ctx, agentAddr, agentData)
-	}
-	if rf, ok := ret.Get(0).(func(context.Context, common.Address, *vc.AgentData) bool); ok {
-		r0 = rf(ctx, agentAddr, agentData)
-	} else {
-		r0 = ret.Get(0).(bool)
-	}
-
-	if rf, ok := ret.Get(1).(func(context.Context, common.Address, *vc.AgentData) types.RejectionReason); ok {
-		r1 = rf(ctx, agentAddr, agentData)
-	} else {
-		r1 = ret.Get(1).(types.RejectionReason)
-	}
-
-	if rf, ok := ret.Get(2).(func(context.Context, common.Address, *vc.AgentData) error); ok {
-		r2 = rf(ctx, agentAddr, agentData)
-	} else {
-		r2 = ret.Error(2)
-	}
-
-	return r0, r1, r2
-}
-
-// FEVMQueries_InfPoolIsApprovedWithReason_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'InfPoolIsApprovedWithReason'
-type FEVMQueries_InfPoolIsApprovedWithReason_Call struct {
-	*mock.Call
-}
-
-// InfPoolIsApprovedWithReason is a helper method to define mock.On call
-//   - ctx context.Context
-//   - agentAddr common.Address
-//   - agentData *vc.AgentData
-func (_e *FEVMQueries_Expecter) InfPoolIsApprovedWithReason(ctx interface{}, agentAddr interface{}, agentData interface{}) *FEVMQueries_InfPoolIsApprovedWithReason_Call {
-	return &FEVMQueries_InfPoolIsApprovedWithReason_Call{Call: _e.mock.On("InfPoolIsApprovedWithReason", ctx, agentAddr, agentData)}
-}
-
-func (_c *FEVMQueries_InfPoolIsApprovedWithReason_Call) Run(run func(ctx context.Context, agentAddr common.Address, agentData *vc.AgentData)) *FEVMQueries_InfPoolIsApprovedWithReason_Call {
-	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(common.Address), args[2].(*vc.AgentData))
-	})
-	return _c
-}
-
-func (_c *FEVMQueries_InfPoolIsApprovedWithReason_Call) Return(_a0 bool, _a1 types.RejectionReason, _a2 error) *FEVMQueries_InfPoolIsApprovedWithReason_Call {
-	_c.Call.Return(_a0, _a1, _a2)
-	return _c
-}
-
-func (_c *FEVMQueries_InfPoolIsApprovedWithReason_Call) RunAndReturn(run func(context.Context, common.Address, *vc.AgentData) (bool, types.RejectionReason, error)) *FEVMQueries_InfPoolIsApprovedWithReason_Call {
 	_c.Call.Return(run)
 	return _c
 }
