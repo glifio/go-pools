@@ -64,3 +64,8 @@ var INFINITY_POOL_ID = big.NewInt(0)
 var CHUNKSIZE = big.NewInt(50000)
 
 var FAULTY_SECTOR_TOLERANCE = big.NewFloat(0.001)
+
+// NOTE these should be generated in the future from the live values in the contracts
+var MAX_DTE = big.NewInt(2e18)
+var MAX_LTV = big.NewInt(8e17)
+var MAX_DTI = big.NewInt(25e16)

@@ -56,7 +56,7 @@ func TestAgentLiquidationValue(t *testing.T) {
 func TestAgentRecoveryRate(t *testing.T) {
 	var testCases = []struct {
 		terminationStats PreviewAgentTerminationSummary
-		expRes           *big.Float
+		expRes           *big.Int
 	}{
 		// case 1 - 50% recovery rate
 		{PreviewAgentTerminationSummary{
@@ -64,34 +64,34 @@ func TestAgentRecoveryRate(t *testing.T) {
 			InitialPledge:      util.ToAtto(big.NewFloat(1000)),
 			AvailableBalance:   util.ToAtto(big.NewFloat(0)),
 			VestingBalance:     util.ToAtto(big.NewFloat(0)),
-		}, big.NewFloat(50.00)},
+		}, big.NewInt(5e17)},
 		// case 2 - 90% recovery rate, 0 available
 		{PreviewAgentTerminationSummary{
 			TerminationPenalty: util.ToAtto(big.NewFloat(100)),
 			InitialPledge:      util.ToAtto(big.NewFloat(1000)),
 			AvailableBalance:   util.ToAtto(big.NewFloat(0)),
 			VestingBalance:     util.ToAtto(big.NewFloat(100)),
-		}, big.NewFloat(90.00)},
+		}, big.NewInt(9e17)},
 		// case 3 termination bigger than initial pledge
 		{PreviewAgentTerminationSummary{
 			TerminationPenalty: util.ToAtto(big.NewFloat(1000)),
 			InitialPledge:      util.ToAtto(big.NewFloat(1000)),
 			AvailableBalance:   util.ToAtto(big.NewFloat(0)),
 			VestingBalance:     util.ToAtto(big.NewFloat(0)),
-		}, big.NewFloat(0)},
+		}, big.NewInt(0)},
 		// case 4 - 0's
 		{PreviewAgentTerminationSummary{
 			TerminationPenalty: util.ToAtto(big.NewFloat(0)),
 			InitialPledge:      util.ToAtto(big.NewFloat(0)),
 			AvailableBalance:   util.ToAtto(big.NewFloat(0)),
 			VestingBalance:     util.ToAtto(big.NewFloat(0)),
-		}, big.NewFloat(0)},
+		}, big.NewInt(0)},
 		{PreviewAgentTerminationSummary{
 			TerminationPenalty: util.ToAtto(big.NewFloat(0)),
 			InitialPledge:      util.ToAtto(big.NewFloat(100)),
 			AvailableBalance:   util.ToAtto(big.NewFloat(0)),
 			VestingBalance:     util.ToAtto(big.NewFloat(0)),
-		}, big.NewFloat(100)},
+		}, big.NewInt(1e18)},
 	}
 
 	for i, tc := range testCases {

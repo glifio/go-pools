@@ -7,6 +7,7 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/filecoin-project/go-state-types/abi"
 	ltypes "github.com/filecoin-project/lotus/chain/types"
+	"github.com/glifio/go-pools/constants"
 	"github.com/glifio/go-pools/types"
 	"github.com/glifio/go-pools/util"
 )
@@ -113,17 +114,16 @@ func (term PreviewAgentTerminationSummary) LiquidationValue() *big.Int {
 	return liquidationValue
 }
 
-func (term PreviewAgentTerminationSummary) RecoveryRate() *big.Float {
+// 1e18 = 100%
+func (term PreviewAgentTerminationSummary) RecoveryRate() *big.Int {
 	if term.InitialPledge.Cmp(term.TerminationPenalty) == -1 || term.InitialPledge.Cmp(big.NewInt(0)) == 0 {
-		return big.NewFloat(0)
+		return big.NewInt(0)
 	}
 
-	initialPledgeFloat := new(big.Float).SetInt(term.InitialPledge)
-	terminationPenaltyFloat := new(big.Float).SetInt(term.TerminationPenalty)
 	// recovery rate = (initial pledge - termination penalty) / initial pledge
-	recoveryRate := new(big.Float).Sub(initialPledgeFloat, terminationPenaltyFloat)
-	recoveryRate.Quo(recoveryRate, initialPledgeFloat)
-	recoveryRate.Mul(recoveryRate, big.NewFloat(100))
+	recoveryRate := new(big.Int).Sub(term.InitialPledge, term.TerminationPenalty)
+	recoveryRate.Mul(recoveryRate, constants.WAD)
+	recoveryRate.Quo(recoveryRate, term.InitialPledge)
 
 	return recoveryRate
 }

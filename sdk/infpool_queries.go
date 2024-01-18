@@ -173,14 +173,40 @@ func computeMaxDTICap(epochRate *big.Int, edr *big.Int, agentExistingPrincipal *
 }
 
 func computeMaxDTECap(agentValue *big.Int, principal *big.Int) *big.Int {
-	return new(big.Int).Sub(agentValue, principal)
+	maxValue := new(big.Int).Mul(agentValue, constants.MAX_DTE)
+	// div out wad math precision
+	maxValue.Div(maxValue, constants.WAD)
+
+	if maxValue.Cmp(principal) == -1 {
+		return big.NewInt(0)
+	}
+
+	return new(big.Int).Sub(maxValue, principal)
 }
 
-// P(new) = AgentValue(old) - 2*P(old)
-// where the value 2 is based on mstat.TerminationPenaltyRatio being .5
-func computeMaxLTVCap(agentValue *big.Int, principal *big.Int) *big.Int {
-	oldPrincipalCap := new(big.Int).Mul(principal, big.NewInt(2))
-	return new(big.Int).Sub(agentValue, oldPrincipalCap)
+// computeMaxLTVCap returns the max borrowable amount from the agent's liquidation value
+// maxBorrow = (-1*((LTV*LVstart)/(LTV * RR) - 1)) - P
+// recovery rate % is expressed as wad math whole number - 1e18 is 100%, 9e17 is 90%, etc
+func computeMaxLTVCap(liquidationValue *big.Int, principal *big.Int, recoveryRate *big.Int) *big.Int {
+	// numerator computation
+	num := new(big.Int).Mul(liquidationValue, constants.MAX_LTV)
+	num.Mul(num, big.NewInt(-1))
+
+	// denom computation
+	denom := new(big.Int).Mul(constants.MAX_LTV, recoveryRate)
+	// div out the wad math precision from the recovery rate
+	denom.Div(denom, constants.WAD)
+	denom.Sub(denom, constants.WAD)
+
+	maxBorrow := new(big.Int).Div(num, denom)
+
+	if maxBorrow.Cmp(principal) < 1 {
+		return big.NewInt(0)
+	}
+
+	// subtract out the existing principal to arrive at maxBorrow
+	maxBorrow.Sub(maxBorrow, principal)
+	return maxBorrow
 }
 
 func findMinCap(values []*big.Int) *big.Int {
@@ -199,9 +225,9 @@ func findMinCap(values []*big.Int) *big.Int {
 func MaxBorrowFromAgentData(agentData *vc.AgentData, rate *big.Int) *big.Int {
 	caps := []*big.Int{
 		// TODO: maxDTI in computeMaxDTI is hardcoded to 25%, this could be derived from the contracts
-		computeMaxDTICap(rate, agentData.ExpectedDailyRewards, agentData.Principal, big.NewInt(25e16)),
+		computeMaxDTICap(rate, agentData.ExpectedDailyRewards, agentData.Principal, constants.MAX_DTI),
 		computeMaxDTECap(agentData.AgentValue, agentData.Principal),
-		computeMaxLTVCap(agentData.AgentValue, agentData.Principal),
+		// computeMaxLTVCap(agentData.AgentValue, agentData.Principal),
 	}
 
 	return findMinCap(caps)
