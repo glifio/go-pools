@@ -3,6 +3,7 @@ package terminate
 import (
 	"math/big"
 
+	"github.com/filecoin-project/go-address"
 	"github.com/filecoin-project/go-state-types/abi"
 	minertypes "github.com/filecoin-project/go-state-types/builtin/v9/miner"
 	"github.com/filecoin-project/lotus/chain/types"
@@ -49,6 +50,22 @@ type PreviewAgentTerminationSummary struct {
 	TerminationPenalty *big.Int
 	InitialPledge      *big.Int
 	VestingBalance     *big.Int
-	AvailableBalance   *big.Int
-	AgentLiquidBalance *big.Int
+	MinersAvailableBal *big.Int
+	AgentAvailableBal  *big.Int
+}
+
+type MinerCollateralStat struct {
+	Address            address.Address `json:"address"`
+	Total              *big.Int        `json:"total"`
+	Available          *big.Int        `json:"available"`
+	Pledged            *big.Int        `json:"pledged"`
+	Vesting            *big.Int        `json:"vesting"`
+	TerminationPenalty *big.Int        `json:"terminationPenalty"`
+}
+
+type AgentCollateralStats struct {
+	AvailableBalance       *big.Int               `json:"agentAvailableBalance"`
+	TerminationPenalty     *big.Int               `json:"terminationPenalty"`
+	MinersTerminationStats []*MinerCollateralStat `json:"minersCollateralStats"`
+	Epoch                  abi.ChainEpoch         `json:"epoch"`
 }

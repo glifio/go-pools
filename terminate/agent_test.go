@@ -17,30 +17,42 @@ func TestAgentLiquidationValue(t *testing.T) {
 		{PreviewAgentTerminationSummary{
 			TerminationPenalty: util.ToAtto(big.NewFloat(500)),
 			InitialPledge:      util.ToAtto(big.NewFloat(1000)),
-			AvailableBalance:   util.ToAtto(big.NewFloat(100)),
+			MinersAvailableBal: util.ToAtto(big.NewFloat(100)),
+			AgentAvailableBal:  util.ToAtto(big.NewFloat(0)),
 			VestingBalance:     util.ToAtto(big.NewFloat(100)),
 		}, util.ToAtto(big.NewFloat(650))},
 		// case 2 - 90% recovery rate, 0 available
 		{PreviewAgentTerminationSummary{
 			TerminationPenalty: util.ToAtto(big.NewFloat(100)),
 			InitialPledge:      util.ToAtto(big.NewFloat(1000)),
-			AvailableBalance:   util.ToAtto(big.NewFloat(0)),
+			MinersAvailableBal: util.ToAtto(big.NewFloat(0)),
+			AgentAvailableBal:  util.ToAtto(big.NewFloat(0)),
 			VestingBalance:     util.ToAtto(big.NewFloat(100)),
 		}, util.ToAtto(big.NewFloat(1000))},
 		// case 3 termination bigger than initial pledge
 		{PreviewAgentTerminationSummary{
 			TerminationPenalty: util.ToAtto(big.NewFloat(1000)),
 			InitialPledge:      util.ToAtto(big.NewFloat(100)),
-			AvailableBalance:   util.ToAtto(big.NewFloat(0)),
+			MinersAvailableBal: util.ToAtto(big.NewFloat(0)),
+			AgentAvailableBal:  util.ToAtto(big.NewFloat(0)),
 			VestingBalance:     util.ToAtto(big.NewFloat(0)),
 		}, util.ToAtto(big.NewFloat(0))},
 		// case 4 - 0's
 		{PreviewAgentTerminationSummary{
 			TerminationPenalty: util.ToAtto(big.NewFloat(0)),
 			InitialPledge:      util.ToAtto(big.NewFloat(0)),
-			AvailableBalance:   util.ToAtto(big.NewFloat(0)),
+			MinersAvailableBal: util.ToAtto(big.NewFloat(0)),
+			AgentAvailableBal:  util.ToAtto(big.NewFloat(0)),
 			VestingBalance:     util.ToAtto(big.NewFloat(0)),
 		}, util.ToAtto(big.NewFloat(0))},
+		// case 5 - same as case 1 but agent has available fil
+		{PreviewAgentTerminationSummary{
+			TerminationPenalty: util.ToAtto(big.NewFloat(500)),
+			InitialPledge:      util.ToAtto(big.NewFloat(1000)),
+			MinersAvailableBal: util.ToAtto(big.NewFloat(50)),
+			AgentAvailableBal:  util.ToAtto(big.NewFloat(50)),
+			VestingBalance:     util.ToAtto(big.NewFloat(100)),
+		}, util.ToAtto(big.NewFloat(650))},
 	}
 
 	for i, tc := range testCases {
@@ -62,34 +74,39 @@ func TestAgentRecoveryRate(t *testing.T) {
 		{PreviewAgentTerminationSummary{
 			TerminationPenalty: util.ToAtto(big.NewFloat(500)),
 			InitialPledge:      util.ToAtto(big.NewFloat(1000)),
-			AvailableBalance:   util.ToAtto(big.NewFloat(0)),
+			MinersAvailableBal: util.ToAtto(big.NewFloat(0)),
+			AgentAvailableBal:  util.ToAtto(big.NewFloat(0)),
 			VestingBalance:     util.ToAtto(big.NewFloat(0)),
 		}, big.NewInt(5e17)},
 		// case 2 - 90% recovery rate, 0 available
 		{PreviewAgentTerminationSummary{
 			TerminationPenalty: util.ToAtto(big.NewFloat(100)),
 			InitialPledge:      util.ToAtto(big.NewFloat(1000)),
-			AvailableBalance:   util.ToAtto(big.NewFloat(0)),
+			MinersAvailableBal: util.ToAtto(big.NewFloat(0)),
+			AgentAvailableBal:  util.ToAtto(big.NewFloat(0)),
 			VestingBalance:     util.ToAtto(big.NewFloat(100)),
 		}, big.NewInt(9e17)},
 		// case 3 termination bigger than initial pledge
 		{PreviewAgentTerminationSummary{
 			TerminationPenalty: util.ToAtto(big.NewFloat(1000)),
 			InitialPledge:      util.ToAtto(big.NewFloat(1000)),
-			AvailableBalance:   util.ToAtto(big.NewFloat(0)),
+			MinersAvailableBal: util.ToAtto(big.NewFloat(0)),
+			AgentAvailableBal:  util.ToAtto(big.NewFloat(0)),
 			VestingBalance:     util.ToAtto(big.NewFloat(0)),
 		}, big.NewInt(0)},
 		// case 4 - 0's
 		{PreviewAgentTerminationSummary{
 			TerminationPenalty: util.ToAtto(big.NewFloat(0)),
 			InitialPledge:      util.ToAtto(big.NewFloat(0)),
-			AvailableBalance:   util.ToAtto(big.NewFloat(0)),
+			MinersAvailableBal: util.ToAtto(big.NewFloat(0)),
+			AgentAvailableBal:  util.ToAtto(big.NewFloat(0)),
 			VestingBalance:     util.ToAtto(big.NewFloat(0)),
 		}, big.NewInt(0)},
 		{PreviewAgentTerminationSummary{
 			TerminationPenalty: util.ToAtto(big.NewFloat(0)),
 			InitialPledge:      util.ToAtto(big.NewFloat(100)),
-			AvailableBalance:   util.ToAtto(big.NewFloat(0)),
+			MinersAvailableBal: util.ToAtto(big.NewFloat(0)),
+			AgentAvailableBal:  util.ToAtto(big.NewFloat(0)),
 			VestingBalance:     util.ToAtto(big.NewFloat(0)),
 		}, big.NewInt(1e18)},
 	}

@@ -20,6 +20,8 @@ import (
 
 	mock "github.com/stretchr/testify/mock"
 
+	terminate "github.com/glifio/go-pools/terminate"
+
 	vc "github.com/glifio/go-pools/vc"
 )
 
@@ -206,6 +208,60 @@ func (_c *FEVMQueries_AgentAdministrator_Call) Return(_a0 common.Address, _a1 er
 }
 
 func (_c *FEVMQueries_AgentAdministrator_Call) RunAndReturn(run func(context.Context, common.Address) (common.Address, error)) *FEVMQueries_AgentAdministrator_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// AgentCollateralStats provides a mock function with given fields: ctx, agentAddr, blockNumber
+func (_m *FEVMQueries) AgentCollateralStats(ctx context.Context, agentAddr common.Address, blockNumber *big.Int) (terminate.PreviewAgentTerminationSummary, error) {
+	ret := _m.Called(ctx, agentAddr, blockNumber)
+
+	var r0 terminate.PreviewAgentTerminationSummary
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, common.Address, *big.Int) (terminate.PreviewAgentTerminationSummary, error)); ok {
+		return rf(ctx, agentAddr, blockNumber)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, common.Address, *big.Int) terminate.PreviewAgentTerminationSummary); ok {
+		r0 = rf(ctx, agentAddr, blockNumber)
+	} else {
+		r0 = ret.Get(0).(terminate.PreviewAgentTerminationSummary)
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, common.Address, *big.Int) error); ok {
+		r1 = rf(ctx, agentAddr, blockNumber)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// FEVMQueries_AgentCollateralStats_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'AgentCollateralStats'
+type FEVMQueries_AgentCollateralStats_Call struct {
+	*mock.Call
+}
+
+// AgentCollateralStats is a helper method to define mock.On call
+//   - ctx context.Context
+//   - agentAddr common.Address
+//   - blockNumber *big.Int
+func (_e *FEVMQueries_Expecter) AgentCollateralStats(ctx interface{}, agentAddr interface{}, blockNumber interface{}) *FEVMQueries_AgentCollateralStats_Call {
+	return &FEVMQueries_AgentCollateralStats_Call{Call: _e.mock.On("AgentCollateralStats", ctx, agentAddr, blockNumber)}
+}
+
+func (_c *FEVMQueries_AgentCollateralStats_Call) Run(run func(ctx context.Context, agentAddr common.Address, blockNumber *big.Int)) *FEVMQueries_AgentCollateralStats_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(common.Address), args[2].(*big.Int))
+	})
+	return _c
+}
+
+func (_c *FEVMQueries_AgentCollateralStats_Call) Return(_a0 terminate.PreviewAgentTerminationSummary, _a1 error) *FEVMQueries_AgentCollateralStats_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *FEVMQueries_AgentCollateralStats_Call) RunAndReturn(run func(context.Context, common.Address, *big.Int) (terminate.PreviewAgentTerminationSummary, error)) *FEVMQueries_AgentCollateralStats_Call {
 	_c.Call.Return(run)
 	return _c
 }
@@ -2731,6 +2787,60 @@ func (_c *FEVMQueries_PoolRegistry_Call) Return(_a0 common.Address) *FEVMQueries
 }
 
 func (_c *FEVMQueries_PoolRegistry_Call) RunAndReturn(run func() common.Address) *FEVMQueries_PoolRegistry_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// PreviewAgentTermination provides a mock function with given fields: ctx, agentAddr, tipset
+func (_m *FEVMQueries) PreviewAgentTermination(ctx context.Context, agentAddr common.Address, tipset *chaintypes.TipSet) (terminate.PreviewAgentTerminationSummary, error) {
+	ret := _m.Called(ctx, agentAddr, tipset)
+
+	var r0 terminate.PreviewAgentTerminationSummary
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, common.Address, *chaintypes.TipSet) (terminate.PreviewAgentTerminationSummary, error)); ok {
+		return rf(ctx, agentAddr, tipset)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, common.Address, *chaintypes.TipSet) terminate.PreviewAgentTerminationSummary); ok {
+		r0 = rf(ctx, agentAddr, tipset)
+	} else {
+		r0 = ret.Get(0).(terminate.PreviewAgentTerminationSummary)
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, common.Address, *chaintypes.TipSet) error); ok {
+		r1 = rf(ctx, agentAddr, tipset)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// FEVMQueries_PreviewAgentTermination_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'PreviewAgentTermination'
+type FEVMQueries_PreviewAgentTermination_Call struct {
+	*mock.Call
+}
+
+// PreviewAgentTermination is a helper method to define mock.On call
+//   - ctx context.Context
+//   - agentAddr common.Address
+//   - tipset *chaintypes.TipSet
+func (_e *FEVMQueries_Expecter) PreviewAgentTermination(ctx interface{}, agentAddr interface{}, tipset interface{}) *FEVMQueries_PreviewAgentTermination_Call {
+	return &FEVMQueries_PreviewAgentTermination_Call{Call: _e.mock.On("PreviewAgentTermination", ctx, agentAddr, tipset)}
+}
+
+func (_c *FEVMQueries_PreviewAgentTermination_Call) Run(run func(ctx context.Context, agentAddr common.Address, tipset *chaintypes.TipSet)) *FEVMQueries_PreviewAgentTermination_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(common.Address), args[2].(*chaintypes.TipSet))
+	})
+	return _c
+}
+
+func (_c *FEVMQueries_PreviewAgentTermination_Call) Return(_a0 terminate.PreviewAgentTerminationSummary, _a1 error) *FEVMQueries_PreviewAgentTermination_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *FEVMQueries_PreviewAgentTermination_Call) RunAndReturn(run func(context.Context, common.Address, *chaintypes.TipSet) (terminate.PreviewAgentTerminationSummary, error)) *FEVMQueries_PreviewAgentTermination_Call {
 	_c.Call.Return(run)
 	return _c
 }

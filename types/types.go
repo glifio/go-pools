@@ -15,6 +15,7 @@ import (
 	filtypes "github.com/filecoin-project/lotus/chain/types"
 	"github.com/glifio/go-pools/abigen"
 	"github.com/glifio/go-pools/constants"
+	"github.com/glifio/go-pools/terminate"
 	"github.com/glifio/go-pools/vc"
 )
 
@@ -36,6 +37,8 @@ type FEVMQueries interface {
 	AgentPrincipal(ctx context.Context, agentAddr common.Address, blockNumber *big.Int) (*big.Int, error)
 	AgentInterestOwed(ctx context.Context, agentAddr common.Address, tsk *filtypes.TipSet) (*big.Int, error)
 	AgentFaultyEpochStart(ctx context.Context, agentAddr common.Address) (*big.Int, error)
+	AgentCollateralStats(ctx context.Context, agentAddr common.Address, blockNumber *big.Int) (terminate.PreviewAgentTerminationSummary, error)
+	PreviewAgentTermination(ctx context.Context, agentAddr common.Address, tipset *filtypes.TipSet) (terminate.PreviewAgentTerminationSummary, error)
 	// agent factory methods
 	AgentFactoryAgentCount(ctx context.Context, blockNumber *big.Int) (*big.Int, error)
 	// infinity pool methods
