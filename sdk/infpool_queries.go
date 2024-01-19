@@ -222,12 +222,11 @@ func findMinCap(values []*big.Int) *big.Int {
 	return min
 }
 
-func MaxBorrowFromAgentData(agentData *vc.AgentData, rate *big.Int) *big.Int {
+func MaxBorrowFromAgentData(agentData *vc.AgentData, rate *big.Int, liquidationValue *big.Int, recoveryRate *big.Int) *big.Int {
 	caps := []*big.Int{
-		// TODO: maxDTI in computeMaxDTI is hardcoded to 25%, this could be derived from the contracts
 		computeMaxDTICap(rate, agentData.ExpectedDailyRewards, agentData.Principal, constants.MAX_DTI),
 		computeMaxDTECap(agentData.AgentValue, agentData.Principal),
-		// computeMaxLTVCap(agentData.AgentValue, agentData.Principal),
+		computeMaxLTVCap(liquidationValue, agentData.Principal, recoveryRate),
 	}
 
 	return findMinCap(caps)
@@ -275,10 +274,15 @@ func (q *fevmQueries) InfPoolAgentMaxBorrow(ctx context.Context, agentAddr commo
 		return nil, err
 	}
 
+	ats, err := q.PreviewAgentTerminationQuick(ctx, agentAddr)
+	if err != nil {
+		return nil, err
+	}
+
 	maxAmtFromLvl := new(big.Int).Sub(agentCap, agentData.Principal)
 
 	caps := []*big.Int{
-		MaxBorrowFromAgentData(agentData, rate),
+		MaxBorrowFromAgentData(agentData, rate, ats.LiquidationValue(), ats.RecoveryRate()),
 		maxAmtFromLvl,
 	}
 
