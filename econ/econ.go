@@ -48,8 +48,15 @@ func ComputeAgentData(
 
 	/* ~~~~~ CollateralValue ~~~~~ */
 
-	// CV = AgentValue * terminationPenalty
-	data.CollateralValue = CollateralValue(data.AgentValue)
+	ats, err := sdk.Query().PreviewAgentTermination(ctx, agentAddr, tsk)
+	if err != nil {
+		return nil, err
+	}
+
+	// here we replace the ats.AgentAvailableBal with the AgentLiquidAssets passed in this call to compute the post-action liquidation value
+	ats.AgentAvailableBal = agentLiquidAssets
+
+	data.CollateralValue = ats.LiquidationValue()
 
 	/* ~~~~~ ExpectedDailyFaultPenalties ~~~~~ */
 
@@ -63,34 +70,8 @@ func ComputeAgentData(
 	/* ~~~~~ Principal ~~~~~ */
 	data.Principal = principal
 
-	// TODO: What to do on a Pay action type? -> deduce principal _after_ the payment is made
-
-	/* ~~~~~ GCRED ~~~~~ */
-
-	// exposure at default is current principal, including newPrincipal
-	var ead = data.Principal
-	// loan to value computation uses agent's total value, less principal as its denominator
-	// valueDenominator := lockedFunds.Balance.Add(lockedFunds.Balance, agentLiquidAssets)
-	// subtract liabilities (upcoming payment or withdrawal) from the denominator
-	// valueDenominator = valueDenominator.Sub(valueDenominator, deductibles)
-
-	var ltv = LoanToValueRatio(ead, data.AgentValue)
-	// loan to collateral value
-	var ltcv = LoanToCollateralRatio(ead, data.CollateralValue)
-
-	var equity = big.NewInt(0).Sub(data.AgentValue, data.Principal)
-
-	var dte = DebtToEquityRatio(ead, equity)
-
-	var faultRatio = big.NewFloat(0)
-	var vestingToPledgeRatio = big.NewFloat(0)
-
-	if data.LiveSectors.Int64() > 0 {
-		faultRatio = faultRatio.Quo(new(big.Float).SetInt(data.FaultySectors), new(big.Float).SetInt(data.LiveSectors))
-		vestingToPledgeRatio = vestingToPledgeRatio.Quo(new(big.Float).SetInt(aggMinerStats.VestingFunds), new(big.Float).SetInt(aggMinerStats.PledgedFunds))
-	}
-
-	data.Gcred = CreditScoreSimple(ead, ltv, ltcv, data.ExpectedDailyRewards, dte, faultRatio, vestingToPledgeRatio)
+	/* ~~~~~ GCRED (NOT IN USE) ~~~~~ */
+	data.Gcred = big.NewInt(100)
 
 	return data, nil
 }
