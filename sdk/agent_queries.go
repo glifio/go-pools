@@ -375,7 +375,7 @@ func (q *fevmQueries) AgentVersion(ctx context.Context, agentAddr common.Address
 	return agentVersion, deployerVersion, nil
 }
 
-func (q *fevmQueries) AgentCollateralStats(ctx context.Context, agentAddr common.Address, blockNumber *big.Int) (terminate.PreviewAgentTerminationSummary, error) {
+func (q *fevmQueries) PreviewAgentTerminationQuick(ctx context.Context, agentAddr common.Address) (terminate.PreviewAgentTerminationSummary, error) {
 	agentID, err := q.AgentID(ctx, agentAddr)
 	if err != nil {
 		return terminate.PreviewAgentTerminationSummary{}, err
@@ -395,7 +395,7 @@ func (q *fevmQueries) AgentCollateralStats(ctx context.Context, agentAddr common
 		vestingBal.Add(vestingBal, miner.Vesting)
 	}
 
-	agentLiquidFIL, err := q.AgentLiquidAssets(ctx, agentAddr, blockNumber)
+	agentLiquidFIL, err := q.AgentLiquidAssets(ctx, agentAddr, nil)
 	if err != nil {
 		return terminate.PreviewAgentTerminationSummary{}, err
 	}
