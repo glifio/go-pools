@@ -7,6 +7,7 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/filecoin-project/go-address"
 	"github.com/filecoin-project/lotus/chain/types"
+	"github.com/glifio/go-pools/constants"
 	"github.com/glifio/go-pools/mstat"
 	poolstypes "github.com/glifio/go-pools/types"
 	"github.com/glifio/go-pools/vc"
@@ -43,20 +44,34 @@ func ComputeAgentData(
 
 	data.AgentValue = big.NewInt(0).Add(agentLiquidAssets, aggMinerStats.Balance)
 
-	data.LiveSectors = aggMinerStats.LiveSectors
-	data.FaultySectors = aggMinerStats.FaultySectors
-
 	/* ~~~~~ CollateralValue ~~~~~ */
 
 	ats, err := sdk.Query().PreviewAgentTermination(ctx, agentAddr, tsk)
 	if err != nil {
 		return nil, err
 	}
-
 	// here we replace the ats.AgentAvailableBal with the AgentLiquidAssets passed in this call to compute the post-action liquidation value
 	ats.AgentAvailableBal = agentLiquidAssets
 
 	data.CollateralValue = ats.LiquidationValue()
+
+	/* ~~~~~ Principal ~~~~~ */
+	data.Principal = principal
+
+	/* ~~~~~ SectorInfo ~~~~~ */
+	data.LiveSectors = aggMinerStats.LiveSectors
+
+	// if the LTV (loan to liquidationm value) is greater than the max LTV, we report faulty sectors in order to trigger a liquidation
+	// this is a bit of a workaround until the liquidation value buffer is built-in to the contracts directly
+	// using wad math
+	numerator := new(big.Int).Mul(principal, constants.WAD)
+
+	if (new(big.Int).Div(numerator, data.CollateralValue)).Cmp(constants.MAX_LTV) > 0 {
+		// 100% faulty sectors if loan to liquidation value buffer is breached
+		data.FaultySectors = aggMinerStats.LiveSectors
+	} else {
+		data.FaultySectors = aggMinerStats.FaultySectors
+	}
 
 	/* ~~~~~ ExpectedDailyFaultPenalties ~~~~~ */
 
@@ -66,9 +81,6 @@ func ComputeAgentData(
 	/* ~~~~~ ExpectedDailyRewards ~~~~~ */
 
 	data.ExpectedDailyRewards = aggMinerStats.ExpectedDailyReward
-
-	/* ~~~~~ Principal ~~~~~ */
-	data.Principal = principal
 
 	/* ~~~~~ GCRED (NOT IN USE) ~~~~~ */
 	data.Gcred = big.NewInt(100)
