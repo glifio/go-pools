@@ -46,6 +46,18 @@ func (ats PreviewAgentTerminationSummary) RecoveryRate() *big.Int {
 	return recoveryRate
 }
 
+func (ats PreviewAgentTerminationSummary) LTV(principal *big.Int) *big.Int {
+	liquidationValue := ats.LiquidationValue()
+	ltv := big.NewInt(0)
+	if liquidationValue.Cmp(big.NewInt(0)) > 0 && principal.Cmp(big.NewInt(0)) > 0 {
+		// add wad precision in prior to the div to keep atto denomination before we convert to percentage
+		ltv.Mul(principal, constants.WAD)
+		ltv.Div(ltv, liquidationValue)
+	}
+
+	return ltv
+}
+
 func (cs *AgentCollateralStats) Summarize() PreviewAgentTerminationSummary {
 	availBal := big.NewInt(0)
 	initialPledge := big.NewInt(0)
