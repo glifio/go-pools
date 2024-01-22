@@ -384,38 +384,20 @@ func (q *fevmQueries) AgentCollateralStatsQuick(ctx context.Context, agentAddr c
 	return terminate.FetchAgentCollateralStats(ctx, agentID)
 }
 
+// this uses the "quick" method of computing the termination penalty, which relies on the indexing server
 func (q *fevmQueries) AgentPreviewTerminationQuick(ctx context.Context, agentAddr common.Address) (terminate.PreviewAgentTerminationSummary, error) {
 	agentID, err := q.AgentID(ctx, agentAddr)
 	if err != nil {
 		return terminate.PreviewAgentTerminationSummary{}, err
 	}
 
+	// this call makes a call to the indexing server
 	agentCollateralStats, err := terminate.FetchAgentCollateralStats(ctx, agentID)
 	if err != nil {
 		return terminate.PreviewAgentTerminationSummary{}, err
 	}
 
-	availBal := big.NewInt(0)
-	initialPledge := big.NewInt(0)
-	vestingBal := big.NewInt(0)
-	for _, miner := range agentCollateralStats.MinersTerminationStats {
-		availBal.Add(availBal, miner.Available)
-		initialPledge.Add(initialPledge, miner.Pledged)
-		vestingBal.Add(vestingBal, miner.Vesting)
-	}
-
-	agentLiquidFIL, err := q.AgentLiquidAssets(ctx, agentAddr, nil)
-	if err != nil {
-		return terminate.PreviewAgentTerminationSummary{}, err
-	}
-
-	return terminate.PreviewAgentTerminationSummary{
-		TerminationPenalty: agentCollateralStats.TerminationPenalty,
-		InitialPledge:      initialPledge,
-		VestingBalance:     vestingBal,
-		MinersAvailableBal: availBal,
-		AgentAvailableBal:  agentLiquidFIL,
-	}, nil
+	return agentCollateralStats.Summarize(), nil
 }
 
 var LookbackEpochs abi.ChainEpoch = 3
@@ -423,7 +405,7 @@ var LookbackEpochs abi.ChainEpoch = 3
 // PreviewAgentTermination preview terminating all the
 // sectors on all the miners for an agent (using sampling and "off-chain"
 // calculation) and will return the liquidation value of the agent.
-func (q *fevmQueries) AgentPreviewTermination(ctx context.Context, agentAddr common.Address, tipset *ltypes.TipSet) (terminate.PreviewAgentTerminationSummary, error) {
+func (q *fevmQueries) AgentPreviewTerminationPrecise(ctx context.Context, agentAddr common.Address, tipset *ltypes.TipSet) (terminate.PreviewAgentTerminationSummary, error) {
 	lapi, closer, err := q.extern.ConnectLotusClient()
 	if err != nil {
 		return terminate.PreviewAgentTerminationSummary{}, err

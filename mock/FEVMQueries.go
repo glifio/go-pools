@@ -902,8 +902,8 @@ func (_c *FEVMQueries_AgentPolice_Call) RunAndReturn(run func() common.Address) 
 	return _c
 }
 
-// AgentPreviewTermination provides a mock function with given fields: ctx, agentAddr, tipset
-func (_m *FEVMQueries) AgentPreviewTermination(ctx context.Context, agentAddr common.Address, tipset *chaintypes.TipSet) (terminate.PreviewAgentTerminationSummary, error) {
+// AgentPreviewTerminationPrecise provides a mock function with given fields: ctx, agentAddr, tipset
+func (_m *FEVMQueries) AgentPreviewTerminationPrecise(ctx context.Context, agentAddr common.Address, tipset *chaintypes.TipSet) (terminate.PreviewAgentTerminationSummary, error) {
 	ret := _m.Called(ctx, agentAddr, tipset)
 
 	var r0 terminate.PreviewAgentTerminationSummary
@@ -926,32 +926,32 @@ func (_m *FEVMQueries) AgentPreviewTermination(ctx context.Context, agentAddr co
 	return r0, r1
 }
 
-// FEVMQueries_AgentPreviewTermination_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'AgentPreviewTermination'
-type FEVMQueries_AgentPreviewTermination_Call struct {
+// FEVMQueries_AgentPreviewTerminationPrecise_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'AgentPreviewTerminationPrecise'
+type FEVMQueries_AgentPreviewTerminationPrecise_Call struct {
 	*mock.Call
 }
 
-// AgentPreviewTermination is a helper method to define mock.On call
+// AgentPreviewTerminationPrecise is a helper method to define mock.On call
 //   - ctx context.Context
 //   - agentAddr common.Address
 //   - tipset *chaintypes.TipSet
-func (_e *FEVMQueries_Expecter) AgentPreviewTermination(ctx interface{}, agentAddr interface{}, tipset interface{}) *FEVMQueries_AgentPreviewTermination_Call {
-	return &FEVMQueries_AgentPreviewTermination_Call{Call: _e.mock.On("AgentPreviewTermination", ctx, agentAddr, tipset)}
+func (_e *FEVMQueries_Expecter) AgentPreviewTerminationPrecise(ctx interface{}, agentAddr interface{}, tipset interface{}) *FEVMQueries_AgentPreviewTerminationPrecise_Call {
+	return &FEVMQueries_AgentPreviewTerminationPrecise_Call{Call: _e.mock.On("AgentPreviewTerminationPrecise", ctx, agentAddr, tipset)}
 }
 
-func (_c *FEVMQueries_AgentPreviewTermination_Call) Run(run func(ctx context.Context, agentAddr common.Address, tipset *chaintypes.TipSet)) *FEVMQueries_AgentPreviewTermination_Call {
+func (_c *FEVMQueries_AgentPreviewTerminationPrecise_Call) Run(run func(ctx context.Context, agentAddr common.Address, tipset *chaintypes.TipSet)) *FEVMQueries_AgentPreviewTerminationPrecise_Call {
 	_c.Call.Run(func(args mock.Arguments) {
 		run(args[0].(context.Context), args[1].(common.Address), args[2].(*chaintypes.TipSet))
 	})
 	return _c
 }
 
-func (_c *FEVMQueries_AgentPreviewTermination_Call) Return(_a0 terminate.PreviewAgentTerminationSummary, _a1 error) *FEVMQueries_AgentPreviewTermination_Call {
+func (_c *FEVMQueries_AgentPreviewTerminationPrecise_Call) Return(_a0 terminate.PreviewAgentTerminationSummary, _a1 error) *FEVMQueries_AgentPreviewTerminationPrecise_Call {
 	_c.Call.Return(_a0, _a1)
 	return _c
 }
 
-func (_c *FEVMQueries_AgentPreviewTermination_Call) RunAndReturn(run func(context.Context, common.Address, *chaintypes.TipSet) (terminate.PreviewAgentTerminationSummary, error)) *FEVMQueries_AgentPreviewTermination_Call {
+func (_c *FEVMQueries_AgentPreviewTerminationPrecise_Call) RunAndReturn(run func(context.Context, common.Address, *chaintypes.TipSet) (terminate.PreviewAgentTerminationSummary, error)) *FEVMQueries_AgentPreviewTerminationPrecise_Call {
 	_c.Call.Return(run)
 	return _c
 }

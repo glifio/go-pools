@@ -46,7 +46,7 @@ func ComputeAgentData(
 
 	/* ~~~~~ CollateralValue ~~~~~ */
 
-	ats, err := sdk.Query().AgentPreviewTermination(ctx, agentAddr, tsk)
+	ats, err := sdk.Query().AgentPreviewTerminationPrecise(ctx, agentAddr, tsk)
 	if err != nil {
 		return nil, err
 	}
