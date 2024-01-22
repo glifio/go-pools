@@ -384,7 +384,7 @@ func (q *fevmQueries) AgentCollateralStatsQuick(ctx context.Context, agentAddr c
 	return terminate.FetchAgentCollateralStats(ctx, agentID)
 }
 
-func (q *fevmQueries) PreviewAgentTerminationQuick(ctx context.Context, agentAddr common.Address) (terminate.PreviewAgentTerminationSummary, error) {
+func (q *fevmQueries) AgentPreviewTerminationQuick(ctx context.Context, agentAddr common.Address) (terminate.PreviewAgentTerminationSummary, error) {
 	agentID, err := q.AgentID(ctx, agentAddr)
 	if err != nil {
 		return terminate.PreviewAgentTerminationSummary{}, err
@@ -423,7 +423,7 @@ var LookbackEpochs abi.ChainEpoch = 3
 // PreviewAgentTermination preview terminating all the
 // sectors on all the miners for an agent (using sampling and "off-chain"
 // calculation) and will return the liquidation value of the agent.
-func (q *fevmQueries) PreviewAgentTermination(ctx context.Context, agentAddr common.Address, tipset *ltypes.TipSet) (terminate.PreviewAgentTerminationSummary, error) {
+func (q *fevmQueries) AgentPreviewTermination(ctx context.Context, agentAddr common.Address, tipset *ltypes.TipSet) (terminate.PreviewAgentTerminationSummary, error) {
 	lapi, closer, err := q.extern.ConnectLotusClient()
 	if err != nil {
 		return terminate.PreviewAgentTerminationSummary{}, err

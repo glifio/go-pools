@@ -274,7 +274,7 @@ func (q *fevmQueries) InfPoolAgentMaxBorrow(ctx context.Context, agentAddr commo
 		return nil, err
 	}
 
-	ats, err := q.PreviewAgentTerminationQuick(ctx, agentAddr)
+	ats, err := q.AgentPreviewTerminationQuick(ctx, agentAddr)
 	if err != nil {
 		return nil, err
 	}

@@ -38,8 +38,8 @@ type FEVMQueries interface {
 	AgentInterestOwed(ctx context.Context, agentAddr common.Address, tsk *filtypes.TipSet) (*big.Int, error)
 	AgentFaultyEpochStart(ctx context.Context, agentAddr common.Address) (*big.Int, error)
 	AgentCollateralStatsQuick(ctx context.Context, agentAddr common.Address) (*terminate.AgentCollateralStats, error)
-	PreviewAgentTermination(ctx context.Context, agentAddr common.Address, tipset *filtypes.TipSet) (terminate.PreviewAgentTerminationSummary, error)
-	PreviewAgentTerminationQuick(ctx context.Context, agentAddr common.Address) (terminate.PreviewAgentTerminationSummary, error)
+	AgentPreviewTermination(ctx context.Context, agentAddr common.Address, tipset *filtypes.TipSet) (terminate.PreviewAgentTerminationSummary, error)
+	AgentPreviewTerminationQuick(ctx context.Context, agentAddr common.Address) (terminate.PreviewAgentTerminationSummary, error)
 	// agent factory methods
 	AgentFactoryAgentCount(ctx context.Context, blockNumber *big.Int) (*big.Int, error)
 	// infinity pool methods
