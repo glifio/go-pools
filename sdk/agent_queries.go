@@ -375,6 +375,15 @@ func (q *fevmQueries) AgentVersion(ctx context.Context, agentAddr common.Address
 	return agentVersion, deployerVersion, nil
 }
 
+func (q *fevmQueries) AgentCollateralStatsQuick(ctx context.Context, agentAddr common.Address) (*terminate.AgentCollateralStats, error) {
+	agentID, err := q.AgentID(ctx, agentAddr)
+	if err != nil {
+		return nil, err
+	}
+
+	return terminate.FetchAgentCollateralStats(ctx, agentID)
+}
+
 func (q *fevmQueries) PreviewAgentTerminationQuick(ctx context.Context, agentAddr common.Address) (terminate.PreviewAgentTerminationSummary, error) {
 	agentID, err := q.AgentID(ctx, agentAddr)
 	if err != nil {
