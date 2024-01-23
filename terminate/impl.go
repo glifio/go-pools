@@ -189,23 +189,6 @@ func terminateSectors(
 
 		nonce := workerActor.Nonce
 
-		workerAddress, err := api.StateAccountKey(ctx, minerInfo.Worker, ts.Key())
-		if err != nil {
-			return nil, err
-		}
-
-		tipsetMsgs, err := api.ChainGetMessagesInTipset(ctx, ts.Key())
-		if err != nil {
-			return nil, err
-		}
-		for _, tMsg := range tipsetMsgs {
-			if (tMsg.Message.From == minerInfo.Worker ||
-				tMsg.Message.From == workerAddress) &&
-				tMsg.Message.Nonce >= nonce {
-				nonce = tMsg.Message.Nonce + 1
-			}
-		}
-
 		msg := &types.Message{
 			Version:    0,
 			To:         minerAddr,
@@ -218,45 +201,41 @@ func terminateSectors(
 			Method:     9, // Terminate sectors
 			Params:     enc.Bytes(),
 		}
-		cid := msg.Cid()
 
 		var msgs []*types.Message
 
 		msgs = append(msgs, msg)
 
-		result, err := api.StateCompute(context.Background(), height, msgs, ts.Key())
+		trace, err := api.StateCall(context.Background(), msg, ts.Key())
 		if err != nil {
 			return nil, err
 		}
 
 		burnAddr, _ := address.NewFromString("f099")
 
-		for _, trace := range result.Trace {
-			if trace.MsgCid == cid {
-				if trace.MsgRct.ExitCode != 0 {
-					return nil, xerrors.Errorf("Exit Code: %v", trace.MsgRct.ExitCode)
-				}
-				for _, subMsg := range trace.ExecutionTrace.Subcalls {
-					if subMsg.Msg.To == burnAddr {
-						stats.TerminationPenalty = new(corebig.Int).Add(stats.TerminationPenalty,
-							subMsg.Msg.Value.Int)
-					}
-				}
-				if trace.Error != "" {
-					return nil, xerrors.Errorf("Error: %v\n", trace.Error)
-				}
-
-				var ret []bool
-
-				err = cbor.DecodeReader(bytes.NewReader(trace.MsgRct.Return), &ret)
-				if err != nil {
-					return nil, err
-				}
-				if !ret[0] {
-					return nil, xerrors.Errorf("Error: Not all sectors terminated!")
-				}
+		if trace.MsgRct.ExitCode != 0 {
+			return nil, xerrors.Errorf("Exit Code: %v", trace.MsgRct.ExitCode)
+		}
+		for _, subMsg := range trace.ExecutionTrace.Subcalls {
+			if subMsg.Msg.To == burnAddr {
+				stats.TerminationPenalty = new(corebig.Int).Add(stats.TerminationPenalty,
+					subMsg.Msg.Value.Int)
 			}
 		}
+		if trace.Error != "" {
+			return nil, xerrors.Errorf("Error: %v\n", trace.Error)
+		}
+
+		var ret []bool
+
+		err = cbor.DecodeReader(bytes.NewReader(trace.MsgRct.Return), &ret)
+		if err != nil {
+			return nil, err
+		}
+		if !ret[0] {
+			return nil, xerrors.Errorf("Error: Not all sectors terminated!")
+		}
+
 		return stats, nil
 	}
 }

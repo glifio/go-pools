@@ -14,7 +14,6 @@ import (
 	lotusapi "github.com/filecoin-project/lotus/api"
 	"github.com/filecoin-project/lotus/chain/types"
 	"github.com/glifio/go-pools/mstat"
-	"github.com/glifio/go-pools/util"
 )
 
 // PreviewTerminateSector will preview the cost of terminating a single sector
@@ -170,13 +169,14 @@ func PreviewTerminateSectors(
 		autoBatchSize = true
 		batchSize = 2500
 		gasLimit = 90000000000 * 3 // 3 deadlines per batch
-
-		workerBal, _ := util.ToFIL(workerActorPrev.Balance.Int).Float64()
-		if workerBal < 3.0 {
-			ratio := workerBal / 3.0
-			batchSize = uint64(float64(batchSize) * ratio)
-			gasLimit = uint64(float64(gasLimit) * ratio)
-		}
+		/*
+			workerBal, _ := util.ToFIL(workerActorPrev.Balance.Int).Float64()
+			if workerBal < 3.0 {
+				ratio := workerBal / 3.0
+				batchSize = uint64(float64(batchSize) * ratio)
+				gasLimit = uint64(float64(gasLimit) * ratio)
+			}
+		*/
 	}
 
 	progressCh <- &PreviewTerminateSectorsProgress{
