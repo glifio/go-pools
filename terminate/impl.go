@@ -189,33 +189,11 @@ func terminateSectors(
 			return nil, err
 		}
 
-		/*
-			state, err := api.StateReadState(ctx, minerAddr, ts.Key())
-			if err != nil {
-				return nil, err
-			}
-			earlyTerminations := state.State.(map[string]interface{})["EarlyTerminations"].([]interface{})
-			if len(earlyTerminations) != 1 {
-				return nil, errors.New("Early terminations exist in state, aborting")
-			}
-			firstValue := earlyTerminations[0].(float64)
-			if firstValue != 0 {
-				fmt.Printf("State: %+v\n", state)
-				fmt.Printf("TypeOf Early Terminations: %+v\n", reflect.TypeOf(earlyTerminations))
-				fmt.Printf("Early Terminations: %+v\n", earlyTerminations)
-				return nil, errors.New("Early terminations exist in state, aborting")
-			}
-		*/
 		_, minerState, err := mstat.LoadMinerActor(ctx, api, minerAddr, ts)
 		if err != nil {
 			return nil, err
 		}
 		state := minerState.GetState().(*miner.State)
-		/*
-			fmt.Printf("TypeOf State: %+v\n", reflect.TypeOf(state))
-			fmt.Printf("State: %+v\n", state)
-			fmt.Printf("Early Terminations: %+v\n", state.EarlyTerminations)
-		*/
 		empty, err := state.EarlyTerminations.IsEmpty()
 		if err != nil {
 			return nil, err
