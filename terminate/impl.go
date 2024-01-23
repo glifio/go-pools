@@ -3,6 +3,7 @@ package terminate
 import (
 	"bytes"
 	"context"
+	"errors"
 	"math"
 	corebig "math/big"
 
@@ -11,11 +12,12 @@ import (
 	"github.com/filecoin-project/go-state-types/abi"
 	"github.com/filecoin-project/go-state-types/big"
 	"github.com/filecoin-project/go-state-types/builtin"
-	"github.com/filecoin-project/go-state-types/builtin/v9/miner"
+	"github.com/filecoin-project/go-state-types/builtin/v12/miner"
 	minertypes "github.com/filecoin-project/go-state-types/builtin/v9/miner"
 	lotusapi "github.com/filecoin-project/lotus/api"
 	"github.com/filecoin-project/lotus/chain/types"
 	miner8 "github.com/filecoin-project/specs-actors/v8/actors/builtin/miner"
+	"github.com/glifio/go-pools/mstat"
 	"github.com/glifio/go-pools/util"
 	cbor "github.com/ipfs/go-ipld-cbor"
 	"golang.org/x/xerrors"
@@ -185,6 +187,41 @@ func terminateSectors(
 		workerActor, err := api.StateGetActor(ctx, minerInfo.Worker, ts.Key())
 		if err != nil {
 			return nil, err
+		}
+
+		/*
+			state, err := api.StateReadState(ctx, minerAddr, ts.Key())
+			if err != nil {
+				return nil, err
+			}
+			earlyTerminations := state.State.(map[string]interface{})["EarlyTerminations"].([]interface{})
+			if len(earlyTerminations) != 1 {
+				return nil, errors.New("Early terminations exist in state, aborting")
+			}
+			firstValue := earlyTerminations[0].(float64)
+			if firstValue != 0 {
+				fmt.Printf("State: %+v\n", state)
+				fmt.Printf("TypeOf Early Terminations: %+v\n", reflect.TypeOf(earlyTerminations))
+				fmt.Printf("Early Terminations: %+v\n", earlyTerminations)
+				return nil, errors.New("Early terminations exist in state, aborting")
+			}
+		*/
+		_, minerState, err := mstat.LoadMinerActor(ctx, api, minerAddr, ts)
+		if err != nil {
+			return nil, err
+		}
+		state := minerState.GetState().(*miner.State)
+		/*
+			fmt.Printf("TypeOf State: %+v\n", reflect.TypeOf(state))
+			fmt.Printf("State: %+v\n", state)
+			fmt.Printf("Early Terminations: %+v\n", state.EarlyTerminations)
+		*/
+		empty, err := state.EarlyTerminations.IsEmpty()
+		if err != nil {
+			return nil, err
+		}
+		if !empty {
+			return nil, errors.New("Early terminations exist in state, aborting")
 		}
 
 		nonce := workerActor.Nonce

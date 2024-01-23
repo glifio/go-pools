@@ -5,7 +5,7 @@ import (
 	"math"
 	"math/big"
 
-	"github.com/filecoin-project/go-state-types/builtin/v9/miner"
+	"github.com/filecoin-project/go-state-types/builtin/v12/miner"
 	"golang.org/x/xerrors"
 
 	"github.com/filecoin-project/go-address"
