@@ -5,7 +5,7 @@ import (
 	"math/big"
 
 	"github.com/filecoin-project/go-state-types/abi"
-	"github.com/filecoin-project/go-state-types/builtin/v9/miner"
+	"github.com/filecoin-project/go-state-types/builtin/v12/miner"
 )
 
 type SectorStats struct {
@@ -25,7 +25,9 @@ type SectorStats struct {
 	InitialPledge         *big.Int
 	ExpectedDayReward     *big.Int
 	ExpectedStoragePledge *big.Int
-	ReplacedSectorAge     *big.Int
+	PowerBaseEpoch        *big.Int
+	MinPowerBaseEpoch     abi.ChainEpoch
+	MaxPowerBaseEpoch     abi.ChainEpoch
 	ReplacedDayReward     *big.Int
 	SectorCount           int64
 }
@@ -48,7 +50,9 @@ func NewSectorStats() *SectorStats {
 		InitialPledge:         big.NewInt(0),
 		ExpectedDayReward:     big.NewInt(0),
 		ExpectedStoragePledge: big.NewInt(0),
-		ReplacedSectorAge:     big.NewInt(0),
+		PowerBaseEpoch:        big.NewInt(0),
+		MinPowerBaseEpoch:     abi.ChainEpoch(math.MaxInt64),
+		MaxPowerBaseEpoch:     abi.ChainEpoch(0),
 		ReplacedDayReward:     big.NewInt(0),
 		SectorCount:           0,
 	}
@@ -78,7 +82,9 @@ func (st *SectorStats) AddSector(
 		InitialPledge:         st.InitialPledge.Add(st.InitialPledge, s.InitialPledge.Int),
 		ExpectedDayReward:     st.ExpectedDayReward.Add(st.ExpectedDayReward, s.ExpectedDayReward.Int),
 		ExpectedStoragePledge: st.ExpectedStoragePledge.Add(st.ExpectedStoragePledge, s.ExpectedStoragePledge.Int),
-		ReplacedSectorAge:     st.ReplacedSectorAge.Add(st.ReplacedSectorAge, big.NewInt(int64(s.ReplacedSectorAge))),
+		PowerBaseEpoch:        st.PowerBaseEpoch.Add(st.PowerBaseEpoch, big.NewInt(int64(s.PowerBaseEpoch))),
+		MinPowerBaseEpoch:     min(st.MinPowerBaseEpoch, s.PowerBaseEpoch),
+		MaxPowerBaseEpoch:     max(st.MaxPowerBaseEpoch, s.PowerBaseEpoch),
 		ReplacedDayReward:     st.ReplacedDayReward.Add(st.ReplacedDayReward, s.ReplacedDayReward.Int),
 		SectorCount:           st.SectorCount + 1,
 	}
@@ -102,7 +108,9 @@ func (st *SectorStats) Accumulate(addStats *SectorStats) *SectorStats {
 		InitialPledge:         st.InitialPledge.Add(st.InitialPledge, addStats.InitialPledge),
 		ExpectedDayReward:     st.ExpectedDayReward.Add(st.ExpectedDayReward, addStats.ExpectedDayReward),
 		ExpectedStoragePledge: st.ExpectedStoragePledge.Add(st.ExpectedStoragePledge, addStats.ExpectedStoragePledge),
-		ReplacedSectorAge:     st.ReplacedSectorAge.Add(st.ReplacedSectorAge, addStats.ReplacedSectorAge),
+		PowerBaseEpoch:        st.PowerBaseEpoch.Add(st.PowerBaseEpoch, addStats.PowerBaseEpoch),
+		MinPowerBaseEpoch:     min(st.MinPowerBaseEpoch, addStats.MinPowerBaseEpoch),
+		MaxPowerBaseEpoch:     max(st.MaxPowerBaseEpoch, addStats.MaxPowerBaseEpoch),
 		ReplacedDayReward:     st.ReplacedDayReward.Add(st.ReplacedDayReward, addStats.ReplacedDayReward),
 		SectorCount:           st.SectorCount + addStats.SectorCount,
 	}
@@ -132,7 +140,9 @@ func (st *SectorStats) ScaleUp(sectorsCount int64, sampledSectorsCount int64) *S
 		InitialPledge:         scaleBigInt(st.InitialPledge),
 		ExpectedDayReward:     scaleBigInt(st.ExpectedDayReward),
 		ExpectedStoragePledge: scaleBigInt(st.ExpectedStoragePledge),
-		ReplacedSectorAge:     scaleBigInt(st.ReplacedSectorAge),
+		PowerBaseEpoch:        scaleBigInt(st.PowerBaseEpoch),
+		MinPowerBaseEpoch:     st.MinPowerBaseEpoch,
+		MaxPowerBaseEpoch:     st.MaxPowerBaseEpoch,
 		ReplacedDayReward:     scaleBigInt(st.ReplacedDayReward),
 		SectorCount:           int64(float64(st.SectorCount) * float64(sectorsCount) / float64(sampledSectorsCount)),
 	}
