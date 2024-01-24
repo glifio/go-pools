@@ -3,6 +3,7 @@ package terminate
 import (
 	"bytes"
 	"context"
+	"errors"
 	"math"
 	corebig "math/big"
 
@@ -11,10 +12,12 @@ import (
 	"github.com/filecoin-project/go-state-types/abi"
 	"github.com/filecoin-project/go-state-types/big"
 	"github.com/filecoin-project/go-state-types/builtin"
-	"github.com/filecoin-project/go-state-types/builtin/v9/miner"
+	"github.com/filecoin-project/go-state-types/builtin/v12/miner"
+	minertypes "github.com/filecoin-project/go-state-types/builtin/v9/miner"
 	lotusapi "github.com/filecoin-project/lotus/api"
 	"github.com/filecoin-project/lotus/chain/types"
 	miner8 "github.com/filecoin-project/specs-actors/v8/actors/builtin/miner"
+	"github.com/glifio/go-pools/mstat"
 	"github.com/glifio/go-pools/util"
 	cbor "github.com/ipfs/go-ipld-cbor"
 	"golang.org/x/xerrors"
@@ -32,9 +35,9 @@ const maxPartitionsPerTx = 3
 
 func runTerminationsInBatches(
 	ctx context.Context,
-	api lotusapi.FullNodeStruct,
+	api *lotusapi.FullNodeStruct,
 	minerAddr address.Address,
-	minerInfo lotusapi.MinerInfo,
+	minerInfo minertypes.MinerInfo,
 	gasLimit int64,
 	offchain bool,
 	tasks chan terminationTask,
@@ -72,9 +75,9 @@ func runTerminationsInBatches(
 
 func runPendingTerminations(
 	ctx context.Context,
-	api lotusapi.FullNodeStruct,
+	api *lotusapi.FullNodeStruct,
 	minerAddr address.Address,
-	minerInfo lotusapi.MinerInfo,
+	minerInfo minertypes.MinerInfo,
 	gasLimit int64,
 	tasks []terminationTask,
 	offchain bool,
@@ -110,11 +113,11 @@ func runPendingTerminations(
 
 func terminateSectors(
 	ctx context.Context,
-	api lotusapi.FullNodeStruct,
+	api *lotusapi.FullNodeStruct,
 	height abi.ChainEpoch,
 	ts *types.TipSet,
 	minerAddr address.Address,
-	minerInfo lotusapi.MinerInfo,
+	minerInfo minertypes.MinerInfo,
 	params miner.TerminateSectorsParams,
 	gasLimit int64,
 	offchain bool,
@@ -151,13 +154,13 @@ func terminateSectors(
 			// the termination penalty calculation
 			termFee := miner8.PledgePenaltyForTermination(
 				s.ExpectedDayReward,
-				height-s.Activation,
+				height-s.PowerBaseEpoch,
 				s.ExpectedStoragePledge,
 				smoothedPow,
 				sectorPower,
 				smoothedRew,
 				s.ReplacedDayReward,
-				s.ReplacedSectorAge,
+				s.PowerBaseEpoch-s.Activation,
 			)
 
 			// the daily sector fee calculation
@@ -186,24 +189,20 @@ func terminateSectors(
 			return nil, err
 		}
 
+		_, minerState, err := mstat.LoadMinerActor(ctx, api, minerAddr, ts)
+		if err != nil {
+			return nil, err
+		}
+		state := minerState.GetState().(*miner.State)
+		empty, err := state.EarlyTerminations.IsEmpty()
+		if err != nil {
+			return nil, err
+		}
+		if !empty {
+			return nil, errors.New("Early terminations exist in state, aborting")
+		}
+
 		nonce := workerActor.Nonce
-
-		workerAddress, err := api.StateAccountKey(ctx, minerInfo.Worker, ts.Key())
-		if err != nil {
-			return nil, err
-		}
-
-		tipsetMsgs, err := api.ChainGetMessagesInTipset(ctx, ts.Key())
-		if err != nil {
-			return nil, err
-		}
-		for _, tMsg := range tipsetMsgs {
-			if (tMsg.Message.From == minerInfo.Worker ||
-				tMsg.Message.From == workerAddress) &&
-				tMsg.Message.Nonce >= nonce {
-				nonce = tMsg.Message.Nonce + 1
-			}
-		}
 
 		msg := &types.Message{
 			Version:    0,
@@ -217,45 +216,41 @@ func terminateSectors(
 			Method:     9, // Terminate sectors
 			Params:     enc.Bytes(),
 		}
-		cid := msg.Cid()
 
 		var msgs []*types.Message
 
 		msgs = append(msgs, msg)
 
-		result, err := api.StateCompute(context.Background(), height, msgs, ts.Key())
+		trace, err := api.StateCall(context.Background(), msg, ts.Key())
 		if err != nil {
 			return nil, err
 		}
 
 		burnAddr, _ := address.NewFromString("f099")
 
-		for _, trace := range result.Trace {
-			if trace.MsgCid == cid {
-				if trace.MsgRct.ExitCode != 0 {
-					return nil, xerrors.Errorf("Exit Code: %v", trace.MsgRct.ExitCode)
-				}
-				for _, subMsg := range trace.ExecutionTrace.Subcalls {
-					if subMsg.Msg.To == burnAddr {
-						stats.TerminationPenalty = new(corebig.Int).Add(stats.TerminationPenalty,
-							subMsg.Msg.Value.Int)
-					}
-				}
-				if trace.Error != "" {
-					return nil, xerrors.Errorf("Error: %v\n", trace.Error)
-				}
-
-				var ret []bool
-
-				err = cbor.DecodeReader(bytes.NewReader(trace.MsgRct.Return), &ret)
-				if err != nil {
-					return nil, err
-				}
-				if !ret[0] {
-					return nil, xerrors.Errorf("Error: Not all sectors terminated!")
-				}
+		if trace.MsgRct.ExitCode != 0 {
+			return nil, xerrors.Errorf("Exit Code: %v", trace.MsgRct.ExitCode)
+		}
+		for _, subMsg := range trace.ExecutionTrace.Subcalls {
+			if subMsg.Msg.To == burnAddr {
+				stats.TerminationPenalty = new(corebig.Int).Add(stats.TerminationPenalty,
+					subMsg.Msg.Value.Int)
 			}
 		}
+		if trace.Error != "" {
+			return nil, xerrors.Errorf("Error: %v\n", trace.Error)
+		}
+
+		var ret []bool
+
+		err = cbor.DecodeReader(bytes.NewReader(trace.MsgRct.Return), &ret)
+		if err != nil {
+			return nil, err
+		}
+		if !ret[0] {
+			return nil, xerrors.Errorf("Error: Not all sectors terminated!")
+		}
+
 		return stats, nil
 	}
 }

@@ -8,8 +8,6 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/glifio/go-pools/abigen"
 	"github.com/glifio/go-pools/constants"
-	"github.com/glifio/go-pools/econ"
-	"github.com/glifio/go-pools/types"
 	"github.com/glifio/go-pools/util"
 	"github.com/glifio/go-pools/vc"
 )
@@ -164,114 +162,6 @@ func (q *fevmQueries) InfPoolExitReserve(ctx context.Context, blockNumber *big.I
 	return minLiquidity, minLiquidity, nil
 }
 
-// InfPoolIsApprovedWithReason returns whether a request has been approved or not, if
-// it has been rejected, the reason is supplied. In the case of an error, the reason
-// is set to types.RejectionReasonNone.
-func (q *fevmQueries) InfPoolIsApprovedWithReason(ctx context.Context, agentAddr common.Address, agentData *vc.AgentData) (bool, types.RejectionReason, error) {
-	client, err := q.extern.ConnectEthClient()
-	if err != nil {
-		return false, types.RejectionReasonNone, err
-	}
-	defer client.Close()
-
-	chainHeight, err := q.ChainHeight(ctx)
-	if err != nil {
-		return false, types.RejectionReasonNone, err
-	}
-
-	agentID, err := q.AgentID(ctx, agentAddr)
-	if err != nil {
-		return false, types.RejectionReasonNone, err
-	}
-
-	rateModule, err := q.RateModule()
-	if err != nil {
-		return false, "", err
-	}
-
-	rateModuleCaller, err := abigen.NewRateModuleCaller(rateModule, client)
-	if err != nil {
-		return false, "", err
-	}
-
-	account, err := q.InfPoolGetAccount(ctx, agentAddr, nil)
-	if err != nil {
-		return false, types.RejectionReasonNone, err
-	}
-
-	if account.EpochsPaid.Cmp(big.NewInt(0)) == 1 && new(big.Int).Add(account.EpochsPaid, big.NewInt(int64(constants.RepeatBorrowEpochTolerance))).Cmp(chainHeight) == -1 {
-		return false, types.RejectionReasonPayUP, nil
-	}
-
-	agentLvl, err := rateModuleCaller.AccountLevel(nil, agentID)
-	if err != nil {
-		return false, "", err
-	}
-
-	agentCap, err := rateModuleCaller.Levels(nil, agentLvl)
-	if err != nil {
-		return false, "", err
-	}
-
-	if agentData.Principal.Cmp(agentCap) == 1 {
-		return false, types.RejectionReasonCap, nil
-	}
-
-	if agentData.Principal.Cmp(big.NewInt(0)) == 0 {
-		return false, types.RejectionReasonZeroCollateral, nil
-	}
-
-	collateralValue := econ.CollateralValue(agentData.AgentValue)
-	equityValue := new(big.Int).Sub(agentData.AgentValue, agentData.Principal)
-
-	maxLTV, err := rateModuleCaller.MaxLTV(nil)
-	if err != nil {
-		return false, "", err
-	}
-
-	maxDTE, err := rateModuleCaller.MaxDTE(nil)
-	if err != nil {
-		return false, "", err
-	}
-
-	maxDTI, err := rateModuleCaller.MaxDTI(nil)
-	if err != nil {
-		return false, "", err
-	}
-
-	ltv := new(big.Int).Div(new(big.Int).Mul(agentData.Principal, constants.WAD), collateralValue)
-	dte := new(big.Int).Div(new(big.Int).Mul(agentData.Principal, constants.WAD), equityValue)
-	if ltv.Cmp(maxLTV) == 1 {
-		return false, types.RejectionReasonLTV, nil
-	}
-
-	if dte.Cmp(maxDTE) == 1 {
-		return false, types.RejectionReasonDTE, nil
-	}
-
-	nullCred, err := vc.NullishVerifiableCredential(*agentData)
-	if err != nil {
-		return false, types.RejectionReasonNone, err
-	}
-
-	rate, err := q.InfPoolGetRate(ctx, *nullCred)
-	if err != nil {
-		return false, types.RejectionReasonNone, err
-	}
-
-	dailyFees := rate.Mul(rate, big.NewInt(constants.EpochsInDay))
-	dailyFees.Mul(dailyFees, agentData.Principal)
-	dailyFees.Div(dailyFees, constants.WAD)
-
-	dti := new(big.Int).Div(dailyFees, agentData.ExpectedDailyRewards)
-
-	if dti.Cmp(maxDTI) == 1 {
-		return false, types.RejectionReasonDTI, nil
-	}
-
-	return true, types.RejectionReasonNone, nil
-}
-
 func computeMaxDTICap(epochRate *big.Int, edr *big.Int, agentExistingPrincipal *big.Int, maxDTI *big.Int) *big.Int {
 	dailyRate := new(big.Int).Mul(epochRate, big.NewInt(constants.EpochsInDay))
 	maxBorrowDTICap := new(big.Int).Mul(edr, maxDTI)
@@ -283,14 +173,41 @@ func computeMaxDTICap(epochRate *big.Int, edr *big.Int, agentExistingPrincipal *
 }
 
 func computeMaxDTECap(agentValue *big.Int, principal *big.Int) *big.Int {
-	return new(big.Int).Sub(agentValue, principal)
+	maxValue := new(big.Int).Mul(agentValue, constants.MAX_DTE)
+	// div out wad math precision
+	maxValue.Div(maxValue, constants.WAD)
+
+	if maxValue.Cmp(principal) == -1 {
+		return big.NewInt(0)
+	}
+
+	return new(big.Int).Sub(maxValue, principal)
 }
 
-// P(new) = AgentValue(old) - 2*P(old)
-// where the value 2 is based on mstat.TerminationPenaltyRatio being .5
-func computeMaxLTVCap(agentValue *big.Int, principal *big.Int) *big.Int {
-	oldPrincipalCap := new(big.Int).Mul(principal, big.NewInt(2))
-	return new(big.Int).Sub(agentValue, oldPrincipalCap)
+// computeMaxLTVCap returns the max borrowable amount from the agent's liquidation value
+// maxBorrow = (-1*((LTV*LVstart)/(LTV * RR) - 1)) - P
+// recovery rate % is expressed as wad math whole number - 1e18 is 100%, 9e17 is 90%, etc
+func computeMaxLTVCap(liquidationValue *big.Int, principal *big.Int, recoveryRate *big.Int) *big.Int {
+	// numerator computation
+	num := new(big.Int).Mul(liquidationValue, constants.MAX_LTV)
+	num.Mul(num, big.NewInt(-1))
+
+	// denom computation
+	denom := new(big.Int).Mul(constants.MAX_LTV, recoveryRate)
+	// div out the wad math precision from the recovery rate
+	denom.Div(denom, constants.WAD)
+	// this is the subtract 1 operation from (LTV * RR)
+	denom.Sub(denom, big.NewInt(1e18))
+
+	maxBorrow := new(big.Int).Div(num, denom)
+
+	if maxBorrow.Cmp(principal) < 1 {
+		return big.NewInt(0)
+	}
+
+	// subtract out the existing principal to arrive at maxBorrow
+	maxBorrow.Sub(maxBorrow, principal)
+	return maxBorrow
 }
 
 func findMinCap(values []*big.Int) *big.Int {
@@ -306,12 +223,11 @@ func findMinCap(values []*big.Int) *big.Int {
 	return min
 }
 
-func MaxBorrowFromAgentData(agentData *vc.AgentData, rate *big.Int) *big.Int {
+func MaxBorrowFromAgentData(agentData *vc.AgentData, rate *big.Int, liquidationValue *big.Int, recoveryRate *big.Int) *big.Int {
 	caps := []*big.Int{
-		// TODO: maxDTI in computeMaxDTI is hardcoded to 25%, this could be derived from the contracts
-		computeMaxDTICap(rate, agentData.ExpectedDailyRewards, agentData.Principal, big.NewInt(25e16)),
+		computeMaxDTICap(rate, agentData.ExpectedDailyRewards, agentData.Principal, constants.MAX_DTI),
 		computeMaxDTECap(agentData.AgentValue, agentData.Principal),
-		computeMaxLTVCap(agentData.AgentValue, agentData.Principal),
+		computeMaxLTVCap(liquidationValue, agentData.Principal, recoveryRate),
 	}
 
 	return findMinCap(caps)
@@ -359,42 +275,19 @@ func (q *fevmQueries) InfPoolAgentMaxBorrow(ctx context.Context, agentAddr commo
 		return nil, err
 	}
 
+	ats, err := q.AgentPreviewTerminationQuick(ctx, agentAddr)
+	if err != nil {
+		return nil, err
+	}
+
 	maxAmtFromLvl := new(big.Int).Sub(agentCap, agentData.Principal)
 
 	caps := []*big.Int{
-		MaxBorrowFromAgentData(agentData, rate),
+		MaxBorrowFromAgentData(agentData, rate, ats.LiquidationValue(), ats.RecoveryRate()),
 		maxAmtFromLvl,
 	}
 
 	return findMinCap(caps), nil
-}
-
-// here we solve for max LTV and DTE after withdrawal
-// max LTV = 2(CV - P)
-// max DTE = Equity / 2
-func maxWithdraw(agentData *vc.AgentData) (*big.Int, error) {
-	if agentData.AgentValue.Cmp(big.NewInt(0)) == 0 {
-		return big.NewInt(0), nil
-	} else if agentData.AgentValue.Cmp(agentData.Principal) < 1 {
-		return big.NewInt(0), nil
-	}
-
-	// the max at any time is half the Agent's equity value, but the LTV check can further constrain this
-	equityVal := new(big.Int).Sub(agentData.AgentValue, agentData.Principal)
-	equityVal.Div(equityVal, big.NewInt(2))
-
-	caps := []*big.Int{
-		// LTV check
-		new(big.Int).Mul(big.NewInt(2), new(big.Int).Sub(agentData.CollateralValue, agentData.Principal)),
-		// DTE
-		equityVal,
-	}
-
-	return findMinCap(caps), nil
-}
-
-func (q *fevmQueries) InfPoolAgentMaxWithdraw(ctx context.Context, agentAddr common.Address, agentData *vc.AgentData) (*big.Int, error) {
-	return maxWithdraw(agentData)
 }
 
 func (q *fevmQueries) InfPoolRateFromGCRED(ctx context.Context, gcred *big.Int) (*big.Float, error) {

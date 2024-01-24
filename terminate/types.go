@@ -1,15 +1,20 @@
 package terminate
 
 import (
+	"math/big"
+
+	"github.com/filecoin-project/go-address"
 	"github.com/filecoin-project/go-state-types/abi"
-	lotusapi "github.com/filecoin-project/lotus/api"
+	minertypes "github.com/filecoin-project/go-state-types/builtin/v9/miner"
 	"github.com/filecoin-project/lotus/chain/types"
 )
 
 // PreviewTerminateSectorsReturn contains the aggregated results from a query.
 type PreviewTerminateSectorsReturn struct {
 	Actor                      *types.ActorV5
-	MinerInfo                  lotusapi.MinerInfo
+	MinerInfo                  minertypes.MinerInfo
+	VestingBalance             *big.Int
+	InitialPledge              *big.Int
 	SectorStats                *SectorStats
 	SectorsTerminated          uint64
 	SectorsCount               uint64
@@ -24,7 +29,7 @@ type PreviewTerminateSectorsReturn struct {
 // query to report progress.
 type PreviewTerminateSectorsProgress struct {
 	Epoch                  abi.ChainEpoch
-	MinerInfo              lotusapi.MinerInfo
+	MinerInfo              minertypes.MinerInfo
 	WorkerActor            *types.ActorV5
 	PrevHeightForImmutable abi.ChainEpoch
 	WorkerActorPrev        *types.ActorV5
@@ -41,23 +46,26 @@ type PreviewTerminateSectorsProgress struct {
 	SliceCount             uint64
 }
 
-type TerminateSectorsSummary struct {
-	MinerAddr          string         `json:"minerAddr"`
-	MinerBal           string         `json:"minerBal"`
-	TerminationPenalty string         `json:"terminationPenalty"`
-	SectorsTerminated  uint64         `json:"sectorsTerminated"`
-	SectorsCount       uint64         `json:"sectorCount"`
-	MinExpiration      abi.ChainEpoch `json:"minExpiration"`
-	MaxExpiration      abi.ChainEpoch `json:"maxExpiration"`
-	MaxAge             abi.ChainEpoch `json:"maxAge"`
-	MinAge             abi.ChainEpoch `json:"minAge"`
+type PreviewAgentTerminationSummary struct {
+	TerminationPenalty *big.Int
+	InitialPledge      *big.Int
+	VestingBalance     *big.Int
+	MinersAvailableBal *big.Int
+	AgentAvailableBal  *big.Int
+}
+
+type MinerCollateralStat struct {
+	Address            address.Address `json:"address"`
+	Total              *big.Int        `json:"total"`
+	Available          *big.Int        `json:"available"`
+	Pledged            *big.Int        `json:"pledged"`
+	Vesting            *big.Int        `json:"vesting"`
+	TerminationPenalty *big.Int        `json:"terminationPenalty"`
 }
 
 type AgentCollateralStats struct {
-	LiquidationValue string `json:"liquidationValue"`
-
-	AggTerminationPenalty  string                     `json:"aggTerminationPenalty"`
-	AgentLiquidCollateral  string                     `json:"agentLiquidCollateral"`
-	MinersTerminationStats []*TerminateSectorsSummary `json:"minersTerminationStats"`
-	Epoch                  abi.ChainEpoch             `json:"epoch"`
+	AvailableBalance       *big.Int               `json:"agentAvailableBalance"`
+	TerminationPenalty     *big.Int               `json:"terminationPenalty"`
+	MinersTerminationStats []*MinerCollateralStat `json:"minersCollateralStats"`
+	Epoch                  abi.ChainEpoch         `json:"epoch"`
 }

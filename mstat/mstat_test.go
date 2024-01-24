@@ -3,53 +3,12 @@ package mstat
 import (
 	"context"
 	"math/big"
-	"net/http"
 	"testing"
 
 	"github.com/filecoin-project/go-address"
-	"github.com/filecoin-project/go-jsonrpc"
-	"github.com/filecoin-project/lotus/api"
-	"github.com/filecoin-project/lotus/build"
 	"github.com/filecoin-project/lotus/chain/types"
+	"github.com/glifio/go-pools/util"
 )
-
-var DIAL_ADDR = ""
-var TOKEN = ""
-
-func setupSuite(t *testing.T) (api.FullNode, jsonrpc.ClientCloser) {
-	var lcli api.FullNodeStruct = api.FullNodeStruct{}
-	head := http.Header{}
-
-	if TOKEN != "" {
-		head.Add("Authorization", "Bearer "+TOKEN)
-	}
-
-	closer, err := jsonrpc.NewMergeClient(
-		context.Background(),
-		DIAL_ADDR,
-		"Filecoin",
-		api.GetInternalStructs(&lcli),
-		head,
-	)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	networkName, err := lcli.StateNetworkName(context.Background())
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	if err := build.UseNetworkBundle(string(networkName)); err != nil {
-		t.Fatal(err)
-	}
-
-	return &lcli, closer
-}
-
-func teardownSuite(close jsonrpc.ClientCloser) {
-	defer close()
-}
 
 func TestComputePercentage(t *testing.T) {
 	// Since we know the percentage is 50%, the results of these tests should always equal original num / 2
@@ -80,8 +39,8 @@ func TestComputePercentage(t *testing.T) {
 }
 
 func TestCmpWithOnChainSectorInfo(t *testing.T) {
-	lapi, closer := setupSuite(t)
-	defer teardownSuite(closer)
+	lapi, closer := util.SetupSuite(t)
+	defer util.TeardownSuite(closer)
 
 	minerTest := toAddressType("f0501283")
 
@@ -104,8 +63,8 @@ func TestCmpWithOnChainSectorInfo(t *testing.T) {
 }
 
 func TestComputeMinerStats(t *testing.T) {
-	lapi, closer := setupSuite(t)
-	defer teardownSuite(closer)
+	lapi, closer := util.SetupSuite(t)
+	defer util.TeardownSuite(closer)
 
 	minerTest := toAddressType("f0501283")
 
@@ -136,8 +95,8 @@ func TestComputeMinerStats(t *testing.T) {
 }
 
 func TestComputeMinersStats(t *testing.T) {
-	lapi, closer := setupSuite(t)
-	defer teardownSuite(closer)
+	lapi, closer := util.SetupSuite(t)
+	defer util.TeardownSuite(closer)
 
 	minerTest := toAddressType("f0501283")
 	minerTest2 := toAddressType("f01660837")
@@ -181,8 +140,8 @@ func TestComputeMinersStats(t *testing.T) {
 }
 
 func TestComputeMinersStatsWrongActor(t *testing.T) {
-	lapi, closer := setupSuite(t)
-	defer teardownSuite(closer)
+	lapi, closer := util.SetupSuite(t)
+	defer util.TeardownSuite(closer)
 
 	// just lookback 5 tipsets from HEAD to see if things look right (don't wanna look too close to head)
 	chainHead, err := lapi.ChainHead(context.Background())
@@ -229,8 +188,8 @@ func TestComputeMinersStatsWrongActor(t *testing.T) {
 }
 
 // func testMinerStats(t *testing.T) {
-// 	lapi, closer := setupSuite(t)
-// 	defer teardownSuite(closer)
+// 	lapi, closer := util.SetupSuite(t)
+// 	defer util.TeardownSuite(closer)
 
 // 	var testCases = []struct {
 // 		addr            address.Address

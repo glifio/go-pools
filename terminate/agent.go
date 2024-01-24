@@ -1,97 +1,78 @@
 package terminate
 
 import (
-	"context"
 	"math/big"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/filecoin-project/go-state-types/abi"
-	ltypes "github.com/filecoin-project/lotus/chain/types"
-	"github.com/glifio/go-pools/types"
-	"github.com/glifio/go-pools/util"
+	"github.com/glifio/go-pools/constants"
 )
 
-// PreviewAgentTermination preview terminating all the
-// sectors on all the miners for an agent (using sampling and "off-chain"
-// calculation) and will return aggregated stats.
-func PreviewAgentTermination(ctx context.Context, sdk types.PoolsSDK, agentAddr common.Address, tipset *ltypes.TipSet) (*AgentCollateralStats, error) {
-	lapi, closer, err := sdk.Extern().ConnectLotusClient()
-	if err != nil {
-		return nil, err
-	}
-	defer closer()
-
-	// if no tipset is found, we use 3 epochs behind chainhead (so we dont get epoch syncronization errors)
-	if tipset == nil {
-		ch, err := lapi.ChainHead(ctx)
-		if err != nil {
-			return nil, err
-		}
-
-		tipset, err = lapi.ChainGetTipSetByHeight(context.Background(), abi.ChainEpoch(ch.Height()-3), ltypes.EmptyTSK)
-		if err != nil {
-			return nil, err
-		}
+func (ats PreviewAgentTerminationSummary) LiquidationValue() *big.Int {
+	// if the termination penalty is greater than the initial pledge,
+	// OR if the initial pledge is 0,
+	// we report liquidation value as 0
+	if ats.InitialPledge.Cmp(ats.TerminationPenalty) < 0 || ats.InitialPledge.Cmp(big.NewInt(0)) == 0 {
+		return big.NewInt(0)
 	}
 
-	bigHeight := big.NewInt(int64(tipset.Height()))
+	totalAvail := new(big.Int).Add(ats.MinersAvailableBal, ats.AgentAvailableBal)
+	// first we multiply the available balance by the recovery rate
+	// recovery rate = (initial pledge - termination penalty) / initial pledge
+	// discounted avail = (available * initial pledge - available * termination penalty) / initial pledge
+	availTimesPledge := new(big.Int).Mul(totalAvail, ats.InitialPledge)
+	availTimesTermPenalty := new(big.Int).Mul(totalAvail, ats.TerminationPenalty)
 
-	miners, err := sdk.Query().AgentMiners(ctx, agentAddr, bigHeight)
-	if err != nil {
-		return nil, err
+	discountedAvail := new(big.Int).Sub(availTimesPledge, availTimesTermPenalty)
+	discountedAvail.Div(discountedAvail, ats.InitialPledge)
+
+	// we add the discounted available balance to the vesting balance and initial pledge, subtract the termination penalty to get the liquidation value
+	liquidationValue := new(big.Int).Add(discountedAvail, ats.VestingBalance)
+	liquidationValue.Add(liquidationValue, ats.InitialPledge)
+	liquidationValue.Sub(liquidationValue, ats.TerminationPenalty)
+
+	return liquidationValue
+}
+
+// 1e18 = 100%
+func (ats PreviewAgentTerminationSummary) RecoveryRate() *big.Int {
+	if ats.InitialPledge.Cmp(ats.TerminationPenalty) == -1 || ats.InitialPledge.Cmp(big.NewInt(0)) == 0 {
+		return big.NewInt(0)
 	}
 
-	minerCount := int64(len(miners))
+	// recovery rate = (initial pledge - termination penalty) / initial pledge
+	recoveryRate := new(big.Int).Sub(ats.InitialPledge, ats.TerminationPenalty)
+	recoveryRate.Mul(recoveryRate, constants.WAD)
+	recoveryRate.Quo(recoveryRate, ats.InitialPledge)
 
-	tasks := make([]util.TaskFunc, minerCount)
-	for i := int64(0); i < minerCount; i++ {
-		minerAddr := miners[i]
-		tasks[i] = func() (interface{}, error) {
-			return PreviewTerminateSectorsQuick(context.Background(), *lapi, minerAddr, tipset)
-		}
+	return recoveryRate
+}
+
+func (ats PreviewAgentTerminationSummary) LTV(principal *big.Int) *big.Int {
+	liquidationValue := ats.LiquidationValue()
+	ltv := big.NewInt(0)
+	if liquidationValue.Cmp(big.NewInt(0)) > 0 && principal.Cmp(big.NewInt(0)) > 0 {
+		// add wad precision in prior to the div to keep atto denomination before we convert to percentage
+		ltv.Mul(principal, constants.WAD)
+		ltv.Div(ltv, liquidationValue)
 	}
 
-	results, err := util.Multiread(tasks)
-	if err != nil {
-		return nil, err
+	return ltv
+}
+
+func (cs *AgentCollateralStats) Summarize() PreviewAgentTerminationSummary {
+	availBal := big.NewInt(0)
+	initialPledge := big.NewInt(0)
+	vestingBal := big.NewInt(0)
+	for _, miner := range cs.MinersTerminationStats {
+		availBal.Add(availBal, miner.Available)
+		initialPledge.Add(initialPledge, miner.Pledged)
+		vestingBal.Add(vestingBal, miner.Vesting)
 	}
 
-	terminationPenalty := big.NewInt(0)
-	collateral := big.NewInt(0)
-	minersTerminationStats := make([]*TerminateSectorsSummary, minerCount)
-	for i, terminationStats := range results {
-		terminationStat := terminationStats.(*PreviewTerminateSectorsReturn)
-		// add the miners termination penalty to the aggregate
-		terminationPenalty = new(big.Int).Add(terminationPenalty, terminationStat.SectorStats.TerminationPenalty)
-		// add the miners balance to the aggregate
-		collateral = new(big.Int).Add(collateral, terminationStat.Actor.Balance.Int)
-		// append to the array of individual miners so the frontend can show better data
-		minersTerminationStats[i] = &TerminateSectorsSummary{
-			MinerAddr:          terminationStat.Actor.Address.String(),
-			MinerBal:           terminationStat.Actor.Balance.String(),
-			TerminationPenalty: terminationStat.SectorStats.TerminationPenalty.String(),
-			SectorsTerminated:  terminationStat.SectorsTerminated,
-			SectorsCount:       terminationStat.SectorsCount,
-			MinExpiration:      terminationStat.SectorStats.MinExpiration,
-			MaxExpiration:      terminationStat.SectorStats.MaxExpiration,
-			MinAge:             terminationStat.SectorStats.MinAge,
-			MaxAge:             terminationStat.SectorStats.MaxAge,
-		}
+	return PreviewAgentTerminationSummary{
+		TerminationPenalty: cs.TerminationPenalty,
+		InitialPledge:      initialPledge,
+		VestingBalance:     vestingBal,
+		MinersAvailableBal: availBal,
+		AgentAvailableBal:  cs.AvailableBalance,
 	}
-
-	agentLiquidFIL, err := sdk.Query().AgentLiquidAssets(ctx, agentAddr, bigHeight)
-	if err != nil {
-		return nil, err
-	}
-
-	liquidationValue := new(big.Int).Add(collateral, agentLiquidFIL)
-	liquidationValue.Sub(liquidationValue, terminationPenalty)
-
-	return &AgentCollateralStats{
-		LiquidationValue:       liquidationValue.String(),
-		AggTerminationPenalty:  terminationPenalty.String(),
-		AgentLiquidCollateral:  agentLiquidFIL.String(),
-		MinersTerminationStats: minersTerminationStats,
-		Epoch:                  tipset.Height(),
-	}, nil
 }

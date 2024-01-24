@@ -2,13 +2,19 @@ package terminate
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
+	"io"
+	"math/big"
+	"net/http"
 	"strings"
 	"time"
 
+	"github.com/filecoin-project/go-address"
 	"github.com/filecoin-project/go-state-types/abi"
 	lotusapi "github.com/filecoin-project/lotus/api"
 	"github.com/filecoin-project/lotus/chain/types"
+	"github.com/glifio/go-pools/constants"
 	"github.com/ipfs/go-cid"
 	"golang.org/x/exp/constraints"
 	"golang.org/x/xerrors"
@@ -16,7 +22,7 @@ import (
 
 // From Lotus
 
-func parseTipSetRef(ctx context.Context, api lotusapi.FullNodeStruct, tss string) (*types.TipSet, error) {
+func parseTipSetRef(ctx context.Context, api *lotusapi.FullNodeStruct, tss string) (*types.TipSet, error) {
 	if tss[0] == '@' {
 		if tss == "@head" {
 			return api.ChainHead(ctx)
@@ -65,7 +71,7 @@ func parseTipSetString(ts string) ([]cid.Cid, error) {
 	return cids, nil
 }
 
-func parseTipSetAndHeight(ctx context.Context, api lotusapi.FullNodeStruct, tipset string, vmHeight uint64) (h abi.ChainEpoch, ts *types.TipSet, err error) {
+func parseTipSetAndHeight(ctx context.Context, api *lotusapi.FullNodeStruct, tipset string, vmHeight uint64) (h abi.ChainEpoch, ts *types.TipSet, err error) {
 	h = abi.ChainEpoch(vmHeight)
 	if tss := tipset; tss != "" {
 		ts, err = parseTipSetRef(ctx, api, tss)
@@ -98,4 +104,101 @@ func max[T constraints.Ordered](a, b T) T {
 		return a
 	}
 	return b
+}
+
+func FetchAgentCollateralStats(ctx context.Context, agentID *big.Int) (*AgentCollateralStats, error) {
+	url := fmt.Sprintf("%s/agent/%s/collateral-value", constants.EventsURL, agentID)
+	// Making an HTTP GET request
+	resp, err := http.Get(url)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("Error fetching collateral stats. Status code: %d", resp.StatusCode)
+	}
+
+	// Read and parse the response body
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	type minerCollateralStat struct {
+		Address            address.Address `json:"address"`
+		Total              string          `json:"total"`
+		Available          string          `json:"available"`
+		Pledged            string          `json:"pledged"`
+		Vesting            string          `json:"vesting"`
+		TerminationPenalty string          `json:"terminationPenalty"`
+	}
+
+	type agentCollateralStats struct {
+		AvailableBalance       string                 `json:"agentAvailableBalance"`
+		TerminationPenalty     string                 `json:"terminationPenalty"`
+		MinersTerminationStats []*minerCollateralStat `json:"minersCollateralStats"`
+		Epoch                  abi.ChainEpoch
+	}
+
+	var response agentCollateralStats
+	if err := json.Unmarshal(body, &response); err != nil {
+		return nil, err
+	}
+
+	minersStats := make([]*MinerCollateralStat, len(response.MinersTerminationStats))
+	for i, miner := range response.MinersTerminationStats {
+		// Convert string values to big.Int
+		total, ok := new(big.Int).SetString(miner.Total, 10)
+		if !ok {
+			return nil, fmt.Errorf("Error converting total to big.Int")
+		}
+
+		available, ok := new(big.Int).SetString(miner.Available, 10)
+		if !ok {
+			return nil, fmt.Errorf("Error converting available to big.Int")
+		}
+
+		pledged, ok := new(big.Int).SetString(miner.Pledged, 10)
+		if !ok {
+			return nil, fmt.Errorf("Error converting pledged to big.Int")
+		}
+
+		vesting, ok := new(big.Int).SetString(miner.Vesting, 10)
+		if !ok {
+			return nil, fmt.Errorf("Error converting vesting to big.Int")
+		}
+
+		terminationPenalty, ok := new(big.Int).SetString(miner.TerminationPenalty, 10)
+		if !ok {
+			return nil, fmt.Errorf("Error converting termination penalty to big.Int")
+		}
+
+		minersStats[i] = &MinerCollateralStat{
+			Address:            miner.Address,
+			Total:              total,
+			Available:          available,
+			Pledged:            pledged,
+			Vesting:            vesting,
+			TerminationPenalty: terminationPenalty,
+		}
+	}
+
+	// Convert string values to big.Int
+	availableBalance, ok := new(big.Int).SetString(response.AvailableBalance, 10)
+	if !ok {
+		return nil, fmt.Errorf("Error converting available balance to big.Int")
+	}
+
+	terminationPenalty, ok := new(big.Int).SetString(response.TerminationPenalty, 10)
+	if !ok {
+		return nil, fmt.Errorf("Error converting termination penalty to big.Int")
+	}
+
+	return &AgentCollateralStats{
+		AvailableBalance:       availableBalance,
+		TerminationPenalty:     terminationPenalty,
+		MinersTerminationStats: minersStats,
+		Epoch:                  response.Epoch,
+	}, nil
 }
