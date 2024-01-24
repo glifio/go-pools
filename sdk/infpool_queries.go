@@ -196,7 +196,8 @@ func computeMaxLTVCap(liquidationValue *big.Int, principal *big.Int, recoveryRat
 	denom := new(big.Int).Mul(constants.MAX_LTV, recoveryRate)
 	// div out the wad math precision from the recovery rate
 	denom.Div(denom, constants.WAD)
-	denom.Sub(denom, constants.WAD)
+	// this is the subtract 1 operation from (LTV * RR)
+	denom.Sub(denom, big.NewInt(1e18))
 
 	maxBorrow := new(big.Int).Div(num, denom)
 
