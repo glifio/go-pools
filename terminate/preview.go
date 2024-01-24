@@ -169,14 +169,6 @@ func PreviewTerminateSectors(
 		autoBatchSize = true
 		batchSize = 2500
 		gasLimit = 90000000000 * 3 // 3 deadlines per batch
-		/*
-			workerBal, _ := util.ToFIL(workerActorPrev.Balance.Int).Float64()
-			if workerBal < 3.0 {
-				ratio := workerBal / 3.0
-				batchSize = uint64(float64(batchSize) * ratio)
-				gasLimit = uint64(float64(gasLimit) * ratio)
-			}
-		*/
 	}
 
 	progressCh <- &PreviewTerminateSectorsProgress{
