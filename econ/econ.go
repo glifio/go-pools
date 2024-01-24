@@ -5,7 +5,6 @@ import (
 	"math/big"
 
 	"github.com/ethereum/go-ethereum/common"
-	"github.com/filecoin-project/go-address"
 	"github.com/filecoin-project/lotus/chain/types"
 	"github.com/glifio/go-pools/constants"
 	"github.com/glifio/go-pools/mstat"
@@ -19,24 +18,13 @@ func ComputeAgentData(
 	sdk poolstypes.PoolsSDK,
 	agentLiquidAssets *big.Int,
 	principal *big.Int,
-	minerIDs []address.Address,
+	aggMinerStats *mstat.MinerStats,
 	agentAddr common.Address,
 	tsk *types.TipSet,
 ) (*vc.AgentData, error) {
-	lapi, closer, err := sdk.Extern().ConnectLotusClient()
-	if err != nil {
-		return nil, err
-	}
-	defer closer()
-
 	// here we just work our way through the AgentData, computing each key
 	// TODO: could probably parellize this elegently to speed things up
 	data := &vc.AgentData{}
-
-	aggMinerStats, err := mstat.ComputeMinersStats(ctx, minerIDs, tsk, lapi)
-	if err != nil {
-		return nil, err
-	}
 
 	data.QaPower = aggMinerStats.QualityAdjPower
 
