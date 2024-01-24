@@ -16,7 +16,7 @@ import (
 func ComputeAgentData(
 	ctx context.Context,
 	sdk poolstypes.PoolsSDK,
-	agentLiquidAssets *big.Int,
+	agentAvailableBalance *big.Int,
 	principal *big.Int,
 	aggMinerStats *mstat.MinerStats,
 	agentAddr common.Address,
@@ -30,7 +30,7 @@ func ComputeAgentData(
 
 	data.GreenScore = aggMinerStats.GreenScore
 
-	data.AgentValue = big.NewInt(0).Add(agentLiquidAssets, aggMinerStats.Balance)
+	data.AgentValue = big.NewInt(0).Add(agentAvailableBalance, aggMinerStats.Balance)
 
 	/* ~~~~~ CollateralValue ~~~~~ */
 
@@ -38,8 +38,8 @@ func ComputeAgentData(
 	if err != nil {
 		return nil, err
 	}
-	// here we replace the ats.AgentAvailableBal with the AgentLiquidAssets passed in this call to compute the post-action liquidation value
-	ats.AgentAvailableBal = agentLiquidAssets
+	// here we replace the ats.AgentAvailableBal with the agentAvailableBalance passed in this call to compute the post-action liquidation value
+	ats.AgentAvailableBal = agentAvailableBalance
 
 	data.CollateralValue = ats.LiquidationValue()
 
