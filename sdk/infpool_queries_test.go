@@ -68,7 +68,8 @@ func TestMaxBorrowLTVCap(t *testing.T) {
 		want             *big.Int
 	}{
 		{"No principal", big.NewInt(100), big.NewInt(0), big.NewInt(9e17), big.NewInt(286)},
-		{"Existing principal", big.NewInt(100), big.NewInt(50), big.NewInt(9e17), big.NewInt(236)},
+		{"Existing principal", big.NewInt(100), big.NewInt(50), big.NewInt(9e17), big.NewInt(108)},
+		{"Existing principal2", big.NewInt(945e3), big.NewInt(750e3), big.NewInt(9e17), big.NewInt(21429)},
 		{"No collateral", big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0)},
 		{"Capped", big.NewInt(100), big.NewInt(286), big.NewInt(9e17), big.NewInt(0)},
 		{"WAD Math", big.NewInt(1e18), big.NewInt(0), big.NewInt(9e17), big.NewInt(2857142857142857143)},
