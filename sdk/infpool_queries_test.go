@@ -24,7 +24,7 @@ func TestMaxBorrowDTICap(t *testing.T) {
 	for _, tt := range tests {
 		testname := fmt.Sprintf("%s", tt.name)
 		t.Run(testname, func(t *testing.T) {
-			answer := computeMaxDTICap(rate, tt.edr, tt.principal, maxDTI)
+			answer := ComputeMaxDTICap(rate, tt.edr, tt.principal, maxDTI)
 			if answer.Cmp(tt.want) != 0 {
 				t.Errorf("Expected %v, received %v", tt.want, answer)
 			}
@@ -50,7 +50,7 @@ func TestMaxBorrowDTECap(t *testing.T) {
 	for _, tt := range tests {
 		testname := fmt.Sprintf("%s", tt.name)
 		t.Run(testname, func(t *testing.T) {
-			answer := computeMaxDTECap(tt.agentValue, tt.principal)
+			answer := ComputeMaxDTECap(tt.agentValue, tt.principal)
 			if answer.Cmp(tt.want) != 0 {
 				t.Errorf("Expected %v, received %v", tt.want, answer)
 			}
@@ -78,7 +78,7 @@ func TestMaxBorrowLTVCap(t *testing.T) {
 	for _, tt := range tests {
 		testname := fmt.Sprintf("%s", tt.name)
 		t.Run(testname, func(t *testing.T) {
-			answer := computeMaxLTVCap(tt.liquidationValue, tt.principal, tt.recoveryRate)
+			answer := ComputeMaxLTVCap(tt.liquidationValue, tt.principal, tt.recoveryRate)
 			if answer.Cmp(tt.want) != 0 {
 				t.Errorf("Expected %v, received %v", tt.want, answer)
 			}
