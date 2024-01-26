@@ -185,11 +185,17 @@ func computeMaxDTECap(agentValue *big.Int, principal *big.Int) *big.Int {
 }
 
 // computeMaxLTVCap returns the max borrowable amount from the agent's liquidation value
-// maxBorrow = (-1*((LTV*LVstart)/(LTV * RR) - 1)) - P
+// maxBorrow = (-1*((LTV*(LV - P*RR)/(LTV * RR) - 1)) - P
+// you can also use equity instead of liquidation value to compute this:
+// maxBorrow = (-1*((LTV*(E*RR)/(LTV * RR) - 1)) - P
 // recovery rate % is expressed as wad math whole number - 1e18 is 100%, 9e17 is 90%, etc
 func computeMaxLTVCap(liquidationValue *big.Int, principal *big.Int, recoveryRate *big.Int) *big.Int {
 	// numerator computation
-	num := new(big.Int).Mul(liquidationValue, constants.MAX_LTV)
+	principalRecovery := new(big.Int).Mul(principal, recoveryRate)
+	// div out wad precision
+	principalRecovery.Div(principalRecovery, constants.WAD)
+	discountedLV := new(big.Int).Sub(liquidationValue, principalRecovery)
+	num := new(big.Int).Mul(discountedLV, constants.MAX_LTV)
 	num.Mul(num, big.NewInt(-1))
 
 	// denom computation
