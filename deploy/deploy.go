@@ -11,13 +11,13 @@ var dialAddr = "https://api.node.glif.io/rpc/v1"
 var t_dialAddr = "https://api.calibration.node.glif.io/rpc/v1"
 
 var Extern = types.Extern{
-	AdoAddr:       "https://ado.glif.link/rpc/v0",
+	AdoAddr:       "https://ado.glif.link/rpc/v1",
 	LotusDialAddr: dialAddr,
 	LotusToken:    "",
 }
 
 var TestExtern = types.Extern{
-	AdoAddr:       "https://ado-testnet.glif.link/rpc/v0",
+	AdoAddr:       "https://ado-testnet.glif.link/rpc/v1",
 	LotusDialAddr: t_dialAddr,
 	LotusToken:    "",
 }
