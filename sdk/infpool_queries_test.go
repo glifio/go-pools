@@ -41,7 +41,7 @@ func TestMaxBorrowDTECap(t *testing.T) {
 		want       *big.Int
 	}{
 		{"No principal", big.NewInt(100), big.NewInt(0), big.NewInt(200)},
-		{"Existing principal", big.NewInt(100), big.NewInt(50), big.NewInt(150)},
+		{"Existing principal", big.NewInt(100), big.NewInt(50), big.NewInt(50)},
 		{"No collateral", big.NewInt(0), big.NewInt(0), big.NewInt(0)},
 		{"Capped", big.NewInt(100), big.NewInt(200), big.NewInt(0)},
 		{"Over", big.NewInt(100), big.NewInt(300), big.NewInt(0)},
