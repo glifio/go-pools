@@ -173,10 +173,15 @@ func ComputeMaxDTICap(epochRate *big.Int, edr *big.Int, agentExistingPrincipal *
 }
 
 func ComputeMaxDTECap(agentValue *big.Int, principal *big.Int) *big.Int {
-	maxValue := new(big.Int).Mul(agentValue, constants.MAX_DTE)
+	if agentValue.Cmp(principal) == -1 {
+		return big.NewInt(0)
+	}
+	equity := new(big.Int).Sub(agentValue, principal)
+	maxValue := new(big.Int).Mul(equity, constants.MAX_DTE)
 	// div out wad math precision
 	maxValue.Div(maxValue, constants.WAD)
 
+	// handles DTE < 100%
 	if maxValue.Cmp(principal) == -1 {
 		return big.NewInt(0)
 	}
