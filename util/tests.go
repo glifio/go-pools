@@ -3,6 +3,7 @@ package util
 import (
 	"context"
 	"net/http"
+	"os"
 	"testing"
 
 	"github.com/filecoin-project/go-jsonrpc"
@@ -10,24 +11,24 @@ import (
 	"github.com/filecoin-project/lotus/build"
 )
 
-var DIAL_ADDR = ""
-var TOKEN = ""
-
 func SetupSuite(t *testing.T) (*api.FullNodeStruct, jsonrpc.ClientCloser) {
-	if DIAL_ADDR == "" {
-		t.Fatal("DIAL_ADDR must be set")
+	lotusDialAddr := os.Getenv("LOTUS_DIAL_ADDR")
+	lotusToken := os.Getenv("LOTUS_TOKEN")
+
+	if lotusDialAddr == "" {
+		t.Fatal("LOTUS_DIAL_ADDR env var must be set")
 	}
 
 	var lcli api.FullNodeStruct = api.FullNodeStruct{}
 	head := http.Header{}
 
-	if TOKEN != "" {
-		head.Add("Authorization", "Bearer "+TOKEN)
+	if lotusToken != "" {
+		head.Add("Authorization", "Bearer "+lotusToken)
 	}
 
 	closer, err := jsonrpc.NewMergeClient(
 		context.Background(),
-		DIAL_ADDR,
+		lotusDialAddr,
 		"Filecoin",
 		api.GetInternalStructs(&lcli),
 		head,
