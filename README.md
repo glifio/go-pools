@@ -84,3 +84,8 @@ type PoolsSDK interface {
 
 ### Generating mocks
 We use [mockery](https://vektra.github.io/mockery/#why-mockery) for generating mock files, which are output to the `./mock` package. For example, see `types/types.go` and run `go generate types/types.go`
+
+### Testing
+To run certain tests, a couple environment variables must be exported:
+`LOTUS_DIAL_ADDRESS`<br />
+`LOTUS_TOKEN`
