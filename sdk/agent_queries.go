@@ -400,8 +400,6 @@ func (q *fevmQueries) AgentPreviewTerminationQuick(ctx context.Context, agentAdd
 	return agentCollateralStats.Summarize(), nil
 }
 
-var LookbackEpochs abi.ChainEpoch = 3
-
 // PreviewAgentTermination preview terminating all the
 // sectors on all the miners for an agent (using sampling and "off-chain"
 // calculation) and will return the liquidation value of the agent.
@@ -419,7 +417,7 @@ func (q *fevmQueries) AgentPreviewTerminationPrecise(ctx context.Context, agentA
 			return terminate.PreviewAgentTerminationSummary{}, err
 		}
 
-		tipset, err = lapi.ChainGetTipSetByHeight(context.Background(), abi.ChainEpoch(ch.Height()-LookbackEpochs), ltypes.EmptyTSK)
+		tipset, err = lapi.ChainGetTipSetByHeight(context.Background(), abi.ChainEpoch(ch.Height()-constants.ChainHeadLookbackEpochs), ltypes.EmptyTSK)
 		if err != nil {
 			return terminate.PreviewAgentTerminationSummary{}, err
 		}
