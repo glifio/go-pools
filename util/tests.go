@@ -2,6 +2,7 @@ package util
 
 import (
 	"context"
+	"math/big"
 	"net/http"
 	"os"
 	"testing"
@@ -51,4 +52,25 @@ func SetupSuite(t *testing.T) (*api.FullNodeStruct, jsonrpc.ClientCloser) {
 
 func TeardownSuite(close jsonrpc.ClientCloser) {
 	defer close()
+}
+
+func AssertApproxEqAbs(a, b, DUST *big.Int) bool {
+	diff := new(big.Int).Sub(a, b)
+	diff.Abs(diff)
+	return diff.Cmp(DUST) <= 0
+}
+
+// DIFF is a WAD math based percentage, such that 1e18 is 100%
+func AssertApproxEqRel(a, b, DIFF *big.Int) bool {
+	// compute the diff
+	diff := new(big.Int).Sub(a, b)
+	diff.Abs(diff)
+
+	// Calculate the difference in terms of percentage: (|a - b| / a) * 1e18
+	// To avoid losing precision, first multiply diff by 1e18, then divide by a
+	percentageDiff := new(big.Int).Mul(diff, big.NewInt(1e18))
+	percentageDiff.Div(percentageDiff, a)
+
+	// Check if the calculated percentage difference is within the specified range
+	return percentageDiff.Cmp(DIFF) <= 0
 }

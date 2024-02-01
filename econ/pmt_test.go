@@ -9,6 +9,7 @@ import (
 	"github.com/filecoin-project/go-state-types/abi"
 	"github.com/filecoin-project/go-state-types/builtin"
 	"github.com/glifio/go-pools/abigen"
+	"github.com/glifio/go-pools/util"
 )
 
 func TestInterestOwed(t *testing.T) {
@@ -35,13 +36,7 @@ func TestInterestOwed(t *testing.T) {
 
 	owed := InterestOwed(context.Background(), testAccount, rate, currentEpoch)
 
-	if !assertApproxEqAbs(owed, expectedOwed, DUST) {
+	if !util.AssertApproxEqAbs(owed, expectedOwed, DUST) {
 		t.Errorf("expected %v, got %v", expectedOwed, owed)
 	}
-}
-
-func assertApproxEqAbs(a, b, DUST *big.Int) bool {
-	diff := new(big.Int).Sub(a, b)
-	diff.Abs(diff)
-	return diff.Cmp(DUST) <= 0
 }
