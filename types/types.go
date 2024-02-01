@@ -68,7 +68,7 @@ type FEVMQueries interface {
 	WFILBalanceOf(ctx context.Context, hodler common.Address) (*big.Float, error)
 	WFILAllowance(ctx context.Context, hodler common.Address, spender common.Address) (*big.Float, error)
 	// policing methods
-	CredentialUsed(ctx context.Context, v uint8, r [32]byte, s [32]byte) (bool, error)
+	CredentialUsed(ctx context.Context, v uint8, r [32]byte, s [32]byte, blockNumber *big.Int) (bool, error)
 	CredentialValidityPeriod(ctx context.Context) (*big.Int, *big.Int, error)
 	DefaultEpoch(ctx context.Context) (*big.Int, error)
 	MaxConsecutiveFaultEpochs(ctx context.Context) (*big.Int, error)
