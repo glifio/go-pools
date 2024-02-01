@@ -49,13 +49,14 @@ func ComputeAgentData(
 	/* ~~~~~ SectorInfo ~~~~~ */
 	data.LiveSectors = aggMinerStats.LiveSectors
 
-	// if the LTV (loan to liquidationm value) is greater than the max LTV, we report faulty sectors in order to trigger a liquidation
-	// this is a bit of a workaround until the liquidation value buffer is built-in to the contracts directly
 	// using wad math
 	numerator := new(big.Int).Mul(principal, constants.WAD)
 
-	if (new(big.Int).Div(numerator, data.CollateralValue)).Cmp(constants.MAX_LTV) > 0 {
-		// 100% faulty sectors if loan to liquidation value buffer is breached
+	if data.CollateralValue.Cmp(big.NewInt(0)) == 0 {
+		data.FaultySectors = aggMinerStats.FaultySectors
+	} else if (new(big.Int).Div(numerator, data.CollateralValue)).Cmp(constants.MAX_LTV) > 0 {
+		// if the LTV (loan to liquidation value) is greater than the max LTV, we report faulty sectors in order to trigger a liquidation
+		// this is a bit of a workaround until the liquidation value buffer is built-in to the contracts directly
 		data.FaultySectors = aggMinerStats.LiveSectors
 	} else {
 		data.FaultySectors = aggMinerStats.FaultySectors
