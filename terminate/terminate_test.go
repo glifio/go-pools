@@ -4,16 +4,18 @@ import (
 	"context"
 	"fmt"
 	"log"
-	"math/rand"
+	"math/big"
 	"testing"
 
-	"github.com/filecoin-project/go-address"
 	"github.com/filecoin-project/lotus/chain/types"
 	"github.com/glifio/go-pools/util"
 )
 
 // this test compares N random miner termination penalties computed in the most precise (time intensive) way against the quick, less precise sampling method used in the ADO
 var N = 10
+
+// the wad based percentage that is acceptible for imprecision
+var DIFF = big.NewInt(3e16)
 
 func TestTerminationPrecision(t *testing.T) {
 	lapi, closer := util.SetupSuite(t)
@@ -36,17 +38,33 @@ func TestTerminationPrecision(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	// make a slice the length of N
-	chosenMiners := make([]address.Address, N)
+	// // make a slice the length of N
+	// chosenMiners := make([]address.Address, N)
 
-	for i := 0; i < N; i++ {
-		// choose a random miner
-		randomIndex := rand.Intn(len(miners))
-		chosenMiners[i] = miners[randomIndex]
-	}
+	// for i := 0; i < N; i++ {
+	// 	// choose a random miner
+	// 	randomIndex := rand.Intn(len(miners))
+	// 	chosenMiners[i] = miners[randomIndex]
+	// }
 	// eventually run this test on all 10 miners in parallel
-	miner := chosenMiners[0]
-	fmt.Println("RANDOM MINER CHOSEN: ", miner)
+	idx := 0
+	miner := miners[0]
+	hasBalance := false
+	// check if the miner has a balance
+	for !hasBalance {
+		sectorCount, err := lapi.StateMinerSectorCount(context.Background(), miner, ts.Key())
+		if err != nil {
+			t.Fatal(err)
+		}
+		// if the miner has no active sectors, move to the next miner
+		fmt.Println(miner, sectorCount.Active)
+		if sectorCount.Active == 0 {
+			idx++
+			miner = miners[idx]
+		} else {
+			hasBalance = true
+		}
+	}
 
 	imprecise, err := PreviewTerminateSectorsQuick(context.Background(), lapi, miner, ts)
 	if err != nil {
@@ -62,7 +80,9 @@ loop:
 	for {
 		select {
 		case result := <-resultCh:
-			if result.SectorStats.TerminationPenalty.Cmp(imprecise.SectorStats.TerminationPenalty) != 0 {
+			fmt.Println("PRECISE: ", result.SectorStats.TerminationPenalty)
+			fmt.Println("IMPRECISE: ", imprecise.SectorStats.TerminationPenalty)
+			if !util.AssertApproxEqRel(result.SectorStats.TerminationPenalty, imprecise.SectorStats.TerminationPenalty, DIFF) {
 				t.Fatalf("TERMINATION PENALTIES DO NOT MATCH: precise: %v, imprecise: %v", result.SectorStats.TerminationPenalty, imprecise.SectorStats.TerminationPenalty)
 			}
 			break loop
