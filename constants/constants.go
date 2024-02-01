@@ -24,6 +24,9 @@ var RepeatBorrowEpochTolerance = EpochsInDay
 const CredentialMinutesValid = 5
 const CredentialEpochsValid = CredentialMinutesValid * EpochsInMinute
 
+// the ChainHeadLookbackEpochs epochs is the protocol wide parameter that is subtracted from ChainHead height to look at real time on chain info
+const ChainHeadLookbackEpochs = 3
+
 type Method string
 
 // these method names must match the names in the Agent contract in order to get the right function signature
