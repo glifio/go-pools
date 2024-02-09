@@ -91,7 +91,9 @@ func IsZeroAddress(address common.Address) bool {
 }
 
 func TruncateAddr(addr string) string {
-	if len(addr) <= 10 {
+	re := regexp.MustCompile(`^[tf][0]`)
+	// return ID addresses as-is
+	if re.MatchString(addr) {
 		return addr
 	}
 

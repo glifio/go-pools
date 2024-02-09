@@ -61,6 +61,55 @@ func (m *MockFullNodeAPI) StateGetActor(ctx context.Context, actor address.Addre
 	}, nil
 }
 
+func TestTruncateAddress(t *testing.T) {
+	testCases := []struct {
+		name     string
+		input    string
+		expected string
+	}{
+		{
+			name:     "Ethereum Address",
+			input:    "0x3972E844729522d367BFA1D64368346D7ccEEa59",
+			expected: "0x3972...Ea59",
+		},
+		{
+			name:     "Filecoin ID Address",
+			input:    idStr,
+			expected: idStr,
+		},
+		{
+			name:     "Valid Filecoin Account f1 Address",
+			input:    "f1ys5qqiciehcml3sp764ymbbytfn3qoar5fo3iwy",
+			expected: "f1ys5q...3iwy",
+		},
+		{
+			name:     "Valid Filecoin Account f3 Address",
+			input:    "f3vpyybzycb3wvhwkxcrodn3rqv66sd5hfho4lfq6p6igmrlgyb22v3ekdghp6km47ioki3gfo4zb4ezirhfaq",
+			expected: "f3vpyy...hfaq",
+		},
+		{
+			name:     "Valid Filecoin Account f4 Address",
+			input:    "f410fmdqxonrwz5peuit5tlbe6ih6zibu5ys223xctfi",
+			expected: "f410fm...ctfi",
+		},
+		{
+			name:     "Random f0 in the middle of string",
+			input:    "f1ys5qqiciehcml3sp764ymbbytfn3qoar5f03iwy",
+			expected: "f1ys5q...3iwy",
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			result := TruncateAddr(tc.input)
+
+			if result != tc.expected {
+				t.Errorf("Expected %v, received %v", tc.expected, result)
+			}
+		})
+	}
+}
+
 func TestParseAddress(t *testing.T) {
 	// Create a mock FullNodeAPI
 	mockAPI := &MockFullNodeAPI{}
