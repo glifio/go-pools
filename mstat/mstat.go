@@ -7,7 +7,6 @@ import (
 	"math/big"
 
 	"github.com/filecoin-project/go-address"
-	"github.com/filecoin-project/go-state-types/abi"
 	"github.com/filecoin-project/lotus/api"
 	"github.com/filecoin-project/lotus/blockstore"
 	"github.com/filecoin-project/lotus/build"
@@ -138,7 +137,7 @@ func ComputeMinerStats(ctx context.Context, minerAddr address.Address, ts *types
 	minerStats.HasMinPower = power.HasMinPower
 
 	// get sector status
-	sectorStatus, err := computeSectorStatus(ctx, api, minerAddr, ts)
+	sectorStatus, err := api.StateMinerSectorCount(ctx, minerAddr, ts.Key())
 	if err != nil {
 		return nil, err
 	}
@@ -293,34 +292,4 @@ func computePercentOf(x *big.Int) *big.Int {
 	// take product of x * percent
 	result := new(big.Int).Mul(x, r.Num())
 	return result.Div(result, r.Denom())
-}
-
-func computeSectorStatus(ctx context.Context, lotus *api.FullNodeStruct, miner address.Address, tsk *types.TipSet) (*api.MinerSectors, error) {
-
-	sectorStatus := api.MinerSectors{}
-
-	const LOOK_BACK_LIMIT = 3
-
-	// loop back in steps of 1000 tipsets 10 times and avarage the sector count
-	for i := 0; i < LOOK_BACK_LIMIT; i++ {
-		ts, err := lotus.ChainGetTipSetByHeight(ctx, tsk.Height()-abi.ChainEpoch((i*200)), tsk.Key())
-		if err != nil {
-			return nil, err
-		}
-		sectorCount, err := lotus.StateMinerSectorCount(ctx, miner, ts.Key())
-		if err != nil {
-			return nil, err
-		}
-
-		// add result to the total and average it
-		sectorStatus.Live += sectorCount.Live
-		sectorStatus.Active += sectorCount.Active
-		sectorStatus.Faulty += sectorCount.Faulty
-	}
-
-	sectorStatus.Live = sectorStatus.Live / LOOK_BACK_LIMIT
-	sectorStatus.Active = sectorStatus.Active / LOOK_BACK_LIMIT
-	sectorStatus.Faulty = sectorStatus.Faulty / LOOK_BACK_LIMIT
-
-	return &sectorStatus, nil
 }
