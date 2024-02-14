@@ -34,7 +34,7 @@ func TestSignVerifyJWS(t *testing.T) {
 		t.Fatal("jws is empty")
 	}
 
-	claims, err := VerifyJWS(ctx, jws, mockFEVMQueries)
+	claims, err := VerifyJWS(ctx, jws, mockFEVMQueries, false)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -76,7 +76,7 @@ func TestBadJWSPubkey(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	_, err = VerifyJWS(ctx, tokenStr, mockQuery)
+	_, err = VerifyJWS(ctx, tokenStr, mockQuery, false)
 	if err == nil {
 		t.Fatal("expected crypto/ecdsa verification error")
 	}
@@ -117,9 +117,63 @@ func TestStaleJWS(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	_, err = VerifyJWS(ctx, tokenStr, mockQueries)
+	_, err = VerifyJWS(ctx, tokenStr, mockQueries, false)
 	if err != TokenExpiredErr {
 		t.Fatal("expected stale JWS error")
+	}
+}
+
+func TestJWSFromWWW(t *testing.T) {
+	ctx := context.Background()
+
+	agentAddr, target, value, signerPrivateKey, signerAddr := setup()
+
+	mockFEVMQueries := mock.NewFEVMQueries(t)
+	mockFEVMQueries.On("ChainHeight", ctx).Return(big.NewInt(100), nil)
+	mockFEVMQueries.On("AgentRequester", ctx, agentAddr).Return(signerAddr, nil)
+
+	pubKeyBytes := crypto.FromECDSAPub(&signerPrivateKey.PublicKey)
+
+	token := jwt.NewWithClaims(jwt.SigningMethodES256, requestClaimsStrVal{
+		AgentAddr:       agentAddr,
+		RequesterPubKey: pubKeyBytes,
+		Target:          target,
+		Value:           value.String(),
+		Method:          constants.MethodBorrow,
+		EpochHeight:     big.NewInt(100),
+	})
+
+	jws, err := token.SignedString(signerPrivateKey)
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if jws == "" {
+		t.Fatal("jws is empty")
+	}
+
+	// call should throw
+	_, err = VerifyJWS(ctx, jws, mockFEVMQueries, false)
+	if err == nil {
+		t.Fatal("error expected - jws from www should fail big.Int parsing")
+	}
+
+	claims, err := VerifyJWS(ctx, jws, mockFEVMQueries, true)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if claims.AgentAddr != agentAddr {
+		t.Fatal("agent address does not match")
+	}
+
+	if claims.Target != target {
+		t.Fatal("target address does not match")
+	}
+
+	if claims.Value.Cmp(value) != 0 {
+		t.Fatal("value does not match")
 	}
 }
 

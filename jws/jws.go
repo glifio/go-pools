@@ -25,6 +25,17 @@ type RequestClaims struct {
 	EpochHeight     *big.Int
 }
 
+// / www sends its requests using string as `value`, so we serialize requestClaimsStrVal into a RequestClaims object to parse the token
+type requestClaimsStrVal struct {
+	jwt.MapClaims
+	AgentAddr       common.Address
+	RequesterPubKey []byte
+	Target          address.Address
+	Value           string
+	Method          constants.Method
+	EpochHeight     *big.Int
+}
+
 var (
 	InvalidAgentAddrErr = errors.New("invalid agent address")
 	InvalidRequesterErr = errors.New("invalid requester")
@@ -59,7 +70,7 @@ type ecdsaSignature struct {
 // signatures last approx 2.5 minutes
 var EXPIRATION_EPOCH_BUFFER = big.NewInt(5)
 
-func VerifyJWS(ctx context.Context, jws string, query types.FEVMQueries) (*RequestClaims, error) {
+func parseClaims(jws string) (*RequestClaims, *jwt.Token, *ecdsa.PublicKey, error) {
 	var jwsIssuerPubkey *ecdsa.PublicKey
 	claims := &RequestClaims{}
 
@@ -75,6 +86,57 @@ func VerifyJWS(ctx context.Context, jws string, query types.FEVMQueries) (*Reque
 		jwsIssuerPubkey = pubkey
 		return pubkey, nil
 	})
+
+	return claims, token, jwsIssuerPubkey, err
+}
+
+func parseClaimsStrVal(jws string) (*RequestClaims, *jwt.Token, *ecdsa.PublicKey, error) {
+	var jwsIssuerPubkey *ecdsa.PublicKey
+	claims := &requestClaimsStrVal{}
+
+	token, err := jwt.ParseWithClaims(jws, claims, func(token *jwt.Token) (interface{}, error) {
+		if _, ok := token.Method.(*jwt.SigningMethodECDSA); !ok {
+			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
+		}
+
+		pubkey, err := crypto.UnmarshalPubkey(claims.RequesterPubKey)
+		if err != nil {
+			return nil, err
+		}
+		jwsIssuerPubkey = pubkey
+		return pubkey, nil
+	})
+
+	val, ok := new(big.Int).SetString(claims.Value, 10)
+	if !ok {
+		return &RequestClaims{}, token, jwsIssuerPubkey, InvalidTokenErr
+	}
+
+	claimsFormatted := &RequestClaims{
+		MapClaims:       claims.MapClaims,
+		AgentAddr:       claims.AgentAddr,
+		RequesterPubKey: claims.RequesterPubKey,
+		Target:          claims.Target,
+		Value:           val,
+		Method:          claims.Method,
+		EpochHeight:     claims.EpochHeight,
+	}
+
+	return claimsFormatted, token, jwsIssuerPubkey, err
+}
+
+// useStrVal is a boolean that informs the jwt parser to use a specific version of the claims type
+func VerifyJWS(ctx context.Context, jws string, query types.FEVMQueries, useStrVal bool) (*RequestClaims, error) {
+	var claims *RequestClaims
+	var token *jwt.Token
+	var jwsIssuerPubkey *ecdsa.PublicKey
+	var err error
+
+	if useStrVal {
+		claims, token, jwsIssuerPubkey, err = parseClaimsStrVal(jws)
+	} else {
+		claims, token, jwsIssuerPubkey, err = parseClaims(jws)
+	}
 
 	if err != nil {
 		return &RequestClaims{}, err
