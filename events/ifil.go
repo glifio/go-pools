@@ -10,7 +10,6 @@ import (
 )
 
 func IFilTransferEvents(ctx context.Context, sdk types.PoolsSDK, startEpoch *big.Int, endEpoch *big.Int) ([]*abigen.PoolTokenTransfer, error) {
-
 	ethclient, err := sdk.Extern().ConnectEthClient()
 	if err != nil {
 		return []*abigen.PoolTokenTransfer{}, err
@@ -34,7 +33,9 @@ func IFilTransferEvents(ctx context.Context, sdk types.PoolsSDK, startEpoch *big
 			return []*abigen.PoolTokenTransfer{}, err
 		}
 
-		events = append(events, iter.Event)
+		for iter.Next() {
+			events = append(events, iter.Event)
+		}
 	}
 
 	return events, nil
