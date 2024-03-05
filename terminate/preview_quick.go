@@ -121,8 +121,9 @@ func PreviewTerminateSectorsQuick(
 			deadlineHeight = prevHeight
 		}
 		partitions, err := api.StateMinerPartitions(ctx, minerAddr, uint64(dlIdx), deadlineTs.Key())
+		// if this error occurs, the miner hasn't been around long enough to process the deadlineTs, so we just skip it
 		if err != nil {
-			return nil, err
+			continue
 		}
 		for partIdx, partition := range partitions {
 			allLiveSectors = append(allLiveSectors, partition.LiveSectors)
