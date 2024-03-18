@@ -171,14 +171,16 @@ func PreviewTerminateSectors(
 		gasLimit = 90000000000 * 3 // 3 deadlines per batch
 	}
 
-	progressCh <- &PreviewTerminateSectorsProgress{
-		Epoch:                  h,
-		MinerInfo:              minerInfo,
-		WorkerActor:            workerActor,
-		PrevHeightForImmutable: prevHeight,
-		WorkerActorPrev:        workerActorPrev,
-		BatchSize:              batchSize,
-		GasLimit:               gasLimit,
+	if progressCh != nil {
+		progressCh <- &PreviewTerminateSectorsProgress{
+			Epoch:                  h,
+			MinerInfo:              minerInfo,
+			WorkerActor:            workerActor,
+			PrevHeightForImmutable: prevHeight,
+			WorkerActorPrev:        workerActorPrev,
+			BatchSize:              batchSize,
+			GasLimit:               gasLimit,
+		}
 	}
 
 	if autoBatchSize && batchSize < 10 {
@@ -320,13 +322,16 @@ func PreviewTerminateSectors(
 				errorCh <- err
 				return
 			}
-			progressCh <- &PreviewTerminateSectorsProgress{
-				DeadlinePartitionCount: len(deadlinePartitions),
-				DeadlinePartitionIndex: deadlinePartitionIdx,
-				Deadline:               dlIdx,
-				DeadlineImmutable:      dlImmutable,
-				Partition:              partIdx,
-				SectorsCount:           sc,
+
+			if progressCh != nil {
+				progressCh <- &PreviewTerminateSectorsProgress{
+					DeadlinePartitionCount: len(deadlinePartitions),
+					DeadlinePartitionIndex: deadlinePartitionIdx,
+					Deadline:               dlIdx,
+					DeadlineImmutable:      dlImmutable,
+					Partition:              partIdx,
+					SectorsCount:           sc,
+				}
 			}
 			if sc > 0 {
 
@@ -346,16 +351,18 @@ func PreviewTerminateSectors(
 								return
 							}
 
-							progressCh <- &PreviewTerminateSectorsProgress{
-								DeadlinePartitionCount: len(deadlinePartitions),
-								DeadlinePartitionIndex: deadlinePartitionIdx,
-								Deadline:               dlIdx,
-								DeadlineImmutable:      dlImmutable,
-								Partition:              partIdx,
-								SectorsCount:           sc,
-								SliceStart:             i,
-								SliceEnd:               lastIndex,
-								SliceCount:             sliceCount,
+							if progressCh != nil {
+								progressCh <- &PreviewTerminateSectorsProgress{
+									DeadlinePartitionCount: len(deadlinePartitions),
+									DeadlinePartitionIndex: deadlinePartitionIdx,
+									Deadline:               dlIdx,
+									DeadlineImmutable:      dlImmutable,
+									Partition:              partIdx,
+									SectorsCount:           sc,
+									SliceStart:             i,
+									SliceEnd:               lastIndex,
+									SliceCount:             sliceCount,
+								}
 							}
 
 							termination := miner.TerminationDeclaration{
