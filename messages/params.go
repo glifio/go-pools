@@ -20,7 +20,7 @@ func (r *MethodLookupError) Error() string {
 	return fmt.Sprintf("%v", r.Err)
 }
 
-func ParseParams(msg types.MessageTrace) (*abi.Method, map[string]interface{}, error) {
+func ParseAgentParams(msg types.MessageTrace) (*abi.Method, map[string]interface{}, error) {
 	data := msg.Params
 
 	if len(data) == 0 {
