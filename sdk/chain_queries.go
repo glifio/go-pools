@@ -4,8 +4,8 @@ import (
 	"context"
 	"math/big"
 
-	"github.com/ethereum/go-ethereum/common"
 	filtypes "github.com/filecoin-project/lotus/chain/types"
+	"github.com/jimpick/go-ethereum/common"
 )
 
 func (q *fevmQueries) ChainHead(ctx context.Context) (*filtypes.TipSet, error) {

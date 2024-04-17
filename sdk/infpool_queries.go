@@ -4,12 +4,12 @@ import (
 	"context"
 	"math/big"
 
-	"github.com/ethereum/go-ethereum/accounts/abi/bind"
-	"github.com/ethereum/go-ethereum/common"
 	"github.com/glifio/go-pools/abigen"
 	"github.com/glifio/go-pools/constants"
 	"github.com/glifio/go-pools/util"
 	"github.com/glifio/go-pools/vc"
+	"github.com/jimpick/go-ethereum/accounts/abi/bind"
+	"github.com/jimpick/go-ethereum/common"
 )
 
 func (q *fevmQueries) InfPoolGetAccount(ctx context.Context, agentAddr common.Address, blockNumber *big.Int) (abigen.Account, error) {

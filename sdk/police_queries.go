@@ -4,9 +4,9 @@ import (
 	"context"
 	"math/big"
 
-	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/glifio/go-pools/abigen"
 	"github.com/glifio/go-pools/constants"
+	"github.com/jimpick/go-ethereum/accounts/abi/bind"
 )
 
 func (q *fevmQueries) DefaultEpoch(ctx context.Context) (*big.Int, error) {

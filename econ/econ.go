@@ -4,12 +4,12 @@ import (
 	"context"
 	"math/big"
 
-	"github.com/ethereum/go-ethereum/common"
 	"github.com/filecoin-project/lotus/chain/types"
 	"github.com/glifio/go-pools/constants"
 	"github.com/glifio/go-pools/mstat"
 	poolstypes "github.com/glifio/go-pools/types"
 	"github.com/glifio/go-pools/vc"
+	"github.com/jimpick/go-ethereum/common"
 )
 
 // TODO https://github.com/glif-confidential/ado/issues/9

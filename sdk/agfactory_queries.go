@@ -4,8 +4,8 @@ import (
 	"context"
 	"math/big"
 
-	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/glifio/go-pools/abigen"
+	"github.com/jimpick/go-ethereum/accounts/abi/bind"
 )
 
 func (q *fevmQueries) AgentFactoryAgentCount(ctx context.Context, blockNumber *big.Int) (*big.Int, error) {

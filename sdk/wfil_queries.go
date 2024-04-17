@@ -4,10 +4,10 @@ import (
 	"context"
 	"math/big"
 
-	"github.com/ethereum/go-ethereum/accounts/abi/bind"
-	"github.com/ethereum/go-ethereum/common"
 	"github.com/glifio/go-pools/abigen"
 	"github.com/glifio/go-pools/util"
+	"github.com/jimpick/go-ethereum/accounts/abi/bind"
+	"github.com/jimpick/go-ethereum/common"
 )
 
 func (q *fevmQueries) WFILBalanceOf(ctx context.Context, address common.Address) (*big.Float, error) {

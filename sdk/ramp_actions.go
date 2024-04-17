@@ -4,11 +4,11 @@ import (
 	"context"
 	"math/big"
 
-	"github.com/ethereum/go-ethereum/accounts/abi/bind"
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/glifio/go-pools/abigen"
 	"github.com/glifio/go-pools/util"
+	"github.com/jimpick/go-ethereum/accounts/abi/bind"
+	"github.com/jimpick/go-ethereum/common"
+	"github.com/jimpick/go-ethereum/core/types"
 )
 
 func (a *fevmActions) RampWithdraw(ctx context.Context, auth *bind.TransactOpts, assets *big.Int, sender common.Address, receiver common.Address) (*types.Transaction, error) {

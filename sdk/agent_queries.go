@@ -5,9 +5,6 @@ import (
 	"log"
 	"math/big"
 
-	"github.com/ethereum/go-ethereum/accounts/abi/bind"
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/filecoin-project/go-address"
 	"github.com/filecoin-project/go-state-types/abi"
 	filtypes "github.com/filecoin-project/lotus/chain/types"
@@ -18,6 +15,9 @@ import (
 	"github.com/glifio/go-pools/terminate"
 	"github.com/glifio/go-pools/util"
 	"github.com/glifio/go-pools/vc"
+	"github.com/jimpick/go-ethereum/accounts/abi/bind"
+	"github.com/jimpick/go-ethereum/common"
+	"github.com/jimpick/go-ethereum/core/types"
 )
 
 func (q *fevmQueries) AgentID(ctx context.Context, address common.Address) (*big.Int, error) {

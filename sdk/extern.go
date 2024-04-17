@@ -4,11 +4,11 @@ import (
 	"context"
 	"net/http"
 
-	"github.com/ethereum/go-ethereum/ethclient"
-	ethrpc "github.com/ethereum/go-ethereum/rpc"
 	"github.com/filecoin-project/go-jsonrpc"
 	lotusapi "github.com/filecoin-project/lotus/api"
 	"github.com/glifio/go-pools/rpc"
+	"github.com/jimpick/go-ethereum/ethclient"
+	ethrpc "github.com/jimpick/go-ethereum/rpc"
 )
 
 func (c *fevmExtern) ConnectEthClient() (*ethclient.Client, error) {

@@ -3,7 +3,7 @@ package util
 import (
 	"math/big"
 
-	"github.com/ethereum/go-ethereum/params"
+	"github.com/jimpick/go-ethereum/params"
 )
 
 func ToAtto(bal *big.Float) *big.Int {

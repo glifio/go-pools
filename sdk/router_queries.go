@@ -3,10 +3,10 @@ package sdk
 import (
 	"context"
 
-	"github.com/ethereum/go-ethereum/accounts/abi/bind"
-	"github.com/ethereum/go-ethereum/common"
 	"github.com/glifio/go-pools/abigen"
 	"github.com/glifio/go-pools/constants"
+	"github.com/jimpick/go-ethereum/accounts/abi/bind"
+	"github.com/jimpick/go-ethereum/common"
 )
 
 func (q *fevmQueries) RouterOwner(ctx context.Context) (common.Address, error) {

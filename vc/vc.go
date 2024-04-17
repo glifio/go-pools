@@ -5,13 +5,13 @@ import (
 	"math/big"
 	"reflect"
 
-	"github.com/ethereum/go-ethereum/accounts/abi"
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/common/hexutil"
-	"github.com/ethereum/go-ethereum/common/math"
-	"github.com/ethereum/go-ethereum/crypto"
-	"github.com/ethereum/go-ethereum/signer/core/apitypes"
 	"github.com/glifio/go-pools/abigen"
+	"github.com/jimpick/go-ethereum/accounts/abi"
+	"github.com/jimpick/go-ethereum/common"
+	"github.com/jimpick/go-ethereum/common/hexutil"
+	"github.com/jimpick/go-ethereum/common/math"
+	"github.com/jimpick/go-ethereum/crypto"
+	"github.com/jimpick/go-ethereum/signer/core/apitypes"
 )
 
 var (

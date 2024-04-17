@@ -6,9 +6,6 @@ import (
 	"errors"
 	"math/big"
 
-	"github.com/ethereum/go-ethereum/accounts/abi/bind"
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/filecoin-project/go-address"
 	ltypes "github.com/filecoin-project/lotus/chain/types"
 	"github.com/glifio/go-pools/abigen"
@@ -16,6 +13,9 @@ import (
 	token "github.com/glifio/go-pools/jws"
 	"github.com/glifio/go-pools/rpc"
 	"github.com/glifio/go-pools/util"
+	"github.com/jimpick/go-ethereum/accounts/abi/bind"
+	"github.com/jimpick/go-ethereum/common"
+	"github.com/jimpick/go-ethereum/core/types"
 )
 
 func (a *fevmActions) AgentCreate(ctx context.Context, auth *bind.TransactOpts, owner common.Address, operator common.Address, request common.Address) (*types.Transaction, error) {

@@ -5,10 +5,10 @@ import (
 	"math/big"
 	"testing"
 
-	"github.com/ethereum/go-ethereum/common"
 	"github.com/filecoin-project/go-state-types/abi"
 	"github.com/filecoin-project/go-state-types/builtin"
 	"github.com/glifio/go-pools/abigen"
+	"github.com/jimpick/go-ethereum/common"
 )
 
 func TestInterestOwed(t *testing.T) {

@@ -3,8 +3,8 @@ package sdk
 import (
 	"math/big"
 
-	"github.com/ethereum/go-ethereum/common"
 	"github.com/glifio/go-pools/types"
+	"github.com/jimpick/go-ethereum/common"
 )
 
 type fevmConnection struct {

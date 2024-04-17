@@ -5,10 +5,6 @@ import (
 	"crypto/ecdsa"
 	"math/big"
 
-	"github.com/ethereum/go-ethereum/accounts/abi/bind"
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/filecoin-project/go-address"
 	"github.com/filecoin-project/go-jsonrpc"
 	"github.com/filecoin-project/lotus/api"
@@ -17,6 +13,10 @@ import (
 	"github.com/glifio/go-pools/constants"
 	"github.com/glifio/go-pools/terminate"
 	"github.com/glifio/go-pools/vc"
+	"github.com/jimpick/go-ethereum/accounts/abi/bind"
+	"github.com/jimpick/go-ethereum/common"
+	"github.com/jimpick/go-ethereum/core/types"
+	"github.com/jimpick/go-ethereum/ethclient"
 )
 
 //go:generate mockery --name FEVMQueries

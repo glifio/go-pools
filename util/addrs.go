@@ -11,8 +11,6 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/filecoin-project/go-address"
 	filcrypto "github.com/filecoin-project/go-crypto"
 	actorstypes "github.com/filecoin-project/go-state-types/actors"
@@ -21,6 +19,8 @@ import (
 	"github.com/filecoin-project/lotus/chain/actors"
 	"github.com/filecoin-project/lotus/chain/types"
 	"github.com/filecoin-project/lotus/chain/types/ethtypes"
+	"github.com/jimpick/go-ethereum/common"
+	"github.com/jimpick/go-ethereum/crypto"
 )
 
 // derives a native filecoin f1 addr from a private key string

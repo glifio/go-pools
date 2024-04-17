@@ -4,10 +4,10 @@ import (
 	"context"
 	"math/big"
 
-	"github.com/ethereum/go-ethereum/common"
 	"github.com/glifio/go-pools/abigen"
 	"github.com/glifio/go-pools/constants"
 	"github.com/glifio/go-pools/types"
+	"github.com/jimpick/go-ethereum/common"
 )
 
 func MinerRegAddMinerEvents(ctx context.Context, sdk types.PoolsSDK, agentsFilter []common.Address, startEpoch *big.Int, endEpoch *big.Int) ([]*abigen.MinerRegistryAddMiner, error) {

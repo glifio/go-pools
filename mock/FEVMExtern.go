@@ -7,7 +7,7 @@ import (
 
 	api "github.com/filecoin-project/lotus/api"
 
-	ethclient "github.com/ethereum/go-ethereum/ethclient"
+	ethclient "github.com/jimpick/go-ethereum/ethclient"
 
 	jsonrpc "github.com/filecoin-project/go-jsonrpc"
 

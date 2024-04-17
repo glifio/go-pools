@@ -7,12 +7,12 @@ import (
 	"fmt"
 	"math/big"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/filecoin-project/go-address"
 	"github.com/glifio/go-pools/constants"
 	"github.com/glifio/go-pools/types"
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/jimpick/go-ethereum/common"
+	"github.com/jimpick/go-ethereum/crypto"
 )
 
 type RequestClaims struct {

@@ -1,8 +1,8 @@
 package sdk
 
 import (
-	"github.com/ethereum/go-ethereum/common"
 	"github.com/glifio/go-pools/abigen"
+	"github.com/jimpick/go-ethereum/common"
 )
 
 func (q *fevmQueries) AgentPolice() common.Address {

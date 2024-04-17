@@ -6,8 +6,6 @@ import (
 	"errors"
 	"math/big"
 
-	"github.com/ethereum/go-ethereum/accounts/abi"
-	"github.com/ethereum/go-ethereum/common"
 	"github.com/filecoin-project/go-address"
 	filbig "github.com/filecoin-project/go-state-types/big"
 	"github.com/filecoin-project/go-state-types/builtin"
@@ -15,6 +13,8 @@ import (
 	ltypes "github.com/filecoin-project/lotus/chain/types"
 	"github.com/filecoin-project/lotus/chain/types/ethtypes"
 	multisig0 "github.com/filecoin-project/specs-actors/actors/builtin/multisig"
+	"github.com/jimpick/go-ethereum/accounts/abi"
+	"github.com/jimpick/go-ethereum/common"
 	cbg "github.com/whyrusleeping/cbor-gen"
 	"golang.org/x/xerrors"
 )
@@ -93,9 +93,9 @@ func MsigProposeFEVMTxWithValue(
 	}
 
 	return &ltypes.Message{
-		To:    msigAddr,
-		From:  senderAddr,
-		Value: filbig.Zero(),
+		To:     msigAddr,
+		From:   senderAddr,
+		Value:  filbig.Zero(),
 		Nonce:  nonce,
 		Method: builtin.MethodsMultisig.Propose,
 		Params: enc,

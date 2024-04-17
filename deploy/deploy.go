@@ -3,8 +3,8 @@ package deploy
 import (
 	"math/big"
 
-	"github.com/ethereum/go-ethereum/common"
 	"github.com/glifio/go-pools/types"
+	"github.com/jimpick/go-ethereum/common"
 )
 
 var dialAddr = "https://api.node.glif.io/rpc/v1"

@@ -5,7 +5,6 @@ import (
 	"math/big"
 	"testing"
 
-	"github.com/ethereum/go-ethereum/common"
 	"github.com/filecoin-project/go-address"
 	"github.com/filecoin-project/lotus/api"
 	"github.com/filecoin-project/lotus/chain/types"
@@ -14,6 +13,7 @@ import (
 	"github.com/glifio/go-pools/mstat"
 	"github.com/glifio/go-pools/terminate"
 	"github.com/glifio/go-pools/util"
+	"github.com/jimpick/go-ethereum/common"
 
 	mockery "github.com/stretchr/testify/mock"
 )

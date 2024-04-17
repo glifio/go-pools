@@ -8,8 +8,8 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/core/types"
+	"github.com/jimpick/go-ethereum/common"
+	"github.com/jimpick/go-ethereum/core/types"
 )
 
 func (q *fevmQueries) StateWaitTx(ctx context.Context, hash common.Hash, ch chan *types.Receipt) {

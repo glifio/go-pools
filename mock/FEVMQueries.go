@@ -10,13 +10,13 @@ import (
 
 	chaintypes "github.com/filecoin-project/lotus/chain/types"
 
-	common "github.com/ethereum/go-ethereum/common"
+	common "github.com/jimpick/go-ethereum/common"
 
 	constants "github.com/glifio/go-pools/constants"
 
 	context "context"
 
-	coretypes "github.com/ethereum/go-ethereum/core/types"
+	coretypes "github.com/jimpick/go-ethereum/core/types"
 
 	mock "github.com/stretchr/testify/mock"
 

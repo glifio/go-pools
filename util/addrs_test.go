@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/ethereum/go-ethereum/common"
 	"github.com/filecoin-project/go-address"
 	actorstypes "github.com/filecoin-project/go-state-types/actors"
 	"github.com/filecoin-project/go-state-types/manifest"
@@ -13,6 +12,7 @@ import (
 	"github.com/filecoin-project/lotus/chain/actors"
 	"github.com/filecoin-project/lotus/chain/types"
 	"github.com/ipfs/go-cid"
+	"github.com/jimpick/go-ethereum/common"
 	"github.com/stretchr/testify/assert"
 )
 

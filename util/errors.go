@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/ethereum/go-ethereum/accounts/abi"
-	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/glifio/go-pools/abigen"
+	"github.com/jimpick/go-ethereum/accounts/abi"
+	"github.com/jimpick/go-ethereum/crypto"
 )
 
 type humanReadableErrorCode struct {

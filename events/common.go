@@ -4,9 +4,9 @@ import (
 	"context"
 	"math/big"
 
-	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/glifio/go-pools/constants"
 	"github.com/glifio/go-pools/deploy"
+	"github.com/jimpick/go-ethereum/accounts/abi/bind"
 )
 
 func getStartEpochIfNil(startEpoch *big.Int, chainID *big.Int) uint64 {
