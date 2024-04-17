@@ -16,7 +16,7 @@ require (
 	github.com/golang-jwt/jwt/v5 v5.0.0
 	github.com/ipfs/go-cid v0.4.1
 	github.com/ipfs/go-ipld-cbor v0.0.6
-	github.com/jimpick/go-ethereum v1.12.1-0.20240416235749-936c2ee98847
+	github.com/jimpick/go-ethereum v1.12.1-0.20240417003055-363296461c72
 	github.com/stretchr/testify v1.8.4
 	github.com/whyrusleeping/cbor-gen v0.0.0-20230923211252-36a87e1ba72f
 	golang.org/x/exp v0.0.0-20230817173708-d852ddb80c63
