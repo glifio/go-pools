@@ -2,8 +2,6 @@ module github.com/glifio/go-pools
 
 go 1.20
 
-replace github.com/ipsn/go-secp256k1 v0.0.0-20180726113642-9d62b9f0bc52 => github.com/glifio/go-secp256k1 v0.0.1
-
 require (
 	github.com/ALTree/bigfloat v0.0.0-20220102081255-38c8b72a9924
 	github.com/filecoin-project/go-address v1.1.0
@@ -18,6 +16,7 @@ require (
 	github.com/golang-jwt/jwt/v5 v5.0.0
 	github.com/ipfs/go-cid v0.4.1
 	github.com/ipfs/go-ipld-cbor v0.0.6
+	github.com/jimpick/go-ethereum v1.12.1-0.20240416235749-936c2ee98847
 	github.com/stretchr/testify v1.8.4
 	github.com/whyrusleeping/cbor-gen v0.0.0-20230923211252-36a87e1ba72f
 	golang.org/x/exp v0.0.0-20230817173708-d852ddb80c63
@@ -97,7 +96,6 @@ require (
 	github.com/ipsn/go-secp256k1 v0.0.0-20180726113642-9d62b9f0bc52 // indirect
 	github.com/jbenet/goprocess v0.1.4 // indirect
 	github.com/jessevdk/go-flags v1.4.0 // indirect
-	github.com/jimpick/go-ethereum v1.12.1-0.20240416235749-936c2ee98847 // indirect
 	github.com/jpillora/backoff v1.0.0 // indirect
 	github.com/klauspost/cpuid/v2 v2.2.5 // indirect
 	github.com/libp2p/go-buffer-pool v0.1.0 // indirect
