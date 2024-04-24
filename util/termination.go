@@ -3,7 +3,7 @@ package util
 import (
 	"context"
 
-	"github.com/filecoin-project/go-state-types/builtin/v12/miner"
+	"github.com/filecoin-project/go-state-types/builtin/v13/miner"
 	lotusapi "github.com/filecoin-project/lotus/api"
 	"github.com/filecoin-project/lotus/blockstore"
 	"github.com/filecoin-project/lotus/chain/actors/adt"
