@@ -150,7 +150,7 @@ func CheckIDNotEVMActorType(ctx context.Context, filAddr address.Address, lapi l
 			return errors.New("actor code not found")
 		}
 		if actor.Code.Equals(actorCodeEvm) {
-			return errors.New("Cant pass an ID address of an EVM actor")
+			return errors.New("can't pass an ID address of an EVM actor")
 		}
 
 		actorCodeEthAccount, success := actors.GetActorCodeID(actorstypes.Version(actors.LatestVersion), manifest.EthAccountKey)
@@ -158,7 +158,7 @@ func CheckIDNotEVMActorType(ctx context.Context, filAddr address.Address, lapi l
 			return errors.New("actor code not found")
 		}
 		if actor.Code.Equals(actorCodeEthAccount) {
-			return errors.New("Cant pass an ID address of an Eth Account")
+			return errors.New("can't pass an ID address of an Eth Account")
 		}
 	}
 
