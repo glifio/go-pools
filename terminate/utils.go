@@ -116,7 +116,18 @@ func FetchAgentCollateralStats(ctx context.Context, agentID *big.Int) (*AgentCol
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("Error fetching collateral stats. Status code: %d", resp.StatusCode)
+		// if the server can't find the agent we're asking for, it will return a 404
+		// we treat it as 0 collateral
+		if resp.StatusCode == http.StatusNotFound {
+			return &AgentCollateralStats{
+				AvailableBalance:       big.NewInt(0),
+				TerminationPenalty:     big.NewInt(0),
+				MinersTerminationStats: []*MinerCollateralStat{},
+				Epoch:                  0,
+			}, nil
+		}
+
+		return nil, fmt.Errorf("error fetching collateral stats. Status code: %d", resp.StatusCode)
 	}
 
 	// Read and parse the response body
