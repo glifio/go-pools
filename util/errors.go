@@ -20,6 +20,11 @@ var humanReadableErrorCodes = []humanReadableErrorCode{
 		errCode: [4]byte{212, 187, 102, 113},
 		errMsg:  "Caller type not supported - is your Agent the owner of the miner you're trying to add?",
 	},
+	// override the PayUp error message
+	{
+		errCode: [4]byte{50, 19, 202, 175},
+		errMsg:  "PayUp - Agent must pay off its fees owed to the pool before continuing. Run `glif agent pay to-current` first and try again",
+	},
 }
 
 func HumanReadableRevert(errMsg error) error {
