@@ -25,7 +25,6 @@ func ParseAgentParams(msg types.MessageTrace) (*abi.Method, map[string]interface
 	if msg.Method != builtin.MustGenerateFRCMethodNum("InvokeEVM") {
 		return nil, nil, nil
 	}
-	fmt.Printf("Jim0 msg %+v\n", msg)
 	data := msg.Params
 
 	if len(data) == 0 {
@@ -41,7 +40,6 @@ func ParseAgentParams(msg types.MessageTrace) (*abi.Method, map[string]interface
 		return nil, nil, err
 	}
 
-	fmt.Println("Jim1")
 	method, err := abi.MethodById(sig)
 	if err != nil {
 		// Try unpacking the params as CBOR
@@ -56,14 +54,12 @@ func ParseAgentParams(msg types.MessageTrace) (*abi.Method, map[string]interface
 			return nil, nil, &MethodLookupError{Err: err}
 		}
 	}
-	fmt.Println("Jim2")
 
 	unpackedMap := make(map[string]interface{})
 	err = method.Inputs.UnpackIntoMap(unpackedMap, paramsBytes[4:])
 	if err != nil {
 		return nil, nil, err
 	}
-	fmt.Println("Jim3")
 
 	return method, unpackedMap, nil
 }
