@@ -15,7 +15,7 @@ func TxPostProcess(tx *types.Transaction, err error) (*types.Transaction, error)
 		return nil, HumanReadableRevert(err)
 	}
 	if tx == nil {
-		return nil, fmt.Errorf("Transaction is nil")
+		return nil, fmt.Errorf("transaction is nil")
 	}
 
 	fmt.Println("Transaction:", tx.Hash())

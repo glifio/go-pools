@@ -20,6 +20,11 @@ var humanReadableErrorCodes = []humanReadableErrorCode{
 		errCode: [4]byte{212, 187, 102, 113},
 		errMsg:  "Caller type not supported - is your Agent the owner of the miner you're trying to add?",
 	},
+	// override the PayUp error message
+	{
+		errCode: [4]byte{50, 19, 202, 175},
+		errMsg:  "PayUp - Agent must pay off its fees owed to the pool before continuing. Run `glif agent pay to-current` first and try again",
+	},
 }
 
 func HumanReadableRevert(errMsg error) error {
@@ -61,14 +66,14 @@ func HumanReadableRevert(errMsg error) error {
 		return err
 	}
 
-	return fmt.Errorf("Error calling contract (could not decode): %s", errStr)
+	return fmt.Errorf("error calling contract (could not decode): %s", errStr)
 }
 
 func matchSelector(thrownSelector [4]byte) (bool, error) {
 	abis, err := gatherABIS()
 	// not sure if we should throw the actual error here...
 	if err != nil {
-		return false, fmt.Errorf("Transaction reverted with error: %s", thrownSelector)
+		return false, fmt.Errorf("transaction reverted with error: %s", thrownSelector)
 	}
 
 	var humanErr error
@@ -80,19 +85,19 @@ func matchSelector(thrownSelector [4]byte) (bool, error) {
 			selector := ToByte4Selector(crypto.Keccak256Hash([]byte(error.Sig)).Bytes())
 
 			if selector == thrownSelector {
-				humanErr = fmt.Errorf("Transaction reverted with error: %s", name)
+				humanErr = fmt.Errorf("transaction reverted with error: %s", name)
 			}
 		}
 	}
 
 	for _, humanReadableErrorCode := range humanReadableErrorCodes {
 		if humanReadableErrorCode.errCode == thrownSelector {
-			humanErr = fmt.Errorf("Transaction reverted with error: %s", humanReadableErrorCode.errMsg)
+			humanErr = fmt.Errorf("transaction reverted with error: %s", humanReadableErrorCode.errMsg)
 		}
 	}
 
 	if humanErr == nil {
-		return false, fmt.Errorf("Transaction reverted with error: %s", thrownSelector)
+		return false, fmt.Errorf("transaction reverted with error: %s", thrownSelector)
 	}
 
 	return true, humanErr
