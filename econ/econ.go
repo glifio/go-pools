@@ -69,7 +69,10 @@ func ComputeAgentData(
 
 	/* ~~~~~ ExpectedDailyRewards ~~~~~ */
 
-	data.ExpectedDailyRewards = aggMinerStats.ExpectedDailyReward
+	// optimistically assume available agent balance will be pledged and subsidize the EDR
+	optimisticEdr := mstat.ComputeOptimisticEarnings(agentAvailableBalance, aggMinerStats.PledgedFunds, aggMinerStats.ExpectedDailyBlockReward)
+	// the Agent's expected daily rewards include its estimated block rewards (from pledged FIL + optimistically pledged FIL) and 1/180 vesting rewards
+	data.ExpectedDailyRewards = new(big.Int).Add(aggMinerStats.ExpectedDailyReward, optimisticEdr)
 
 	/* ~~~~~ GCRED (NOT IN USE) ~~~~~ */
 	data.Gcred = big.NewInt(100)

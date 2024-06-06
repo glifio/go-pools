@@ -29,35 +29,39 @@ type SectorStatus struct {
 
 // TODO: add fault info
 type MinerStats struct {
-	MinerInfo           *api.MinerInfo
-	Balance             *big.Int
-	PenaltyTermination  *big.Int
-	ExpectedDailyReward *big.Int
-	PenaltyFaultPerDay  *big.Int
-	PledgedFunds        *big.Int
-	VestingFunds        *big.Int
-	GreenScore          *big.Int
-	QualityAdjPower     *big.Int
-	LiveSectors         *big.Int
-	FaultySectors       *big.Int
-	HasMinPower         bool
+	MinerInfo                *api.MinerInfo
+	Balance                  *big.Int
+	ExpectedDailyReward      *big.Int
+	ExpectedDailyBlockReward *big.Int
+	PenaltyFaultPerDay       *big.Int
+	PledgedFunds             *big.Int
+	VestingFunds             *big.Int
+	GreenScore               *big.Int
+	QualityAdjPower          *big.Int
+	LiveSectors              *big.Int
+	FaultySectors            *big.Int
+	HasMinPower              bool
+
+	// DEPRECATED
+	PenaltyTermination *big.Int
 }
 
 // create a new miner stats struct
 func NewMinerStats() *MinerStats {
 	return &MinerStats{
-		MinerInfo:           &api.MinerInfo{},
-		Balance:             big.NewInt(0),
-		PenaltyTermination:  big.NewInt(0),
-		ExpectedDailyReward: big.NewInt(0),
-		PenaltyFaultPerDay:  big.NewInt(0),
-		PledgedFunds:        big.NewInt(0),
-		VestingFunds:        big.NewInt(0),
-		GreenScore:          big.NewInt(0),
-		QualityAdjPower:     big.NewInt(0),
-		LiveSectors:         big.NewInt(0),
-		FaultySectors:       big.NewInt(0),
-		HasMinPower:         false,
+		MinerInfo:                &api.MinerInfo{},
+		Balance:                  big.NewInt(0),
+		PenaltyTermination:       big.NewInt(0),
+		ExpectedDailyReward:      big.NewInt(0),
+		ExpectedDailyBlockReward: big.NewInt(0),
+		PenaltyFaultPerDay:       big.NewInt(0),
+		PledgedFunds:             big.NewInt(0),
+		VestingFunds:             big.NewInt(0),
+		GreenScore:               big.NewInt(0),
+		QualityAdjPower:          big.NewInt(0),
+		LiveSectors:              big.NewInt(0),
+		FaultySectors:            big.NewInt(0),
+		HasMinPower:              false,
 	}
 }
 
@@ -86,6 +90,7 @@ func ComputeMinersStats(ctx context.Context, minerAddrs []address.Address, ts *t
 		aggMinerStats.PenaltyTermination = big.NewInt(0).Add(aggMinerStats.PenaltyTermination, minerStats.PenaltyTermination)
 		aggMinerStats.PenaltyFaultPerDay = big.NewInt(0).Add(aggMinerStats.PenaltyFaultPerDay, minerStats.PenaltyFaultPerDay)
 		aggMinerStats.ExpectedDailyReward = big.NewInt(0).Add(aggMinerStats.ExpectedDailyReward, minerStats.ExpectedDailyReward)
+		aggMinerStats.ExpectedDailyBlockReward = big.NewInt(0).Add(aggMinerStats.ExpectedDailyBlockReward, minerStats.ExpectedDailyBlockReward)
 		aggMinerStats.PledgedFunds = big.NewInt(0).Add(aggMinerStats.PledgedFunds, minerStats.PledgedFunds)
 		aggMinerStats.VestingFunds = big.NewInt(0).Add(aggMinerStats.VestingFunds, minerStats.VestingFunds)
 
@@ -146,12 +151,24 @@ func ComputeMinerStats(ctx context.Context, minerAddr address.Address, ts *types
 
 	// penalty is 50% of miner's assets
 	minerStats.Balance = actor.Balance.Int
+	// TODO: Deprecate
 	minerStats.PenaltyTermination = computePercentOf(actor.Balance.Int)
 	// lazy compute of PenaltyFaultPerDay is 3x the EDR
-	edr, err := ComputeEDRLazy1(ctx, minerAddr, ts, api)
+	expectedDailyBlockRewards, err := ComputeBlockRewardsLazy(ctx, minerAddr, ts, api)
 	if err != nil {
 		return nil, err
 	}
+	// set the expected daily block reward
+	minerStats.ExpectedDailyBlockReward = expectedDailyBlockRewards
+
+	edr := expectedDailyBlockRewards
+
+	// add optimistic earnings to the edr based on non pledged FIL
+	availBal := big.NewInt(0).Sub(actor.Balance.Int, minerStats.PledgedFunds)
+	availBal.Sub(availBal, minerStats.VestingFunds)
+
+	// if we have pledged assets, we can optimistically add edr from available balance, assuming it will be pledged
+	edr.Add(edr, ComputeOptimisticEarnings(availBal, minerStats.PledgedFunds, expectedDailyBlockRewards))
 
 	// calculate estimated daily vesting rewards as 1/180 of vesting funds
 	edvr := big.NewInt(0)
@@ -193,7 +210,27 @@ func ComputeFilPerTiB(ctx context.Context, ts *types.TipSet, api *api.FullNodeSt
 	return &ratio, nil
 }
 
+// This function takes an amount of FIL, an amount of pledged FIL, and an amount of block reward earnings, and computes a theoretical earnings for the available FIL if it were pledged
+func ComputeOptimisticEarnings(available *big.Int, pledged *big.Int, expectedBlockRewards *big.Int) *big.Int {
+	// if we dont have any pledge funds, we can't compute optimistic earnings
+	if pledged.Cmp(big.NewInt(0)) == 1 {
+		// compute ratio of earnings to initial pledge
+		rewardsPledgeRatio := new(big.Rat).SetFrac(expectedBlockRewards, pledged)
+		// multiply by available balance to get the expected daily reward
+		optimisticEdr := new(big.Int).Mul(available, rewardsPledgeRatio.Num())
+		optimisticEdr.Div(optimisticEdr, rewardsPledgeRatio.Denom())
+		// add the optimistic edr to the edr
+		return optimisticEdr
+	}
+	return big.NewInt(0)
+}
+
+// Deprecated: ComputeEDRLazy1 is deprecated.
 func ComputeEDRLazy1(ctx context.Context, minerAddr address.Address, ts *types.TipSet, api *api.FullNodeStruct) (*big.Int, error) {
+	return ComputeBlockRewardsLazy(ctx, minerAddr, ts, api)
+}
+
+func ComputeBlockRewardsLazy(ctx context.Context, minerAddr address.Address, ts *types.TipSet, api *api.FullNodeStruct) (*big.Int, error) {
 	pow, err := api.StateMinerPower(ctx, minerAddr, ts.Key())
 	if err != nil {
 		return nil, err

@@ -55,7 +55,7 @@ func TestCmpWithOnChainSectorInfo(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	_, err = ComputeEDRLazy1(context.Background(), minerTest, ts, lapi)
+	_, err = ComputeBlockRewardsLazy(context.Background(), minerTest, ts, lapi)
 	if err != nil {
 		t.Fatal(err)
 	}
