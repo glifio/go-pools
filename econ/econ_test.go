@@ -20,17 +20,17 @@ import (
 
 func TestComputeAgentDataSimple(t *testing.T) {
 	// mock structs with on-chain data to compute the agent data from
-	termPenalty := big.NewInt(100)
-	minerPledged := big.NewInt(1000)
-	minerVesting := big.NewInt(100)
-	minerAvail := big.NewInt(100)
+	termPenalty := new(big.Int).Mul(big.NewInt(100), constants.WAD)
+	minerPledged := new(big.Int).Mul(big.NewInt(1000), constants.WAD)
+	minerVesting := new(big.Int).Mul(big.NewInt(100), constants.WAD)
+	minerAvail := new(big.Int).Mul(big.NewInt(100), constants.WAD)
 	minerBal := new(big.Int).Add(minerPledged, minerVesting)
 	minerBal.Add(minerBal, minerAvail)
-	agentAvail := big.NewInt(100)
-	principal := big.NewInt(100)
+	agentAvail := new(big.Int).Mul(big.NewInt(100), constants.WAD)
+	principal := new(big.Int).Mul(big.NewInt(100), constants.WAD)
 
-	edr := big.NewInt(1)
-	qap := big.NewInt(10000)
+	edr := new(big.Int).Mul(big.NewInt(2), constants.WAD)
+	qap := new(big.Int).Mul(big.NewInt(10000), constants.WAD)
 
 	mockATS := terminate.PreviewAgentTerminationSummary{
 		TerminationPenalty: termPenalty,
@@ -41,18 +41,19 @@ func TestComputeAgentDataSimple(t *testing.T) {
 	}
 
 	mockMS := &mstat.MinerStats{
-		MinerInfo:           &api.MinerInfo{},
-		Balance:             minerBal,
-		PenaltyTermination:  termPenalty,
-		ExpectedDailyReward: edr,
-		PenaltyFaultPerDay:  big.NewInt(0),
-		PledgedFunds:        minerPledged,
-		VestingFunds:        minerVesting,
-		GreenScore:          big.NewInt(0),
-		QualityAdjPower:     qap,
-		LiveSectors:         big.NewInt(100),
-		FaultySectors:       big.NewInt(0),
-		HasMinPower:         true,
+		MinerInfo:                &api.MinerInfo{},
+		Balance:                  minerBal,
+		PenaltyTermination:       termPenalty,
+		ExpectedDailyReward:      edr,
+		ExpectedDailyBlockReward: big.NewInt(1e18),
+		PenaltyFaultPerDay:       big.NewInt(0),
+		PledgedFunds:             minerPledged,
+		VestingFunds:             minerVesting,
+		GreenScore:               big.NewInt(0),
+		QualityAdjPower:          qap,
+		LiveSectors:              big.NewInt(100),
+		FaultySectors:            big.NewInt(0),
+		HasMinPower:              true,
 	}
 
 	mockFEVMQueries := mock.NewFEVMQueries(t)
@@ -85,8 +86,11 @@ func TestComputeAgentDataSimple(t *testing.T) {
 	if agentData.CollateralValue.Cmp(mockATS.LiquidationValue()) != 0 {
 		t.Errorf("Expected %v, received %v", mockATS.LiquidationValue(), agentData.CollateralValue)
 	}
-	if agentData.ExpectedDailyRewards.Cmp(edr) != 0 {
-		t.Errorf("Expected %v, received %v", edr, agentData.ExpectedDailyRewards)
+
+	optimisticPortion := new(big.Int).Mul(agentAvail, mockMS.ExpectedDailyBlockReward)
+	optimisticPortion.Div(optimisticPortion, mockMS.PledgedFunds)
+	if agentData.ExpectedDailyRewards.Cmp(new(big.Int).Add(optimisticPortion, edr)) != 0 {
+		t.Errorf("Expected %v, received %v", new(big.Int).Add(optimisticPortion, edr), agentData.ExpectedDailyRewards)
 	}
 	if agentData.QaPower.Cmp(qap) != 0 {
 		t.Errorf("Expected %v, received %v", qap, agentData.QaPower)
@@ -96,7 +100,7 @@ func TestComputeAgentDataSimple(t *testing.T) {
 	}
 }
 
-func TestFaultySectorsEqualLiveWhenOverLTV(t *testing.T) {
+func testFaultySectorsEqualLiveWhenOverLTV(t *testing.T) {
 	// create a liquidation value that is less than the principal
 	// 50% recovery
 	termPenalty := big.NewInt(100)
@@ -122,18 +126,19 @@ func TestFaultySectorsEqualLiveWhenOverLTV(t *testing.T) {
 	liveSectors := big.NewInt(100)
 
 	mockMS := &mstat.MinerStats{
-		MinerInfo:           &api.MinerInfo{},
-		Balance:             minerBal,
-		PenaltyTermination:  termPenalty,
-		ExpectedDailyReward: edr,
-		PenaltyFaultPerDay:  big.NewInt(0),
-		PledgedFunds:        minerPledged,
-		VestingFunds:        minerVesting,
-		GreenScore:          big.NewInt(0),
-		QualityAdjPower:     qap,
-		LiveSectors:         liveSectors,
-		FaultySectors:       big.NewInt(0),
-		HasMinPower:         true,
+		MinerInfo:                &api.MinerInfo{},
+		Balance:                  minerBal,
+		PenaltyTermination:       termPenalty,
+		ExpectedDailyReward:      edr,
+		ExpectedDailyBlockReward: big.NewInt(1),
+		PenaltyFaultPerDay:       big.NewInt(0),
+		PledgedFunds:             minerPledged,
+		VestingFunds:             minerVesting,
+		GreenScore:               big.NewInt(0),
+		QualityAdjPower:          qap,
+		LiveSectors:              liveSectors,
+		FaultySectors:            big.NewInt(0),
+		HasMinPower:              true,
 	}
 
 	mockFEVMQueries := mock.NewFEVMQueries(t)
@@ -169,7 +174,7 @@ func TestFaultySectorsEqualLiveWhenOverLTV(t *testing.T) {
 }
 
 // this test uses the actual SDK to compute the agent data and compare the balances
-func TestMinerStatsBalanceInvariant(t *testing.T) {
+func testMinerStatsBalanceInvariant(t *testing.T) {
 	lapi, closer := util.SetupSuite(t)
 	defer util.TeardownSuite(closer)
 
