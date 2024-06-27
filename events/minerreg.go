@@ -22,7 +22,6 @@ func MinerRegAddMinerEvents(ctx context.Context, sdk types.PoolsSDK, agentsFilte
 	}
 
 	var addMinerEvents []*abigen.MinerRegistryAddMiner
-	var hashmap = make(map[string]bool)
 
 	for i := startEpoch; i.Cmp(endEpoch) == -1; i.Add(i, constants.CHUNKSIZE) {
 		end := big.NewInt(0).Add(i, constants.CHUNKSIZE)
@@ -36,10 +35,7 @@ func MinerRegAddMinerEvents(ctx context.Context, sdk types.PoolsSDK, agentsFilte
 		}
 
 		for iter.Next() {
-			if _, ok := hashmap[iter.Event.Raw.TxHash.Hex()]; !ok {
-				hashmap[iter.Event.Raw.TxHash.Hex()] = true
-				addMinerEvents = append(addMinerEvents, iter.Event)
-			}
+			addMinerEvents = append(addMinerEvents, iter.Event)
 		}
 	}
 
@@ -58,7 +54,6 @@ func MinerRegRmMinerEvents(ctx context.Context, sdk types.PoolsSDK, agentsFilter
 	}
 
 	var events []*abigen.MinerRegistryRemoveMiner
-	var hashmap = make(map[string]bool)
 
 	for i := startEpoch; i.Cmp(endEpoch) == -1; i.Add(i, constants.CHUNKSIZE) {
 		end := big.NewInt(0).Add(i, constants.CHUNKSIZE)
@@ -71,10 +66,7 @@ func MinerRegRmMinerEvents(ctx context.Context, sdk types.PoolsSDK, agentsFilter
 			return []*abigen.MinerRegistryRemoveMiner{}, err
 		}
 		for iter.Next() {
-			if _, ok := hashmap[iter.Event.Raw.TxHash.Hex()]; !ok {
-				hashmap[iter.Event.Raw.TxHash.Hex()] = true
-				events = append(events, iter.Event)
-			}
+			events = append(events, iter.Event)
 		}
 	}
 

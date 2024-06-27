@@ -9,6 +9,7 @@ import (
 	"github.com/filecoin-project/go-address"
 	"github.com/filecoin-project/lotus/api"
 	"github.com/filecoin-project/lotus/chain/types"
+	"github.com/glifio/go-pools/constants"
 	"github.com/glifio/go-pools/mock"
 	"github.com/glifio/go-pools/mstat"
 	"github.com/glifio/go-pools/terminate"
@@ -178,7 +179,7 @@ func TestMinerStatsBalanceInvariant(t *testing.T) {
 	}
 
 	// lookback 3 blocks to avoid reorgs
-	ts, err := lapi.ChainGetTipSetByHeight(context.Background(), chainHead.Height()-3, types.EmptyTSK)
+	ts, err := lapi.ChainGetTipSetByHeight(context.Background(), chainHead.Height()-constants.ChainHeadLookbackEpochs, types.EmptyTSK)
 
 	agentID := big.NewInt(2)
 

@@ -1386,23 +1386,23 @@ func (_c *FEVMQueries_ChainID_Call) RunAndReturn(run func() *big.Int) *FEVMQueri
 	return _c
 }
 
-// CredentialUsed provides a mock function with given fields: ctx, v, r, s
-func (_m *FEVMQueries) CredentialUsed(ctx context.Context, v uint8, r [32]byte, s [32]byte) (bool, error) {
-	ret := _m.Called(ctx, v, r, s)
+// CredentialUsed provides a mock function with given fields: ctx, v, r, s, blockNumber
+func (_m *FEVMQueries) CredentialUsed(ctx context.Context, v uint8, r [32]byte, s [32]byte, blockNumber *big.Int) (bool, error) {
+	ret := _m.Called(ctx, v, r, s, blockNumber)
 
 	var r0 bool
 	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context, uint8, [32]byte, [32]byte) (bool, error)); ok {
-		return rf(ctx, v, r, s)
+	if rf, ok := ret.Get(0).(func(context.Context, uint8, [32]byte, [32]byte, *big.Int) (bool, error)); ok {
+		return rf(ctx, v, r, s, blockNumber)
 	}
-	if rf, ok := ret.Get(0).(func(context.Context, uint8, [32]byte, [32]byte) bool); ok {
-		r0 = rf(ctx, v, r, s)
+	if rf, ok := ret.Get(0).(func(context.Context, uint8, [32]byte, [32]byte, *big.Int) bool); ok {
+		r0 = rf(ctx, v, r, s, blockNumber)
 	} else {
 		r0 = ret.Get(0).(bool)
 	}
 
-	if rf, ok := ret.Get(1).(func(context.Context, uint8, [32]byte, [32]byte) error); ok {
-		r1 = rf(ctx, v, r, s)
+	if rf, ok := ret.Get(1).(func(context.Context, uint8, [32]byte, [32]byte, *big.Int) error); ok {
+		r1 = rf(ctx, v, r, s, blockNumber)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -1420,13 +1420,14 @@ type FEVMQueries_CredentialUsed_Call struct {
 //   - v uint8
 //   - r [32]byte
 //   - s [32]byte
-func (_e *FEVMQueries_Expecter) CredentialUsed(ctx interface{}, v interface{}, r interface{}, s interface{}) *FEVMQueries_CredentialUsed_Call {
-	return &FEVMQueries_CredentialUsed_Call{Call: _e.mock.On("CredentialUsed", ctx, v, r, s)}
+//   - blockNumber *big.Int
+func (_e *FEVMQueries_Expecter) CredentialUsed(ctx interface{}, v interface{}, r interface{}, s interface{}, blockNumber interface{}) *FEVMQueries_CredentialUsed_Call {
+	return &FEVMQueries_CredentialUsed_Call{Call: _e.mock.On("CredentialUsed", ctx, v, r, s, blockNumber)}
 }
 
-func (_c *FEVMQueries_CredentialUsed_Call) Run(run func(ctx context.Context, v uint8, r [32]byte, s [32]byte)) *FEVMQueries_CredentialUsed_Call {
+func (_c *FEVMQueries_CredentialUsed_Call) Run(run func(ctx context.Context, v uint8, r [32]byte, s [32]byte, blockNumber *big.Int)) *FEVMQueries_CredentialUsed_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(uint8), args[2].([32]byte), args[3].([32]byte))
+		run(args[0].(context.Context), args[1].(uint8), args[2].([32]byte), args[3].([32]byte), args[4].(*big.Int))
 	})
 	return _c
 }
@@ -1436,7 +1437,7 @@ func (_c *FEVMQueries_CredentialUsed_Call) Return(_a0 bool, _a1 error) *FEVMQuer
 	return _c
 }
 
-func (_c *FEVMQueries_CredentialUsed_Call) RunAndReturn(run func(context.Context, uint8, [32]byte, [32]byte) (bool, error)) *FEVMQueries_CredentialUsed_Call {
+func (_c *FEVMQueries_CredentialUsed_Call) RunAndReturn(run func(context.Context, uint8, [32]byte, [32]byte, *big.Int) (bool, error)) *FEVMQueries_CredentialUsed_Call {
 	_c.Call.Return(run)
 	return _c
 }

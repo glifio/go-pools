@@ -23,8 +23,6 @@ func PrestakeEvents(ctx context.Context, sdk types.PoolsSDK, startEpoch *big.Int
 	}
 
 	var events []*abigen.PreStakeDeposit
-	// to do - can remove hashmap logic when https://github.com/filecoin-project/lotus/issues/10964 gets merged
-	var hashmap = make(map[string]bool)
 
 	for i := startEpoch; i.Cmp(endEpoch) == -1; i.Add(i, constants.CHUNKSIZE) {
 		end := big.NewInt(0).Add(i, constants.CHUNKSIZE)
@@ -38,10 +36,7 @@ func PrestakeEvents(ctx context.Context, sdk types.PoolsSDK, startEpoch *big.Int
 		}
 
 		for iter.Next() {
-			if _, ok := hashmap[iter.Event.Raw.TxHash.Hex()]; !ok {
-				hashmap[iter.Event.Raw.TxHash.Hex()] = true
-				events = append(events, iter.Event)
-			}
+			events = append(events, iter.Event)
 		}
 	}
 

@@ -59,7 +59,7 @@ func (q *fevmQueries) CredentialValidityPeriod(ctx context.Context) (*big.Int, *
 	return epochIssued, epochValidUntil, nil
 }
 
-func (q *fevmQueries) CredentialUsed(ctx context.Context, v uint8, r [32]byte, s [32]byte) (bool, error) {
+func (q *fevmQueries) CredentialUsed(ctx context.Context, v uint8, r [32]byte, s [32]byte, blockNumber *big.Int) (bool, error) {
 	client, err := q.extern.ConnectEthClient()
 	if err != nil {
 		return false, err
@@ -71,7 +71,7 @@ func (q *fevmQueries) CredentialUsed(ctx context.Context, v uint8, r [32]byte, s
 		return false, err
 	}
 
-	return policeCaller.CredentialUsed(&bind.CallOpts{Context: ctx}, v, r, s)
+	return policeCaller.CredentialUsed(&bind.CallOpts{Context: ctx, BlockNumber: blockNumber}, v, r, s)
 }
 
 func (q *fevmQueries) SectorFaultyTolerance(ctx context.Context) (*big.Int, error) {

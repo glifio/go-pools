@@ -9,19 +9,18 @@ import (
 	"github.com/glifio/go-pools/types"
 )
 
-func AgFactoryCreateAgentEvents(ctx context.Context, sdk types.PoolsSDK, startEpoch *big.Int, endEpoch *big.Int) ([]*abigen.AgentFactoryCreateAgent, error) {
-
+func IFilTransferEvents(ctx context.Context, sdk types.PoolsSDK, startEpoch *big.Int, endEpoch *big.Int) ([]*abigen.PoolTokenTransfer, error) {
 	ethclient, err := sdk.Extern().ConnectEthClient()
 	if err != nil {
-		return []*abigen.AgentFactoryCreateAgent{}, err
+		return []*abigen.PoolTokenTransfer{}, err
 	}
 
-	filterer, err := abigen.NewAgentFactoryFilterer(sdk.Query().AgentFactory(), ethclient)
+	filterer, err := abigen.NewPoolTokenFilterer(sdk.Query().IFIL(), ethclient)
 	if err != nil {
-		return []*abigen.AgentFactoryCreateAgent{}, err
+		return []*abigen.PoolTokenTransfer{}, err
 	}
 
-	var events []*abigen.AgentFactoryCreateAgent
+	var events []*abigen.PoolTokenTransfer
 
 	for i := startEpoch; i.Cmp(endEpoch) == -1; i.Add(i, constants.CHUNKSIZE) {
 		end := big.NewInt(0).Add(i, constants.CHUNKSIZE)
@@ -29,9 +28,9 @@ func AgFactoryCreateAgentEvents(ctx context.Context, sdk types.PoolsSDK, startEp
 			end = endEpoch
 		}
 
-		iter, err := filterer.FilterCreateAgent(getFilterOpts(ctx, i, end, sdk.Query().ChainID()), nil, nil, nil)
+		iter, err := filterer.FilterTransfer(getFilterOpts(ctx, i, end, sdk.Query().ChainID()), nil, nil)
 		if err != nil {
-			return []*abigen.AgentFactoryCreateAgent{}, err
+			return []*abigen.PoolTokenTransfer{}, err
 		}
 
 		for iter.Next() {
