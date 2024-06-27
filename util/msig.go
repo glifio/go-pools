@@ -78,7 +78,7 @@ func MsigProposeFEVMTxWithValue(
 	}
 
 	if senderAddr == address.Undef {
-		return nil, errors.New("Invalid private key")
+		return nil, errors.New("invalid private key")
 	}
 
 	enc, actErr := actors.SerializeParams(&multisig0.ProposeParams{
@@ -93,9 +93,9 @@ func MsigProposeFEVMTxWithValue(
 	}
 
 	return &ltypes.Message{
-		To:    msigAddr,
-		From:  senderAddr,
-		Value: filbig.Zero(),
+		To:     msigAddr,
+		From:   senderAddr,
+		Value:  filbig.Zero(),
 		Nonce:  nonce,
 		Method: builtin.MethodsMultisig.Propose,
 		Params: enc,

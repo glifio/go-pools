@@ -457,7 +457,9 @@ func (q *fevmQueries) AgentPreviewTerminationPrecise(ctx context.Context, agentA
 		// add the miners bals to their aggregate counterpart
 		initialPledgeAgg = new(big.Int).Add(initialPledgeAgg, terminationStat.InitialPledge)
 		vestingBalanceAgg = new(big.Int).Add(vestingBalanceAgg, terminationStat.VestingBalance)
-		availableBalanceAgg = new(big.Int).Add(availableBalanceAgg, terminationStat.Actor.Balance.Int)
+		lockedFunds := new(big.Int).Add(terminationStat.InitialPledge, terminationStat.VestingBalance)
+		availBal := new(big.Int).Sub(terminationStat.Actor.Balance.Int, lockedFunds)
+		availableBalanceAgg = new(big.Int).Add(availableBalanceAgg, availBal)
 	}
 
 	agentLiquidFIL, err := q.AgentLiquidAssets(ctx, agentAddr, bigHeight)
