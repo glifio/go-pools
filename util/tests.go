@@ -2,7 +2,9 @@ package util
 
 import (
 	"context"
+	"math/big"
 	"net/http"
+	"os"
 	"testing"
 
 	"github.com/filecoin-project/go-jsonrpc"
@@ -10,24 +12,24 @@ import (
 	"github.com/filecoin-project/lotus/build"
 )
 
-var DIAL_ADDR = ""
-var TOKEN = ""
-
 func SetupSuite(t *testing.T) (*api.FullNodeStruct, jsonrpc.ClientCloser) {
-	if DIAL_ADDR == "" {
-		t.Fatal("DIAL_ADDR must be set")
+	lotusDialAddr := os.Getenv("LOTUS_DIAL_ADDR")
+	lotusToken := os.Getenv("LOTUS_TOKEN")
+
+	if lotusDialAddr == "" {
+		t.Fatal("LOTUS_DIAL_ADDR env var must be set")
 	}
 
 	var lcli api.FullNodeStruct = api.FullNodeStruct{}
 	head := http.Header{}
 
-	if TOKEN != "" {
-		head.Add("Authorization", "Bearer "+TOKEN)
+	if lotusToken != "" {
+		head.Add("Authorization", "Bearer "+lotusToken)
 	}
 
 	closer, err := jsonrpc.NewMergeClient(
 		context.Background(),
-		DIAL_ADDR,
+		lotusDialAddr,
 		"Filecoin",
 		api.GetInternalStructs(&lcli),
 		head,
@@ -50,4 +52,25 @@ func SetupSuite(t *testing.T) (*api.FullNodeStruct, jsonrpc.ClientCloser) {
 
 func TeardownSuite(close jsonrpc.ClientCloser) {
 	defer close()
+}
+
+func AssertApproxEqAbs(a, b, DUST *big.Int) bool {
+	diff := new(big.Int).Sub(a, b)
+	diff.Abs(diff)
+	return diff.Cmp(DUST) <= 0
+}
+
+// DIFF is a WAD math based percentage, such that 1e18 is 100%
+func AssertApproxEqRel(a, b, DIFF *big.Int) bool {
+	// compute the diff
+	diff := new(big.Int).Sub(a, b)
+	diff.Abs(diff)
+
+	// Calculate the difference in terms of percentage: (|a - b| / a) * 1e18
+	// To avoid losing precision, first multiply diff by 1e18, then divide by a
+	percentageDiff := new(big.Int).Mul(diff, big.NewInt(1e18))
+	percentageDiff.Div(percentageDiff, a)
+
+	// Check if the calculated percentage difference is within the specified range
+	return percentageDiff.Cmp(DIFF) <= 0
 }
