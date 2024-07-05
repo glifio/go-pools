@@ -116,6 +116,8 @@ func PreviewTerminateSectors(
 	progressCh chan *PreviewTerminateSectorsProgress,
 	resultCh chan *PreviewTerminateSectorsReturn,
 ) {
+	var desiredMinSamples uint64 = 600
+
 	h, ts, err := parseTipSetAndHeight(ctx, api, tipset, vmHeight)
 	if err != nil {
 		errorCh <- err
@@ -388,7 +390,8 @@ func PreviewTerminateSectors(
 							return
 						}
 						sampledSectors := make([]uint64, 0)
-						step := max(float64(len(sectors))/float64(batchSize-1), 1.0)
+						partitionBatchSize := max(batchSize, desiredMinSamples/uint64(len(deadlinePartitions)))
+						step := max(float64(len(sectors))/float64(partitionBatchSize-1), 1.0)
 						lastIndex := -1
 						for sampleIndex := 0.0; int(sampleIndex) < len(sectors); sampleIndex += step {
 							i := int(sampleIndex)
