@@ -62,7 +62,14 @@ func TermPenaltyOnPledge(
 	dealWeight := big.NewInt(0)
 
 	// FIXME
-	verifiedDealWeight, _ := new(big.Int).SetString("53173584910090240", 10)
+	// verifiedDealWeight, _ := new(big.Int).SetString("53173584910090240", 10)
+
+	scaledSectorSize := int64(float64(sectorSize) * ratioVerified)
+	verifiedDealWeight := new(big.Int).Mul(
+		big.NewInt(scaledSectorSize),
+		big.NewInt(int64(duration)),
+	)
+	fmt.Printf("Jim verifiedDealWeight: %v\n", verifiedDealWeight)
 
 	// expectedDayReward, _ := new(big.Int).SetString("1445692053274289", 10)
 
@@ -82,7 +89,15 @@ func TermPenaltyOnPledge(
 	)
 	fmt.Printf("Jim expectedDayReward: %v\n", expectedDayReward)
 
-	expectedStoragePledge, _ := new(big.Int).SetString("28791341617364739", 10)
+	// expectedStoragePledge, _ := new(big.Int).SetString("28791341617364739", 10)
+
+	expectedStoragePledge := miner.ExpectedRewardForPower(
+		util.ConvertSmoothing(smoothedRew),
+		util.ConvertSmoothing(smoothedPow),
+		pwr,
+		miner.InitialPledgeProjectionPeriod,
+	)
+	fmt.Printf("Jim expectedStoragePledge: %v\n", expectedStoragePledge)
 
 	s := miner.SectorOnChainInfo{
 		Activation:            abi.ChainEpoch(activation),
@@ -90,7 +105,7 @@ func TermPenaltyOnPledge(
 		DealWeight:            abi.DealWeight(filbig.NewFromGo(dealWeight)),
 		VerifiedDealWeight:    abi.DealWeight(filbig.NewFromGo(verifiedDealWeight)),
 		ExpectedDayReward:     expectedDayReward,
-		ExpectedStoragePledge: filbig.NewFromGo(expectedStoragePledge),
+		ExpectedStoragePledge: expectedStoragePledge,
 		PowerBaseEpoch:        abi.ChainEpoch(powerBaseEpoch),
 		ReplacedDayReward:     filbig.NewFromGo(replacedDayReward),
 	}
