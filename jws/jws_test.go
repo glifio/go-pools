@@ -177,7 +177,53 @@ func TestJWSFromWWW(t *testing.T) {
 	}
 }
 
-var ZERO_ADDR = common.Address{}
+func TestVerifyJWSFromWWWNoRequesterSet(t *testing.T) {
+	ctx := context.Background()
+
+	agentAddr, target, value, signerPrivateKey, _ := setup()
+
+	mockFEVMQueries := mock.NewFEVMQueries(t)
+	mockFEVMQueries.On("ChainHeight", ctx).Return(big.NewInt(100), nil)
+	mockFEVMQueries.On("AgentRequester", ctx, agentAddr).Return(common.HexToAddress(""), nil)
+
+	pubKeyBytes := crypto.FromECDSAPub(&signerPrivateKey.PublicKey)
+
+	token := jwt.NewWithClaims(jwt.SigningMethodES256, requestClaimsStrVal{
+		AgentAddr:       agentAddr,
+		RequesterPubKey: pubKeyBytes,
+		Target:          target,
+		Value:           value.String(),
+		Method:          constants.MethodBorrow,
+		EpochHeight:     big.NewInt(100),
+	})
+
+	jws, err := token.SignedString(signerPrivateKey)
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if jws == "" {
+		t.Fatal("jws is empty")
+	}
+
+	claims, err := VerifyJWS(ctx, jws, mockFEVMQueries, true)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if claims.AgentAddr != agentAddr {
+		t.Fatal("agent address does not match")
+	}
+
+	if claims.Target != target {
+		t.Fatal("target address does not match")
+	}
+
+	if claims.Value.Cmp(value) != 0 {
+		t.Fatal("value does not match")
+	}
+}
 
 func setup() (agentAddr common.Address, target address.Address, value *big.Int, privateKey *ecdsa.PrivateKey, signerAddr common.Address) {
 	privateKey, _ = crypto.GenerateKey()
