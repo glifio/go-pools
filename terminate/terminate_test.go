@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"log"
 	"math/big"
-	"math/rand"
+	"sort"
+	"strconv"
 	"testing"
-	"time"
 
 	"github.com/filecoin-project/go-address"
 	"github.com/filecoin-project/lotus/chain/types"
@@ -40,24 +40,35 @@ func TestTerminationPrecision(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	r := rand.New(rand.NewSource(time.Now().UnixNano()))
-	r.Shuffle(len(miners), func(i, j int) { miners[i], miners[j] = miners[j], miners[i] })
+	// r := rand.New(rand.NewSource(time.Now().UnixNano()))
+	// r.Shuffle(len(miners), func(i, j int) { miners[i], miners[j] = miners[j], miners[i] })
+	sort.Slice(miners, func(i, j int) bool {
+		miner1, _ := strconv.Atoi(miners[i].String()[2:])
+		miner2, _ := strconv.Atoi(miners[j].String()[2:])
+		return miner1 < miner2
+	})
 
 	// // make a slice the length of N
 	chosenMiners := make([]address.Address, 0)
 
-	for _, miner := range miners {
+	for i, miner := range miners {
 		sectorCount, err := lapi.StateMinerSectorCount(context.Background(), miner, ts.Key())
 		if err != nil {
 			t.Fatal(err)
 		}
 		// if the miner has no active sectors, move to the next miner
 		// fmt.Println(miner, sectorCount.Active)
+		if i%100 == 0 {
+			fmt.Printf("%v\n", miner)
+		}
 		if sectorCount.Active > 0 {
+			fmt.Printf("Miner: %v - %d sectors @%v\n", miner, sectorCount.Active, ts.Height())
 			chosenMiners = append(chosenMiners, miner)
-			if len(chosenMiners) >= N {
-				break
-			}
+			/*
+				if len(chosenMiners) >= N {
+					break
+				}
+			*/
 		}
 	}
 
