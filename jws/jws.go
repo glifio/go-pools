@@ -43,6 +43,8 @@ var (
 	TokenExpiredErr     = errors.New("token expired")
 )
 
+var ZERO_ADDR = common.Address{}
+
 func SignJWS(ctx context.Context, agentAddr common.Address, target address.Address, value *big.Int, method constants.Method, key *ecdsa.PrivateKey, query types.FEVMQueries) (string, error) {
 	epochHeight, err := query.ChainHeight(ctx)
 	if err != nil {
@@ -157,7 +159,7 @@ func VerifyJWS(ctx context.Context, jws string, query types.FEVMQueries, useStrV
 		return &RequestClaims{}, err
 	}
 
-	if requester != requesterFromClaims {
+	if requester != ZERO_ADDR && requester != requesterFromClaims {
 		return &RequestClaims{}, InvalidRequesterErr
 	}
 
