@@ -34,6 +34,7 @@ func PreviewTerminateSectorsQuick(
 	ts *types.TipSet,
 ) (*PreviewTerminateSectorsReturn, error) {
 	var batchSize uint64 = 40
+	var desiredMinSamples uint64 = 600
 	var gasLimit uint64 = 270000000000
 	var maxPartitions uint64 = 21
 
@@ -217,7 +218,8 @@ func PreviewTerminateSectorsQuick(
 						return
 					}
 					sampledSectors := make([]uint64, 0)
-					step := max(float64(len(sectors))/float64(batchSize-1), 1.0)
+					partitionBatchSize := max(batchSize, desiredMinSamples/uint64(len(deadlinePartitions)))
+					step := max(float64(len(sectors))/float64(partitionBatchSize-1), 1.0)
 					lastIndex := -1
 					for sampleIndex := 0.0; int(sampleIndex) < len(sectors); sampleIndex += step {
 						i := int(sampleIndex)
