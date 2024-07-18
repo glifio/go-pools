@@ -163,6 +163,11 @@ func terminateSectors(
 				s.PowerBaseEpoch-s.Activation,
 			)
 
+			// this should never happen, but termination fee should never be negative
+			if termFee.Cmp(big.Zero().Int) < 0 {
+				return nil, xerrors.Errorf("negative termination fee: %v", termFee)
+			}
+
 			// the daily sector fee calculation
 			sectorFee := miner8.PledgePenaltyForContinuedFault(smoothedRew, smoothedPow, sectorPower)
 
