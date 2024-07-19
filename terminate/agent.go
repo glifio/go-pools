@@ -7,27 +7,20 @@ import (
 )
 
 func (ats PreviewAgentTerminationSummary) LiquidationValue() *big.Int {
-	// if the termination penalty is greater than the initial pledge,
-	// OR if the initial pledge is 0,
-	// we report liquidation value as 0
-	if ats.InitialPledge.Cmp(ats.TerminationPenalty) < 0 || ats.InitialPledge.Cmp(big.NewInt(0)) == 0 {
+	// total available balance is the sum of the miners available balance and the agent available balance
+	totalAvailableBalance := new(big.Int).Add(ats.MinersAvailableBal, ats.AgentAvailableBal)
+
+	// we add the total available balance to the vesting balance and initial pledge, subtract the termination penalty to get the liquidation value
+	totalAssets := new(big.Int).Add(totalAvailableBalance, ats.VestingBalance)
+	totalAssets.Add(totalAssets, ats.InitialPledge)
+
+	// if the total assets is less than or equal the termination penalty, we return 0
+	if totalAssets.Cmp(ats.TerminationPenalty) <= 0 {
 		return big.NewInt(0)
 	}
 
-	totalAvail := new(big.Int).Add(ats.MinersAvailableBal, ats.AgentAvailableBal)
-	// first we multiply the available balance by the recovery rate
-	// recovery rate = (initial pledge - termination penalty) / initial pledge
-	// discounted avail = (available * initial pledge - available * termination penalty) / initial pledge
-	availTimesPledge := new(big.Int).Mul(totalAvail, ats.InitialPledge)
-	availTimesTermPenalty := new(big.Int).Mul(totalAvail, ats.TerminationPenalty)
-
-	discountedAvail := new(big.Int).Sub(availTimesPledge, availTimesTermPenalty)
-	discountedAvail.Div(discountedAvail, ats.InitialPledge)
-
-	// we add the discounted available balance to the vesting balance and initial pledge, subtract the termination penalty to get the liquidation value
-	liquidationValue := new(big.Int).Add(discountedAvail, ats.VestingBalance)
-	liquidationValue.Add(liquidationValue, ats.InitialPledge)
-	liquidationValue.Sub(liquidationValue, ats.TerminationPenalty)
+	// liquidation value = total assets - termination penalty
+	liquidationValue := new(big.Int).Sub(totalAssets, ats.TerminationPenalty)
 
 	return liquidationValue
 }

@@ -20,7 +20,7 @@ func TestAgentLiquidationValue(t *testing.T) {
 			MinersAvailableBal: util.ToAtto(big.NewFloat(100)),
 			AgentAvailableBal:  util.ToAtto(big.NewFloat(0)),
 			VestingBalance:     util.ToAtto(big.NewFloat(100)),
-		}, util.ToAtto(big.NewFloat(650))},
+		}, util.ToAtto(big.NewFloat(700))},
 		// case 2 - 90% recovery rate, 0 available
 		{PreviewAgentTerminationSummary{
 			TerminationPenalty: util.ToAtto(big.NewFloat(100)),
@@ -52,7 +52,7 @@ func TestAgentLiquidationValue(t *testing.T) {
 			MinersAvailableBal: util.ToAtto(big.NewFloat(50)),
 			AgentAvailableBal:  util.ToAtto(big.NewFloat(50)),
 			VestingBalance:     util.ToAtto(big.NewFloat(100)),
-		}, util.ToAtto(big.NewFloat(650))},
+		}, util.ToAtto(big.NewFloat(700))},
 	}
 
 	for i, tc := range testCases {
