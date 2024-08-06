@@ -46,7 +46,7 @@ func PreviewTerminateSectorsQuick(
 		return nil, err
 	}
 
-	actor.Address = &minerAddr
+	actor.DelegatedAddress = &minerAddr
 
 	// Lookup current owner / worker
 	minerInfo, err := mstate.Info()
