@@ -2,6 +2,7 @@ package terminate
 
 import (
 	"context"
+	"log"
 	"math"
 	"math/big"
 
@@ -16,23 +17,31 @@ import (
 	"golang.org/x/xerrors"
 )
 
-var PERC_SECTORS_TO_SAMPLE = big.NewRat(1, 100)
-var MAX_SAMPLED_SECTORS = big.NewInt(10000)
-var MIN_SAMPLED_SECTORS = big.NewInt(1000)
+var PERC_SECTORS_TO_SAMPLE = big.NewRat(2, 100)
+var MAX_SAMPLED_SECTORS = big.NewInt(1000)
+var MIN_SAMPLED_SECTORS = big.NewInt(1)
 
 func EstimateTerminationPenalty(ctx context.Context, api *lotusapi.FullNodeStruct, minerAddr address.Address, ts *types.TipSet) (*big.Int, float64, error) {
+	log.Println("Fetching all sectors ")
 	sectors, err := AllSectors(ctx, api, minerAddr, ts)
 	if err != nil {
 		return nil, 0, err
 	}
+	log.Println("Fetched all sectors ", len(sectors))
+
+	sampled := SampleSectors(sectors, PERC_SECTORS_TO_SAMPLE, MAX_SAMPLED_SECTORS, MIN_SAMPLED_SECTORS)
+
+	log.Println("Sampled sectors length: ", len(sampled))
 
 	// Sample 1% of sectors, with a max of 10000 and a minimum of 1000
-	sample := bitfield.NewFromSet(SampleSectors(sectors, PERC_SECTORS_TO_SAMPLE, MAX_SAMPLED_SECTORS, MIN_SAMPLED_SECTORS))
+	sample := bitfield.NewFromSet(sampled)
 
 	penalty, avgPenaltyPerPledge, err := TerminateSectors(ctx, api, minerAddr, &sample, ts)
 	if err != nil {
 		return nil, 0, err
 	}
+
+	log.Printf("Termination penalty: %0.02f\n", util.ToFIL(penalty))
 
 	return penalty, avgPenaltyPerPledge, nil
 }
@@ -150,6 +159,8 @@ func TerminateSectors(ctx context.Context, api *lotusapi.FullNodeStruct, minerAd
 		termFeeRat := big.NewRat(0, 1).SetFrac(termFee, s.InitialPledge.Int)
 		termFeeFloat, _ := termFeeRat.Float64()
 		penaltyPerPledges = append(penaltyPerPledges, termFeeFloat)
+
+		// fmt.Printf("Sector stats: %0.02f\n", termFeeFloat)
 	}
 
 	// loop through the penalties and average them
@@ -166,10 +177,15 @@ func TerminateSectors(ctx context.Context, api *lotusapi.FullNodeStruct, minerAd
 		return nil, 0, err
 	}
 
-	initialPledge := new(big.Int).Add(lf.InitialPledgeRequirement.Int, lf.PreCommitDeposits.Int)
+	initialPledgeFloat := new(big.Float).SetInt(new(big.Int).Add(lf.InitialPledgeRequirement.Int, lf.PreCommitDeposits.Int))
+	avgPenaltyPerPledgeBigFloat := big.NewFloat(avgPenaltyPerPledge)
 
 	// the total penalty is the average penalty per pledge times the total initial pledge
-	totalPenalty := avgPenaltyPerPledge * float64(initialPledge.Int64())
+	totalPenaltyBigFloat := new(big.Float).Mul(avgPenaltyPerPledgeBigFloat, initialPledgeFloat)
+	pen := big.NewInt(0)
+	totalPenaltyBigFloat.Int(pen)
 
-	return big.NewInt(int64(totalPenalty)), avgPenaltyPerPledge, nil
+	log.Printf("AVERAGE PERCENTAGE PENALTY: %0.02f\n", avgPenaltyPerPledge)
+
+	return pen, avgPenaltyPerPledge, nil
 }
