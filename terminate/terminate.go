@@ -38,7 +38,23 @@ func EstimateTerminationPenalty(ctx context.Context, api *lotusapi.FullNodeStruc
 }
 
 func AllSectors(ctx context.Context, api *lotusapi.FullNodeStruct, minerAddr address.Address, ts *types.TipSet) ([]uint64, error) {
-	allSectors, err := api.StateMinerAllocated(context.Background(), minerAddr, ts.Key())
+	allLiveSectors := make([]bitfield.BitField, 0)
+
+	for dlIdx := uint64(0); dlIdx < 48; dlIdx++ {
+		// 48 calls to the internet
+		partitions, err := api.StateMinerPartitions(ctx, minerAddr, uint64(dlIdx), ts.Key())
+		// if this error occurs, the miner hasn't been around long enough to process the deadlineTs, so we just skip it
+		if err != nil {
+			continue
+		}
+
+		for _, partition := range partitions {
+			allLiveSectors = append(allLiveSectors, partition.LiveSectors)
+		}
+	}
+
+	// one bitfield with all the sectors
+	allSectors, err := bitfield.MultiMerge(allLiveSectors...)
 	if err != nil {
 		return nil, err
 	}
