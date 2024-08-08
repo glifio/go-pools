@@ -36,15 +36,15 @@ var ProtoMeta = types.ProtocolMeta{
 }
 
 var TestProtoMeta = types.ProtocolMeta{
-	AgentFactory:  common.HexToAddress("0x1EbF54537437a372614Eb50B6EDCbDB643603Fe7"),
-	AgentPolice:   common.HexToAddress("0xDA730B08A67D261fD8343c2061a269A2296c8469"),
-	IFIL:          common.HexToAddress("0x8c97F94b2cDbF7Dc0098057334d9908C4dC0a885"),
-	InfinityPool:  common.HexToAddress("0x37621D9a49FFE8f13BF2Adcb87f1b115D82ac378"),
-	SimpleRamp:    common.HexToAddress("0xbf3dE3D08A8C93fFB87A02E3Cb9758746450246e"),
-	MinerRegistry: common.HexToAddress("0xac13FF4743594344152Af8d1626cC80257bdf5C0"),
-	PoolRegistry:  common.HexToAddress("0x9de147901aA6a87bFC6BC1c84b2fE1a60bf38e1A"),
-	Router:        common.HexToAddress("0xa0770911848Bd1A0930Fc6782522381Bb6256617"),
-	WFIL:          common.HexToAddress("0xaC26a4Ab9cF2A8c5DBaB6fb4351ec0F4b07356c4"),
+	AgentFactory:  common.HexToAddress("0xeb9ED18AaDd2C9e6d805328D082d4b09db9a1152"),
+	AgentPolice:   common.HexToAddress("0x95e6987456a7f84A9F0355C9F501f977dA6D228d"),
+	IFIL:          common.HexToAddress("0xE22C205d2d2C0b8D3215025639BBbF2984316aa1"),
+	InfinityPool:  common.HexToAddress("0xF7f1905073bC968b2B0746F949e18F4c5C390Fb7"),
+	SimpleRamp:    common.HexToAddress("0x0000000000000000000000000000000000000000"),
+	MinerRegistry: common.HexToAddress("0xD228e88650468ac169805136ED4Df9d29dEd5F6d"),
+	PoolRegistry:  common.HexToAddress("0x3a4a2A203149fccc95421ce2b966d9beA6a866ba"),
+	Router:        common.HexToAddress("0xf7Aad120bF9540Cdd69Ba2ae10dC2820e8e700e3"),
+	WFIL:          common.HexToAddress("0x2583b67A8dD8c252a570376c79A43095895e1d4D"),
 	ChainID:       big.NewInt(314159),
 }
 
