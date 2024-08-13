@@ -32,6 +32,17 @@ type SectorStats struct {
 	SectorCount           int64
 }
 
+type TerminateSectorResult struct {
+	InitialPledgeFromSample      *big.Int
+	TerminationFeeFromSample     *big.Int
+	AvgTerminationFeePerPledge   *big.Int
+	AvgInitialPledgePerSector    *big.Int
+	EstimatedTotalTerminationFee *big.Int
+	EstimatedTotalInitialPledge  *big.Int
+	InitialPledge                *big.Int
+	SectorCount                  int64
+}
+
 func NewSectorStats() *SectorStats {
 	return &SectorStats{
 		TerminationPenalty:    big.NewInt(0),
