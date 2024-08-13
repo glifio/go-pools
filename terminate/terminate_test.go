@@ -39,9 +39,9 @@ var tests = []struct {
 	{"miner that was off", "f08403", 4157809, 1, "669276103568731990330"},
 	{"miner that was off", "f02366381", 4157809, 1, "0"},
 	{"miner that was off", "f01847751", 4157809, 1, "10305264645060108083102"},
-	{"miner that was off", "f01315096", 4157809, 1, "-1"},
+	{"miner that was off", "f01315096", 4157809, 1, "25865743620631274061184"},
 	{"miner that was off", "f02177086", 4158864, 1, "206662397221857395692"},
-	{"miner that was off", "f01889668", 4157809, 1, "-1"},
+	{"miner that was off", "f01889668", 4157809, 1, "25205954710368106840743"},
 }
 
 func TestTerminationOffChainFullMiner(t *testing.T) {
