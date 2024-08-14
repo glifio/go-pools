@@ -1,16 +1,18 @@
 package util
 
-import "math/big"
+import (
+	"math/big"
 
-var _WAD = big.NewInt(1e18)
+	"github.com/glifio/go-pools/constants"
+)
 
 func MulWad(x *big.Int, y *big.Int) *big.Int {
-	z := new(big.Int).Div(new(big.Int).Mul(x, y), _WAD)
+	z := new(big.Int).Div(new(big.Int).Mul(x, y), constants.WAD)
 	return z
 }
 
 func DivWad(x *big.Int, y *big.Int) *big.Int {
-	z := new(big.Int).Div(new(big.Int).Mul(x, _WAD), y)
+	z := new(big.Int).Div(new(big.Int).Mul(x, constants.WAD), y)
 	return z
 }
 

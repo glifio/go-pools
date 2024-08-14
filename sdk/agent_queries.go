@@ -436,7 +436,7 @@ func (q *fevmQueries) AgentPreviewTerminationPrecise(ctx context.Context, agentA
 	for i := int64(0); i < minerCount; i++ {
 		minerAddr := miners[i]
 		tasks[i] = func() (interface{}, error) {
-			return terminate.PreviewTerminateSectorsQuick(context.Background(), lapi, minerAddr, tipset)
+			return terminate.EstimateTerminationPenalty(context.Background(), lapi, minerAddr, tipset)
 		}
 	}
 

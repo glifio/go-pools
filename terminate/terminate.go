@@ -2,7 +2,6 @@ package terminate
 
 import (
 	"context"
-	"log"
 	"math"
 	"math/big"
 
@@ -17,33 +16,24 @@ import (
 	"golang.org/x/xerrors"
 )
 
-var PERC_SECTORS_TO_SAMPLE = big.NewRat(2, 100)
-var MAX_SAMPLED_SECTORS = big.NewInt(1000)
-var MIN_SAMPLED_SECTORS = big.NewInt(1)
+var MAX_SAMPLED_SECTORS = 1000
 
-func EstimateTerminationPenalty(ctx context.Context, api *lotusapi.FullNodeStruct, minerAddr address.Address, ts *types.TipSet) (*big.Int, *big.Int, error) {
-	log.Println("Fetching all sectors ")
+func EstimateTerminationPenalty(ctx context.Context, api *lotusapi.FullNodeStruct, minerAddr address.Address, ts *types.TipSet) (*TerminateSectorResult, error) {
 	sectors, err := AllSectors(ctx, api, minerAddr, ts)
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
-	log.Println("Fetched all sectors ", len(sectors))
 
-	sampled := SampleSectors(sectors, PERC_SECTORS_TO_SAMPLE, MAX_SAMPLED_SECTORS, MIN_SAMPLED_SECTORS)
+	sampled := SampleSectors(sectors, MAX_SAMPLED_SECTORS)
 
-	log.Println("Sampled sectors length: ", len(sampled))
-
-	// Sample 1% of sectors, with a max of 10000 and a minimum of 1000
 	sample := bitfield.NewFromSet(sampled)
 
 	res, err := TerminateSectors(ctx, api, minerAddr, &sample, ts)
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 
-	log.Printf("Termination penalty: %0.02f\n", util.ToFIL(res.TerminationFeeFromSample))
-
-	return res.EstimatedTotalTerminationFee, res.AvgTerminationFeePerPledge, nil
+	return res, nil
 }
 
 func AllSectors(ctx context.Context, api *lotusapi.FullNodeStruct, minerAddr address.Address, ts *types.TipSet) ([]uint64, error) {
@@ -71,30 +61,28 @@ func AllSectors(ctx context.Context, api *lotusapi.FullNodeStruct, minerAddr add
 	return allSectors.All(math.MaxUint64)
 }
 
-func SampleSectors(sectors []uint64, perc *big.Rat, max *big.Int, min *big.Int) []uint64 {
+func SampleSectors(sectors []uint64, max int) []uint64 {
 	sectorCount := len(sectors)
+
+	// If there are no sectors, return an empty slice
 	if sectorCount == 0 {
 		return []uint64{}
 	}
 
-	// Compute the percentage of sectors
-	percFloat, _ := perc.Float64()
-	desiredCount := int(percFloat * float64(sectorCount))
+	// Initialize the number of samples to the maximum number of samples
+	samples := max
 
-	// Apply the min and max boundaries
-	if big.NewInt(int64(desiredCount)).Cmp(min) < 0 {
-		desiredCount = int(min.Int64())
-	}
-	if big.NewInt(int64(desiredCount)).Cmp(max) > 0 {
-		desiredCount = int(max.Int64())
+	// If there are fewer sectors than the maximum number of samples, sample all sectors
+	if sectorCount < max {
+		samples = sectorCount
 	}
 
 	// Compute the step size for evenly spaced sampling
-	step := float64(sectorCount-1) / float64(desiredCount-1)
+	step := float64(sectorCount-1) / float64(samples-1)
 
 	// Sample the sectors
-	sampledSectors := make([]uint64, desiredCount)
-	for i := 0; i < desiredCount; i++ {
+	sampledSectors := make([]uint64, samples)
+	for i := 0; i < samples; i++ {
 		index := int(float64(i) * step)
 		sampledSectors[i] = sectors[index]
 	}
@@ -105,14 +93,13 @@ func SampleSectors(sectors []uint64, perc *big.Rat, max *big.Int, min *big.Int) 
 func TerminateSectors(ctx context.Context, api *lotusapi.FullNodeStruct, minerAddr address.Address, sectors *bitfield.BitField, ts *types.TipSet) (*TerminateSectorResult, error) {
 	// create a new terminate sector result
 	result := TerminateSectorResult{
-		InitialPledgeFromSample:      big.NewInt(0),
-		TerminationFeeFromSample:     big.NewInt(0),
-		AvgInitialPledgePerSector:    big.NewInt(0),
-		AvgTerminationFeePerPledge:   big.NewInt(0),
-		EstimatedTotalInitialPledge:  big.NewInt(0),
-		EstimatedTotalTerminationFee: big.NewInt(0),
-		InitialPledge:                big.NewInt(0),
-		SectorCount:                  0,
+		InitialPledgeFromSample:    big.NewInt(0),
+		TerminationFeeFromSample:   big.NewInt(0),
+		AvgInitialPledgePerSector:  big.NewInt(0),
+		AvgTerminationFeePerPledge: big.NewInt(0),
+		EstimatedInitialPledge:     big.NewInt(0),
+		EstimatedTerminationFee:    big.NewInt(0),
+		InitialPledge:              big.NewInt(0),
 	}
 
 	_, mstate, err := mstat.LoadMinerActor(ctx, api, minerAddr, ts)
@@ -136,6 +123,12 @@ func TerminateSectors(ctx context.Context, api *lotusapi.FullNodeStruct, minerAd
 	}
 
 	sectorInfos, err := api.StateMinerSectors(context.Background(), minerAddr, sectors, ts.Key())
+	if err != nil {
+		return nil, err
+	}
+
+	// set the total number of live sectors
+	result.LiveSectors, err = mstate.NumLiveSectors()
 	if err != nil {
 		return nil, err
 	}
@@ -172,18 +165,14 @@ func TerminateSectors(ctx context.Context, api *lotusapi.FullNodeStruct, minerAd
 
 		result.TerminationFeeFromSample = big.NewInt(0).Add(result.TerminationFeeFromSample, termFee)
 		result.InitialPledgeFromSample = big.NewInt(0).Add(result.InitialPledgeFromSample, s.InitialPledge.Int)
-		result.SectorCount++
+		result.SampledSectors++
 	}
 
 	// calculate the average penalty per pledge as result.TerminationFee / result.InitialPledge and keep the reult in big.int
 	result.AvgTerminationFeePerPledge = util.DivWad(result.TerminationFeeFromSample, result.InitialPledgeFromSample)
-	// log average penalty per pledge
-	// log.Printf("AVERAGE PENALTY PER PLEDGE: %f\n", util.ToFIL(result.AvgTerminationFeePerPledge))
 
 	// calculate the average initial pledge per sector as result.InitialPledge / result.SectorCount and keep the result in big.int
-	result.AvgInitialPledgePerSector = big.NewInt(0).Div(result.InitialPledgeFromSample, big.NewInt(int64(result.SectorCount)))
-	// log initial pledge per sector
-	// log.Printf("AVERAGE INITIAL PLEDGE PER SECTOR: %d\n", result.AvgInitialPledgePerSector)
+	result.AvgInitialPledgePerSector = big.NewInt(0).Div(result.InitialPledgeFromSample, big.NewInt(int64(result.SampledSectors)))
 
 	// interpolate the penalty to the entire sector set based on initial pledge
 	lf, err := mstate.LockedFunds()
@@ -194,16 +183,10 @@ func TerminateSectors(ctx context.Context, api *lotusapi.FullNodeStruct, minerAd
 	result.InitialPledge = lf.InitialPledgeRequirement.Int
 
 	// the total penalty is the average penalty per pledge times the total initial pledge
-	result.EstimatedTotalTerminationFee = util.MulWad(result.AvgTerminationFeePerPledge, lf.InitialPledgeRequirement.Int)
-	// log.Printf("ESTIMATED TOTAL TERMINATION FEE: %f\n", util.ToFIL(result.EstimatedTotalTerminationFee))
+	result.EstimatedTerminationFee = util.MulWad(result.AvgTerminationFeePerPledge, lf.InitialPledgeRequirement.Int)
 
 	// the total initial pledge is the average initial pledge per sector times the total number of sectors
-	mstate.GetAllocatedSectors()
-	liveSectors, _ := mstate.NumLiveSectors()
-	result.EstimatedTotalInitialPledge = new(big.Int).Mul(result.AvgInitialPledgePerSector, big.NewInt(int64(liveSectors)))
-	// log.Printf("ESTIMATED TOTAL INITIAL PLEDGE: %f\n", util.ToFIL(result.EstimatedTotalInitialPledge))
-
-	// log.Printf("AVERAGE PERCENTAGE PENALTY: %0.02f\n", avgPenaltyPerPledge)
+	result.EstimatedInitialPledge = new(big.Int).Mul(result.AvgInitialPledgePerSector, big.NewInt(int64(result.LiveSectors)))
 
 	return &result, nil
 }

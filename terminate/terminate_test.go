@@ -29,19 +29,20 @@ type SectorInfo struct {
 }
 
 var tests = []struct {
-	name              string
-	miner             string
-	height            abi.ChainEpoch
-	percent_to_sample int64
-	want              string
+	name    string
+	miner   string
+	height  abi.ChainEpoch
+	samples int
+	want    string
 }{
-	{"miner that was off", "f01824405", 4157809, 1, "15276221548081039917042"},
-	{"miner that was off", "f08403", 4157809, 1, "669276103568731990330"},
-	{"miner that was off", "f02366381", 4157809, 1, "0"},
-	{"miner that was off", "f01847751", 4157809, 1, "10305264645060108083102"},
-	{"miner that was off", "f01315096", 4157809, 1, "25865743620631274061184"},
-	{"miner that was off", "f02177086", 4158864, 1, "206662397221857395692"},
-	{"miner that was off", "f01889668", 4157809, 1, "25205954710368106840743"},
+	{"miner", "f01344987", 4161576, 1000, "19784479924073946376310"},
+	{"miner", "f01824405", 4157809, 1000, "15276221548081039917042"},
+	{"miner", "f08403", 4157809, 1000, "669276103568731990330"},
+	{"miner", "f02366381", 4157809, 1000, "0"},
+	{"miner", "f01847751", 4157809, 1000, "10305264645060108083102"},
+	{"miner", "f01315096", 4157809, 1000, "25865743620631274061184"},
+	{"miner", "f02177086", 4158864, 1000, "206662397221857395692"},
+	{"miner", "f01889668", 4157809, 1000, "25205954710368106840743"},
 }
 
 func TestTerminationOffChainFullMiner(t *testing.T) {
@@ -49,7 +50,7 @@ func TestTerminationOffChainFullMiner(t *testing.T) {
 	defer util.TeardownSuite(closer)
 
 	for _, tt := range tests {
-		testname := fmt.Sprintf("%s:miner %s", tt.name, tt.miner)
+		testname := fmt.Sprintf("%s:%s", tt.name, tt.miner)
 		t.Run(testname, func(t *testing.T) {
 			ts, err := lapi.ChainGetTipSetByHeight(context.Background(), tt.height, types.EmptyTSK)
 			if err != nil {
@@ -61,16 +62,15 @@ func TestTerminationOffChainFullMiner(t *testing.T) {
 				t.Fatal(err)
 			}
 
-			log.Println("Fetching sectors ")
+			log.Println("get all sectors ")
 			sectors, err := AllSectors(context.Background(), lapi, minerAddr, ts)
 			if err != nil {
 				t.Fatal(err)
 			}
 
-			var PERC_SECTORS_TO_SAMPLE = big.NewRat(tt.percent_to_sample, 100)
-			var MAX_SAMPLED_SECTORS = big.NewInt(1000)
-			var MIN_SAMPLED_SECTORS = big.NewInt(300)
-			sampled := SampleSectors(sectors, PERC_SECTORS_TO_SAMPLE, MAX_SAMPLED_SECTORS, MIN_SAMPLED_SECTORS)
+			log.Println("sample sectors ")
+
+			sampled := SampleSectors(sectors, tt.samples)
 
 			log.Println("Sampled sectors length: ", len(sampled))
 
@@ -78,7 +78,7 @@ func TestTerminationOffChainFullMiner(t *testing.T) {
 			sample := bitfield.NewFromSet(sampled)
 			full := bitfield.NewFromSet(sectors)
 
-			// if want is 0 fetch all sectors
+			// if want is -1 fetch all sectors
 			expectedTermFee := big.NewInt(0)
 			if tt.want == "-1" {
 				resFull, err := TerminateSectors(context.Background(), lapi, minerAddr, &full, ts)
@@ -86,7 +86,7 @@ func TestTerminationOffChainFullMiner(t *testing.T) {
 					t.Fatal(err)
 				}
 				t.Logf("Termination fee: %v", resFull.TerminationFeeFromSample)
-				expectedTermFee = resFull.EstimatedTotalTerminationFee
+				expectedTermFee = resFull.EstimatedTerminationFee
 			} else {
 				expectedTermFee.SetString(tt.want, 10)
 			}
@@ -96,19 +96,19 @@ func TestTerminationOffChainFullMiner(t *testing.T) {
 				t.Fatal(err)
 			}
 
-			t.Logf("Estimated total pledge: %v", util.ToFIL(res.EstimatedTotalInitialPledge))
+			t.Logf("Estimated total pledge: %v", util.ToFIL(res.EstimatedInitialPledge))
 
-			termFeeDiff := util.Diff(expectedTermFee, res.EstimatedTotalTerminationFee)
-			initialPledgeDiff := util.Diff(res.InitialPledge, res.EstimatedTotalInitialPledge)
-			t.Logf("The difference in term fee: %s%%", util.Diff(expectedTermFee, res.EstimatedTotalTerminationFee).Text('f', 2))
-			t.Logf("The difference in initial pledge: %s%%", util.Diff(res.InitialPledge, res.EstimatedTotalInitialPledge).Text('f', 2))
+			termFeeDiff := util.Diff(expectedTermFee, res.EstimatedTerminationFee)
+			initialPledgeDiff := util.Diff(res.InitialPledge, res.EstimatedInitialPledge)
+			t.Logf("The difference in term fee: %s%%", util.Diff(expectedTermFee, res.EstimatedTerminationFee).Text('f', 2))
+			t.Logf("The difference in initial pledge: %s%%", util.Diff(res.InitialPledge, res.EstimatedInitialPledge).Text('f', 2))
 
 			// if the difference in term fee is greater than 3% or the difference in initial pledge is greater than 3%, fail the test
 			if termFeeDiff.Cmp(DIFF) == 1 {
-				t.Fatalf("Expected term fee: %v, actual fee: %v", util.ToFIL(expectedTermFee), util.ToFIL(res.EstimatedTotalTerminationFee))
+				t.Fatalf("Expected term fee: %v, actual fee: %v", util.ToFIL(expectedTermFee), util.ToFIL(res.EstimatedTerminationFee))
 			}
 			if initialPledgeDiff.Cmp(DIFF) == 1 {
-				t.Fatalf("Expected initial pledge: %v, actual: %v", util.ToFIL(res.InitialPledge), util.ToFIL(res.EstimatedTotalInitialPledge))
+				t.Fatalf("Expected initial pledge: %v, actual: %v", util.ToFIL(res.InitialPledge), util.ToFIL(res.EstimatedInitialPledge))
 			}
 		})
 	}
@@ -189,7 +189,7 @@ func TestTerminationPrecision(t *testing.T) {
 
 	for i, miner := range chosenMiners {
 		fmt.Printf("(%d/%d) %v:\n", i+1, N, miner)
-		imprecise, err := PreviewTerminateSectorsQuick(context.Background(), lapi, miner, ts)
+		imprecise, err := EstimateTerminationPenalty(context.Background(), lapi, miner, ts)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -204,9 +204,9 @@ func TestTerminationPrecision(t *testing.T) {
 			select {
 			case result := <-resultCh:
 				fmt.Println("PRECISE: ", result.SectorStats.TerminationPenalty)
-				fmt.Println("IMPRECISE: ", imprecise.SectorStats.TerminationPenalty)
-				if !util.AssertApproxEqRel(result.SectorStats.TerminationPenalty, imprecise.SectorStats.TerminationPenalty, big.NewInt(3e16)) {
-					t.Fatalf("TERMINATION PENALTIES DO NOT MATCH: precise: %v, imprecise: %v", result.SectorStats.TerminationPenalty, imprecise.SectorStats.TerminationPenalty)
+				fmt.Println("IMPRECISE: ", imprecise.EstimatedTerminationFee)
+				if !util.AssertApproxEqRel(result.SectorStats.TerminationPenalty, imprecise.EstimatedTerminationFee, big.NewInt(3e16)) {
+					t.Fatalf("TERMINATION PENALTIES DO NOT MATCH: precise: %v, imprecise: %v", result.SectorStats.TerminationPenalty, imprecise.EstimatedTerminationFee)
 				}
 				break loop
 
