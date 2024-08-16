@@ -136,7 +136,6 @@ func TerminateSectors(ctx context.Context, api *lotusapi.FullNodeStruct, minerAd
 		return nil, err
 	}
 
-	// interpolate the penalty to the entire sector set based on initial pledge
 	lf, err := mstate.LockedFunds()
 	if err != nil {
 		return nil, err
