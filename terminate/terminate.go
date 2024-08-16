@@ -93,16 +93,19 @@ func SampleSectors(sectors []uint64, max int) []uint64 {
 func TerminateSectors(ctx context.Context, api *lotusapi.FullNodeStruct, minerAddr address.Address, sectors *bitfield.BitField, ts *types.TipSet) (*TerminateSectorResult, error) {
 	// create a new terminate sector result
 	result := TerminateSectorResult{
+		TotalBalance:               big.NewInt(0),
+		AvailableBalance:           big.NewInt(0),
+		InitialPledge:              big.NewInt(0),
+		VestingFunds:               big.NewInt(0),
 		InitialPledgeFromSample:    big.NewInt(0),
 		TerminationFeeFromSample:   big.NewInt(0),
 		AvgInitialPledgePerSector:  big.NewInt(0),
 		AvgTerminationFeePerPledge: big.NewInt(0),
 		EstimatedInitialPledge:     big.NewInt(0),
 		EstimatedTerminationFee:    big.NewInt(0),
-		InitialPledge:              big.NewInt(0),
 	}
 
-	_, mstate, err := mstat.LoadMinerActor(ctx, api, minerAddr, ts)
+	actor, mstate, err := mstat.LoadMinerActor(ctx, api, minerAddr, ts)
 	if err != nil {
 		return nil, err
 	}
@@ -132,6 +135,18 @@ func TerminateSectors(ctx context.Context, api *lotusapi.FullNodeStruct, minerAd
 	if err != nil {
 		return nil, err
 	}
+
+	// interpolate the penalty to the entire sector set based on initial pledge
+	lf, err := mstate.LockedFunds()
+	if err != nil {
+		return nil, err
+	}
+
+	result.InitialPledge = lf.InitialPledgeRequirement.Int
+	result.VestingFunds = lf.VestingFunds.Int
+	result.TotalBalance = actor.Balance.Int
+	// the available balance is the total balance minus the initial pledge and vesting funds
+	result.AvailableBalance = big.NewInt(0).Sub(result.TotalBalance, big.NewInt(0).Add(result.InitialPledge, result.VestingFunds))
 
 	// if no sectors found return empty result
 	if len(sectorInfos) == 0 {
@@ -173,14 +188,6 @@ func TerminateSectors(ctx context.Context, api *lotusapi.FullNodeStruct, minerAd
 
 	// calculate the average initial pledge per sector as result.InitialPledge / result.SectorCount and keep the result in big.int
 	result.AvgInitialPledgePerSector = big.NewInt(0).Div(result.InitialPledgeFromSample, big.NewInt(int64(result.SampledSectors)))
-
-	// interpolate the penalty to the entire sector set based on initial pledge
-	lf, err := mstate.LockedFunds()
-	if err != nil {
-		return nil, err
-	}
-
-	result.InitialPledge = lf.InitialPledgeRequirement.Int
 
 	// the total penalty is the average penalty per pledge times the total initial pledge
 	result.EstimatedTerminationFee = util.MulWad(result.AvgTerminationFeePerPledge, lf.InitialPledgeRequirement.Int)

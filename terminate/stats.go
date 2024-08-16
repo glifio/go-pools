@@ -39,6 +39,9 @@ type TerminateSectorResult struct {
 	AvgInitialPledgePerSector  *big.Int
 	EstimatedTerminationFee    *big.Int
 	EstimatedInitialPledge     *big.Int
+	TotalBalance               *big.Int // available balance + vesting funds + initial pledge
+	AvailableBalance           *big.Int
+	VestingFunds               *big.Int
 	InitialPledge              *big.Int
 	SampledSectors             uint64
 	LiveSectors                uint64
