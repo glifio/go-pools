@@ -267,6 +267,62 @@ func (_c *FEVMQueries_AgentCollateralStatsQuick_Call) RunAndReturn(run func(cont
 	return _c
 }
 
+// AgentDebt provides a mock function with given fields: ctx, agentAddr, blockNumber
+func (_m *FEVMQueries) AgentDebt(ctx context.Context, agentAddr common.Address, blockNumber *big.Int) (*big.Int, error) {
+	ret := _m.Called(ctx, agentAddr, blockNumber)
+
+	var r0 *big.Int
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, common.Address, *big.Int) (*big.Int, error)); ok {
+		return rf(ctx, agentAddr, blockNumber)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, common.Address, *big.Int) *big.Int); ok {
+		r0 = rf(ctx, agentAddr, blockNumber)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*big.Int)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, common.Address, *big.Int) error); ok {
+		r1 = rf(ctx, agentAddr, blockNumber)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// FEVMQueries_AgentDebt_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'AgentDebt'
+type FEVMQueries_AgentDebt_Call struct {
+	*mock.Call
+}
+
+// AgentDebt is a helper method to define mock.On call
+//   - ctx context.Context
+//   - agentAddr common.Address
+//   - blockNumber *big.Int
+func (_e *FEVMQueries_Expecter) AgentDebt(ctx interface{}, agentAddr interface{}, blockNumber interface{}) *FEVMQueries_AgentDebt_Call {
+	return &FEVMQueries_AgentDebt_Call{Call: _e.mock.On("AgentDebt", ctx, agentAddr, blockNumber)}
+}
+
+func (_c *FEVMQueries_AgentDebt_Call) Run(run func(ctx context.Context, agentAddr common.Address, blockNumber *big.Int)) *FEVMQueries_AgentDebt_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(common.Address), args[2].(*big.Int))
+	})
+	return _c
+}
+
+func (_c *FEVMQueries_AgentDebt_Call) Return(_a0 *big.Int, _a1 error) *FEVMQueries_AgentDebt_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *FEVMQueries_AgentDebt_Call) RunAndReturn(run func(context.Context, common.Address, *big.Int) (*big.Int, error)) *FEVMQueries_AgentDebt_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // AgentDefaulted provides a mock function with given fields: ctx, agentAddr
 func (_m *FEVMQueries) AgentDefaulted(ctx context.Context, agentAddr common.Address) (bool, error) {
 	ret := _m.Called(ctx, agentAddr)
@@ -473,25 +529,25 @@ func (_c *FEVMQueries_AgentID_Call) RunAndReturn(run func(context.Context, commo
 	return _c
 }
 
-// AgentInterestOwed provides a mock function with given fields: ctx, agentAddr, tsk
-func (_m *FEVMQueries) AgentInterestOwed(ctx context.Context, agentAddr common.Address, tsk *chaintypes.TipSet) (*big.Int, error) {
-	ret := _m.Called(ctx, agentAddr, tsk)
+// AgentInterestOwed provides a mock function with given fields: ctx, agentAddr, blockNumber
+func (_m *FEVMQueries) AgentInterestOwed(ctx context.Context, agentAddr common.Address, blockNumber *big.Int) (*big.Int, error) {
+	ret := _m.Called(ctx, agentAddr, blockNumber)
 
 	var r0 *big.Int
 	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context, common.Address, *chaintypes.TipSet) (*big.Int, error)); ok {
-		return rf(ctx, agentAddr, tsk)
+	if rf, ok := ret.Get(0).(func(context.Context, common.Address, *big.Int) (*big.Int, error)); ok {
+		return rf(ctx, agentAddr, blockNumber)
 	}
-	if rf, ok := ret.Get(0).(func(context.Context, common.Address, *chaintypes.TipSet) *big.Int); ok {
-		r0 = rf(ctx, agentAddr, tsk)
+	if rf, ok := ret.Get(0).(func(context.Context, common.Address, *big.Int) *big.Int); ok {
+		r0 = rf(ctx, agentAddr, blockNumber)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*big.Int)
 		}
 	}
 
-	if rf, ok := ret.Get(1).(func(context.Context, common.Address, *chaintypes.TipSet) error); ok {
-		r1 = rf(ctx, agentAddr, tsk)
+	if rf, ok := ret.Get(1).(func(context.Context, common.Address, *big.Int) error); ok {
+		r1 = rf(ctx, agentAddr, blockNumber)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -507,14 +563,14 @@ type FEVMQueries_AgentInterestOwed_Call struct {
 // AgentInterestOwed is a helper method to define mock.On call
 //   - ctx context.Context
 //   - agentAddr common.Address
-//   - tsk *chaintypes.TipSet
-func (_e *FEVMQueries_Expecter) AgentInterestOwed(ctx interface{}, agentAddr interface{}, tsk interface{}) *FEVMQueries_AgentInterestOwed_Call {
-	return &FEVMQueries_AgentInterestOwed_Call{Call: _e.mock.On("AgentInterestOwed", ctx, agentAddr, tsk)}
+//   - blockNumber *big.Int
+func (_e *FEVMQueries_Expecter) AgentInterestOwed(ctx interface{}, agentAddr interface{}, blockNumber interface{}) *FEVMQueries_AgentInterestOwed_Call {
+	return &FEVMQueries_AgentInterestOwed_Call{Call: _e.mock.On("AgentInterestOwed", ctx, agentAddr, blockNumber)}
 }
 
-func (_c *FEVMQueries_AgentInterestOwed_Call) Run(run func(ctx context.Context, agentAddr common.Address, tsk *chaintypes.TipSet)) *FEVMQueries_AgentInterestOwed_Call {
+func (_c *FEVMQueries_AgentInterestOwed_Call) Run(run func(ctx context.Context, agentAddr common.Address, blockNumber *big.Int)) *FEVMQueries_AgentInterestOwed_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(common.Address), args[2].(*chaintypes.TipSet))
+		run(args[0].(context.Context), args[1].(common.Address), args[2].(*big.Int))
 	})
 	return _c
 }
@@ -524,7 +580,7 @@ func (_c *FEVMQueries_AgentInterestOwed_Call) Return(_a0 *big.Int, _a1 error) *F
 	return _c
 }
 
-func (_c *FEVMQueries_AgentInterestOwed_Call) RunAndReturn(run func(context.Context, common.Address, *chaintypes.TipSet) (*big.Int, error)) *FEVMQueries_AgentInterestOwed_Call {
+func (_c *FEVMQueries_AgentInterestOwed_Call) RunAndReturn(run func(context.Context, common.Address, *big.Int) (*big.Int, error)) *FEVMQueries_AgentInterestOwed_Call {
 	_c.Call.Return(run)
 	return _c
 }
