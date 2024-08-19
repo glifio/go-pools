@@ -37,9 +37,9 @@ var ProtoMeta = types.ProtocolMeta{
 
 var TestProtoMeta = types.ProtocolMeta{
 	AgentFactory:  common.HexToAddress("0xeb9ED18AaDd2C9e6d805328D082d4b09db9a1152"),
-	AgentPolice:   common.HexToAddress("0x95e6987456a7f84A9F0355C9F501f977dA6D228d"),
+	AgentPolice:   common.HexToAddress("0x0e91fb458C2A5615b6AE5053be7F1C6b71faB521"),
 	IFIL:          common.HexToAddress("0xE22C205d2d2C0b8D3215025639BBbF2984316aa1"),
-	InfinityPool:  common.HexToAddress("0xF7f1905073bC968b2B0746F949e18F4c5C390Fb7"),
+	InfinityPool:  common.HexToAddress("0x6638373545A49c64e3e64cDeE42Bc267D76D565b"),
 	SimpleRamp:    common.HexToAddress("0x0000000000000000000000000000000000000000"),
 	MinerRegistry: common.HexToAddress("0xD228e88650468ac169805136ED4Df9d29dEd5F6d"),
 	PoolRegistry:  common.HexToAddress("0x3a4a2A203149fccc95421ce2b966d9beA6a866ba"),
