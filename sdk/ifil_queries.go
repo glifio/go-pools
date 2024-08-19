@@ -52,7 +52,7 @@ func (q *fevmQueries) IFILPrice(ctx context.Context, blockNumber *big.Int) (*big
 	}
 	defer client.Close()
 
-	infPoolCaller, err := abigen.NewInfinityPoolCaller(q.infinityPool, client)
+	infPoolCaller, err := abigen.NewInfinityPoolV2Caller(q.infinityPool, client)
 	if err != nil {
 		return nil, err
 	}

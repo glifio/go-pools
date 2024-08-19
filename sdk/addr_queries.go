@@ -2,7 +2,6 @@ package sdk
 
 import (
 	"github.com/ethereum/go-ethereum/common"
-	"github.com/glifio/go-pools/abigen"
 )
 
 func (q *fevmQueries) AgentPolice() common.Address {
@@ -35,23 +34,4 @@ func (q *fevmQueries) WFIL() common.Address {
 
 func (q *fevmQueries) InfinityPool() common.Address {
 	return q.infinityPool
-}
-
-func (q *fevmQueries) SimpleRamp() common.Address {
-	return q.simpleRamp
-}
-
-func (q *fevmQueries) RateModule() (common.Address, error) {
-	client, err := q.extern.ConnectEthClient()
-	if err != nil {
-		return common.Address{}, err
-	}
-	defer client.Close()
-
-	infpool, err := abigen.NewInfinityPoolCaller(q.infinityPool, client)
-	if err != nil {
-		return common.Address{}, err
-	}
-
-	return infpool.RateModule(nil)
 }

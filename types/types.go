@@ -36,7 +36,6 @@ type FEVMQueries interface {
 	AgentLiquidAssets(ctx context.Context, agentAddr common.Address, blockNumber *big.Int) (*big.Int, error)
 	AgentPrincipal(ctx context.Context, agentAddr common.Address, blockNumber *big.Int) (*big.Int, error)
 	AgentInterestOwed(ctx context.Context, agentAddr common.Address, tsk *filtypes.TipSet) (*big.Int, error)
-	AgentFaultyEpochStart(ctx context.Context, agentAddr common.Address) (*big.Int, error)
 	AgentCollateralStatsQuick(ctx context.Context, agentAddr common.Address) (*terminate.AgentCollateralStats, error)
 	AgentPreviewTerminationPrecise(ctx context.Context, agentAddr common.Address, tipset *filtypes.TipSet) (terminate.PreviewAgentTerminationSummary, error)
 	AgentPreviewTerminationQuick(ctx context.Context, agentAddr common.Address) (terminate.PreviewAgentTerminationSummary, error)
@@ -52,11 +51,9 @@ type FEVMQueries interface {
 	InfPoolTotalBorrowed(ctx context.Context, blockNumber *big.Int) (*big.Float, error)
 	InfPoolExitReserve(ctx context.Context, blockNumber *big.Int) (*big.Int, *big.Int, error)
 	InfPoolAgentMaxBorrow(ctx context.Context, agentAddr common.Address, agentData *vc.AgentData) (*big.Int, error)
-	InfPoolMaxEpochsOwedTolerance(ctx context.Context, agentAddr common.Address) (*big.Int, error)
 	InfPoolFeesAccrued(ctx context.Context, blockNumber *big.Int) (*big.Int, error)
 	InfPoolApy(ctx context.Context, blockNumber *big.Int) (*big.Int, error)
 	// pool registry methods
-	ListPools(ctx context.Context) ([]common.Address, error)
 	TreasuryFeeRate(ctx context.Context, blockNumber *big.Int) (*big.Int, error)
 	// ifil methods
 	IFILBalanceOf(ctx context.Context, hodler common.Address) (*big.Float, error)
@@ -68,10 +65,8 @@ type FEVMQueries interface {
 	WFILBalanceOf(ctx context.Context, hodler common.Address) (*big.Float, error)
 	WFILAllowance(ctx context.Context, hodler common.Address, spender common.Address) (*big.Float, error)
 	// policing methods
-	CredentialUsed(ctx context.Context, v uint8, r [32]byte, s [32]byte, blockNumber *big.Int) (bool, error)
+	CredentialUsedEpoch(ctx context.Context, vc abigen.VerifiableCredential, blockNumber *big.Int) (*big.Int, error)
 	CredentialValidityPeriod(ctx context.Context) (*big.Int, *big.Int, error)
-	DefaultEpoch(ctx context.Context) (*big.Int, error)
-	MaxConsecutiveFaultEpochs(ctx context.Context) (*big.Int, error)
 	SectorFaultyTolerance(ctx context.Context) (*big.Int, error)
 	// miner registry methods
 	MinerRegistryAgentMinersCount(ctx context.Context, agentID *big.Int, blockNumber *big.Int) (*big.Int, error)
@@ -92,14 +87,10 @@ type FEVMQueries interface {
 	AgentPolice() common.Address
 	MinerRegistry() common.Address
 	Router() common.Address
-	PoolRegistry() common.Address
 	AgentFactory() common.Address
 	IFIL() common.Address
 	WFIL() common.Address
 	InfinityPool() common.Address
-	SimpleRamp() common.Address
-	// RateModule gets fetched from InfinityPool
-	RateModule() (common.Address, error)
 }
 
 //go:generate mockery --name FEVMActions
@@ -153,12 +144,10 @@ type ProtocolMeta struct {
 	AgentPolice   common.Address `json:"agentPolice"`
 	MinerRegistry common.Address `json:"minerRegistry"`
 	Router        common.Address `json:"router"`
-	PoolRegistry  common.Address `json:"poolRegistry"`
 	AgentFactory  common.Address `json:"agentFactory"`
 	IFIL          common.Address `json:"ifil"`
 	WFIL          common.Address `json:"wfil"`
 	InfinityPool  common.Address `json:"infinityPool"`
-	SimpleRamp    common.Address `json:"simpleRamp"`
 	ChainID       *big.Int       `json:"chainID"`
 }
 
