@@ -39,6 +39,7 @@ var (
 	MethodPushFunds    Method = "pushFunds"
 	MethodPullFunds    Method = "pullFunds"
 	MethodSetRecovered Method = "setRecovered"
+	MethodDefaultDTL   Method = "setAgentDefaultDTL"
 )
 
 type Route string
@@ -74,3 +75,5 @@ var FAULTY_SECTOR_TOLERANCE = big.NewFloat(0.001)
 var MAX_DTE = big.NewInt(2e18)
 var MAX_LTV = big.NewInt(8e17)
 var MAX_DTI = big.NewInt(25e16)
+var MAX_BORROW_DTL = big.NewInt(75e16)
+var LIQUIDATION_DTL = big.NewInt(85e16)

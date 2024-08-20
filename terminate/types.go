@@ -54,6 +54,33 @@ type PreviewAgentTerminationSummary struct {
 	AgentAvailableBal  *big.Int
 }
 
+type BaseMargin struct {
+	AvailableBalance     *big.Int `json:"availableBalance"`
+	LockedRewards        *big.Int `json:"lockedRewards"`
+	InitialPledge        *big.Int `json:"initialPledge"`
+	Margin               *big.Int `json:"margin"`
+	TerminationPenalty   *big.Int `json:"terminationPenalty"`
+	MaxBorrowAndSeal     *big.Int `json:"maxBorrowAndSeal"`
+	MaxBorrowAndWithdraw *big.Int `json:"maxBorrowAndWithdraw"`
+}
+
+type AgentMargin struct {
+	BaseMargin
+	AgentId       *big.Int `json:"agentId"`
+	AgentBalance  *big.Int `json:"agentBalance"`
+	Principal     *big.Int `json:"principal"`
+	LeverageRatio float64  `json:"leverageRatio"`
+	BorrowLimit   *big.Int `json:"borrowLimit"`
+	WithdrawLimit *big.Int `json:"withdrawLimit"`
+	MarginCall    *big.Int `json:"marginCall"`
+}
+
+type MinerMargin struct {
+	BaseMargin
+	MinerAddr    address.Address `json:"minerAddr"`
+	MinerBalance *big.Int        `json:"minerBalance"`
+}
+
 type MinerCollateralStat struct {
 	Address            address.Address `json:"address"`
 	Total              *big.Int        `json:"total"`
