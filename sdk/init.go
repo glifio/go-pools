@@ -19,12 +19,10 @@ func InitFEVMConnection(
 	agentPolice common.Address,
 	minerRegistry common.Address,
 	router common.Address,
-	poolRegistry common.Address,
 	agentFactory common.Address,
 	iFIL common.Address,
 	wFIL common.Address,
 	infinityPool common.Address,
-	simpleRamp common.Address,
 	adoAddr string,
 	adoNamespace string,
 	dialAddr string,
@@ -43,9 +41,7 @@ func InitFEVMConnection(
 		iFIL:          iFIL,
 		wFIL:          wFIL,
 		infinityPool:  infinityPool,
-		simpleRamp:    simpleRamp,
 		agentFactory:  agentFactory,
-		poolRegistry:  poolRegistry,
 		minerRegistry: minerRegistry,
 		agentPolice:   agentPolice,
 		chainID:       chainID,
@@ -158,7 +154,7 @@ func LazyInit(
 		return err
 	}
 
-	infpoolCaller, err := abigen.NewInfinityPoolCaller(infpool, client)
+	infpoolCaller, err := abigen.NewInfinityPoolV2Caller(infpool, client)
 	if err != nil {
 		return err
 	}
@@ -168,21 +164,14 @@ func LazyInit(
 		return err
 	}
 
-	simpleRamp, err := infpoolCaller.Ramp(&bind.CallOpts{Context: ctx})
-	if err != nil {
-		return err
-	}
-
 	*sdk = InitFEVMConnection(
 		routes[constants.RouteAgentPolice],
 		routes[constants.RouteMinerRegistry],
 		router,
-		routes[constants.RoutePoolRegistry],
 		routes[constants.RouteAgentFactory],
 		iFIL,
 		routes[constants.RouteWFIL],
 		infpool,
-		simpleRamp,
 		adoAddr,
 		adoNamespace,
 		dialAddr,
@@ -232,12 +221,10 @@ func New(
 		protoMeta.AgentPolice,
 		protoMeta.MinerRegistry,
 		protoMeta.Router,
-		protoMeta.PoolRegistry,
 		protoMeta.AgentFactory,
 		protoMeta.IFIL,
 		protoMeta.WFIL,
 		protoMeta.InfinityPool,
-		protoMeta.SimpleRamp,
 		extern.AdoAddr,
 		namespace,
 		extern.LotusDialAddr,
@@ -280,12 +267,10 @@ func Init(
 		agentPolice,
 		minerRegistry,
 		router,
-		poolRegistry,
 		agentFactory,
 		iFIL,
 		wFIL,
 		infinityPool,
-		simpleRamp,
 		adoAddr,
 		adoNamespace,
 		dialAddr,

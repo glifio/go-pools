@@ -9,46 +9,6 @@ import (
 	"github.com/glifio/go-pools/constants"
 )
 
-func (q *fevmQueries) DefaultEpoch(ctx context.Context) (*big.Int, error) {
-	client, err := q.extern.ConnectEthClient()
-	if err != nil {
-		return nil, err
-	}
-	defer client.Close()
-
-	policeCaller, err := abigen.NewAgentPoliceCaller(q.agentPolice, client)
-	if err != nil {
-		return nil, err
-	}
-
-	defaultWindow, err := policeCaller.DefaultWindow(&bind.CallOpts{Context: ctx})
-	if err != nil {
-		return nil, err
-	}
-
-	chainHeadHeight, err := q.ChainHeight(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	return chainHeadHeight.Sub(chainHeadHeight, defaultWindow), nil
-}
-
-func (q *fevmQueries) MaxConsecutiveFaultEpochs(ctx context.Context) (*big.Int, error) {
-	client, err := q.extern.ConnectEthClient()
-	if err != nil {
-		return nil, err
-	}
-	defer client.Close()
-
-	policeCaller, err := abigen.NewAgentPoliceCaller(q.agentPolice, client)
-	if err != nil {
-		return nil, err
-	}
-
-	return policeCaller.MaxConsecutiveFaultEpochs(&bind.CallOpts{Context: ctx})
-}
-
 func (q *fevmQueries) CredentialValidityPeriod(ctx context.Context) (*big.Int, *big.Int, error) {
 	epochIssued, err := q.ChainHeight(ctx)
 	if err != nil {
@@ -59,19 +19,19 @@ func (q *fevmQueries) CredentialValidityPeriod(ctx context.Context) (*big.Int, *
 	return epochIssued, epochValidUntil, nil
 }
 
-func (q *fevmQueries) CredentialUsed(ctx context.Context, v uint8, r [32]byte, s [32]byte, blockNumber *big.Int) (bool, error) {
+func (q *fevmQueries) CredentialUsedEpoch(ctx context.Context, vc abigen.VerifiableCredential, blockNumber *big.Int) (*big.Int, error) {
 	client, err := q.extern.ConnectEthClient()
 	if err != nil {
-		return false, err
+		return nil, err
 	}
 	defer client.Close()
 
-	policeCaller, err := abigen.NewAgentPoliceCaller(q.agentPolice, client)
+	policeCaller, err := abigen.NewAgentPoliceV2Caller(q.agentPolice, client)
 	if err != nil {
-		return false, err
+		return nil, err
 	}
 
-	return policeCaller.CredentialUsed(&bind.CallOpts{Context: ctx, BlockNumber: blockNumber}, v, r, s)
+	return policeCaller.CredentialUsed(&bind.CallOpts{Context: ctx, BlockNumber: blockNumber}, vc)
 }
 
 func (q *fevmQueries) SectorFaultyTolerance(ctx context.Context) (*big.Int, error) {
@@ -81,7 +41,7 @@ func (q *fevmQueries) SectorFaultyTolerance(ctx context.Context) (*big.Int, erro
 	}
 	defer client.Close()
 
-	policeCaller, err := abigen.NewAgentPoliceCaller(q.agentPolice, client)
+	policeCaller, err := abigen.NewAgentPoliceV2Caller(q.agentPolice, client)
 	if err != nil {
 		return nil, err
 	}

@@ -9,7 +9,6 @@ import (
 	"github.com/glifio/go-pools/abigen"
 	"github.com/glifio/go-pools/constants"
 	"github.com/glifio/go-pools/util"
-	"github.com/glifio/go-pools/vc"
 )
 
 func (q *fevmQueries) InfPoolGetAccount(ctx context.Context, agentAddr common.Address, blockNumber *big.Int) (abigen.Account, error) {
@@ -23,27 +22,17 @@ func (q *fevmQueries) InfPoolGetAgentLvl(ctx context.Context, agentID *big.Int) 
 	}
 	defer client.Close()
 
-	infpool, err := abigen.NewInfinityPoolCaller(q.infinityPool, client)
+	police, err := abigen.NewAgentPoliceV2Caller(q.infinityPool, client)
 	if err != nil {
 		return nil, 0, err
 	}
 
-	rateModuleAddr, err := infpool.RateModule(nil)
+	lvl, err := police.AccountLevel(nil, agentID)
 	if err != nil {
 		return nil, 0, err
 	}
 
-	rateModule, err := abigen.NewRateModuleCaller(rateModuleAddr, client)
-	if err != nil {
-		return nil, 0, err
-	}
-
-	lvl, err := rateModule.AccountLevel(nil, agentID)
-	if err != nil {
-		return nil, 0, err
-	}
-
-	cap, err := rateModule.Levels(nil, lvl)
+	cap, err := police.Levels(nil, lvl)
 	if err != nil {
 		return nil, 0, err
 	}
@@ -60,12 +49,12 @@ func (q *fevmQueries) InfPoolGetRate(ctx context.Context, cred abigen.Verifiable
 	}
 	defer ethClient.Close()
 
-	infCaller, err := abigen.NewInfinityPoolCaller(q.infinityPool, ethClient)
+	infCaller, err := abigen.NewInfinityPoolV2Caller(q.infinityPool, ethClient)
 	if err != nil {
 		return nil, err
 	}
 
-	rate, err := infCaller.GetRate(&bind.CallOpts{Context: ctx}, cred)
+	rate, err := infCaller.GetRate(&bind.CallOpts{Context: ctx})
 	if err != nil {
 		return nil, err
 	}
@@ -80,7 +69,7 @@ func (q *fevmQueries) InfPoolTotalAssets(ctx context.Context, blockNumber *big.I
 	}
 	defer client.Close()
 
-	poolCaller, err := abigen.NewInfinityPoolCaller(q.infinityPool, client)
+	poolCaller, err := abigen.NewInfinityPoolV2Caller(q.infinityPool, client)
 	if err != nil {
 		return nil, err
 	}
@@ -100,7 +89,7 @@ func (q *fevmQueries) InfPoolBorrowableLiquidity(ctx context.Context, blockNumbe
 	}
 	defer client.Close()
 
-	poolCaller, err := abigen.NewInfinityPoolCaller(q.infinityPool, client)
+	poolCaller, err := abigen.NewInfinityPoolV2Caller(q.infinityPool, client)
 	if err != nil {
 		return nil, err
 	}
@@ -120,7 +109,7 @@ func (q *fevmQueries) InfPoolTotalBorrowed(ctx context.Context, blockNumber *big
 	}
 	defer client.Close()
 
-	poolCaller, err := abigen.NewInfinityPoolCaller(q.infinityPool, client)
+	poolCaller, err := abigen.NewInfinityPoolV2Caller(q.infinityPool, client)
 	if err != nil {
 		return nil, err
 	}
@@ -140,7 +129,7 @@ func (q *fevmQueries) InfPoolExitReserve(ctx context.Context, blockNumber *big.I
 	}
 	defer client.Close()
 
-	poolCaller, err := abigen.NewInfinityPoolCaller(q.infinityPool, client)
+	poolCaller, err := abigen.NewInfinityPoolV2Caller(q.infinityPool, client)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -162,65 +151,6 @@ func (q *fevmQueries) InfPoolExitReserve(ctx context.Context, blockNumber *big.I
 	return minLiquidity, minLiquidity, nil
 }
 
-func ComputeMaxDTICap(epochRate *big.Int, edr *big.Int, agentExistingPrincipal *big.Int, maxDTI *big.Int) *big.Int {
-	dailyRate := new(big.Int).Mul(epochRate, big.NewInt(constants.EpochsInDay))
-	maxBorrowDTICap := new(big.Int).Mul(edr, maxDTI)
-	// here we add a WAD in for precision, since dailyRate has an extra wad precision
-	maxBorrowDTICap.Mul(maxBorrowDTICap, constants.WAD)
-	maxBorrowDTICap.Div(maxBorrowDTICap, dailyRate)
-	maxBorrowDTICap.Sub(maxBorrowDTICap, agentExistingPrincipal)
-	return maxBorrowDTICap
-}
-
-func ComputeMaxDTECap(agentValue *big.Int, principal *big.Int) *big.Int {
-	if agentValue.Cmp(principal) == -1 {
-		return big.NewInt(0)
-	}
-	equity := new(big.Int).Sub(agentValue, principal)
-	maxValue := new(big.Int).Mul(equity, constants.MAX_DTE)
-	// div out wad math precision
-	maxValue.Div(maxValue, constants.WAD)
-
-	// handles DTE < 100%
-	if maxValue.Cmp(principal) == -1 {
-		return big.NewInt(0)
-	}
-
-	return new(big.Int).Sub(maxValue, principal)
-}
-
-// ComputeMaxLTVCap returns the max borrowable amount from the agent's liquidation value
-// maxBorrow = (-1*((LTV*(LV - P*RR)/(LTV * RR) - 1)) - P
-// you can also use equity instead of liquidation value to compute this:
-// maxBorrow = (-1*((LTV*(E*RR)/(LTV * RR) - 1)) - P
-// recovery rate % is expressed as wad math whole number - 1e18 is 100%, 9e17 is 90%, etc
-func ComputeMaxLTVCap(liquidationValue *big.Int, principal *big.Int, recoveryRate *big.Int) *big.Int {
-	// numerator computation
-	principalRecovery := new(big.Int).Mul(principal, recoveryRate)
-	// div out wad precision
-	principalRecovery.Div(principalRecovery, constants.WAD)
-	discountedLV := new(big.Int).Sub(liquidationValue, principalRecovery)
-	num := new(big.Int).Mul(discountedLV, constants.MAX_LTV)
-	num.Mul(num, big.NewInt(-1))
-
-	// denom computation
-	denom := new(big.Int).Mul(constants.MAX_LTV, recoveryRate)
-	// div out the wad math precision from the recovery rate
-	denom.Div(denom, constants.WAD)
-	// this is the subtract 1 operation from (LTV * RR)
-	denom.Sub(denom, big.NewInt(1e18))
-
-	maxBorrow := new(big.Int).Div(num, denom)
-
-	if maxBorrow.Cmp(principal) < 1 {
-		return big.NewInt(0)
-	}
-
-	// subtract out the existing principal to arrive at maxBorrow
-	maxBorrow.Sub(maxBorrow, principal)
-	return maxBorrow
-}
-
 func findMinCap(values []*big.Int) *big.Int {
 	min := new(big.Int).Set(values[0]) // Copy the first value
 
@@ -234,134 +164,6 @@ func findMinCap(values []*big.Int) *big.Int {
 	return min
 }
 
-func MaxBorrowFromAgentData(agentData *vc.AgentData, rate *big.Int, liquidationValue *big.Int, recoveryRate *big.Int) *big.Int {
-	caps := []*big.Int{
-		ComputeMaxDTICap(rate, agentData.ExpectedDailyRewards, agentData.Principal, constants.MAX_DTI),
-		ComputeMaxDTECap(agentData.AgentValue, agentData.Principal),
-		ComputeMaxLTVCap(liquidationValue, agentData.Principal, recoveryRate),
-	}
-
-	return findMinCap(caps)
-}
-
-func (q *fevmQueries) InfPoolAgentMaxBorrow(ctx context.Context, agentAddr common.Address, agentData *vc.AgentData) (*big.Int, error) {
-	client, err := q.extern.ConnectEthClient()
-	if err != nil {
-		return nil, err
-	}
-	defer client.Close()
-
-	agentID, err := q.AgentID(ctx, agentAddr)
-	if err != nil {
-		return nil, err
-	}
-
-	rateModule, err := q.RateModule()
-	if err != nil {
-		return nil, err
-	}
-
-	rateModuleCaller, err := abigen.NewRateModuleCaller(rateModule, client)
-	if err != nil {
-		return nil, err
-	}
-
-	nullCred, err := vc.NullishVerifiableCredential(*agentData)
-	if err != nil {
-		return nil, err
-	}
-
-	rate, err := q.InfPoolGetRate(ctx, *nullCred)
-	if err != nil {
-		return nil, err
-	}
-
-	agentLvl, err := rateModuleCaller.AccountLevel(nil, agentID)
-	if err != nil {
-		return nil, err
-	}
-
-	agentCap, err := rateModuleCaller.Levels(nil, agentLvl)
-	if err != nil {
-		return nil, err
-	}
-
-	ats, err := q.AgentPreviewTerminationQuick(ctx, agentAddr)
-	if err != nil {
-		return nil, err
-	}
-
-	maxAmtFromLvl := new(big.Int).Sub(agentCap, agentData.Principal)
-
-	caps := []*big.Int{
-		MaxBorrowFromAgentData(agentData, rate, ats.LiquidationValue(), ats.RecoveryRate()),
-		maxAmtFromLvl,
-	}
-
-	return findMinCap(caps), nil
-}
-
-func (q *fevmQueries) InfPoolRateFromGCRED(ctx context.Context, gcred *big.Int) (*big.Float, error) {
-	client, err := q.extern.ConnectEthClient()
-	if err != nil {
-		return nil, err
-	}
-	defer client.Close()
-
-	rateModule, err := q.RateModule()
-	if err != nil {
-		return nil, err
-	}
-
-	rateModuleCaller, err := abigen.NewRateModuleCaller(rateModule, client)
-	if err != nil {
-		return nil, err
-	}
-
-	agentDataWithGCRED := vc.AgentData{
-		AgentValue:                  common.Big0,
-		CollateralValue:             common.Big0,
-		ExpectedDailyFaultPenalties: common.Big0,
-		ExpectedDailyRewards:        common.Big0,
-		Gcred:                       gcred,
-		QaPower:                     common.Big0,
-		Principal:                   common.Big0,
-		FaultySectors:               common.Big0,
-		LiveSectors:                 common.Big0,
-		GreenScore:                  common.Big0,
-	}
-
-	nullishVC, err := vc.NullishVerifiableCredential(agentDataWithGCRED)
-	if err != nil {
-		return nil, err
-	}
-
-	perEpochRate, err := rateModuleCaller.GetRate(&bind.CallOpts{Context: ctx}, *nullishVC)
-	if err != nil {
-		return nil, err
-	}
-
-	// div out the precision wad from the annualized rate
-	perEpochRate.Div(perEpochRate, big.NewInt(1e18))
-
-	return util.ToFIL(perEpochRate), nil
-}
-
-func (q *fevmQueries) InfPoolMaxEpochsOwedTolerance(ctx context.Context, agentAddr common.Address) (*big.Int, error) {
-	client, err := q.extern.ConnectEthClient()
-	if err != nil {
-		return nil, err
-	}
-	defer client.Close()
-
-	poolCaller, err := abigen.NewInfinityPoolCaller(q.infinityPool, client)
-	if err != nil {
-		return nil, err
-	}
-
-	return poolCaller.MaxEpochsOwedTolerance(nil)
-}
-
 func (q *fevmQueries) InfPoolFeesAccrued(ctx context.Context, blockNumber *big.Int) (*big.Int, error) {
 	client, err := q.extern.ConnectEthClient()
 	if err != nil {
@@ -369,12 +171,12 @@ func (q *fevmQueries) InfPoolFeesAccrued(ctx context.Context, blockNumber *big.I
 	}
 	defer client.Close()
 
-	poolCaller, err := abigen.NewInfinityPoolCaller(q.infinityPool, client)
+	poolCaller, err := abigen.NewInfinityPoolV2Caller(q.infinityPool, client)
 	if err != nil {
 		return nil, err
 	}
 
-	return poolCaller.FeesCollected(&bind.CallOpts{Context: ctx, BlockNumber: blockNumber})
+	return poolCaller.TreasuryFeesOwed(&bind.CallOpts{Context: ctx, BlockNumber: blockNumber})
 }
 
 func (q *fevmQueries) InfPoolApy(ctx context.Context, blockNumber *big.Int) (*big.Int, error) {
@@ -384,35 +186,12 @@ func (q *fevmQueries) InfPoolApy(ctx context.Context, blockNumber *big.Int) (*bi
 	}
 	defer client.Close()
 
-	rateModule, err := q.RateModule()
+	poolCaller, err := abigen.NewInfinityPoolV2Caller(q.infinityPool, client)
 	if err != nil {
 		return nil, err
 	}
 
-	rateModuleCaller, err := abigen.NewRateModuleCaller(rateModule, client)
-	if err != nil {
-		return nil, err
-	}
-
-	agentDataWithGCRED := vc.AgentData{
-		AgentValue:                  common.Big0,
-		CollateralValue:             common.Big0,
-		ExpectedDailyFaultPenalties: common.Big0,
-		ExpectedDailyRewards:        common.Big0,
-		Gcred:                       big.NewInt(100),
-		QaPower:                     common.Big0,
-		Principal:                   common.Big0,
-		FaultySectors:               common.Big0,
-		LiveSectors:                 common.Big0,
-		GreenScore:                  common.Big0,
-	}
-
-	nullishVC, err := vc.NullishVerifiableCredential(agentDataWithGCRED)
-	if err != nil {
-		return nil, err
-	}
-
-	perEpochRate, err := rateModuleCaller.GetRate(&bind.CallOpts{Context: ctx}, *nullishVC)
+	perEpochRate, err := poolCaller.GetRate(&bind.CallOpts{Context: ctx})
 	if err != nil {
 		return nil, err
 	}
