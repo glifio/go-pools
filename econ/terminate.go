@@ -1,27 +1,86 @@
-package terminate
+package econ
 
 import (
 	"context"
 	"math"
 	"math/big"
 
+	"github.com/ethereum/go-ethereum/common"
 	"github.com/filecoin-project/go-address"
 	"github.com/filecoin-project/go-bitfield"
 	lotusapi "github.com/filecoin-project/lotus/api"
 	"github.com/filecoin-project/lotus/chain/types"
 	miner8 "github.com/filecoin-project/specs-actors/v8/actors/builtin/miner"
 
-	"github.com/glifio/go-pools/mstat"
+	poolstypes "github.com/glifio/go-pools/types"
 	"github.com/glifio/go-pools/util"
 	"golang.org/x/xerrors"
 )
 
 var MAX_SAMPLED_SECTORS = 1000
 
-func EstimateTerminationPenalty(ctx context.Context, api *lotusapi.FullNodeStruct, minerAddr address.Address, ts *types.TipSet) (*TerminateSectorResult, error) {
+func EstimateTerminationFeeAgent(ctx context.Context, agentAddr common.Address, psdk poolstypes.PoolsSDK, tsk *types.TipSet) (*AgentFi, error) {
+	agentFi := &AgentFi{}
+
+	lapi, closer, err := psdk.Extern().ConnectLotusClient()
+	if err != nil {
+		return nil, err
+	}
+	defer closer()
+
+	height := big.NewInt(int64(tsk.Height()) - 1)
+	agentAvail, err := psdk.Query().AgentLiquidAssets(ctx, agentAddr, height)
+	if err != nil {
+		return nil, err
+	}
+
+	agentFi.AvailableBalance = agentAvail
+
+	miners, err := psdk.Query().AgentMiners(ctx, agentAddr, height)
+	if err != nil {
+		return nil, err
+	}
+
+	minerCount := int64(len(miners))
+
+	tasks := make([]util.TaskFunc, minerCount)
+	for i := int64(0); i < minerCount; i++ {
+		minerAddr := miners[i]
+		tasks[i] = func() (interface{}, error) {
+			return EstimateTerminationFeeMiner(ctx, lapi, minerAddr, tsk)
+		}
+	}
+
+	results, err := util.Multiread(tasks)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, res := range results {
+		termResult := res.(*TerminateSectorResult)
+		agentFi.AvailableBalance = big.NewInt(0).Add(agentFi.AvailableBalance, termResult.AvailableBalance)
+		agentFi.LockedRewards = big.NewInt(0).Add(agentFi.LockedRewards, termResult.VestingFunds)
+		agentFi.InitialPledge = big.NewInt(0).Add(agentFi.InitialPledge, termResult.InitialPledge)
+		agentFi.FeeDebt = big.NewInt(0).Add(agentFi.FeeDebt, termResult.FeeDebt)
+		agentFi.TerminationFee = big.NewInt(0).Add(agentFi.TerminationFee, termResult.EstimatedTerminationFee)
+	}
+
+	return agentFi, nil
+}
+
+func EstimateTerminationFeeMiner(ctx context.Context, api *lotusapi.FullNodeStruct, minerAddr address.Address, ts *types.TipSet) (*TerminateSectorResult, error) {
 	sectors, err := AllSectors(ctx, api, minerAddr, ts)
 	if err != nil {
 		return nil, err
+	}
+
+	allSectors, err := api.StateMinerSectorCount(ctx, minerAddr, ts.Key())
+	if err != nil {
+		return nil, err
+	}
+
+	if allSectors.Live != uint64(len(sectors)) {
+		return nil, xerrors.Errorf("sector count mismatch: %d != %d", allSectors.Live, len(sectors))
 	}
 
 	sampled := SampleSectors(sectors, MAX_SAMPLED_SECTORS)
@@ -32,6 +91,9 @@ func EstimateTerminationPenalty(ctx context.Context, api *lotusapi.FullNodeStruc
 	if err != nil {
 		return nil, err
 	}
+
+	res.FaultySectors = allSectors.Faulty
+	res.LiveSectors = allSectors.Live
 
 	return res, nil
 }
@@ -91,21 +153,9 @@ func SampleSectors(sectors []uint64, max int) []uint64 {
 }
 
 func TerminateSectors(ctx context.Context, api *lotusapi.FullNodeStruct, minerAddr address.Address, sectors *bitfield.BitField, ts *types.TipSet) (*TerminateSectorResult, error) {
-	// create a new terminate sector result
-	result := TerminateSectorResult{
-		TotalBalance:               big.NewInt(0),
-		AvailableBalance:           big.NewInt(0),
-		InitialPledge:              big.NewInt(0),
-		VestingFunds:               big.NewInt(0),
-		InitialPledgeFromSample:    big.NewInt(0),
-		TerminationFeeFromSample:   big.NewInt(0),
-		AvgInitialPledgePerSector:  big.NewInt(0),
-		AvgTerminationFeePerPledge: big.NewInt(0),
-		EstimatedInitialPledge:     big.NewInt(0),
-		EstimatedTerminationFee:    big.NewInt(0),
-	}
+	result := TerminateSectorResult{}
 
-	actor, mstate, err := mstat.LoadMinerActor(ctx, api, minerAddr, ts)
+	actor, mstate, err := LoadMinerActor(ctx, api, minerAddr, ts)
 	if err != nil {
 		return nil, err
 	}
@@ -130,22 +180,21 @@ func TerminateSectors(ctx context.Context, api *lotusapi.FullNodeStruct, minerAd
 		return nil, err
 	}
 
-	// set the total number of live sectors
-	result.LiveSectors, err = mstate.NumLiveSectors()
-	if err != nil {
-		return nil, err
-	}
-
 	lf, err := mstate.LockedFunds()
 	if err != nil {
 		return nil, err
 	}
 
-	result.InitialPledge = lf.InitialPledgeRequirement.Int
-	result.VestingFunds = lf.VestingFunds.Int
 	result.TotalBalance = actor.Balance.Int
-	// the available balance is the total balance minus the initial pledge and vesting funds
 	result.AvailableBalance = big.NewInt(0).Sub(result.TotalBalance, big.NewInt(0).Add(result.InitialPledge, result.VestingFunds))
+	result.VestingFunds = lf.VestingFunds.Int
+	result.InitialPledge = lf.InitialPledgeRequirement.Int
+	// the available balance is the total balance minus the initial pledge and vesting funds
+	feeDebt, err := mstate.FeeDebt()
+	if err != nil {
+		return nil, err
+	}
+	result.FeeDebt = feeDebt.Int
 
 	// if no sectors found return empty result
 	if len(sectorInfos) == 0 {

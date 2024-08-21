@@ -1,47 +1,10 @@
 package econ
 
 import (
-	"fmt"
 	"math/big"
 
 	"github.com/glifio/go-pools/constants"
 )
-
-type BaseFi struct {
-	AvailableBalance *big.Int `json:"availableBalance"`
-	LockedRewards    *big.Int `json:"lockedRewards"`
-	InitialPledge    *big.Int `json:"initialPledge"`
-	FeeDebt          *big.Int `json:"feeDebt"`
-	TerminationFee   *big.Int `json:"terminationFee"`
-}
-
-type AgentFi struct {
-	BaseFi
-
-	Principal *big.Int `json:"principal"`
-}
-
-type BaseFiRet struct {
-	AvailableBalance     string `json:"availableBalance"`
-	LockedRewards        string `json:"lockedRewards"`
-	InitialPledge        string `json:"initialPledge"`
-	FeeDebt              string `json:"feeDebt"`
-	TerminationFee       string `json:"terminationFee"`
-	Balance              string `json:"balance"`
-	LiquidationValue     string `json:"liquidationValue"`
-	MaxBorrowAndSeal     string `json:"maxBorrowAndSeal"`
-	MaxBorrowAndWithdraw string `json:"maxBorrowAndWithdraw"`
-}
-
-type AgentFiRet struct {
-	BaseFiRet
-
-	Principal     string `json:"principal"`
-	BorrowLimit   string `json:"borrowLimit"`
-	WithdrawLimit string `json:"withdrawLimit"`
-	MarginCall    string `json:"marginCall"`
-	LeverageRatio string `json:"leverageRatio"`
-}
 
 func NewBaseFi(
 	availableBalance *big.Int,
@@ -56,6 +19,41 @@ func NewBaseFi(
 		InitialPledge:    initialPledge,
 		FeeDebt:          feeDebt,
 		TerminationFee:   terminationFee,
+	}
+}
+
+func NewAgentFi(
+	agentAvailableBalance *big.Int,
+	principal *big.Int,
+	minerFis []*BaseFi,
+) *AgentFi {
+	// loop through all the BaseFi and create 1 consolidated BaseFi
+	availableBalance := big.NewInt(0)
+	lockedRewards := big.NewInt(0)
+	initialPledge := big.NewInt(0)
+	feeDebt := big.NewInt(0)
+	terminationFee := big.NewInt(0)
+
+	for _, minerFi := range minerFis {
+		availableBalance.Add(availableBalance, minerFi.AvailableBalance)
+		lockedRewards.Add(lockedRewards, minerFi.LockedRewards)
+		initialPledge.Add(initialPledge, minerFi.InitialPledge)
+		feeDebt.Add(feeDebt, minerFi.FeeDebt)
+		terminationFee.Add(terminationFee, minerFi.TerminationFee)
+	}
+
+	// add the agent's available balance
+	availableBalance.Add(availableBalance, agentAvailableBalance)
+
+	return &AgentFi{
+		BaseFi: BaseFi{
+			AvailableBalance: availableBalance,
+			LockedRewards:    lockedRewards,
+			InitialPledge:    initialPledge,
+			FeeDebt:          feeDebt,
+			TerminationFee:   terminationFee,
+		},
+		Principal: principal,
 	}
 }
 
@@ -130,29 +128,4 @@ func (afi *AgentFi) LeverageRatio() float64 {
 	).Float64()
 
 	return leverageRatio
-}
-
-func (bfi *BaseFi) String() *BaseFiRet {
-	return &BaseFiRet{
-		AvailableBalance:     bfi.AvailableBalance.String(),
-		LockedRewards:        bfi.LockedRewards.String(),
-		InitialPledge:        bfi.InitialPledge.String(),
-		FeeDebt:              bfi.FeeDebt.String(),
-		TerminationFee:       bfi.TerminationFee.String(),
-		MaxBorrowAndSeal:     bfi.MaxBorrowAndSeal().String(),
-		MaxBorrowAndWithdraw: bfi.MaxBorrowAndWithdraw().String(),
-		Balance:              bfi.Balance().String(),
-		LiquidationValue:     bfi.LiquidationValue().String(),
-	}
-}
-
-func (afi *AgentFi) String() *AgentFiRet {
-	return &AgentFiRet{
-		BaseFiRet:     *afi.BaseFi.String(),
-		Principal:     afi.Principal.String(),
-		BorrowLimit:   afi.BorrowLimit().String(),
-		WithdrawLimit: afi.WithdrawLimit().String(),
-		MarginCall:    afi.MarginCall().String(),
-		LeverageRatio: fmt.Sprintf("%0.02f", afi.LeverageRatio()),
-	}
 }
