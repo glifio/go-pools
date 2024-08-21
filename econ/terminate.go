@@ -19,7 +19,13 @@ import (
 
 var MAX_SAMPLED_SECTORS = 1000
 
-func EstimateTerminationFeeAgent(ctx context.Context, agentAddr common.Address, psdk poolstypes.PoolsSDK, tsk *types.TipSet) (*AgentFi, error) {
+func EstimateTerminationFeeAgent(
+	ctx context.Context,
+	agentAddr common.Address,
+	withoutMiner address.Address,
+	psdk poolstypes.PoolsSDK,
+	tsk *types.TipSet,
+) (*AgentFi, error) {
 	agentFi := &AgentFi{}
 
 	lapi, closer, err := psdk.Extern().ConnectLotusClient()
@@ -39,6 +45,16 @@ func EstimateTerminationFeeAgent(ctx context.Context, agentAddr common.Address, 
 	miners, err := psdk.Query().AgentMiners(ctx, agentAddr, height)
 	if err != nil {
 		return nil, err
+	}
+
+	// remove any miner that is supplised as the withoutMiner
+	if withoutMiner != address.Undef {
+		for i, miner := range miners {
+			if miner == withoutMiner {
+				miners = append(miners[:i], miners[i+1:]...)
+				break
+			}
+		}
 	}
 
 	minerCount := int64(len(miners))
@@ -155,7 +171,7 @@ func SampleSectors(sectors []uint64, max int) []uint64 {
 func TerminateSectors(ctx context.Context, api *lotusapi.FullNodeStruct, minerAddr address.Address, sectors *bitfield.BitField, ts *types.TipSet) (*TerminateSectorResult, error) {
 	result := TerminateSectorResult{}
 
-	actor, mstate, err := LoadMinerActor(ctx, api, minerAddr, ts)
+	actor, mstate, err := util.LoadMinerActor(ctx, api, minerAddr, ts)
 	if err != nil {
 		return nil, err
 	}

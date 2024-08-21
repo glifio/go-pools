@@ -1,4 +1,4 @@
-package econ
+package util
 
 import (
 	"context"

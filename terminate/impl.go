@@ -17,7 +17,6 @@ import (
 	lotusapi "github.com/filecoin-project/lotus/api"
 	"github.com/filecoin-project/lotus/chain/types"
 	miner8 "github.com/filecoin-project/specs-actors/v8/actors/builtin/miner"
-	"github.com/glifio/go-pools/econ"
 	"github.com/glifio/go-pools/util"
 	cbor "github.com/ipfs/go-ipld-cbor"
 	"golang.org/x/xerrors"
@@ -194,7 +193,7 @@ func terminateSectors(
 			return nil, err
 		}
 
-		_, minerState, err := econ.LoadMinerActor(ctx, api, minerAddr, ts)
+		_, minerState, err := util.LoadMinerActor(ctx, api, minerAddr, ts)
 		if err != nil {
 			return nil, err
 		}
