@@ -15,14 +15,17 @@ import (
 var ErrInsufficientAgentBalance = errors.New("insufficient agent balance to process transaction")
 
 // TODO https://github.com/glif-confidential/ado/issues/9
+// note that this function is supposed to implement a post action credential
+// in some cases, it's incomplete
+// example 1 - pay - if the amount should reduce principal, principal in the credential is not updated - V2 pools does not use principal in the cred anyways
+// example 2 - add miner - there are no cred checks on adding miner
 func ComputeAgentData(
 	ctx context.Context,
 	sdk poolstypes.PoolsSDK,
 	// the change (+/-) in the agent's balance
 	agentBalDelta *big.Int,
 	principal *big.Int,
-	// if this is an add miner transaction, this will be the address of the miner being added
-	addMiner address.Address,
+	// if this is a remove miner transaction, this will be the address of the miner to remove
 	rmMiner address.Address,
 	agentAddr common.Address,
 	tsk *types.TipSet,
@@ -31,7 +34,7 @@ func ComputeAgentData(
 
 	/* ~~~~~ CollateralValue ~~~~~ */
 
-	agentFi, err := EstimateTerminationFeeAgent(ctx, agentAddr, sdk, tsk)
+	agentFi, err := EstimateTerminationFeeAgent(ctx, agentAddr, rmMiner, sdk, tsk)
 	if err != nil {
 		return nil, err
 	}
@@ -41,6 +44,8 @@ func ComputeAgentData(
 	if (agentBalDelta.Sign() < 0) && (agentFi.AvailableBalance.CmpAbs(agentBalDelta) < 0) {
 		return nil, ErrInsufficientAgentBalance
 	}
+	// add any delta to the agent's available balance (namely withdraw, borrow)
+	agentFi.AvailableBalance.Add(agentFi.AvailableBalance, agentBalDelta)
 
 	data.CollateralValue = agentFi.LiquidationValue()
 
