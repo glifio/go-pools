@@ -224,7 +224,7 @@ func New(
 	}
 
 	var namespace = "Mock"
-	if chainID.Int64() == constants.MainnetChainID {
+	if chainID.Int64() == constants.MainnetChainID || chainID.Int64() == constants.CalibnetChainID {
 		namespace = "ADO"
 	}
 
