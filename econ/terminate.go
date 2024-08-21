@@ -174,7 +174,25 @@ func SampleSectors(sectors []uint64, max int) []uint64 {
 }
 
 func TerminateSectors(ctx context.Context, api *lotusapi.FullNodeStruct, minerAddr address.Address, sectors *bitfield.BitField, ts *types.TipSet) (*TerminateSectorResult, error) {
-	result := TerminateSectorResult{}
+	result := TerminateSectorResult{
+		TotalBalance:     big.NewInt(0),
+		AvailableBalance: big.NewInt(0),
+		VestingFunds:     big.NewInt(0),
+		InitialPledge:    big.NewInt(0),
+		FeeDebt:          big.NewInt(0),
+
+		EstimatedInitialPledge:    big.NewInt(0),
+		InitialPledgeFromSample:   big.NewInt(0),
+		AvgInitialPledgePerSector: big.NewInt(0),
+
+		EstimatedTerminationFee:    big.NewInt(0),
+		TerminationFeeFromSample:   big.NewInt(0),
+		AvgTerminationFeePerPledge: big.NewInt(0),
+
+		SampledSectors: 0,
+		LiveSectors:    0,
+		FaultySectors:  0,
+	}
 
 	actor, mstate, err := util.LoadMinerActor(ctx, api, minerAddr, ts)
 	if err != nil {
@@ -201,21 +219,33 @@ func TerminateSectors(ctx context.Context, api *lotusapi.FullNodeStruct, minerAd
 		return nil, err
 	}
 
+	sectorCount, err := api.StateMinerSectorCount(context.Background(), minerAddr, ts.Key())
+	if err != nil {
+		return nil, err
+	}
+	result.LiveSectors = sectorCount.Live
+	result.FaultySectors = sectorCount.Faulty
+
 	lf, err := mstate.LockedFunds()
 	if err != nil {
 		return nil, err
 	}
 
-	result.TotalBalance = actor.Balance.Int
-	result.AvailableBalance = big.NewInt(0).Sub(result.TotalBalance, big.NewInt(0).Add(result.InitialPledge, result.VestingFunds))
 	result.VestingFunds = lf.VestingFunds.Int
 	result.InitialPledge = lf.InitialPledgeRequirement.Int
-	// the available balance is the total balance minus the initial pledge and vesting funds
 	feeDebt, err := mstate.FeeDebt()
 	if err != nil {
 		return nil, err
 	}
 	result.FeeDebt = feeDebt.Int
+
+	// the available balance is the total balance minus the initial pledge and vesting funds
+	availableBal := big.NewInt(0).Sub(actor.Balance.Int, big.NewInt(0).Add(result.InitialPledge, result.VestingFunds))
+	// total bal incorporates fee debt, can be negative
+	totalBal := big.NewInt(0).Sub(availableBal, feeDebt.Int)
+
+	result.TotalBalance = totalBal
+	result.AvailableBalance = availableBal
 
 	// if no sectors found return empty result
 	if len(sectorInfos) == 0 {

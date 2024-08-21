@@ -116,6 +116,44 @@ func TestTerminationOffChainFullMiner(t *testing.T) {
 	}
 }
 
+func TestFeeDebt(t *testing.T) {
+	lapi, closer := util.SetupSuite(t)
+	defer util.TeardownSuite(closer)
+
+	ts, err := lapi.ChainGetTipSetByHeight(context.Background(), 4198539, types.EmptyTSK)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	minerAddr, err := address.NewFromString("f01836766")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	res, err := EstimateTerminationFeeMiner(context.Background(), lapi, minerAddr, ts)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	expectedTermFee := big.NewInt(0)
+	expectedFeeDebt, _ := new(big.Int).SetString("43697948992036495293", 10)
+	expectedAvailBal := big.NewInt(0)
+	expectedTotalBal := new(big.Int).Sub(expectedAvailBal, expectedFeeDebt)
+
+	if expectedTermFee.Cmp(res.EstimatedTerminationFee) != 0 {
+		t.Fatalf("Expected term fee: %v, actual fee: %v", expectedTermFee, res.EstimatedTerminationFee)
+	}
+	if expectedFeeDebt.Cmp(res.FeeDebt) != 0 {
+		t.Fatalf("Expected fee debt: %v, actual fee debt: %v", expectedFeeDebt, res.FeeDebt)
+	}
+	if expectedAvailBal.Cmp(res.AvailableBalance) != 0 {
+		t.Fatalf("Expected available balance: %v, actual available balance: %v", expectedAvailBal, res.AvailableBalance)
+	}
+	if expectedTotalBal.Cmp(res.TotalBalance) != 0 {
+		t.Fatalf("Expected total balance: %v, actual total balance: %v", expectedTotalBal, res.TotalBalance)
+	}
+}
+
 func TestTerminationPrecisionFromOffChain(t *testing.T) {
 	lapi, closer := util.SetupSuite(t)
 	defer util.TeardownSuite(closer)
@@ -138,14 +176,11 @@ func TestTerminationPrecisionFromOffChain(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	// test if the penalty is within 3% of the expected value
-	expectedPenalty := big.NewInt(9397221857395692)
-	if !util.AssertApproxEqAbs(res.TerminationFeeFromSample, expectedPenalty, big.NewInt(3e1)) {
-		t.Fatalf("Expected penalty: %v, actual penalty: %v", expectedPenalty, res.TerminationFeeFromSample)
-	} else {
-		t.Logf("Expected penalty: %v, actual penalty: %v", expectedPenalty, res.TerminationFeeFromSample)
+	expectedTermFee := big.NewInt(9397221857395692)
+	termFeeDiff := util.Diff(expectedTermFee, res.TerminationFeeFromSample)
+	if termFeeDiff.Cmp(DIFF) == 1 {
+		t.Fatalf("Expected term fee: %v, actual fee: %v", util.ToFIL(expectedTermFee), util.ToFIL(res.EstimatedTerminationFee))
 	}
-
 }
 
 func TestTerminationPrecision(t *testing.T) {
