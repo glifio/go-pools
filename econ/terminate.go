@@ -47,13 +47,18 @@ func EstimateTerminationFeeAgent(
 		return nil, err
 	}
 
-	// remove any miner that is supplised as the withoutMiner
+	// remove any miner that is supplied as the withoutMiner
 	if withoutMiner != address.Undef {
+		minerCount := len(miners)
 		for i, miner := range miners {
 			if miner == withoutMiner {
 				miners = append(miners[:i], miners[i+1:]...)
 				break
 			}
+		}
+		// check that we actually removed a miner
+		if minerCount == len(miners) {
+			return nil, xerrors.Errorf("miner %s not found in agent's miners", withoutMiner)
 		}
 	}
 

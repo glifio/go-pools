@@ -12,8 +12,6 @@ import (
 	"github.com/glifio/go-pools/vc"
 )
 
-var ErrInsufficientAgentBalance = errors.New("insufficient agent balance to process transaction")
-
 // TODO https://github.com/glif-confidential/ado/issues/9
 // note that this function is supposed to implement a post action credential
 // in some cases, it's incomplete
@@ -21,13 +19,13 @@ var ErrInsufficientAgentBalance = errors.New("insufficient agent balance to proc
 // example 2 - add miner - there are no cred checks on adding miner
 func ComputeAgentData(
 	ctx context.Context,
-	sdk poolstypes.PoolsSDK,
+	agentAddr common.Address,
 	// the change (+/-) in the agent's balance
 	agentBalDelta *big.Int,
 	principal *big.Int,
 	// if this is a remove miner transaction, this will be the address of the miner to remove
 	rmMiner address.Address,
-	agentAddr common.Address,
+	sdk poolstypes.PoolsSDK,
 	tsk *types.TipSet,
 ) (*vc.AgentData, error) {
 	data := &vc.AgentData{}
@@ -42,7 +40,7 @@ func ComputeAgentData(
 	// negative number means agent balance is being removed (withdraw, pay)
 	// check to ensure that subtracting the agentBalDelta from the agent's available balance doesn't result in a negative number
 	if (agentBalDelta.Sign() < 0) && (agentFi.AvailableBalance.CmpAbs(agentBalDelta) < 0) {
-		return nil, ErrInsufficientAgentBalance
+		return nil, errors.New("insufficient agent balance to process transaction")
 	}
 	// add any delta to the agent's available balance (namely withdraw, borrow)
 	agentFi.AvailableBalance.Add(agentFi.AvailableBalance, agentBalDelta)
