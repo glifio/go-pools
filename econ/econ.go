@@ -20,7 +20,7 @@ import (
 func ComputeAgentData(
 	ctx context.Context,
 	agentAddr common.Address,
-	// the change (+/-) in the agent's balance
+	// the change (+/-) in the agent's balance, can be negative
 	agentBalDelta *big.Int,
 	principal *big.Int,
 	// if this is a remove miner transaction, this will be the address of the miner to remove
@@ -54,10 +54,9 @@ func ComputeAgentData(
 	if (agentBalDelta.Sign() < 0) && (agentFi.AvailableBalance.CmpAbs(agentBalDelta) < 0) {
 		return nil, errors.New("insufficient agent balance to process transaction")
 	}
-	// add any delta to the agent's available balance (namely withdraw, borrow)
-	agentFi.AvailableBalance.Add(agentFi.AvailableBalance, agentBalDelta)
 
-	data.CollateralValue = agentFi.LiquidationValue()
+	// add any delta (can be negative) to the agent's collateral value (namely withdraw, borrow)
+	data.CollateralValue = new(big.Int).Add(agentFi.LiquidationValue(), agentBalDelta)
 
 	/* ~~~~~ Principal ~~~~~ */
 
