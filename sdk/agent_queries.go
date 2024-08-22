@@ -2,22 +2,14 @@ package sdk
 
 import (
 	"context"
-	"log"
 	"math/big"
 
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/filecoin-project/go-address"
-	"github.com/filecoin-project/go-state-types/abi"
-	filtypes "github.com/filecoin-project/lotus/chain/types"
-	ltypes "github.com/filecoin-project/lotus/chain/types"
 	"github.com/glifio/go-pools/abigen"
 	"github.com/glifio/go-pools/constants"
-	"github.com/glifio/go-pools/econ"
-	"github.com/glifio/go-pools/terminate"
-	"github.com/glifio/go-pools/util"
-	"github.com/glifio/go-pools/vc"
 )
 
 func (q *fevmQueries) AgentID(ctx context.Context, address common.Address) (*big.Int, error) {
@@ -170,6 +162,9 @@ func (q *fevmQueries) AgentMiners(
 		}
 
 		minerAddr, err := address.NewIDAddress(miner)
+		if err != nil {
+			return nil, err
+		}
 
 		miners = append(miners, minerAddr)
 	}
@@ -208,31 +203,12 @@ func (q *fevmQueries) AgentPrincipal(ctx context.Context, agentAddr common.Addre
 		return nil, err
 	}
 
-	poolRegistryCaller, err := abigen.NewPoolRegistryCaller(q.poolRegistry, ethClient)
+	poolCaller, err := abigen.NewInfinityPoolV2(q.infinityPool, ethClient)
 	if err != nil {
 		return nil, err
 	}
 
-	poolIDs, err := poolRegistryCaller.PoolIDs(&bind.CallOpts{Context: ctx, BlockNumber: blockNumber}, agentID)
-	if err != nil {
-		return nil, err
-	}
-
-	routerCaller, err := abigen.NewRouterCaller(q.router, ethClient)
-	if err != nil {
-		return nil, err
-	}
-
-	principal := big.NewInt(0)
-	for _, poolID := range poolIDs {
-		account, err := routerCaller.GetAccount(&bind.CallOpts{Context: ctx, BlockNumber: blockNumber}, agentID, poolID)
-		if err != nil {
-			return nil, err
-		}
-		principal.Add(principal, account.Principal)
-	}
-
-	return principal, nil
+	return poolCaller.GetAgentBorrowed(&bind.CallOpts{Context: ctx, BlockNumber: blockNumber}, agentID)
 }
 
 func (q *fevmQueries) AgentAccount(ctx context.Context, agentAddr common.Address, poolID *big.Int, blockNumber *big.Int) (abigen.Account, error) {
@@ -293,36 +269,42 @@ func (q *fevmQueries) AgentAddrIDFromRcpt(ctx context.Context, receipt *types.Re
 	return agentAddr, agentID, nil
 }
 
-func (q *fevmQueries) AgentInterestOwed(ctx context.Context, agentAddr common.Address, tsk *filtypes.TipSet) (*big.Int, error) {
-	account, err := q.AgentAccount(ctx, agentAddr, constants.INFINITY_POOL_ID, nil)
+func (q *fevmQueries) AgentInterestOwed(ctx context.Context, agentAddr common.Address, blockNumber *big.Int) (*big.Int, error) {
+	ethClient, err := q.extern.ConnectEthClient()
 	if err != nil {
-		log.Printf("Error getting agent account: %v", err)
 		return nil, err
 	}
 
-	nullishVC, err := vc.NullishVerifiableCredential(*vc.EmptyAgentData())
+	pool, err := abigen.NewInfinityPoolV2Caller(q.infinityPool, ethClient)
 	if err != nil {
-		log.Printf("Error getting nullish VC: %v", err)
 		return nil, err
 	}
 
-	rate, err := q.InfPoolGetRate(ctx, *nullishVC)
+	id, err := q.AgentID(ctx, agentAddr)
 	if err != nil {
-		log.Printf("Error getting rate: %v", err)
 		return nil, err
 	}
 
-	if tsk == nil {
-		tsk, err = q.ChainHead(ctx)
-		if err != nil {
-			log.Printf("Error getting chain head: %v", err)
-			return nil, err
-		}
+	return pool.GetAgentInterestOwed(&bind.CallOpts{Context: ctx, BlockNumber: blockNumber}, id)
+}
+
+func (q *fevmQueries) AgentDebt(ctx context.Context, agentAddr common.Address, blockNumber *big.Int) (*big.Int, error) {
+	ethClient, err := q.extern.ConnectEthClient()
+	if err != nil {
+		return nil, err
 	}
 
-	owed := econ.InterestOwed(ctx, account, rate, tsk.Height())
+	pool, err := abigen.NewInfinityPoolV2Caller(q.infinityPool, ethClient)
+	if err != nil {
+		return nil, err
+	}
 
-	return owed, nil
+	id, err := q.AgentID(ctx, agentAddr)
+	if err != nil {
+		return nil, err
+	}
+
+	return pool.GetAgentDebt(&bind.CallOpts{Context: ctx, BlockNumber: blockNumber}, id)
 }
 
 func (q *fevmQueries) AgentFaultyEpochStart(ctx context.Context, agentAddr common.Address) (*big.Int, error) {
@@ -373,103 +355,4 @@ func (q *fevmQueries) AgentVersion(ctx context.Context, agentAddr common.Address
 	}
 
 	return agentVersion, deployerVersion, nil
-}
-
-func (q *fevmQueries) AgentCollateralStatsQuick(ctx context.Context, agentAddr common.Address) (*terminate.AgentCollateralStats, error) {
-	agentID, err := q.AgentID(ctx, agentAddr)
-	if err != nil {
-		return nil, err
-	}
-
-	return terminate.FetchAgentCollateralStats(ctx, agentID)
-}
-
-// this uses the "quick" method of computing the termination penalty, which relies on the indexing server
-func (q *fevmQueries) AgentPreviewTerminationQuick(ctx context.Context, agentAddr common.Address) (terminate.PreviewAgentTerminationSummary, error) {
-	agentID, err := q.AgentID(ctx, agentAddr)
-	if err != nil {
-		return terminate.PreviewAgentTerminationSummary{}, err
-	}
-
-	// this call makes a call to the indexing server
-	agentCollateralStats, err := terminate.FetchAgentCollateralStats(ctx, agentID)
-	if err != nil {
-		return terminate.PreviewAgentTerminationSummary{}, err
-	}
-
-	return agentCollateralStats.Summarize(), nil
-}
-
-// PreviewAgentTermination preview terminating all the
-// sectors on all the miners for an agent (using sampling and "off-chain"
-// calculation) and will return the liquidation value of the agent.
-func (q *fevmQueries) AgentPreviewTerminationPrecise(ctx context.Context, agentAddr common.Address, tipset *ltypes.TipSet) (terminate.PreviewAgentTerminationSummary, error) {
-	lapi, closer, err := q.extern.ConnectLotusClient()
-	if err != nil {
-		return terminate.PreviewAgentTerminationSummary{}, err
-	}
-	defer closer()
-
-	// if no tipset is found, we use 3 epochs behind chainhead (so we dont get epoch syncronization errors)
-	if tipset == nil {
-		ch, err := lapi.ChainHead(ctx)
-		if err != nil {
-			return terminate.PreviewAgentTerminationSummary{}, err
-		}
-
-		tipset, err = lapi.ChainGetTipSetByHeight(context.Background(), abi.ChainEpoch(ch.Height()-constants.ChainHeadLookbackEpochs), ltypes.EmptyTSK)
-		if err != nil {
-			return terminate.PreviewAgentTerminationSummary{}, err
-		}
-	}
-
-	bigHeight := big.NewInt(int64(tipset.Height()))
-
-	miners, err := q.AgentMiners(ctx, agentAddr, bigHeight)
-	if err != nil {
-		return terminate.PreviewAgentTerminationSummary{}, err
-	}
-
-	minerCount := int64(len(miners))
-
-	tasks := make([]util.TaskFunc, minerCount)
-	for i := int64(0); i < minerCount; i++ {
-		minerAddr := miners[i]
-		tasks[i] = func() (interface{}, error) {
-			return terminate.EstimateTerminationPenalty(context.Background(), lapi, minerAddr, tipset)
-		}
-	}
-
-	results, err := util.Multiread(tasks)
-	if err != nil {
-		return terminate.PreviewAgentTerminationSummary{}, err
-	}
-
-	terminationPenaltyAgg := big.NewInt(0)
-	initialPledgeAgg := big.NewInt(0)
-	vestingBalanceAgg := big.NewInt(0)
-	availableBalanceAgg := big.NewInt(0)
-
-	for _, terminationStats := range results {
-		terminationStat := terminationStats.(*terminate.TerminateSectorResult)
-		// add the miners termination penalty to the aggregate
-		terminationPenaltyAgg = new(big.Int).Add(terminationPenaltyAgg, terminationStat.EstimatedTerminationFee)
-		// add the miners bals to their aggregate counterpart
-		initialPledgeAgg = new(big.Int).Add(initialPledgeAgg, terminationStat.InitialPledge)
-		vestingBalanceAgg = new(big.Int).Add(vestingBalanceAgg, terminationStat.VestingFunds)
-		availableBalanceAgg = new(big.Int).Add(availableBalanceAgg, terminationStat.AvailableBalance)
-	}
-
-	agentLiquidFIL, err := q.AgentLiquidAssets(ctx, agentAddr, bigHeight)
-	if err != nil {
-		return terminate.PreviewAgentTerminationSummary{}, err
-	}
-
-	return terminate.PreviewAgentTerminationSummary{
-		TerminationPenalty: terminationPenaltyAgg,
-		InitialPledge:      initialPledgeAgg,
-		VestingBalance:     vestingBalanceAgg,
-		MinersAvailableBal: availableBalanceAgg,
-		AgentAvailableBal:  agentLiquidFIL,
-	}, nil
 }

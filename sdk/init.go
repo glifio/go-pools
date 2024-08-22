@@ -19,12 +19,10 @@ func InitFEVMConnection(
 	agentPolice common.Address,
 	minerRegistry common.Address,
 	router common.Address,
-	poolRegistry common.Address,
 	agentFactory common.Address,
 	iFIL common.Address,
 	wFIL common.Address,
 	infinityPool common.Address,
-	simpleRamp common.Address,
 	adoAddr string,
 	adoNamespace string,
 	dialAddr string,
@@ -43,9 +41,7 @@ func InitFEVMConnection(
 		iFIL:          iFIL,
 		wFIL:          wFIL,
 		infinityPool:  infinityPool,
-		simpleRamp:    simpleRamp,
 		agentFactory:  agentFactory,
-		poolRegistry:  poolRegistry,
 		minerRegistry: minerRegistry,
 		agentPolice:   agentPolice,
 		chainID:       chainID,
@@ -140,6 +136,7 @@ func LazyInit(
 		constants.RoutePoolRegistry,
 		constants.RouteMinerRegistry,
 		constants.RouteWFIL,
+		constants.RouteInfinityPool,
 	}
 
 	routes, err := getRoutes(ctx, fetchRoutes, routerCaller)
@@ -147,18 +144,9 @@ func LazyInit(
 		return err
 	}
 
-	poolRegCaller, err := abigen.NewPoolRegistryCaller(routes[constants.RoutePoolRegistry], client)
-	if err != nil {
-		return err
-	}
+	infpool := routes[constants.RouteInfinityPool]
 
-	// infpool is poolID 0
-	infpool, err := poolRegCaller.AllPools(&bind.CallOpts{Context: ctx}, big.NewInt(0))
-	if err != nil {
-		return err
-	}
-
-	infpoolCaller, err := abigen.NewInfinityPoolCaller(infpool, client)
+	infpoolCaller, err := abigen.NewInfinityPoolV2Caller(infpool, client)
 	if err != nil {
 		return err
 	}
@@ -168,21 +156,14 @@ func LazyInit(
 		return err
 	}
 
-	simpleRamp, err := infpoolCaller.Ramp(&bind.CallOpts{Context: ctx})
-	if err != nil {
-		return err
-	}
-
 	*sdk = InitFEVMConnection(
 		routes[constants.RouteAgentPolice],
 		routes[constants.RouteMinerRegistry],
 		router,
-		routes[constants.RoutePoolRegistry],
 		routes[constants.RouteAgentFactory],
 		iFIL,
 		routes[constants.RouteWFIL],
 		infpool,
-		simpleRamp,
 		adoAddr,
 		adoNamespace,
 		dialAddr,
@@ -223,23 +204,16 @@ func New(
 		return nil, fmt.Errorf("chain id mismatch: %d != %d", protoMeta.ChainID, chainID)
 	}
 
-	var namespace = "Mock"
-	if chainID.Int64() == constants.MainnetChainID {
-		namespace = "ADO"
-	}
-
 	sdk = InitFEVMConnection(
 		protoMeta.AgentPolice,
 		protoMeta.MinerRegistry,
 		protoMeta.Router,
-		protoMeta.PoolRegistry,
 		protoMeta.AgentFactory,
 		protoMeta.IFIL,
 		protoMeta.WFIL,
 		protoMeta.InfinityPool,
-		protoMeta.SimpleRamp,
 		extern.AdoAddr,
-		namespace,
+		"ADO",
 		extern.LotusDialAddr,
 		extern.LotusToken,
 		chainID,
@@ -280,12 +254,10 @@ func Init(
 		agentPolice,
 		minerRegistry,
 		router,
-		poolRegistry,
 		agentFactory,
 		iFIL,
 		wFIL,
 		infinityPool,
-		simpleRamp,
 		adoAddr,
 		adoNamespace,
 		dialAddr,

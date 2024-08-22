@@ -6,6 +6,7 @@ import (
 	"math/big"
 
 	"github.com/filecoin-project/go-state-types/builtin/v14/miner"
+	"github.com/glifio/go-pools/util"
 	"golang.org/x/xerrors"
 
 	"github.com/filecoin-project/go-address"
@@ -13,7 +14,6 @@ import (
 	"github.com/filecoin-project/go-state-types/abi"
 	lotusapi "github.com/filecoin-project/lotus/api"
 	"github.com/filecoin-project/lotus/chain/types"
-	"github.com/glifio/go-pools/mstat"
 )
 
 // PreviewTerminateSector will preview the cost of terminating a single sector
@@ -38,7 +38,7 @@ func PreviewTerminateSector(
 	}
 
 	// Lookup actor balance
-	mactor, mstate, err := mstat.LoadMinerActor(ctx, api, minerAddr, ts)
+	mactor, mstate, err := util.LoadMinerActor(ctx, api, minerAddr, ts)
 	if err != nil {
 		return nil, nil, 0, err
 	}
@@ -125,7 +125,7 @@ func PreviewTerminateSectors(
 	}
 
 	// Lookup actor balance
-	actor, mstate, err := mstat.LoadMinerActor(ctx, api, minerAddr, ts)
+	actor, mstate, err := util.LoadMinerActor(ctx, api, minerAddr, ts)
 
 	// Lookup current owner / worker
 	minerInfo, err := mstate.Info()

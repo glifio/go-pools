@@ -2,9 +2,11 @@ package util
 
 import (
 	"context"
+	"fmt"
 	"math/big"
 	"net/http"
 	"os"
+	"reflect"
 	"testing"
 
 	"github.com/filecoin-project/go-jsonrpc"
@@ -73,4 +75,15 @@ func AssertApproxEqRel(a, b, DIFF *big.Int) bool {
 
 	// Check if the calculated percentage difference is within the specified range
 	return percentageDiff.Cmp(DIFF) <= 0
+}
+
+func PrintStructKeysAndValues(s interface{}) {
+	v := reflect.ValueOf(s)
+	t := v.Type()
+
+	for i := 0; i < v.NumField(); i++ {
+		fieldName := t.Field(i).Name
+		fieldValue := v.Field(i).Interface()
+		fmt.Printf("%s: %v\n", fieldName, fieldValue)
+	}
 }

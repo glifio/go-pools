@@ -118,23 +118,11 @@ func gatherABIS() ([]*abi.ABI, error) {
 	}
 	abis = append(abis, agentFactoryAbi)
 
-	agentPoliceAbi, err := abigen.AgentPoliceMetaData.GetAbi()
-	if err != nil {
-		return nil, nil
-	}
-	abis = append(abis, agentPoliceAbi)
-
 	credParserAbi, err := abigen.CredParserMetaData.GetAbi()
 	if err != nil {
 		return nil, nil
 	}
 	abis = append(abis, credParserAbi)
-
-	infPoolAbi, err := abigen.InfinityPoolMetaData.GetAbi()
-	if err != nil {
-		return nil, nil
-	}
-	abis = append(abis, infPoolAbi)
 
 	minerRegistryAbi, err := abigen.MinerRegistryMetaData.GetAbi()
 	if err != nil {
@@ -142,23 +130,11 @@ func gatherABIS() ([]*abi.ABI, error) {
 	}
 	abis = append(abis, minerRegistryAbi)
 
-	poolRegistryAbi, err := abigen.PoolRegistryMetaData.GetAbi()
-	if err != nil {
-		return nil, nil
-	}
-	abis = append(abis, poolRegistryAbi)
-
 	poolTokenAbi, err := abigen.PoolTokenMetaData.GetAbi()
 	if err != nil {
 		return nil, nil
 	}
 	abis = append(abis, poolTokenAbi)
-
-	rateModuleAbi, err := abigen.RateModuleMetaData.GetAbi()
-	if err != nil {
-		return nil, nil
-	}
-	abis = append(abis, rateModuleAbi)
 
 	routerAbi, err := abigen.RouterMetaData.GetAbi()
 	if err != nil {
@@ -171,6 +147,18 @@ func gatherABIS() ([]*abi.ABI, error) {
 		return nil, nil
 	}
 	abis = append(abis, wrappedFILAbi)
+
+	poolV2Abi, err := abigen.InfinityPoolV2MetaData.GetAbi()
+	if err != nil {
+		return nil, nil
+	}
+	abis = append(abis, poolV2Abi)
+
+	policeV2Abi, err := abigen.AgentPoliceV2MetaData.GetAbi()
+	if err != nil {
+		return nil, nil
+	}
+	abis = append(abis, policeV2Abi)
 
 	return abis, nil
 }
