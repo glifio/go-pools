@@ -53,6 +53,7 @@ var (
 	RouteVCIssuer      Route = "ROUTER_VC_ISSUER"
 	RouteCredParser    Route = "ROUTER_CRED_PARSER"
 	RouteAgentDeployer Route = "ROUTER_AGENT_DEPLOYER"
+	RouteInfinityPool  Route = "ROUTER_INFINITY_POOL"
 )
 
 var dialAddr = "https://api.node.glif.io/rpc/v1"

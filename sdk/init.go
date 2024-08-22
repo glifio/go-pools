@@ -136,6 +136,7 @@ func LazyInit(
 		constants.RoutePoolRegistry,
 		constants.RouteMinerRegistry,
 		constants.RouteWFIL,
+		constants.RouteInfinityPool,
 	}
 
 	routes, err := getRoutes(ctx, fetchRoutes, routerCaller)
@@ -143,16 +144,7 @@ func LazyInit(
 		return err
 	}
 
-	poolRegCaller, err := abigen.NewPoolRegistryCaller(routes[constants.RoutePoolRegistry], client)
-	if err != nil {
-		return err
-	}
-
-	// infpool is poolID 0
-	infpool, err := poolRegCaller.AllPools(&bind.CallOpts{Context: ctx}, big.NewInt(0))
-	if err != nil {
-		return err
-	}
+	infpool := routes[constants.RouteInfinityPool]
 
 	infpoolCaller, err := abigen.NewInfinityPoolV2Caller(infpool, client)
 	if err != nil {

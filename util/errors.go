@@ -130,12 +130,6 @@ func gatherABIS() ([]*abi.ABI, error) {
 	}
 	abis = append(abis, minerRegistryAbi)
 
-	poolRegistryAbi, err := abigen.PoolRegistryMetaData.GetAbi()
-	if err != nil {
-		return nil, nil
-	}
-	abis = append(abis, poolRegistryAbi)
-
 	poolTokenAbi, err := abigen.PoolTokenMetaData.GetAbi()
 	if err != nil {
 		return nil, nil

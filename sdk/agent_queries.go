@@ -203,31 +203,12 @@ func (q *fevmQueries) AgentPrincipal(ctx context.Context, agentAddr common.Addre
 		return nil, err
 	}
 
-	poolRegistryCaller, err := abigen.NewPoolRegistryCaller(q.poolRegistry, ethClient)
+	poolCaller, err := abigen.NewInfinityPoolV2(q.infinityPool, ethClient)
 	if err != nil {
 		return nil, err
 	}
 
-	poolIDs, err := poolRegistryCaller.PoolIDs(&bind.CallOpts{Context: ctx, BlockNumber: blockNumber}, agentID)
-	if err != nil {
-		return nil, err
-	}
-
-	routerCaller, err := abigen.NewRouterCaller(q.router, ethClient)
-	if err != nil {
-		return nil, err
-	}
-
-	principal := big.NewInt(0)
-	for _, poolID := range poolIDs {
-		account, err := routerCaller.GetAccount(&bind.CallOpts{Context: ctx, BlockNumber: blockNumber}, agentID, poolID)
-		if err != nil {
-			return nil, err
-		}
-		principal.Add(principal, account.Principal)
-	}
-
-	return principal, nil
+	return poolCaller.GetAgentBorrowed(&bind.CallOpts{Context: ctx, BlockNumber: blockNumber}, agentID)
 }
 
 func (q *fevmQueries) AgentAccount(ctx context.Context, agentAddr common.Address, poolID *big.Int, blockNumber *big.Int) (abigen.Account, error) {

@@ -400,7 +400,7 @@ var baseFiTests = []struct {
 			InitialPledge:    bigFromStr("174806889795421914477165"),
 			FeeDebt:          big.NewInt(0),
 			TerminationFee:   bigFromStr("19439988058419303079504"),
-			LiveSectors:      big.NewInt(0),
+			LiveSectors:      big.NewInt(89417),
 			FaultySectors:    big.NewInt(0),
 		},
 		maxBorrowAndSeal:     bigFromStr("492527766798191726655114"),

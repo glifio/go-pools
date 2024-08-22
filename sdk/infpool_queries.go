@@ -231,3 +231,18 @@ func (q *fevmQueries) InfPoolApy(ctx context.Context, blockNumber *big.Int) (*bi
 
 	return curApy, nil
 }
+
+func (q *fevmQueries) TreasuryFeeRate(ctx context.Context, blockNumber *big.Int) (*big.Int, error) {
+	client, err := q.extern.ConnectEthClient()
+	if err != nil {
+		return nil, err
+	}
+	defer client.Close()
+
+	poolCaller, err := abigen.NewInfinityPoolV2Caller(q.infinityPool, client)
+	if err != nil {
+		return nil, err
+	}
+
+	return poolCaller.TreasuryFeeRate(&bind.CallOpts{Context: ctx, BlockNumber: blockNumber})
+}
