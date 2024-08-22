@@ -39,8 +39,7 @@ type FEVMQueries interface {
 	// agent factory methods
 	AgentFactoryAgentCount(ctx context.Context, blockNumber *big.Int) (*big.Int, error)
 	// infinity pool methods
-	InfPoolGetRate(ctx context.Context, cred abigen.VerifiableCredential) (*big.Int, error)
-	InfPoolRateFromGCRED(ctx context.Context, gcred *big.Int) (*big.Float, error)
+	InfPoolGetRate(ctx context.Context) (*big.Int, error)
 	InfPoolGetAgentLvl(ctx context.Context, agentID *big.Int) (*big.Int, float64, error)
 	InfPoolGetAccount(ctx context.Context, agentAddr common.Address, blockNumber *big.Int) (abigen.Account, error)
 	InfPoolBorrowableLiquidity(ctx context.Context, blockNumber *big.Int) (*big.Float, error)

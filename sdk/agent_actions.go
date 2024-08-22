@@ -276,7 +276,7 @@ func (a *fevmActions) AgentPullFunds(ctx context.Context, auth *bind.TransactOpt
 	}
 
 	if !registered {
-		return nil, errors.New("Miner not registered with agent. Be sure to call `agent add-miner` first before pulling funds.")
+		return nil, errors.New("miner not registered with agent. Be sure to call `agent add-miner` first before pulling funds")
 	}
 
 	closer, err := a.extern.ConnectAdoClient(ctx)
@@ -334,7 +334,7 @@ func (a *fevmActions) AgentPushFunds(ctx context.Context, auth *bind.TransactOpt
 	}
 
 	if !registered {
-		return nil, errors.New("Miner not registered with agent. Be sure to call `agent add-miner` first before pushing funds.")
+		return nil, errors.New("miner not registered with agent. Be sure to call `agent add-miner` first before pushing funds")
 	}
 
 	closer, err := a.extern.ConnectAdoClient(ctx)

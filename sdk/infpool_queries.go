@@ -42,7 +42,7 @@ func (q *fevmQueries) InfPoolGetAgentLvl(ctx context.Context, agentID *big.Int) 
 	return lvl, capInFIL, nil
 }
 
-func (q *fevmQueries) InfPoolGetRate(ctx context.Context, cred abigen.VerifiableCredential) (*big.Int, error) {
+func (q *fevmQueries) InfPoolGetRate(ctx context.Context) (*big.Int, error) {
 	ethClient, err := q.extern.ConnectEthClient()
 	if err != nil {
 		return nil, err
@@ -149,19 +149,6 @@ func (q *fevmQueries) InfPoolExitReserve(ctx context.Context, blockNumber *big.I
 	}
 
 	return minLiquidity, minLiquidity, nil
-}
-
-func findMinCap(values []*big.Int) *big.Int {
-	min := new(big.Int).Set(values[0]) // Copy the first value
-
-	for _, value := range values {
-		// If value is smaller than min, replace min
-		if value.Cmp(min) == -1 {
-			min = value
-		}
-	}
-
-	return min
 }
 
 func (q *fevmQueries) InfPoolFeesAccrued(ctx context.Context, blockNumber *big.Int) (*big.Int, error) {
