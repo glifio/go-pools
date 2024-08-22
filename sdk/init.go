@@ -204,11 +204,6 @@ func New(
 		return nil, fmt.Errorf("chain id mismatch: %d != %d", protoMeta.ChainID, chainID)
 	}
 
-	var namespace = "Mock"
-	if chainID.Int64() == constants.MainnetChainID {
-		namespace = "ADO"
-	}
-
 	sdk = InitFEVMConnection(
 		protoMeta.AgentPolice,
 		protoMeta.MinerRegistry,
@@ -218,7 +213,7 @@ func New(
 		protoMeta.WFIL,
 		protoMeta.InfinityPool,
 		extern.AdoAddr,
-		namespace,
+		"ADO",
 		extern.LotusDialAddr,
 		extern.LotusToken,
 		chainID,
