@@ -136,12 +136,6 @@ func gatherABIS() ([]*abi.ABI, error) {
 	}
 	abis = append(abis, poolTokenAbi)
 
-	rateModuleAbi, err := abigen.RateModuleMetaData.GetAbi()
-	if err != nil {
-		return nil, nil
-	}
-	abis = append(abis, rateModuleAbi)
-
 	routerAbi, err := abigen.RouterMetaData.GetAbi()
 	if err != nil {
 		return nil, nil
