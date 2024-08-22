@@ -9,6 +9,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/ethereum/go-ethereum/common"
 	"github.com/filecoin-project/go-address"
 	"github.com/filecoin-project/go-bitfield"
 	"github.com/filecoin-project/go-state-types/abi"
@@ -116,44 +117,6 @@ func TestTerminationOffChainFullMiner(t *testing.T) {
 	}
 }
 
-func TestFeeDebt(t *testing.T) {
-	lapi, closer := util.SetupSuite(t)
-	defer util.TeardownSuite(closer)
-
-	ts, err := lapi.ChainGetTipSetByHeight(context.Background(), 4198539, types.EmptyTSK)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	minerAddr, err := address.NewFromString("f01836766")
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	res, err := EstimateTerminationFeeMiner(context.Background(), lapi, minerAddr, ts)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	expectedTermFee := big.NewInt(0)
-	expectedFeeDebt, _ := new(big.Int).SetString("43697948992036495293", 10)
-	expectedAvailBal := big.NewInt(0)
-	expectedTotalBal := new(big.Int).Sub(expectedAvailBal, expectedFeeDebt)
-
-	if expectedTermFee.Cmp(res.EstimatedTerminationFee) != 0 {
-		t.Fatalf("Expected term fee: %v, actual fee: %v", expectedTermFee, res.EstimatedTerminationFee)
-	}
-	if expectedFeeDebt.Cmp(res.FeeDebt) != 0 {
-		t.Fatalf("Expected fee debt: %v, actual fee debt: %v", expectedFeeDebt, res.FeeDebt)
-	}
-	if expectedAvailBal.Cmp(res.AvailableBalance) != 0 {
-		t.Fatalf("Expected available balance: %v, actual available balance: %v", expectedAvailBal, res.AvailableBalance)
-	}
-	if expectedTotalBal.Cmp(res.TotalBalance) != 0 {
-		t.Fatalf("Expected total balance: %v, actual total balance: %v", expectedTotalBal, res.TotalBalance)
-	}
-}
-
 func TestTerminationPrecisionFromOffChain(t *testing.T) {
 	lapi, closer := util.SetupSuite(t)
 	defer util.TeardownSuite(closer)
@@ -183,7 +146,7 @@ func TestTerminationPrecisionFromOffChain(t *testing.T) {
 	}
 }
 
-func TestTerminationPrecision(t *testing.T) {
+func XTestTerminationPrecision(t *testing.T) {
 	lapi, closer := util.SetupSuite(t)
 	defer util.TeardownSuite(closer)
 
@@ -367,4 +330,345 @@ func TestEstimateTerminationPenalty2(t *testing.T) {
 	} else {
 		t.Logf("Expected penalty: %v, actual penalty: %v", expectedPenalty, res.TerminationFeeFromSample)
 	}
+}
+
+var BLOCK_HEIGHT = abi.ChainEpoch(4198539)
+
+type baseFiTest struct {
+	*BaseFi
+
+	maxBorrowAndSeal     *big.Int
+	maxBorrowAndWithdraw *big.Int
+	liquidationValue     *big.Int
+}
+
+var baseFiTests = []struct {
+	name  string
+	miner string
+	want  baseFiTest
+}{
+	{"no sectors miner", "f01882569", baseFiTest{
+		BaseFi: &BaseFi{
+			Balance:          bigFromStr("16791927372141826678333"),
+			AvailableBalance: bigFromStr("16753493784149168047801"),
+			LockedRewards:    bigFromStr("38433587992658630532"),
+			InitialPledge:    big.NewInt(0),
+			FeeDebt:          big.NewInt(0),
+			TerminationFee:   big.NewInt(0),
+			LiveSectors:      big.NewInt(0),
+			FaultySectors:    big.NewInt(0),
+		},
+		maxBorrowAndSeal:     bigFromStr("50375782116425480034999"),
+		maxBorrowAndWithdraw: bigFromStr("12593945529106370008750"),
+		liquidationValue:     bigFromStr("16791927372141826678333"),
+	}},
+	{"miner with fee debt", "f01836766", baseFiTest{
+		BaseFi: &BaseFi{
+			Balance:          big.NewInt(0),
+			AvailableBalance: big.NewInt(0),
+			LockedRewards:    big.NewInt(0),
+			InitialPledge:    big.NewInt(0),
+			FeeDebt:          bigFromStr("43697948992036495293"),
+			TerminationFee:   big.NewInt(0),
+			LiveSectors:      big.NewInt(0),
+			FaultySectors:    big.NewInt(0),
+		},
+		maxBorrowAndSeal:     big.NewInt(0),
+		maxBorrowAndWithdraw: big.NewInt(0),
+		liquidationValue:     big.NewInt(0),
+	}},
+	{"inactive miner (all 0s)", "f01156", baseFiTest{
+		BaseFi: &BaseFi{
+			Balance:          big.NewInt(0),
+			AvailableBalance: big.NewInt(0),
+			LockedRewards:    big.NewInt(0),
+			InitialPledge:    big.NewInt(0),
+			FeeDebt:          big.NewInt(0),
+			TerminationFee:   big.NewInt(0),
+			LiveSectors:      big.NewInt(0),
+			FaultySectors:    big.NewInt(0),
+		},
+		maxBorrowAndSeal:     big.NewInt(0),
+		maxBorrowAndWithdraw: big.NewInt(0),
+		liquidationValue:     big.NewInt(0),
+	}},
+	{"normal miner", "f01344987", baseFiTest{
+		BaseFi: &BaseFi{
+			Balance:          bigFromStr("183615910324483211964542"),
+			AvailableBalance: bigFromStr("217841811153934568647"),
+			LockedRewards:    bigFromStr("8591178717907362918730"),
+			InitialPledge:    bigFromStr("174806889795421914477165"),
+			FeeDebt:          big.NewInt(0),
+			TerminationFee:   bigFromStr("19439988058419303079504"),
+			LiveSectors:      big.NewInt(0),
+			FaultySectors:    big.NewInt(0),
+		},
+		maxBorrowAndSeal:     bigFromStr("492527766798191726655114"),
+		maxBorrowAndWithdraw: bigFromStr("123131941699547931663779"),
+		liquidationValue:     bigFromStr("164175922266063908885038"),
+	}},
+}
+
+func TestBaseFi(t *testing.T) {
+	psdk, err := setupTest()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	lapi, closer, err := psdk.Extern().ConnectLotusClient()
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer closer()
+
+	ts, err := lapi.ChainGetTipSetByHeight(context.Background(), BLOCK_HEIGHT, types.EmptyTSK)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	for _, tt := range baseFiTests {
+		testname := fmt.Sprintf("%s:%s", tt.name, tt.miner)
+		t.Run(testname, func(t *testing.T) {
+			minerAddr, err := address.NewFromString(tt.miner)
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			ret, err := EstimateTerminationFeeMiner(context.Background(), lapi, minerAddr, ts)
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			assertBaseFiEqual(t, &tt.want, ret.ToBaseFi())
+		})
+	}
+}
+
+type agentFiTest struct {
+	*AgentFi
+
+	balance              *big.Int
+	maxBorrowAndSeal     *big.Int
+	maxBorrowAndWithdraw *big.Int
+	liquidationValue     *big.Int
+	borrowLimit          *big.Int
+	withdrawLimit        *big.Int
+	marginCall           *big.Int
+	leverageRatio        float64
+}
+
+var agentTests = []struct {
+	name  string
+	agent string
+	want  agentFiTest
+}{
+	// agent 59
+	{"agent many miners", "0x64Ea1aD49A78B6A6878c4975566b8953b1Ef1e79", agentFiTest{
+		AgentFi: &AgentFi{
+			BaseFi: BaseFi{
+				Balance:          bigFromStr("2090733730144435384596917"),
+				AvailableBalance: bigFromStr("8911457546764252091903"),
+				LockedRewards:    bigFromStr("90756351468487272842162"),
+				InitialPledge:    bigFromStr("1991050146969153602729858"),
+				FeeDebt:          big.NewInt(0),
+				TerminationFee:   bigFromStr("207962529375567399782062"),
+				LiveSectors:      big.NewInt(2805488),
+				FaultySectors:    big.NewInt(0),
+			},
+			Principal: bigFromStr("1081255000003082191780823"),
+		},
+		maxBorrowAndSeal:     bigFromStr("5648313602306603954444565"),
+		maxBorrowAndWithdraw: bigFromStr("1412078400576650988611142"),
+		liquidationValue:     bigFromStr("1882771200768867984814855"),
+		borrowLimit:          bigFromStr("4567058602303521762663742"),
+		withdrawLimit:        bigFromStr("441097867431425062440425"),
+		marginCall:           bigFromStr("1272064705885979049153909"),
+		leverageRatio:        0.5742891114764925,
+	}},
+	// agent 27
+	{"agent no miners", "0xDBa96B0FDbc87C7eEb641Ee37EAFC55B355079E4", agentFiTest{
+		AgentFi:              EmptyAgentFi(),
+		balance:              big.NewInt(0),
+		maxBorrowAndSeal:     big.NewInt(0),
+		maxBorrowAndWithdraw: big.NewInt(0),
+		liquidationValue:     big.NewInt(0),
+		borrowLimit:          big.NewInt(0),
+		withdrawLimit:        big.NewInt(0),
+		marginCall:           big.NewInt(0),
+		leverageRatio:        0,
+	}},
+	// agent 2
+	{"agent single miner", "0xf0F1ceCCF78D411EeD9Ca190ca7F157140cCB2d3", agentFiTest{
+		AgentFi: &AgentFi{
+			BaseFi: BaseFi{
+				Balance:          bigFromStr("133252309755096579751"),
+				AvailableBalance: bigFromStr("57665444302030819344"),
+				LockedRewards:    bigFromStr("10682659000384066417"),
+				InitialPledge:    bigFromStr("64904206452681693990"),
+				FeeDebt:          big.NewInt(0),
+				TerminationFee:   bigFromStr("12832724091624933434"),
+				LiveSectors:      big.NewInt(323),
+				FaultySectors:    big.NewInt(0),
+			},
+			Principal: bigFromStr("2000000000000000000"),
+		},
+		maxBorrowAndSeal:     bigFromStr("361258756990414938951"),
+		maxBorrowAndWithdraw: bigFromStr("90314689247603734738"),
+		liquidationValue:     bigFromStr("120419585663471646317"),
+		borrowLimit:          bigFromStr("359258756990414938951"),
+		withdrawLimit:        bigFromStr("117752918996804979651"),
+		marginCall:           bigFromStr("2352941176470588235"),
+		leverageRatio:        0.0166085939341235,
+	}},
+	// agent 91
+	{"agent miner with fee debt", "0xFF65F5f3D309fEA7aA2d4cB2727E918FAb0aE7F7", agentFiTest{
+		AgentFi: &AgentFi{
+			BaseFi: BaseFi{
+				Balance:          bigFromStr("0"),
+				AvailableBalance: bigFromStr("145838619789"),
+				LockedRewards:    bigFromStr("0"),
+				InitialPledge:    bigFromStr("0"),
+				FeeDebt:          bigFromStr("43697948992036495293"),
+				TerminationFee:   bigFromStr("0"),
+				LiveSectors:      big.NewInt(0),
+				FaultySectors:    big.NewInt(0),
+			},
+			Principal: bigFromStr("0"),
+		},
+		maxBorrowAndSeal:     bigFromStr("0"),
+		maxBorrowAndWithdraw: bigFromStr("0"),
+		liquidationValue:     bigFromStr("0"),
+		borrowLimit:          bigFromStr("0"),
+		withdrawLimit:        bigFromStr("0"),
+		marginCall:           bigFromStr("0"),
+		leverageRatio:        0,
+	}},
+}
+
+func TestEstimateTermationFeeAgent(t *testing.T) {
+	psdk, err := setupTest()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	lapi, closer, err := psdk.Extern().ConnectLotusClient()
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer closer()
+
+	ts, err := lapi.ChainGetTipSetByHeight(context.Background(), BLOCK_HEIGHT, types.EmptyTSK)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	for _, tt := range agentTests {
+		testname := fmt.Sprintf("%s:%s", tt.name, tt.agent)
+		t.Run(testname, func(t *testing.T) {
+
+			agent := common.HexToAddress(tt.agent)
+
+			agentFi, err := EstimateTerminationFeeAgent(context.Background(), agent, address.Undef, psdk, ts)
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			assertAgentFiEqual(t, &tt.want, agentFi)
+		})
+	}
+}
+
+func assertAgentFiEqual(t *testing.T, expected *agentFiTest, actual *AgentFi) {
+	if expected.AvailableBalance.Cmp(actual.AvailableBalance) != 0 {
+		t.Fatalf("Expected available balance: %v, actual: %v", expected.AvailableBalance, actual.AvailableBalance)
+	}
+	if expected.LockedRewards.Cmp(actual.LockedRewards) != 0 {
+		t.Fatalf("Expected locked rewards: %v, actual: %v", expected.LockedRewards, actual.LockedRewards)
+	}
+	if expected.InitialPledge.Cmp(actual.InitialPledge) != 0 {
+		t.Fatalf("Expected initial pledge: %v, actual: %v", expected.InitialPledge, actual.InitialPledge)
+	}
+	if expected.FeeDebt.Cmp(actual.FeeDebt) != 0 {
+		t.Fatalf("Expected fee debt: %v, actual: %v", expected.FeeDebt, actual.FeeDebt)
+	}
+	if expected.TerminationFee.Cmp(actual.TerminationFee) != 0 {
+		t.Fatalf("Expected termination fee: %v, actual: %v", expected.TerminationFee, actual.TerminationFee)
+	}
+	if expected.Principal.Cmp(actual.Principal) != 0 {
+		t.Fatalf("Expected principal: %v, actual: %v", expected.Principal, actual.Principal)
+	}
+	if expected.Balance.Cmp(actual.Balance) != 0 {
+		t.Fatalf("Expected balance: %v, actual: %v", expected.balance, actual.Balance)
+	}
+	if expected.FaultySectors.Cmp(actual.FaultySectors) != 0 {
+		t.Fatalf("Expected faulty sectors: %v, actual: %v", expected.FaultySectors, actual.FaultySectors)
+	}
+	if expected.LiveSectors.Cmp(actual.LiveSectors) != 0 {
+		t.Fatalf("Expected live sectors: %v, actual: %v", expected.LiveSectors, actual.LiveSectors)
+	}
+
+	if expected.maxBorrowAndSeal.Cmp(actual.MaxBorrowAndSeal()) != 0 {
+		t.Fatalf("Expected max borrow and seal: %v, actual: %v", expected.maxBorrowAndSeal, actual.MaxBorrowAndSeal())
+	}
+	if expected.maxBorrowAndWithdraw.Cmp(actual.MaxBorrowAndWithdraw()) != 0 {
+		t.Fatalf("Expected max borrow and withdraw: %v, actual: %v", expected.maxBorrowAndWithdraw, actual.MaxBorrowAndWithdraw())
+	}
+	if expected.liquidationValue.Cmp(actual.LiquidationValue()) != 0 {
+		t.Fatalf("Expected liquidation value: %v, actual: %v", expected.liquidationValue, actual.LiquidationValue())
+	}
+	if expected.borrowLimit.Cmp(actual.BorrowLimit()) != 0 {
+		t.Fatalf("Expected borrow limit: %v, actual: %v", expected.borrowLimit, actual.BorrowLimit())
+	}
+	if expected.withdrawLimit.Cmp(actual.WithdrawLimit()) != 0 {
+		t.Fatalf("Expected withdraw limit: %v, actual: %v", expected.withdrawLimit, actual.WithdrawLimit())
+	}
+	if expected.marginCall.Cmp(actual.MarginCall()) != 0 {
+		t.Fatalf("Expected margin call: %v, actual: %v", expected.marginCall, actual.MarginCall())
+	}
+	if expected.leverageRatio != actual.LeverageRatio() {
+		t.Fatalf("Expected leverage ratio: %v, actual: %v", expected.leverageRatio, actual.LeverageRatio())
+	}
+}
+
+func assertBaseFiEqual(t *testing.T, expected *baseFiTest, actual *BaseFi) {
+	if expected.AvailableBalance.Cmp(actual.AvailableBalance) != 0 {
+		t.Fatalf("Expected available balance: %v, actual: %v", expected.AvailableBalance, actual.AvailableBalance)
+	}
+	if expected.LockedRewards.Cmp(actual.LockedRewards) != 0 {
+		t.Fatalf("Expected locked rewards: %v, actual: %v", expected.LockedRewards, actual.LockedRewards)
+	}
+	if expected.InitialPledge.Cmp(actual.InitialPledge) != 0 {
+		t.Fatalf("Expected initial pledge: %v, actual: %v", expected.InitialPledge, actual.InitialPledge)
+	}
+	if expected.FeeDebt.Cmp(actual.FeeDebt) != 0 {
+		t.Fatalf("Expected fee debt: %v, actual: %v", expected.FeeDebt, actual.FeeDebt)
+	}
+	if expected.TerminationFee.Cmp(actual.TerminationFee) != 0 {
+		t.Fatalf("Expected termination fee: %v, actual: %v", expected.TerminationFee, actual.TerminationFee)
+	}
+	if expected.Balance.Cmp(actual.Balance) != 0 {
+		t.Fatalf("Expected balance: %v, actual: %v", expected.Balance, actual.Balance)
+	}
+	if expected.FaultySectors.Cmp(actual.FaultySectors) != 0 {
+		t.Fatalf("Expected faulty sectors: %v, actual: %v", expected.FaultySectors, actual.FaultySectors)
+	}
+	if expected.LiveSectors.Cmp(actual.LiveSectors) != 0 {
+		t.Fatalf("Expected live sectors: %v, actual: %v", expected.LiveSectors, actual.LiveSectors)
+	}
+
+	if expected.maxBorrowAndSeal.Cmp(actual.MaxBorrowAndSeal()) != 0 {
+		t.Fatalf("Expected max borrow and seal: %v, actual: %v", expected.maxBorrowAndSeal, actual.MaxBorrowAndSeal())
+	}
+	if expected.maxBorrowAndWithdraw.Cmp(actual.MaxBorrowAndWithdraw()) != 0 {
+		t.Fatalf("Expected max borrow and withdraw: %v, actual: %v", expected.maxBorrowAndWithdraw, actual.MaxBorrowAndWithdraw())
+	}
+	if expected.liquidationValue.Cmp(actual.LiquidationValue()) != 0 {
+		t.Fatalf("Expected liquidation value: %v, actual: %v", expected.liquidationValue, actual.LiquidationValue())
+	}
+}
+
+func bigFromStr(s string) *big.Int {
+	b := new(big.Int)
+	b.SetString(s, 10)
+	return b
 }

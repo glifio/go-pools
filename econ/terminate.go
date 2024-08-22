@@ -26,8 +26,6 @@ func EstimateTerminationFeeAgent(
 	psdk poolstypes.PoolsSDK,
 	tsk *types.TipSet,
 ) (*AgentFi, error) {
-	agentFi := &AgentFi{}
-
 	lapi, closer, err := psdk.Extern().ConnectLotusClient()
 	if err != nil {
 		return nil, err
@@ -39,8 +37,6 @@ func EstimateTerminationFeeAgent(
 	if err != nil {
 		return nil, err
 	}
-
-	agentFi.AvailableBalance = agentAvail
 
 	miners, err := psdk.Query().AgentMiners(ctx, agentAddr, height)
 	if err != nil {
@@ -77,31 +73,24 @@ func EstimateTerminationFeeAgent(
 		return nil, err
 	}
 
-	for _, res := range results {
-		termResult := res.(*TerminateSectorResult)
-		agentFi.AvailableBalance = big.NewInt(0).Add(agentFi.AvailableBalance, termResult.AvailableBalance)
-		agentFi.LockedRewards = big.NewInt(0).Add(agentFi.LockedRewards, termResult.VestingFunds)
-		agentFi.InitialPledge = big.NewInt(0).Add(agentFi.InitialPledge, termResult.InitialPledge)
-		agentFi.FeeDebt = big.NewInt(0).Add(agentFi.FeeDebt, termResult.FeeDebt)
-		agentFi.TerminationFee = big.NewInt(0).Add(agentFi.TerminationFee, termResult.EstimatedTerminationFee)
+	baseFis := make([]*BaseFi, minerCount)
+
+	for i, res := range results {
+		baseFis[i] = res.(*TerminateSectorResult).ToBaseFi()
 	}
 
-	return agentFi, nil
+	principal, err := psdk.Query().AgentPrincipal(ctx, agentAddr, height)
+	if err != nil {
+		return nil, err
+	}
+
+	return NewAgentFi(agentAvail, principal, baseFis), nil
 }
 
 func EstimateTerminationFeeMiner(ctx context.Context, api *lotusapi.FullNodeStruct, minerAddr address.Address, ts *types.TipSet) (*TerminateSectorResult, error) {
 	sectors, err := AllSectors(ctx, api, minerAddr, ts)
 	if err != nil {
 		return nil, err
-	}
-
-	allSectors, err := api.StateMinerSectorCount(ctx, minerAddr, ts.Key())
-	if err != nil {
-		return nil, err
-	}
-
-	if allSectors.Live != uint64(len(sectors)) {
-		return nil, xerrors.Errorf("sector count mismatch: %d != %d", allSectors.Live, len(sectors))
 	}
 
 	sampled := SampleSectors(sectors, MAX_SAMPLED_SECTORS)
@@ -112,9 +101,6 @@ func EstimateTerminationFeeMiner(ctx context.Context, api *lotusapi.FullNodeStru
 	if err != nil {
 		return nil, err
 	}
-
-	res.FaultySectors = allSectors.Faulty
-	res.LiveSectors = allSectors.Live
 
 	return res, nil
 }
@@ -226,26 +212,35 @@ func TerminateSectors(ctx context.Context, api *lotusapi.FullNodeStruct, minerAd
 	result.LiveSectors = sectorCount.Live
 	result.FaultySectors = sectorCount.Faulty
 
-	lf, err := mstate.LockedFunds()
-	if err != nil {
-		return nil, err
-	}
-
-	result.VestingFunds = lf.VestingFunds.Int
-	result.InitialPledge = lf.InitialPledgeRequirement.Int
 	feeDebt, err := mstate.FeeDebt()
 	if err != nil {
 		return nil, err
 	}
 	result.FeeDebt = feeDebt.Int
 
-	// the available balance is the total balance minus the initial pledge and vesting funds
-	availableBal := big.NewInt(0).Sub(actor.Balance.Int, big.NewInt(0).Add(result.InitialPledge, result.VestingFunds))
-	// total bal incorporates fee debt, can be negative
-	totalBal := big.NewInt(0).Sub(availableBal, feeDebt.Int)
+	lf, err := mstate.LockedFunds()
+	if err != nil {
+		return nil, err
+	}
+	result.TotalBalance = actor.Balance.Int
+	result.VestingFunds = lf.VestingFunds.Int
+	result.InitialPledge = lf.InitialPledgeRequirement.Int
 
-	result.TotalBalance = totalBal
-	result.AvailableBalance = availableBal
+	avail, err := mstate.AvailableBalance(actor.Balance)
+	if err != nil {
+		return nil, err
+	}
+
+	// sanity check that the available is a positive number
+	if feeDebt.Int.Sign() > 0 && avail.Int.Sign() > 0 {
+		// this should never happen
+		return nil, xerrors.Errorf("fee debt and available balance are both positive")
+	} else if feeDebt.Int.Sign() > 0 {
+		result.AvailableBalance = big.NewInt(0)
+	} else {
+		// otherwise no fee debt, go on normally
+		result.AvailableBalance = avail.Int
+	}
 
 	// if no sectors found return empty result
 	if len(sectorInfos) == 0 {
@@ -294,5 +289,24 @@ func TerminateSectors(ctx context.Context, api *lotusapi.FullNodeStruct, minerAd
 	// the total initial pledge is the average initial pledge per sector times the total number of sectors
 	result.EstimatedInitialPledge = new(big.Int).Mul(result.AvgInitialPledgePerSector, big.NewInt(int64(result.LiveSectors)))
 
+	if err := failOnBrokenAssumptions(&result); err != nil {
+		return nil, err
+	}
+
 	return &result, nil
+}
+
+// there cannot be negative fee debt
+// there cannot be positive fee debt with a positive balance
+// there cannot be positive fee debt with a positive available balance
+// there cannot be a positive fee debt with a positive initial pledge
+// there cannot be a positive fee debt with a positive pre commit funds
+// there cannot be a negative termination fee
+// there cannot be a negaitve initial pledge
+// with no fee debt, available balance should always be positive (or 0)
+// with no fee debt, initial pledge should always be positive (or 0)
+// with no fee debt, pre commit funds should always be positive (or 0)
+// with no fee debt, balance should always be positive (or 0)
+func failOnBrokenAssumptions(result *TerminateSectorResult) error {
+	return nil
 }

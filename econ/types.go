@@ -5,6 +5,9 @@ import (
 )
 
 type BaseFi struct {
+	// total balance of the miner (and in the case of an Agent, includes Agent balance and locked FIL)
+	Balance *big.Int `json:"balance"`
+	// liquid FIL on the miner (and in the case of an Agent, includes Agent available balance, does not account for any fee debt)
 	AvailableBalance *big.Int `json:"availableBalance"`
 	LockedRewards    *big.Int `json:"lockedRewards"`
 	InitialPledge    *big.Int `json:"initialPledge"`
@@ -21,6 +24,8 @@ type AgentFi struct {
 	Principal *big.Int `json:"principal"`
 }
 
+// note that in feeDebt, AvailableBalance will be kept at 0, and feeDebt will be a positive number
+// lotus actually returns a negative number for availableBalance, but we scrap that and return 0
 type TerminateSectorResult struct {
 	TotalBalance     *big.Int
 	AvailableBalance *big.Int
