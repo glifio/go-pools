@@ -21,9 +21,6 @@ import (
 // this test compares N random miner termination penalties computed in the most precise (time intensive) way against the quick, less precise sampling method used in the ADO
 var N = 3
 
-// the percentage that is acceptible for imprecision
-var DIFF = big.NewFloat(3.00) // 3%
-
 type SectorInfo struct {
 	Deadline  int    `json:"Deadline"`
 	Partition int    `json:"Partition"`
@@ -107,10 +104,10 @@ func TestTerminationOffChainFullMiner(t *testing.T) {
 			t.Logf("The difference in initial pledge: %s%%", util.Diff(res.InitialPledge, res.EstimatedInitialPledge).Text('f', 2))
 
 			// if the difference in term fee is greater than 3% or the difference in initial pledge is greater than 3%, fail the test
-			if termFeeDiff.Cmp(DIFF) == 1 {
+			if termFeeDiff.Cmp(INITIAL_PLEDGE_INTERPOLATION_REL_DIFF) == 1 {
 				t.Fatalf("Expected term fee: %v, actual fee: %v", util.ToFIL(expectedTermFee), util.ToFIL(res.EstimatedTerminationFee))
 			}
-			if initialPledgeDiff.Cmp(DIFF) == 1 {
+			if initialPledgeDiff.Cmp(INITIAL_PLEDGE_INTERPOLATION_REL_DIFF) == 1 {
 				t.Fatalf("Expected initial pledge: %v, actual: %v", util.ToFIL(res.InitialPledge), util.ToFIL(res.EstimatedInitialPledge))
 			}
 		})
@@ -141,7 +138,7 @@ func TestTerminationPrecisionFromOffChain(t *testing.T) {
 
 	expectedTermFee := big.NewInt(9397221857395692)
 	termFeeDiff := util.Diff(expectedTermFee, res.TerminationFeeFromSample)
-	if termFeeDiff.Cmp(DIFF) == 1 {
+	if termFeeDiff.Cmp(INITIAL_PLEDGE_INTERPOLATION_REL_DIFF) == 1 {
 		t.Fatalf("Expected term fee: %v, actual fee: %v", util.ToFIL(expectedTermFee), util.ToFIL(res.EstimatedTerminationFee))
 	}
 }

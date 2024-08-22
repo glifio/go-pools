@@ -18,6 +18,7 @@ import (
 )
 
 var MAX_SAMPLED_SECTORS = 1000
+var INITIAL_PLEDGE_INTERPOLATION_REL_DIFF = big.NewFloat(3.00) // 3%
 
 func EstimateTerminationFeeAgent(
 	ctx context.Context,
@@ -99,6 +100,10 @@ func EstimateTerminationFeeMiner(ctx context.Context, api *lotusapi.FullNodeStru
 
 	res, err := TerminateSectors(ctx, api, minerAddr, &sample, ts)
 	if err != nil {
+		return nil, err
+	}
+
+	if err := failOnBrokenAssumptions(minerAddr, res); err != nil {
 		return nil, err
 	}
 
@@ -234,7 +239,7 @@ func TerminateSectors(ctx context.Context, api *lotusapi.FullNodeStruct, minerAd
 	// sanity check that the available is a positive number
 	if feeDebt.Int.Sign() > 0 && avail.Int.Sign() > 0 {
 		// this should never happen
-		return nil, xerrors.Errorf("fee debt and available balance are both positive")
+		return nil, xerrors.Errorf("miner: %s: fee debt and available balance are both positive", minerAddr)
 	} else if feeDebt.Int.Sign() > 0 {
 		result.AvailableBalance = big.NewInt(0)
 	} else {
@@ -264,12 +269,12 @@ func TerminateSectors(ctx context.Context, api *lotusapi.FullNodeStruct, minerAd
 
 		// this should never happen, but termination fee should never be negative
 		if termFee.Cmp(big.NewInt(0)) < 0 {
-			return nil, xerrors.Errorf("negative termination fee: %v", termFee)
+			return nil, xerrors.Errorf("miner %s: negative termination fee: %v", minerAddr, termFee)
 		}
 
 		if s.InitialPledge.Int.Cmp(big.NewInt(0)) == 0 {
 			// if the initial pledge is 0, something is up?
-			return nil, xerrors.Errorf("0 initial pledge for sector")
+			return nil, xerrors.Errorf("miner %s: 0 initial pledge for sector", minerAddr)
 		}
 
 		result.TerminationFeeFromSample = big.NewInt(0).Add(result.TerminationFeeFromSample, termFee)
@@ -289,24 +294,75 @@ func TerminateSectors(ctx context.Context, api *lotusapi.FullNodeStruct, minerAd
 	// the total initial pledge is the average initial pledge per sector times the total number of sectors
 	result.EstimatedInitialPledge = new(big.Int).Mul(result.AvgInitialPledgePerSector, big.NewInt(int64(result.LiveSectors)))
 
-	if err := failOnBrokenAssumptions(&result); err != nil {
-		return nil, err
-	}
-
 	return &result, nil
 }
 
-// there cannot be negative fee debt
-// there cannot be positive fee debt with a positive balance
-// there cannot be positive fee debt with a positive available balance
-// there cannot be a positive fee debt with a positive initial pledge
-// there cannot be a positive fee debt with a positive pre commit funds
-// there cannot be a negative termination fee
-// there cannot be a negaitve initial pledge
-// with no fee debt, available balance should always be positive (or 0)
-// with no fee debt, initial pledge should always be positive (or 0)
-// with no fee debt, pre commit funds should always be positive (or 0)
-// with no fee debt, balance should always be positive (or 0)
-func failOnBrokenAssumptions(result *TerminateSectorResult) error {
+// Assumptions:
+// 1. there cannot be negative fee debt
+// 2. there cannot be positive fee debt with a positive balance
+// 3. there cannot be positive fee debt with a positive available balance
+// 4. there cannot be a positive fee debt with a positive initial pledge
+// 5. there cannot be a positive fee debt with a positive vesting funds
+// 6. there cannot be a negative termination fee
+// 7. there cannot be a negative initial pledge
+// 8. with no fee debt, available balance should always be positive (or 0)
+// 9. with no fee debt, initial pledge should always be positive (or 0)
+// 10. with no fee debt, balance should always be positive (or 0)
+// 11. If estimated initial pledge is off from actual initial pledge, the sampling result is too imprecise
+func failOnBrokenAssumptions(minerAddr address.Address, result *TerminateSectorResult) error {
+	// 6. there cannot be a negative termination fee
+	if result.EstimatedTerminationFee.Cmp(big.NewInt(0)) < 0 {
+		return xerrors.Errorf("miner %s: negative termination fee: %v", minerAddr, result.EstimatedTerminationFee)
+	}
+	// 7. there cannot be a negative initial pledge
+	if result.InitialPledge.Cmp(big.NewInt(0)) < 0 {
+		return xerrors.Errorf("miner %s: negative initial pledge: %v", minerAddr, result.InitialPledge)
+	}
+
+	// fee debt exists
+	if result.FeeDebt.Cmp(big.NewInt(0)) > 0 {
+		// 2.there cannot be positive fee debt with a positive balance
+		if result.TotalBalance.Cmp(big.NewInt(0)) > 0 {
+			return xerrors.Errorf("miner %s: positive fee debt with positive balance: %v", minerAddr, result.FeeDebt)
+		}
+		// 3. there cannot be positive fee debt with a positive available balance
+		if result.AvailableBalance.Cmp(big.NewInt(0)) > 0 {
+			return xerrors.Errorf("miner %s: positive fee debt with positive available balance: %v", minerAddr, result.FeeDebt)
+		}
+		// 4. there cannot be a positive fee debt with a positive initial pledge
+		if result.InitialPledge.Cmp(big.NewInt(0)) > 0 {
+			return xerrors.Errorf("miner %s: positive fee debt with positive initial pledge: %v", minerAddr, result.FeeDebt)
+		}
+		// 5. there cannot be a positive fee debt with a positive vesting funds
+		if result.VestingFunds.Cmp(big.NewInt(0)) > 0 {
+			return xerrors.Errorf("miner %s: positive fee debt with positive vesting funds: %v", minerAddr, result.FeeDebt)
+		}
+	} else if result.FeeDebt.Cmp(big.NewInt(0)) == 0 {
+		// no fee debt
+		// 8. with no fee debt, available balance should always be positive (or 0)
+		if result.AvailableBalance.Cmp(big.NewInt(0)) < 0 {
+			return xerrors.Errorf("miner %s: no fee debt, but negative available balance: %v", minerAddr, result.AvailableBalance)
+		}
+		// 9. with no fee debt, initial pledge should always be positive (or 0)
+		if result.InitialPledge.Cmp(big.NewInt(0)) < 0 {
+			return xerrors.Errorf("miner %s: no fee debt, but negative initial pledge: %v", minerAddr, result.InitialPledge)
+		}
+		// 10. with no fee debt, balance should always be positive (or 0)
+		if result.TotalBalance.Cmp(big.NewInt(0)) < 0 {
+			return xerrors.Errorf("miner %s: no fee debt, but negative balance: %v", minerAddr, result.TotalBalance)
+		}
+	} else {
+		// 1. fee debt is negative - error
+		return xerrors.Errorf("miner %s: negative fee debt: %v", minerAddr, result.FeeDebt)
+	}
+
+	// 11. If estimated initial pledge is off from actual initial pledge, the sampling result is too imprecise
+	initialPledgeDiff := util.Diff(result.InitialPledge, result.EstimatedInitialPledge)
+
+	// we're out of the acceptance range
+	if initialPledgeDiff.Cmp(INITIAL_PLEDGE_INTERPOLATION_REL_DIFF) > 0 {
+		return xerrors.Errorf("miner %s: initial pledge diff too high: %v, %v, %v", minerAddr, result.InitialPledge, result.EstimatedInitialPledge, initialPledgeDiff)
+	}
+
 	return nil
 }
