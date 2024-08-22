@@ -14,6 +14,7 @@ import (
 	"github.com/filecoin-project/go-bitfield"
 	"github.com/filecoin-project/go-state-types/abi"
 	"github.com/filecoin-project/lotus/chain/types"
+	"github.com/glifio/go-pools/constants"
 	"github.com/glifio/go-pools/terminate"
 	"github.com/glifio/go-pools/util"
 )
@@ -436,7 +437,33 @@ func TestBaseFi(t *testing.T) {
 				t.Fatal(err)
 			}
 
-			assertBaseFiEqual(t, &tt.want, ret.ToBaseFi())
+			baseFi := ret.ToBaseFi()
+			lv := baseFi.LiquidationValue()
+
+			assertBaseFiEqual(t, &tt.want, baseFi)
+
+			// if the miner can borrow, test the limits
+			if lv.Sign() == 1 {
+				// test the max borrow and seal by simulating a borrow
+				maxBorrowAndSeal := baseFi.MaxBorrowAndSeal()
+				// new collateral value after borrowing
+				newCollateralValue := big.NewInt(0).Add(lv, maxBorrowAndSeal)
+				// test under DTL
+				dtl := util.DivWad(maxBorrowAndSeal, newCollateralValue)
+				if dtl.Cmp(constants.MAX_BORROW_DTL) != 0 {
+					t.Fatalf("DTL is not equal to max borrow dtl: %v", dtl)
+				}
+
+				// test max borrow and withdraw by simulating a borrow and withdraw
+				maxBorrowAndWithdraw := baseFi.MaxBorrowAndWithdraw()
+				// new collateral value after borrowing is the old liquidation value
+				newCollateralValue = lv
+				// test under DTL
+				dtl = util.DivWad(maxBorrowAndWithdraw, newCollateralValue)
+				if dtl.Cmp(constants.MAX_BORROW_DTL) == 1 {
+					t.Fatalf("DTL is greater than max borrow dtl: %v", dtl)
+				}
+			}
 		})
 	}
 }
