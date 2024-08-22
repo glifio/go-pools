@@ -9,6 +9,7 @@ import (
 	"github.com/filecoin-project/go-address"
 	"github.com/filecoin-project/lotus/chain/types"
 	pooltypes "github.com/glifio/go-pools/types"
+	"github.com/glifio/go-pools/util"
 	"github.com/glifio/go-pools/vc"
 )
 
@@ -21,7 +22,7 @@ func GetAgentEcon(ctx context.Context, agentAddr common.Address, psdk pooltypes.
 		return nil, nil, err
 	}
 
-	principal, err := query.AgentPrincipal(ctx, agentAddr, blockNumber)
+	principal, err := getAgentPrincipal(ctx, agentAddr, psdk, ts)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -29,9 +30,18 @@ func GetAgentEcon(ctx context.Context, agentAddr common.Address, psdk pooltypes.
 	return agentAvailableBal, principal, nil
 }
 
-func ComputeBorrowAgentData(ctx context.Context, agentAddr common.Address, amount *big.Int, psdk pooltypes.PoolsSDK, ts *types.TipSet) (*vc.AgentData, error) {
+func getAgentPrincipal(ctx context.Context, agentAddr common.Address, psdk pooltypes.PoolsSDK, ts *types.TipSet) (*big.Int, error) {
 	blockNumber := big.NewInt(int64(ts.Height()))
 	principal, err := psdk.Query().AgentPrincipal(ctx, agentAddr, blockNumber)
+	if err != nil {
+		return nil, err
+	}
+
+	return principal, nil
+}
+
+func ComputeBorrowAgentData(ctx context.Context, agentAddr common.Address, amount *big.Int, psdk pooltypes.PoolsSDK, ts *types.TipSet) (*vc.AgentData, error) {
+	principal, err := getAgentPrincipal(ctx, agentAddr, psdk, ts)
 	if err != nil {
 		return nil, err
 	}
@@ -83,9 +93,38 @@ func ComputeWithdrawAgentData(ctx context.Context, agentAddr common.Address, wit
 	return data, err
 }
 
+func ComputePushFundsAgentData(ctx context.Context, agentAddr common.Address, minerAddr address.Address, psdk pooltypes.PoolsSDK, ts *types.TipSet) (*vc.AgentData, error) {
+	principal, err := getAgentPrincipal(ctx, agentAddr, psdk, ts)
+	if err != nil {
+		return nil, err
+	}
+
+	lapi, closer, err := psdk.Extern().ConnectLotusClient()
+	if err != nil {
+		return nil, err
+	}
+	defer closer()
+
+	// make sure we aren't pushing a miner with fee debt
+	_, mstate, err := util.LoadMinerActor(ctx, lapi, minerAddr, ts)
+	if err != nil {
+		return nil, err
+	}
+
+	feeDebt, err := mstate.FeeDebt()
+	if err != nil {
+		return nil, err
+	}
+
+	if feeDebt.Sign() == 1 {
+		return nil, errors.New("cannot push funds to miner with fee debt")
+	}
+
+	return ComputeAgentData(ctx, agentAddr, big.NewInt(0), principal, address.Undef, psdk, ts)
+}
+
 func ComputeRmMinerAgentData(ctx context.Context, agentAddr common.Address, miner address.Address, psdk pooltypes.PoolsSDK, ts *types.TipSet) (*vc.AgentData, error) {
-	blockNumber := big.NewInt(int64(ts.Height()))
-	principal, err := psdk.Query().AgentPrincipal(ctx, agentAddr, blockNumber)
+	principal, err := getAgentPrincipal(ctx, agentAddr, psdk, ts)
 	if err != nil {
 		return nil, err
 	}

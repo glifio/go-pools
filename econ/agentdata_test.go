@@ -184,7 +184,7 @@ func TestComputeRemoveSingleMiner(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	// multiminer agent
+	// single miner agent
 	agentAddr := common.HexToAddress(agentDataTests[1].agent)
 	minerToRm, _ := address.NewFromString("f01931245")
 
@@ -266,6 +266,34 @@ func TestComputeWithdrawTooMuch(t *testing.T) {
 	_, err = ComputeWithdrawAgentData(context.Background(), agentAddr, withdrawAmount, psdk, ts)
 	if err == nil {
 		t.Fatal("Expected error - withdraw amount is greater than agent's available balance")
+	}
+}
+
+func TestPushFundsToMinerWFeeDebt(t *testing.T) {
+	psdk, err := setupTest()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	lapi, closer, err := psdk.Extern().ConnectLotusClient()
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer closer()
+
+	ts, err := lapi.ChainGetTipSetByHeight(context.Background(), abi.ChainEpoch(TIPSET_HEIGHT.Int64()), ltypes.EmptyTSK)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// fee debt agent
+	agentAddr := common.HexToAddress(agentDataTests[2].agent)
+	// fee debt miner
+	minerAddr, _ := address.NewFromString("f01836766")
+
+	_, err = ComputePushFundsAgentData(context.Background(), agentAddr, minerAddr, psdk, ts)
+	if err == nil {
+		t.Fatal("Expected error - cannot push funds to agent with fee debt")
 	}
 }
 
