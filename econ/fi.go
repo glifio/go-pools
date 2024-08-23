@@ -178,7 +178,7 @@ func (afi *AgentFi) MarginCall() *big.Int {
 	return new(big.Int).Div(big.NewInt(0).Mul(afi.Principal, big.NewInt(1e18)), constants.LIQUIDATION_DTL)
 }
 
-func (afi *AgentFi) LeverageRatio() float64 {
+func (afi *AgentFi) DTL() float64 {
 	lv := afi.LiquidationValue()
 	if lv.Cmp(big.NewInt(0)) == 0 {
 		return 0

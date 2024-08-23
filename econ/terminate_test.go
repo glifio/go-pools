@@ -649,8 +649,8 @@ func assertAgentFiEqual(t *testing.T, expected *agentFiTest, actual *AgentFi) {
 	if expected.marginCall.Cmp(actual.MarginCall()) != 0 {
 		t.Fatalf("Expected margin call: %v, actual: %v", expected.marginCall, actual.MarginCall())
 	}
-	if expected.leverageRatio != actual.LeverageRatio() {
-		t.Fatalf("Expected leverage ratio: %v, actual: %v", expected.leverageRatio, actual.LeverageRatio())
+	if expected.leverageRatio != actual.DTL() {
+		t.Fatalf("Expected leverage ratio: %v, actual: %v", expected.leverageRatio, actual.DTL())
 	}
 }
 
