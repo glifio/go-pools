@@ -18,10 +18,14 @@ type BaseFi struct {
 	FaultySectors *big.Int `json:"faultySectors"`
 }
 
+type Liability struct {
+	Principal *big.Int `json:"principal"`
+	Interest  *big.Int `json:"interest"`
+}
+
 type AgentFi struct {
 	BaseFi
-
-	Principal *big.Int `json:"principal"`
+	Liability
 }
 
 // note that in feeDebt, AvailableBalance will be kept at 0, and feeDebt will be a positive number

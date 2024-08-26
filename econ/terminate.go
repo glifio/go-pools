@@ -85,7 +85,17 @@ func EstimateTerminationFeeAgent(
 		return nil, err
 	}
 
-	return NewAgentFi(agentAvail, principal, baseFis), nil
+	interest, err := psdk.Query().AgentInterestOwed(ctx, agentAddr, height)
+	if err != nil {
+		return nil, err
+	}
+
+	l := Liability{
+		Principal: principal,
+		Interest:  interest,
+	}
+
+	return NewAgentFi(agentAvail, l, baseFis), nil
 }
 
 func EstimateTerminationFeeMiner(ctx context.Context, api *lotusapi.FullNodeStruct, minerAddr address.Address, ts *types.TipSet) (*TerminateSectorResult, error) {
