@@ -18,14 +18,14 @@ func LoadMinerActor(ctx context.Context, api *api.FullNodeStruct, minerAddr addr
 		return nil, nil, err
 	}
 
-	tbsMiner := newTieredBlockstore(api)
+	tbsMiner := NewTieredBlockstore(api)
 
 	state, err := miner.Load(adt.WrapStore(ctx, cbor.NewCborStore(tbsMiner)), mact)
 
 	return mact, state, err
 }
 
-func newTieredBlockstore(lapi *api.FullNodeStruct) blockstore.Blockstore {
+func NewTieredBlockstore(lapi *api.FullNodeStruct) blockstore.Blockstore {
 	return blockstore.NewTieredBstore(
 		blockstore.NewAPIBlockstore(lapi),
 		blockstore.NewMemory(),
