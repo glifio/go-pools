@@ -44,7 +44,7 @@ func (termRes *TerminateSectorResult) ToBaseFi() *BaseFi {
 
 func NewAgentFi(
 	agentAvailableBalance *big.Int,
-	principal *big.Int,
+	liability Liability,
 	minerFis []*BaseFi,
 ) *AgentFi {
 	// loop through all the BaseFi and create 1 consolidated BaseFi
@@ -92,7 +92,7 @@ func NewAgentFi(
 			LiveSectors:   liveSectors,
 			FaultySectors: faultySectors,
 		},
-		Principal: principal,
+		Liability: liability,
 	}
 }
 
@@ -108,7 +108,10 @@ func EmptyAgentFi() *AgentFi {
 			LiveSectors:      big.NewInt(0),
 			FaultySectors:    big.NewInt(0),
 		},
-		Principal: big.NewInt(0),
+		Liability: Liability{
+			Principal: big.NewInt(0),
+			Interest:  big.NewInt(0),
+		},
 	}
 }
 
@@ -161,21 +164,27 @@ func (bfi *BaseFi) LiquidationValue() *big.Int {
 }
 
 func (afi *AgentFi) BorrowLimit() *big.Int {
-	return new(big.Int).Sub(afi.MaxBorrowAndSeal(), afi.Principal)
+	return new(big.Int).Sub(afi.MaxBorrowAndSeal(), afi.Debt())
 }
 
 func (afi *AgentFi) WithdrawLimit() *big.Int {
-	return big.NewInt(0).Sub(
+	withdrawLimit := big.NewInt(0).Sub(
 		afi.LiquidationValue(),
 		big.NewInt(0).Div(
-			big.NewInt(0).Mul(afi.Principal, big.NewInt(1e18)),
+			big.NewInt(0).Mul(afi.Debt(), big.NewInt(1e18)),
 			constants.MAX_BORROW_DTL,
 		),
 	)
+
+	// make sure the agent has enough available balance to withdraw the withdraw limit
+	if afi.AvailableBalance.Cmp(withdrawLimit) < 0 {
+		return afi.AvailableBalance
+	}
+	return withdrawLimit
 }
 
 func (afi *AgentFi) MarginCall() *big.Int {
-	return new(big.Int).Div(big.NewInt(0).Mul(afi.Principal, big.NewInt(1e18)), constants.LIQUIDATION_DTL)
+	return new(big.Int).Div(big.NewInt(0).Mul(afi.Debt(), big.NewInt(1e18)), constants.LIQUIDATION_DTL)
 }
 
 func (afi *AgentFi) DTL() float64 {
@@ -184,9 +193,13 @@ func (afi *AgentFi) DTL() float64 {
 		return 0
 	}
 	leverageRatio, _ := new(big.Float).Quo(
-		new(big.Float).SetInt(afi.Principal),
+		new(big.Float).SetInt(afi.Debt()),
 		new(big.Float).SetInt(afi.LiquidationValue()),
 	).Float64()
 
 	return leverageRatio
+}
+
+func (l *Liability) Debt() *big.Int {
+	return new(big.Int).Add(l.Principal, l.Interest)
 }
