@@ -183,8 +183,20 @@ func (afi *AgentFi) WithdrawLimit() *big.Int {
 	return withdrawLimit
 }
 
+// margin = liquidation value - principal
+func (afi *AgentFi) Margin() *big.Int {
+	return big.NewInt(0).Sub(afi.LiquidationValue(), afi.Principal)
+}
+
 func (afi *AgentFi) MarginCall() *big.Int {
 	return new(big.Int).Div(big.NewInt(0).Mul(afi.Debt(), big.NewInt(1e18)), constants.LIQUIDATION_DTL)
+}
+
+// leverage ratio = liquidation value / margin
+func (afi *AgentFi) LeverageRatio() *big.Float {	
+	return new(big.Float).Quo(
+		new(big.Float).SetInt(afi.LiquidationValue()),
+		new(big.Float).SetInt(afi.Margin()))
 }
 
 func (afi *AgentFi) DTL() float64 {
