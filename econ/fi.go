@@ -167,6 +167,18 @@ func (bfi *BaseFi) LiquidationValue() *big.Int {
 	return new(big.Int).Sub(bfi.Balance, bfi.TerminationFee)
 }
 
+func (bfi *BaseFi) RecoveryRate() float64 {
+	if bfi.Balance.Cmp(big.NewInt(0)) == 0 {
+		return 0
+	}
+
+	rr, _ := new(big.Float).Quo(
+		new(big.Float).SetInt(bfi.LiquidationValue()),
+		new(big.Float).SetInt(bfi.Balance)).Float64()
+
+	return rr
+}
+
 func (afi *AgentFi) BorrowLimit() *big.Int {
 	return new(big.Int).Sub(afi.MaxBorrowAndSeal(), afi.Debt())
 }
