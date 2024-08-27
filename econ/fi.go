@@ -1,6 +1,7 @@
 package econ
 
 import (
+	"math"
 	"math/big"
 
 	"github.com/glifio/go-pools/constants"
@@ -185,7 +186,7 @@ func (afi *AgentFi) WithdrawLimit() *big.Int {
 
 // margin = liquidation value - principal
 func (afi *AgentFi) Margin() *big.Int {
-	return big.NewInt(0).Sub(afi.LiquidationValue(), afi.Principal)
+	return big.NewInt(0).Sub(afi.LiquidationValue(), afi.Debt())
 }
 
 func (afi *AgentFi) MarginCall() *big.Int {
@@ -193,23 +194,39 @@ func (afi *AgentFi) MarginCall() *big.Int {
 }
 
 // leverage ratio = liquidation value / margin
-func (afi *AgentFi) LeverageRatio() *big.Float {	
+func (afi *AgentFi) LeverageRatio() *big.Float {
+	// if debt is zero then leverage ratio is 1
+	if afi.Debt().Cmp(big.NewInt(0)) == 0 {
+		return new(big.Float).SetInt(big.NewInt(1))
+	}
+	// if margin is zero and debt is not zero then leverage ratio is infinite
+	if afi.Margin().Cmp(big.NewInt(0)) == 0 {
+		// set float to infinite
+		return new(big.Float).SetInf(true)
+	}
+
 	return new(big.Float).Quo(
 		new(big.Float).SetInt(afi.LiquidationValue()),
 		new(big.Float).SetInt(afi.Margin()))
 }
 
 func (afi *AgentFi) DTL() float64 {
-	lv := afi.LiquidationValue()
-	if lv.Cmp(big.NewInt(0)) == 0 {
+	// if debt is zero then DTL is 0
+	if afi.Debt().Cmp(big.NewInt(0)) == 0 {
 		return 0
 	}
-	leverageRatio, _ := new(big.Float).Quo(
+	lv := afi.LiquidationValue()
+	// if liquidation value is zero and debt is non zero then DTL is infinite
+	if lv.Cmp(big.NewInt(0)) == 0 {
+		// return positive infinite float
+		return math.Inf(1)
+	}
+	dtl, _ := new(big.Float).Quo(
 		new(big.Float).SetInt(afi.Debt()),
 		new(big.Float).SetInt(afi.LiquidationValue()),
 	).Float64()
 
-	return leverageRatio
+	return dtl
 }
 
 func (l *Liability) Debt() *big.Int {
