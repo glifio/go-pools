@@ -97,18 +97,22 @@ func NewAgentFi(
 	}
 }
 
+func EmptyBaseFi() *BaseFi {
+	return &BaseFi{
+		Balance:          big.NewInt(0),
+		AvailableBalance: big.NewInt(0),
+		LockedRewards:    big.NewInt(0),
+		InitialPledge:    big.NewInt(0),
+		FeeDebt:          big.NewInt(0),
+		TerminationFee:   big.NewInt(0),
+		LiveSectors:      big.NewInt(0),
+		FaultySectors:    big.NewInt(0),
+	}
+}
+
 func EmptyAgentFi() *AgentFi {
 	return &AgentFi{
-		BaseFi: BaseFi{
-			Balance:          big.NewInt(0),
-			AvailableBalance: big.NewInt(0),
-			LockedRewards:    big.NewInt(0),
-			InitialPledge:    big.NewInt(0),
-			FeeDebt:          big.NewInt(0),
-			TerminationFee:   big.NewInt(0),
-			LiveSectors:      big.NewInt(0),
-			FaultySectors:    big.NewInt(0),
-		},
+		BaseFi: *EmptyBaseFi(),
 		Liability: Liability{
 			Principal: big.NewInt(0),
 			Interest:  big.NewInt(0),
@@ -162,6 +166,18 @@ func (bfi *BaseFi) LiquidationValue() *big.Int {
 	}
 
 	return new(big.Int).Sub(bfi.Balance, bfi.TerminationFee)
+}
+
+func (bfi *BaseFi) RecoveryRate() float64 {
+	if bfi.Balance.Cmp(big.NewInt(0)) == 0 {
+		return 0
+	}
+
+	rr, _ := new(big.Float).Quo(
+		new(big.Float).SetInt(bfi.LiquidationValue()),
+		new(big.Float).SetInt(bfi.Balance)).Float64()
+
+	return rr
 }
 
 func (afi *AgentFi) BorrowLimit() *big.Int {

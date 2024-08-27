@@ -23,10 +23,10 @@ var TestExtern = types.Extern{
 }
 
 var InfinityPoolV0 = common.HexToAddress("0x43dAe5624445e7679D16a63211c5ff368681500c")
-var InfinityPoolV2 = common.HexToAddress("0x283BeE91E1fb2Db7aBb522540Bc8e609b85Aff6a")
+var InfinityPoolV2 = common.HexToAddress("0xe764Acf02D8B7c21d2B6A8f0a96C78541e0DC3fd")
 
 var AgentPoliceV0 = common.HexToAddress("0x1403D2163B4beA09F1b26cA4479FFc60Ca2E46BF")
-var AgentPoliceV2 = common.HexToAddress("0x227a6DE9964fFc27B07F8919C2D5837579b9100C")
+var AgentPoliceV2 = common.HexToAddress("0xE87f7d4C9f9BD235CB1b15b88Ed5E9a844726947")
 
 var ProtoMeta = types.ProtocolMeta{
 	AgentFactory:  common.HexToAddress("0x526Ab27Af261d28c2aC1fD24f63CcB3bd44D50e0"),
@@ -73,7 +73,7 @@ var (
 
 var (
 	// the agent police v2 and infinity pool v2 were deployed prior to this epoch, so it is safe to fetch events from this height
-	ProtocolV2DeployEpoch = big.NewInt(4213120)
+	ProtocolV2DeployEpoch = big.NewInt(4215971)
 	// no events will occur on these contracts before this epoch
 	ProtocolV2UpgradeEpoch = big.NewInt(0)
 )

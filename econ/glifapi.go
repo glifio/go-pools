@@ -98,6 +98,62 @@ type AgentInfo struct {
 	PrincipalBalance string `json:"principalBalance"`
 }
 
+func GetBaseFisFromAPI(agentAddr common.Address) (miners []address.Address, baseFis []*BaseFi, err error) {
+	baseFis = make([]*BaseFi, 0)
+	miners = make([]address.Address, 0)
+
+	url := fmt.Sprintf("%s/agent/%s/collateral-value", constants.EventsURL, agentAddr)
+	// Making an HTTP GET request
+	resp, err := http.Get(url)
+	if err != nil {
+		return nil, nil, err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		// if the server can't find the agent we're asking for, it will return a 404
+		// we treat it as 0 baseFis
+		if resp.StatusCode == http.StatusNotFound {
+			return miners, baseFis, nil
+		}
+
+		return nil, nil, fmt.Errorf("error fetching collateral stats. Status code: %d", resp.StatusCode)
+	}
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	var response agentCollateralStats
+	if err := json.Unmarshal(body, &response); err != nil {
+		return nil, nil, err
+	}
+
+	// convert the miners stats to the econ package's type
+	for _, miner := range response.MinersTerminationStats {
+		m, err := convertToBigInt(miner)
+		if err != nil {
+			return nil, nil, err
+		}
+		miners = append(miners, m.Address)
+		baseFis = append(baseFis, NewBaseFi(
+			m.Total,
+			m.Available,
+			m.Vesting,
+			m.Pledged,
+			// TODO: https://github.com/glifio/go-db/issues/3
+			big.NewInt(0),
+			m.TerminationPenalty,
+			// TODO: merge liveSectors stuff in pools-events
+			big.NewInt(0),
+			big.NewInt(0),
+		))
+	}
+
+	return miners, baseFis, nil
+}
+
 func GetAgentDebtFromAPI(agentAddr common.Address) (interest *big.Int, principal *big.Int, err error) {
 	url := fmt.Sprintf("%s/agent/%s", constants.EventsURL, agentAddr)
 	// Making an HTTP GET request
