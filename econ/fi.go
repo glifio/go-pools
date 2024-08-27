@@ -96,18 +96,22 @@ func NewAgentFi(
 	}
 }
 
+func EmptyBaseFi() *BaseFi {
+	return &BaseFi{
+		Balance:          big.NewInt(0),
+		AvailableBalance: big.NewInt(0),
+		LockedRewards:    big.NewInt(0),
+		InitialPledge:    big.NewInt(0),
+		FeeDebt:          big.NewInt(0),
+		TerminationFee:   big.NewInt(0),
+		LiveSectors:      big.NewInt(0),
+		FaultySectors:    big.NewInt(0),
+	}
+}
+
 func EmptyAgentFi() *AgentFi {
 	return &AgentFi{
-		BaseFi: BaseFi{
-			Balance:          big.NewInt(0),
-			AvailableBalance: big.NewInt(0),
-			LockedRewards:    big.NewInt(0),
-			InitialPledge:    big.NewInt(0),
-			FeeDebt:          big.NewInt(0),
-			TerminationFee:   big.NewInt(0),
-			LiveSectors:      big.NewInt(0),
-			FaultySectors:    big.NewInt(0),
-		},
+		BaseFi: *EmptyBaseFi(),
 		Liability: Liability{
 			Principal: big.NewInt(0),
 			Interest:  big.NewInt(0),
@@ -193,7 +197,7 @@ func (afi *AgentFi) MarginCall() *big.Int {
 }
 
 // leverage ratio = liquidation value / margin
-func (afi *AgentFi) LeverageRatio() *big.Float {	
+func (afi *AgentFi) LeverageRatio() *big.Float {
 	return new(big.Float).Quo(
 		new(big.Float).SetInt(afi.LiquidationValue()),
 		new(big.Float).SetInt(afi.Margin()))
