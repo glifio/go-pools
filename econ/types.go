@@ -26,6 +26,8 @@ type Liability struct {
 type AgentFi struct {
 	BaseFi
 	Liability
+	// represents the amount of FIL and WFIL that is held by the Agent's smart contract
+	SpendableBalance *big.Int `json:"spendableBalance"`
 }
 
 // note that in feeDebt, AvailableBalance will be kept at 0, and feeDebt will be a positive number
