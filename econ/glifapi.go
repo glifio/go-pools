@@ -10,11 +10,12 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/filecoin-project/go-address"
 	"github.com/filecoin-project/go-state-types/abi"
-	"github.com/glifio/go-pools/constants"
+	pooltypes "github.com/glifio/go-pools/types"
 )
 
-func GetAgentFiFromAPI(agentAddr common.Address) (*AgentFi, error) {
-	url := fmt.Sprintf("%s/agent/%s/collateral-value", constants.EventsURL, agentAddr)
+func GetAgentFiFromAPI(agentAddr common.Address, psdk pooltypes.PoolsSDK) (*AgentFi, error) {
+	eventsAPI := psdk.Extern().GetEventsAPI()
+	url := fmt.Sprintf("%s/agent/%s/collateral-value", eventsAPI, agentAddr)
 	// Making an HTTP GET request
 	resp, err := http.Get(url)
 	if err != nil {
@@ -69,7 +70,7 @@ func GetAgentFiFromAPI(agentAddr common.Address) (*AgentFi, error) {
 		)
 	}
 
-	interest, principal, err := GetAgentDebtFromAPI(agentAddr)
+	interest, principal, err := GetAgentDebtFromAPI(agentAddr, psdk)
 	if err != nil {
 		return nil, err
 	}
@@ -98,11 +99,12 @@ type AgentInfo struct {
 	PrincipalBalance string `json:"principalBalance"`
 }
 
-func GetBaseFisFromAPI(agentAddr common.Address) (miners []address.Address, baseFis []*BaseFi, err error) {
+func GetBaseFisFromAPI(agentAddr common.Address, psdk pooltypes.PoolsSDK) (miners []address.Address, baseFis []*BaseFi, err error) {
 	baseFis = make([]*BaseFi, 0)
 	miners = make([]address.Address, 0)
 
-	url := fmt.Sprintf("%s/agent/%s/collateral-value", constants.EventsURL, agentAddr)
+	eventsAPI := psdk.Extern().GetEventsAPI()
+	url := fmt.Sprintf("%s/agent/%s/collateral-value", eventsAPI, agentAddr)
 	// Making an HTTP GET request
 	resp, err := http.Get(url)
 	if err != nil {
@@ -154,8 +156,9 @@ func GetBaseFisFromAPI(agentAddr common.Address) (miners []address.Address, base
 	return miners, baseFis, nil
 }
 
-func GetAgentDebtFromAPI(agentAddr common.Address) (interest *big.Int, principal *big.Int, err error) {
-	url := fmt.Sprintf("%s/agent/%s", constants.EventsURL, agentAddr)
+func GetAgentDebtFromAPI(agentAddr common.Address, psdk pooltypes.PoolsSDK) (interest *big.Int, principal *big.Int, err error) {
+	eventsAPI := psdk.Extern().GetEventsAPI()
+	url := fmt.Sprintf("%s/agent/%s", eventsAPI, agentAddr)
 	// Making an HTTP GET request
 	resp, err := http.Get(url)
 	if err != nil {

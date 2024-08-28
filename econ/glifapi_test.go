@@ -9,6 +9,11 @@ import (
 )
 
 func TestFetchAgentEcon(t *testing.T) {
+	psdk, err := setupTest()
+	if err != nil {
+		t.Fatal(err)
+	}
+
 	testCases := []struct {
 		name             string
 		input            common.Address
@@ -37,7 +42,7 @@ func TestFetchAgentEcon(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			afi, err := GetAgentFiFromAPI(tc.input)
+			afi, err := GetAgentFiFromAPI(tc.input, psdk)
 			if tc.expectError {
 				assert.Error(t, err)
 			} else {

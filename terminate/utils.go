@@ -14,7 +14,7 @@ import (
 	"github.com/filecoin-project/go-state-types/abi"
 	lotusapi "github.com/filecoin-project/lotus/api"
 	"github.com/filecoin-project/lotus/chain/types"
-	"github.com/glifio/go-pools/constants"
+	pooltypes "github.com/glifio/go-pools/types"
 	"github.com/ipfs/go-cid"
 	"golang.org/x/exp/constraints"
 	"golang.org/x/xerrors"
@@ -106,8 +106,9 @@ func max[T constraints.Ordered](a, b T) T {
 	return b
 }
 
-func FetchAgentCollateralStats(ctx context.Context, agentID *big.Int) (*AgentCollateralStats, error) {
-	url := fmt.Sprintf("%s/agent/%s/collateral-value", constants.EventsURL, agentID)
+func FetchAgentCollateralStats(ctx context.Context, agentID *big.Int, psdk pooltypes.PoolsSDK) (*AgentCollateralStats, error) {
+	eventsAPI := psdk.Extern().GetEventsAPI()
+	url := fmt.Sprintf("%s/agent/%s/collateral-value", eventsAPI, agentID)
 	// Making an HTTP GET request
 	resp, err := http.Get(url)
 	if err != nil {

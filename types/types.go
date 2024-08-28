@@ -127,6 +127,7 @@ type FEVMExtern interface {
 	ConnectEthClient() (*ethclient.Client, error)
 	ConnectLotusClient() (*api.FullNodeStruct, jsonrpc.ClientCloser, error)
 	ConnectAdoClient(ctx context.Context) (jsonrpc.ClientCloser, error)
+	GetEventsAPI() string
 }
 
 //go:generate mockery --name PoolsSDK

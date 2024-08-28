@@ -65,3 +65,7 @@ func connectLotusClient(lotusDialAddr string, lotusToken string) (*lotusapi.Full
 func (c *fevmExtern) ConnectAdoClient(ctx context.Context) (jsonrpc.ClientCloser, error) {
 	return rpc.NewADOClient(ctx, c.adoAddr, c.adoNamespace)
 }
+
+func (c *fevmExtern) GetEventsAPI() string {
+	return c.eventsAddr
+}
