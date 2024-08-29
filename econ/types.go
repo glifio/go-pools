@@ -23,6 +23,10 @@ type Liability struct {
 	Interest  *big.Int `json:"interest"`
 }
 
+type MinerFi struct {
+	BaseFi
+}
+
 type AgentFi struct {
 	BaseFi
 	Liability

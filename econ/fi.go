@@ -43,6 +43,30 @@ func (termRes *TerminateSectorResult) ToBaseFi() *BaseFi {
 	)
 }
 
+func NewMinerFi(
+	balance *big.Int,
+	availableBalance *big.Int,
+	lockedRewards *big.Int,
+	initialPledge *big.Int,
+	feeDebt *big.Int,
+	terminationFee *big.Int,
+	liveSectors *big.Int,
+	faultySectors *big.Int,
+) *MinerFi {
+	return &MinerFi{
+		BaseFi: *NewBaseFi(
+			balance,
+			availableBalance,
+			lockedRewards,
+			initialPledge,
+			feeDebt,
+			terminationFee,
+			liveSectors,
+			faultySectors,
+		),
+	}
+}
+
 func NewAgentFi(
 	agentAvailableBalance *big.Int,
 	liability Liability,
@@ -111,6 +135,12 @@ func EmptyBaseFi() *BaseFi {
 	}
 }
 
+func EmptyMinerFi() *MinerFi {
+	return &MinerFi{
+		BaseFi: *EmptyBaseFi(),
+	}
+}
+
 func EmptyAgentFi() *AgentFi {
 	return &AgentFi{
 		BaseFi: *EmptyBaseFi(),
@@ -121,8 +151,8 @@ func EmptyAgentFi() *AgentFi {
 	}
 }
 
-func (bfi *BaseFi) MaxBorrowAndSealIgnorePrincipal() *big.Int {
-	lv := bfi.LiquidationValue()
+func (mfi *MinerFi) MaxBorrowAndSeal() *big.Int {
+	lv := mfi.LiquidationValue()
 
 	if lv.Cmp(big.NewInt(0)) == 0 {
 		return big.NewInt(0)
@@ -139,8 +169,8 @@ func (bfi *BaseFi) MaxBorrowAndSealIgnorePrincipal() *big.Int {
 	return maxBorrowAndSeal
 }
 
-func (bfi *BaseFi) MaxBorrowAndWithdrawIgnorePrincipal() *big.Int {
-	lv := bfi.LiquidationValue()
+func (mfi *MinerFi) MaxBorrowAndWithdraw() *big.Int {
+	lv := mfi.LiquidationValue()
 
 	if lv.Cmp(big.NewInt(0)) == 0 {
 		return big.NewInt(0)
