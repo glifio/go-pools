@@ -93,7 +93,8 @@ func NewAgentFi(
 			LiveSectors:   liveSectors,
 			FaultySectors: faultySectors,
 		},
-		Liability: liability,
+		Liability:        liability,
+		SpendableBalance: agentAvailableBalance,
 	}
 }
 
