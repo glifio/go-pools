@@ -155,19 +155,19 @@ func SampleSectors(sectors []uint64, max int) []uint64 {
 
 	// Initialize the number of samples to the maximum number of samples
 	samples := max
+	// Compute the step size for evenly spaced sampling
+	step := int(float64(sectorCount-1) / float64(samples-1))
 
 	// If there are fewer sectors than the maximum number of samples, sample all sectors
 	if sectorCount < max {
 		samples = sectorCount
+		step = 1
 	}
-
-	// Compute the step size for evenly spaced sampling
-	step := float64(sectorCount-1) / float64(samples-1)
 
 	// Sample the sectors
 	sampledSectors := make([]uint64, samples)
 	for i := 0; i < samples; i++ {
-		index := int(float64(i) * step)
+		index := i * step
 		sampledSectors[i] = sectors[index]
 	}
 
