@@ -16,6 +16,7 @@ import (
 	"github.com/filecoin-project/lotus/chain/types"
 	"github.com/glifio/go-pools/terminate"
 	"github.com/glifio/go-pools/util"
+	"github.com/glifio/go-pools/constants"
 )
 
 // this test compares N random miner termination penalties computed in the most precise (time intensive) way against the quick, less precise sampling method used in the ADO
@@ -407,7 +408,7 @@ var baseFiTests = []struct {
 	}},
 }
 
-func TestBaseFi(t *testing.T) {
+func TestMinerFi(t *testing.T) {
 	psdk, err := setupTest()
 	if err != nil {
 		t.Fatal(err)
@@ -436,35 +437,34 @@ func TestBaseFi(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
+			
+			minerFi := MinerFi{BaseFi: *ret.ToBaseFi()}
+			lv := minerFi.LiquidationValue()
 
-			baseFi := ret.ToBaseFi()
-			// lv := baseFi.LiquidationValue()
+			assertBaseFiEqual(t, &tt.want, &minerFi)
 
-			assertBaseFiEqual(t, &tt.want, baseFi)
-
-			// todo move to a new test for MinerFi
 			// if the miner can borrow, test the limits
-			// if lv.Sign() == 1 {
-			// 	// test the max borrow and seal by simulating a borrow
-			// 	maxBorrowAndSeal := baseFi.MaxBorrowAndSeal()
-			// 	// new collateral value after borrowing
-			// 	newCollateralValue := big.NewInt(0).Add(lv, maxBorrowAndSeal)
-			// 	// test under DTL
-			// 	dtl := util.DivWad(maxBorrowAndSeal, newCollateralValue)
-			// 	if dtl.Cmp(constants.MAX_BORROW_DTL) != 0 {
-			// 		t.Fatalf("DTL is not equal to max borrow dtl: %v", dtl)
-			// 	}
+			if lv.Sign() == 1 {
+				// test the max borrow and seal by simulating a borrow
+				maxBorrowAndSeal := minerFi.MaxBorrowAndSeal()
+				// new collateral value after borrowing
+				newCollateralValue := big.NewInt(0).Add(lv, maxBorrowAndSeal)
+				// test under DTL
+				dtl := util.DivWad(maxBorrowAndSeal, newCollateralValue)
+				if dtl.Cmp(constants.MAX_BORROW_DTL) != 0 {
+					t.Fatalf("DTL is not equal to max borrow dtl: %v", dtl)
+				}
 
-			// 	// test max borrow and withdraw by simulating a borrow and withdraw
-			// 	maxBorrowAndWithdraw := baseFi.MaxBorrowAndWithdraw()
-			// 	// new collateral value after borrowing is the old liquidation value
-			// 	newCollateralValue = lv
-			// 	// test under DTL
-			// 	dtl = util.DivWad(maxBorrowAndWithdraw, newCollateralValue)
-			// 	if dtl.Cmp(constants.MAX_BORROW_DTL) == 1 {
-			// 		t.Fatalf("DTL is greater than max borrow dtl: %v", dtl)
-			// 	}
-			// }
+				// test max borrow and withdraw by simulating a borrow and withdraw
+				maxBorrowAndWithdraw := minerFi.MaxBorrowAndWithdraw()
+				// new collateral value after borrowing is the old liquidation value
+				newCollateralValue = lv
+				// test under DTL
+				dtl = util.DivWad(maxBorrowAndWithdraw, newCollateralValue)
+				if dtl.Cmp(constants.MAX_BORROW_DTL) == 1 {
+					t.Fatalf("DTL is greater than max borrow dtl: %v", dtl)
+				}
+			}
 		})
 	}
 }
@@ -664,7 +664,7 @@ func assertAgentFiEqual(t *testing.T, expected *agentFiTest, actual *AgentFi) {
 	}
 }
 
-func assertBaseFiEqual(t *testing.T, expected *baseFiTest, actual *BaseFi) {
+func assertBaseFiEqual(t *testing.T, expected *baseFiTest, actual *MinerFi) {
 	if expected.AvailableBalance.Cmp(actual.AvailableBalance) != 0 {
 		t.Fatalf("Expected available balance: %v, actual: %v", expected.AvailableBalance, actual.AvailableBalance)
 	}
@@ -689,14 +689,12 @@ func assertBaseFiEqual(t *testing.T, expected *baseFiTest, actual *BaseFi) {
 	if expected.LiveSectors.Cmp(actual.LiveSectors) != 0 {
 		t.Fatalf("Expected live sectors: %v, actual: %v", expected.LiveSectors, actual.LiveSectors)
 	}
-
-	// todo move to a new test for MinerFi
-	// if expected.maxBorrowAndSeal.Cmp(actual.MaxBorrowAndSeal()) != 0 {
-	// 	t.Fatalf("Expected max borrow and seal: %v, actual: %v", expected.maxBorrowAndSeal, actual.MaxBorrowAndSeal())
-	// }
-	// if expected.maxBorrowAndWithdraw.Cmp(actual.MaxBorrowAndWithdraw()) != 0 {
-	// 	t.Fatalf("Expected max borrow and withdraw: %v, actual: %v", expected.maxBorrowAndWithdraw, actual.MaxBorrowAndWithdraw())
-	// }
+	if expected.maxBorrowAndSeal.Cmp(actual.MaxBorrowAndSeal()) != 0 {
+		t.Fatalf("Expected max borrow and seal: %v, actual: %v", expected.maxBorrowAndSeal, actual.MaxBorrowAndSeal())
+	}
+	if expected.maxBorrowAndWithdraw.Cmp(actual.MaxBorrowAndWithdraw()) != 0 {
+		t.Fatalf("Expected max borrow and withdraw: %v, actual: %v", expected.maxBorrowAndWithdraw, actual.MaxBorrowAndWithdraw())
+	}
 	if expected.liquidationValue.Cmp(actual.LiquidationValue()) != 0 {
 		t.Fatalf("Expected liquidation value: %v, actual: %v", expected.liquidationValue, actual.LiquidationValue())
 	}

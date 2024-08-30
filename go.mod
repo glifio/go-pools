@@ -3,7 +3,6 @@ module github.com/glifio/go-pools
 go 1.21
 
 require (
-	github.com/ALTree/bigfloat v0.0.0-20220102081255-38c8b72a9924
 	github.com/ethereum/go-ethereum v1.12.0
 	github.com/filecoin-project/go-address v1.1.0
 	github.com/filecoin-project/go-bitfield v0.2.4
