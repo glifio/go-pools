@@ -28,14 +28,14 @@ func InitFEVMConnection(
 	dialAddr string,
 	token string,
 	chainID *big.Int,
-	eventsAddr string,
+	eventsURL string,
 ) *fevmConnection {
 	extern := &fevmExtern{
 		dialAddr:     dialAddr,
 		token:        token,
 		adoAddr:      adoAddr,
 		adoNamespace: adoNamespace,
-		eventsAddr:   eventsAddr,
+		eventsURL:    eventsURL,
 	}
 
 	fevmQueries := &fevmQueries{
@@ -115,7 +115,7 @@ func LazyInit(
 	adoNamespace string,
 	dialAddr string,
 	token string,
-	eventsAddr string,
+	eventsURL string,
 ) error {
 	client, err := ethclient.Dial(dialAddr)
 	if err != nil {
@@ -172,7 +172,7 @@ func LazyInit(
 		dialAddr,
 		token,
 		chainID,
-		eventsAddr,
+		eventsURL,
 	)
 
 	return nil
@@ -195,14 +195,14 @@ func New(
 	}
 
 	var protoMeta types.ProtocolMeta
-	var eventsAddr string
+	var eventsURL string
 	switch id.Int64() {
 	case constants.MainnetChainID:
 		protoMeta = deploy.ProtoMeta
-		eventsAddr = constants.MainnetEventsURL
+		eventsURL = deploy.Extern.EventsURL
 	case constants.CalibnetChainID:
 		protoMeta = deploy.TestProtoMeta
-		eventsAddr = constants.CalibnetEventsURL
+		eventsURL = deploy.Extern.EventsURL
 	default:
 		return nil, fmt.Errorf("unsupported chain id: %d", id.Int64())
 	}
@@ -224,7 +224,7 @@ func New(
 		extern.LotusDialAddr,
 		extern.LotusToken,
 		chainID,
-		eventsAddr,
+		eventsURL,
 	)
 
 	return sdk, nil
@@ -246,7 +246,7 @@ func Init(
 	adoNamespace string,
 	dialAddr string,
 	token string,
-	eventsAddr string,
+	eventsURL string,
 ) error {
 	client, err := connectEthClient(dialAddr, token)
 	if err != nil {
@@ -272,7 +272,7 @@ func Init(
 		dialAddr,
 		token,
 		chainID,
-		eventsAddr,
+		eventsURL,
 	)
 
 	return nil

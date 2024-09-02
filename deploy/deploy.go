@@ -10,16 +10,21 @@ import (
 var dialAddr = "https://api.node.glif.io/rpc/v1"
 var t_dialAddr = "https://api.calibration.node.glif.io/rpc/v1"
 
+var MainnetEventsURL = "https://events.glif.link"
+var CalibnetEventsURL = "https://events-calibration.glif.link"
+
 var Extern = types.Extern{
 	AdoAddr:       "https://ado.glif.link/rpc/v1",
 	LotusDialAddr: dialAddr,
 	LotusToken:    "",
+	EventsURL:     MainnetEventsURL,
 }
 
 var TestExtern = types.Extern{
 	AdoAddr:       "https://ado-testnet.glif.link/rpc/v1",
 	LotusDialAddr: t_dialAddr,
 	LotusToken:    "",
+	EventsURL:     CalibnetEventsURL,
 }
 
 var InfinityPoolV0 = common.HexToAddress("0x43dAe5624445e7679D16a63211c5ff368681500c")

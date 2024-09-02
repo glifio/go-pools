@@ -10,12 +10,10 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/filecoin-project/go-address"
 	"github.com/filecoin-project/go-state-types/abi"
-	pooltypes "github.com/glifio/go-pools/types"
 )
 
-func GetAgentFiFromAPI(agentAddr common.Address, psdk pooltypes.PoolsSDK) (*AgentFi, error) {
-	eventsAPI := psdk.Extern().GetEventsAPI()
-	url := fmt.Sprintf("%s/agent/%s/collateral-value", eventsAPI, agentAddr)
+func GetAgentFiFromAPI(agentAddr common.Address, eventsURL string) (*AgentFi, error) {
+	url := fmt.Sprintf("%s/agent/%s/collateral-value", eventsURL, agentAddr)
 	// Making an HTTP GET request
 	resp, err := http.Get(url)
 	if err != nil {
@@ -70,7 +68,7 @@ func GetAgentFiFromAPI(agentAddr common.Address, psdk pooltypes.PoolsSDK) (*Agen
 		)
 	}
 
-	interest, principal, err := GetAgentDebtFromAPI(agentAddr, psdk)
+	interest, principal, err := GetAgentDebtFromAPI(agentAddr, eventsURL)
 	if err != nil {
 		return nil, err
 	}
@@ -99,12 +97,11 @@ type AgentInfo struct {
 	PrincipalBalance string `json:"principalBalance"`
 }
 
-func GetBaseFisFromAPI(agentAddr common.Address, psdk pooltypes.PoolsSDK) (miners []address.Address, baseFis []*BaseFi, err error) {
+func GetBaseFisFromAPI(agentAddr common.Address, eventsURL string) (miners []address.Address, baseFis []*BaseFi, err error) {
 	baseFis = make([]*BaseFi, 0)
 	miners = make([]address.Address, 0)
 
-	eventsAPI := psdk.Extern().GetEventsAPI()
-	url := fmt.Sprintf("%s/agent/%s/collateral-value", eventsAPI, agentAddr)
+	url := fmt.Sprintf("%s/agent/%s/collateral-value", eventsURL, agentAddr)
 	// Making an HTTP GET request
 	resp, err := http.Get(url)
 	if err != nil {
@@ -156,9 +153,8 @@ func GetBaseFisFromAPI(agentAddr common.Address, psdk pooltypes.PoolsSDK) (miner
 	return miners, baseFis, nil
 }
 
-func GetAgentDebtFromAPI(agentAddr common.Address, psdk pooltypes.PoolsSDK) (interest *big.Int, principal *big.Int, err error) {
-	eventsAPI := psdk.Extern().GetEventsAPI()
-	url := fmt.Sprintf("%s/agent/%s", eventsAPI, agentAddr)
+func GetAgentDebtFromAPI(agentAddr common.Address, eventsURL string) (interest *big.Int, principal *big.Int, err error) {
+	url := fmt.Sprintf("%s/agent/%s", eventsURL, agentAddr)
 	// Making an HTTP GET request
 	resp, err := http.Get(url)
 	if err != nil {

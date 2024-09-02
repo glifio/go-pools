@@ -67,5 +67,5 @@ func (c *fevmExtern) ConnectAdoClient(ctx context.Context) (jsonrpc.ClientCloser
 }
 
 func (c *fevmExtern) GetEventsAPI() string {
-	return c.eventsAddr
+	return c.eventsURL
 }
