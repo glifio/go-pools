@@ -55,3 +55,24 @@ type TerminateSectorResult struct {
 	LiveSectors    uint64
 	FaultySectors  uint64
 }
+
+type AgentMarginJSON struct {
+	AgentId                uint64  `json:"agentId"`
+	Balance                string  `json:"balance"`
+	SpendableBalance       string  `json:"spendableBalance"`
+	AvailableBalance       string  `json:"availableBalance"`
+	LockedRewards          string  `json:"lockedRewards"`
+	FeeDebt                string  `json:"feeDebt"`
+	InitialPledge          string  `json:"initialPledge"`
+	TerminationPenalty     string  `json:"terminationPenalty"`
+	LiquidationValue       string  `json:"liquidationValue"`
+	Margin                 string  `json:"margin"`
+	MarginCall             string  `json:"marginCall"`
+	Principal              string  `json:"principal"`
+	Interest               string  `json:"interest"`
+	DTL                    float64 `json:"dtl"`
+	LeverageRatio          float64 `json:"leverageRatio"`
+	BorrowLimit            string  `json:"borrowLimit"`
+	BorrowAndWithdrawLimit string  `json:"borrowAndWithdrawLimit"`
+	WithdrawLimit          string  `json:"withdrawLimit"`
+}
