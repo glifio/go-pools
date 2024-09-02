@@ -145,7 +145,7 @@ func AllSectors(ctx context.Context, api *lotusapi.FullNodeStruct, minerAddr add
 	return allSectors.All(math.MaxUint64)
 }
 
-func SampleSectors(sectors []uint64, max int) []uint64 {
+func SampleSectors(sectors []uint64, samples int) []uint64 {
 	sectorCount := len(sectors)
 
 	// If there are no sectors, return an empty slice
@@ -153,21 +153,18 @@ func SampleSectors(sectors []uint64, max int) []uint64 {
 		return []uint64{}
 	}
 
-	// Initialize the number of samples to the maximum number of samples
-	samples := max
-	// Compute the step size for evenly spaced sampling
-	step := int(float64(sectorCount-1) / float64(samples-1))
-
 	// If there are fewer sectors than the maximum number of samples, sample all sectors
-	if sectorCount < max {
-		samples = sectorCount
-		step = 1
+	if sectorCount <= samples {
+		return sectors
 	}
+	
+	// Compute the step size for evenly spaced sampling
+	step := float64(sectorCount-1) / float64(samples-1)
 
 	// Sample the sectors
 	sampledSectors := make([]uint64, samples)
 	for i := 0; i < samples; i++ {
-		index := i * step
+		index := int(float64(i) * step)
 		sampledSectors[i] = sectors[index]
 	}
 
