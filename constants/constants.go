@@ -56,11 +56,6 @@ var (
 	RouteInfinityPool  Route = "ROUTER_INFINITY_POOL"
 )
 
-var dialAddr = "https://api.node.glif.io/rpc/v1"
-var t_dialAddr = "https://api.calibration.node.glif.io/rpc/v1"
-
-var EventsURL = "https://events.glif.link"
-
 var MAX_UINT256 = new(big.Int).Sub(new(big.Int).Exp(big.NewInt(2), big.NewInt(256), nil), big.NewInt(1))
 var WAD = big.NewInt(1e18)
 

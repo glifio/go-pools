@@ -127,6 +127,7 @@ type FEVMExtern interface {
 	ConnectEthClient() (*ethclient.Client, error)
 	ConnectLotusClient() (*api.FullNodeStruct, jsonrpc.ClientCloser, error)
 	ConnectAdoClient(ctx context.Context) (jsonrpc.ClientCloser, error)
+	GetEventsURL() string
 }
 
 //go:generate mockery --name PoolsSDK
@@ -151,4 +152,5 @@ type Extern struct {
 	AdoAddr       string `json:"adoAddr"`
 	LotusDialAddr string `json:"lotusDialAddr"`
 	LotusToken    string `json:"lotusToken"`
+	EventsURL     string `json:"eventsURL"`
 }

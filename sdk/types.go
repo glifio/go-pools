@@ -19,6 +19,7 @@ type fevmExtern struct {
 	token        string
 	adoAddr      string
 	adoNamespace string
+	eventsURL    string
 	types.FEVMExtern
 }
 

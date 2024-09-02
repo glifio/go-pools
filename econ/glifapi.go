@@ -10,11 +10,10 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/filecoin-project/go-address"
 	"github.com/filecoin-project/go-state-types/abi"
-	"github.com/glifio/go-pools/constants"
 )
 
-func GetAgentFiFromAPI(agentAddr common.Address) (*AgentFi, error) {
-	url := fmt.Sprintf("%s/agent/%s/collateral-value", constants.EventsURL, agentAddr)
+func GetAgentFiFromAPI(agentAddr common.Address, eventsURL string) (*AgentFi, error) {
+	url := fmt.Sprintf("%s/agent/%s/collateral-value", eventsURL, agentAddr)
 	// Making an HTTP GET request
 	resp, err := http.Get(url)
 	if err != nil {
@@ -69,7 +68,7 @@ func GetAgentFiFromAPI(agentAddr common.Address) (*AgentFi, error) {
 		)
 	}
 
-	interest, principal, err := GetAgentDebtFromAPI(agentAddr)
+	interest, principal, err := GetAgentDebtFromAPI(agentAddr, eventsURL)
 	if err != nil {
 		return nil, err
 	}
@@ -98,11 +97,11 @@ type AgentInfo struct {
 	PrincipalBalance string `json:"principalBalance"`
 }
 
-func GetBaseFisFromAPI(agentAddr common.Address) (miners []address.Address, baseFis []*BaseFi, err error) {
+func GetBaseFisFromAPI(agentAddr common.Address, eventsURL string) (miners []address.Address, baseFis []*BaseFi, err error) {
 	baseFis = make([]*BaseFi, 0)
 	miners = make([]address.Address, 0)
 
-	url := fmt.Sprintf("%s/agent/%s/collateral-value", constants.EventsURL, agentAddr)
+	url := fmt.Sprintf("%s/agent/%s/collateral-value", eventsURL, agentAddr)
 	// Making an HTTP GET request
 	resp, err := http.Get(url)
 	if err != nil {
@@ -154,8 +153,8 @@ func GetBaseFisFromAPI(agentAddr common.Address) (miners []address.Address, base
 	return miners, baseFis, nil
 }
 
-func GetAgentDebtFromAPI(agentAddr common.Address) (interest *big.Int, principal *big.Int, err error) {
-	url := fmt.Sprintf("%s/agent/%s", constants.EventsURL, agentAddr)
+func GetAgentDebtFromAPI(agentAddr common.Address, eventsURL string) (interest *big.Int, principal *big.Int, err error) {
+	url := fmt.Sprintf("%s/agent/%s", eventsURL, agentAddr)
 	// Making an HTTP GET request
 	resp, err := http.Get(url)
 	if err != nil {
