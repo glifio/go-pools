@@ -75,4 +75,6 @@ type AgentMarginJSON struct {
 	BorrowLimit            string  `json:"borrowLimit"`
 	BorrowAndWithdrawLimit string  `json:"borrowAndWithdrawLimit"`
 	WithdrawLimit          string  `json:"withdrawLimit"`
+	LiveSectors            uint64  `json:"liveSectors"`
+	FaultySectors          uint64  `json:"faultySectors"`
 }
