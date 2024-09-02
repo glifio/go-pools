@@ -64,7 +64,7 @@ type AgentMarginJSON struct {
 	LockedRewards          string  `json:"lockedRewards"`
 	FeeDebt                string  `json:"feeDebt"`
 	InitialPledge          string  `json:"initialPledge"`
-	TerminationPenalty     string  `json:"terminationPenalty"`
+	TerminationFee         string  `json:"terminationFee"`
 	LiquidationValue       string  `json:"liquidationValue"`
 	Margin                 string  `json:"margin"`
 	MarginCall             string  `json:"marginCall"`
