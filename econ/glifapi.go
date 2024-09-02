@@ -9,7 +9,6 @@ import (
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/filecoin-project/go-address"
-	"github.com/filecoin-project/go-state-types/abi"
 )
 
 func GetAgentFiFromAPI(agentAddr common.Address, eventsURL string) (*AgentFi, error) {
@@ -28,7 +27,7 @@ func GetAgentFiFromAPI(agentAddr common.Address, eventsURL string) (*AgentFi, er
 			return EmptyAgentFi(), nil
 		}
 
-		return nil, fmt.Errorf("error fetching collateral stats. Status code: %d", resp.StatusCode)
+		return nil, fmt.Errorf("error fetching margin. Status code: %d", resp.StatusCode)
 	}
 
 	body, err := io.ReadAll(resp.Body)
@@ -133,7 +132,7 @@ func GetBaseFisFromAPI(agentAddr common.Address, eventsURL string) (miners []add
 	baseFis = make([]*BaseFi, 0)
 	miners = make([]address.Address, 0)
 
-	url := fmt.Sprintf("%s/agent/%s/collateral-value", eventsURL, agentAddr)
+	url := fmt.Sprintf("%s/agent/%s/miners", eventsURL, agentAddr)
 	// Making an HTTP GET request
 	resp, err := http.Get(url)
 	if err != nil {
@@ -156,89 +155,65 @@ func GetBaseFisFromAPI(agentAddr common.Address, eventsURL string) (miners []add
 		return nil, nil, err
 	}
 
-	var response agentCollateralStats
+	var response []MinerDetailsJSON
 	if err := json.Unmarshal(body, &response); err != nil {
 		return nil, nil, err
 	}
 
 	// convert the miners stats to the econ package's type
-	for _, miner := range response.MinersTerminationStats {
-		m, err := convertToBigInt(miner)
-		if err != nil {
-			return nil, nil, err
+	for _, miner := range response {
+		bal, ok := new(big.Int).SetString(miner.Balance, 10)
+		if !ok {
+			return nil, nil, fmt.Errorf("error converting miner balance to big.Int")
 		}
-		miners = append(miners, m.Address)
+
+		avail, ok := new(big.Int).SetString(miner.AvailableBalance, 10)
+		if !ok {
+			return nil, nil, fmt.Errorf("error converting miner available balance to big.Int")
+		}
+
+		ip, ok := new(big.Int).SetString(miner.InitialPledge, 10)
+		if !ok {
+			return nil, nil, fmt.Errorf("error converting miner initial pledge to big.Int")
+		}
+
+		locked, ok := new(big.Int).SetString(miner.LockedRewards, 10)
+		if !ok {
+			return nil, nil, fmt.Errorf("error converting miner locked rewards to big.Int")
+		}
+
+		feeDebt, ok := new(big.Int).SetString(miner.FeeDebt, 10)
+		if !ok {
+			return nil, nil, fmt.Errorf("error converting miner fee debt to big.Int")
+		}
+
+		termFee, ok := new(big.Int).SetString(miner.TerminationFee, 10)
+		if !ok {
+			return nil, nil, fmt.Errorf("error converting miner termination fee to big.Int")
+		}
+
+		live, ok := new(big.Int).SetString(miner.LiveSectors, 10)
+		if !ok {
+			return nil, nil, fmt.Errorf("error converting miner live sectors to big.Int")
+		}
+
+		faulty, ok := new(big.Int).SetString(miner.FaultySectors, 10)
+		if !ok {
+			return nil, nil, fmt.Errorf("error converting miner faulty sectors to big.Int")
+		}
+
+		miners = append(miners, miner.MinerAddr)
 		baseFis = append(baseFis, NewBaseFi(
-			m.Total,
-			m.Available,
-			m.Vesting,
-			m.Pledged,
-			// TODO: https://github.com/glifio/go-db/issues/3
-			big.NewInt(0),
-			m.TerminationPenalty,
-			// TODO: merge liveSectors stuff in pools-events
-			big.NewInt(0),
-			big.NewInt(0),
+			bal,
+			avail,
+			locked,
+			ip,
+			feeDebt,
+			termFee,
+			live,
+			faulty,
 		))
 	}
 
 	return miners, baseFis, nil
-}
-
-type minerCollateralStat struct {
-	Address            address.Address `json:"address"`
-	Total              string          `json:"total"`
-	Available          string          `json:"available"`
-	Pledged            string          `json:"pledged"`
-	Vesting            string          `json:"vesting"`
-	TerminationPenalty string          `json:"terminationPenalty"`
-}
-
-type agentCollateralStats struct {
-	AvailableBalance       string                 `json:"agentAvailableBalance"`
-	TerminationPenalty     string                 `json:"terminationPenalty"`
-	MinersTerminationStats []*minerCollateralStat `json:"minersCollateralStats"`
-	Epoch                  abi.ChainEpoch
-}
-
-type minerCollateralStatBig struct {
-	Address            address.Address `json:"address"`
-	Total              *big.Int        `json:"total"`
-	Available          *big.Int        `json:"available"`
-	Pledged            *big.Int        `json:"pledged"`
-	Vesting            *big.Int        `json:"vesting"`
-	TerminationPenalty *big.Int        `json:"terminationPenalty"`
-}
-
-func convertToBigInt(m *minerCollateralStat) (*minerCollateralStatBig, error) {
-	// convert all string types to big.Int
-	total, ok := new(big.Int).SetString(m.Total, 10)
-	if !ok {
-		return nil, fmt.Errorf("error converting miner total collateral to big.Int")
-	}
-	available, ok := new(big.Int).SetString(m.Available, 10)
-	if !ok {
-		return nil, fmt.Errorf("error converting miner available collateral to big.Int")
-	}
-	pledged, ok := new(big.Int).SetString(m.Pledged, 10)
-	if !ok {
-		return nil, fmt.Errorf("error converting miner pledged collateral to big.Int")
-	}
-	vesting, ok := new(big.Int).SetString(m.Vesting, 10)
-	if !ok {
-		return nil, fmt.Errorf("error converting miner vesting collateral to big.Int")
-	}
-	tp, ok := new(big.Int).SetString(m.TerminationPenalty, 10)
-	if !ok {
-		return nil, fmt.Errorf("error converting miner termination penalty to big.Int")
-	}
-
-	return &minerCollateralStatBig{
-		Address:            m.Address,
-		Total:              total,
-		Available:          available,
-		Pledged:            pledged,
-		Vesting:            vesting,
-		TerminationPenalty: tp,
-	}, nil
 }
