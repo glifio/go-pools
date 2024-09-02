@@ -14,9 +14,9 @@ import (
 	"github.com/filecoin-project/go-bitfield"
 	"github.com/filecoin-project/go-state-types/abi"
 	"github.com/filecoin-project/lotus/chain/types"
-	"github.com/glifio/go-pools/constants"
 	"github.com/glifio/go-pools/terminate"
 	"github.com/glifio/go-pools/util"
+	"github.com/glifio/go-pools/constants"
 )
 
 // this test compares N random miner termination penalties computed in the most precise (time intensive) way against the quick, less precise sampling method used in the ADO
@@ -36,6 +36,7 @@ var tests = []struct {
 	want    string
 }{
 	{"empty miner", "f01882569", 4182470, 1000, "0"},
+	{"miner", "f08403", 4171951, 1000, "685608907628163727896"},
 	{"miner", "f01344987", 4161576, 1000, "19784479924073946376310"},
 	{"miner", "f01824405", 4157809, 1000, "15276221548081039917042"},
 	{"miner", "f08403", 4157809, 1000, "669276103568731990330"},
@@ -43,7 +44,7 @@ var tests = []struct {
 	{"miner", "f01847751", 4157809, 1000, "10305264645060108083102"},
 	{"miner", "f01315096", 4157809, 1000, "25865743620631274061184"},
 	{"miner", "f02177086", 4158864, 1000, "206662397221857395692"},
-	{"miner", "f01889668", 4157809, 1000, "25205954710368106840743"},
+	{"miner", "f01889668", 4157809, 1000, "25205954710368106840743"},	
 }
 
 func TestTerminationOffChainFullMiner(t *testing.T) {
@@ -407,7 +408,7 @@ var baseFiTests = []struct {
 	}},
 }
 
-func TestBaseFi(t *testing.T) {
+func TestMinerFi(t *testing.T) {
 	psdk, err := setupTest()
 	if err != nil {
 		t.Fatal(err)
@@ -436,16 +437,16 @@ func TestBaseFi(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
+			
+			minerFi := MinerFi{BaseFi: *ret.ToBaseFi()}
+			lv := minerFi.LiquidationValue()
 
-			baseFi := ret.ToBaseFi()
-			lv := baseFi.LiquidationValue()
-
-			assertBaseFiEqual(t, &tt.want, baseFi)
+			assertBaseFiEqual(t, &tt.want, &minerFi)
 
 			// if the miner can borrow, test the limits
 			if lv.Sign() == 1 {
 				// test the max borrow and seal by simulating a borrow
-				maxBorrowAndSeal := baseFi.MaxBorrowAndSeal()
+				maxBorrowAndSeal := minerFi.MaxBorrowAndSeal()
 				// new collateral value after borrowing
 				newCollateralValue := big.NewInt(0).Add(lv, maxBorrowAndSeal)
 				// test under DTL
@@ -455,7 +456,7 @@ func TestBaseFi(t *testing.T) {
 				}
 
 				// test max borrow and withdraw by simulating a borrow and withdraw
-				maxBorrowAndWithdraw := baseFi.MaxBorrowAndWithdraw()
+				maxBorrowAndWithdraw := minerFi.MaxBorrowAndWithdraw()
 				// new collateral value after borrowing is the old liquidation value
 				newCollateralValue = lv
 				// test under DTL
@@ -663,7 +664,7 @@ func assertAgentFiEqual(t *testing.T, expected *agentFiTest, actual *AgentFi) {
 	}
 }
 
-func assertBaseFiEqual(t *testing.T, expected *baseFiTest, actual *BaseFi) {
+func assertBaseFiEqual(t *testing.T, expected *baseFiTest, actual *MinerFi) {
 	if expected.AvailableBalance.Cmp(actual.AvailableBalance) != 0 {
 		t.Fatalf("Expected available balance: %v, actual: %v", expected.AvailableBalance, actual.AvailableBalance)
 	}
@@ -688,7 +689,6 @@ func assertBaseFiEqual(t *testing.T, expected *baseFiTest, actual *BaseFi) {
 	if expected.LiveSectors.Cmp(actual.LiveSectors) != 0 {
 		t.Fatalf("Expected live sectors: %v, actual: %v", expected.LiveSectors, actual.LiveSectors)
 	}
-
 	if expected.maxBorrowAndSeal.Cmp(actual.MaxBorrowAndSeal()) != 0 {
 		t.Fatalf("Expected max borrow and seal: %v, actual: %v", expected.maxBorrowAndSeal, actual.MaxBorrowAndSeal())
 	}
