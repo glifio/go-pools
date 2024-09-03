@@ -192,23 +192,12 @@ func (q *fevmQueries) AgentLiquidAssets(ctx context.Context, address common.Addr
 }
 
 func (q *fevmQueries) AgentPrincipal(ctx context.Context, agentAddr common.Address, blockNumber *big.Int) (*big.Int, error) {
-	ethClient, err := q.extern.ConnectEthClient()
-	if err != nil {
-		return nil, err
-	}
-	defer ethClient.Close()
-
-	agentID, err := q.AgentID(ctx, agentAddr)
+	account, err := q.AgentAccount(ctx, agentAddr, constants.INFINITY_POOL_ID, blockNumber)
 	if err != nil {
 		return nil, err
 	}
 
-	poolCaller, err := abigen.NewInfinityPoolV2(q.infinityPool, ethClient)
-	if err != nil {
-		return nil, err
-	}
-
-	return poolCaller.GetAgentBorrowed(&bind.CallOpts{Context: ctx, BlockNumber: blockNumber}, agentID)
+	return account.Principal, nil
 }
 
 func (q *fevmQueries) AgentAccount(ctx context.Context, agentAddr common.Address, poolID *big.Int, blockNumber *big.Int) (abigen.Account, error) {
@@ -275,17 +264,41 @@ func (q *fevmQueries) AgentInterestOwed(ctx context.Context, agentAddr common.Ad
 		return nil, err
 	}
 
-	pool, err := abigen.NewInfinityPoolV2Caller(q.infinityPool, ethClient)
+	account, err := q.AgentAccount(ctx, agentAddr, constants.INFINITY_POOL_ID, blockNumber)
 	if err != nil {
 		return nil, err
 	}
 
-	id, err := q.AgentID(ctx, agentAddr)
-	if err != nil {
-		return nil, err
+	// empty account has no interest owed
+	if account.EpochsPaid.Cmp(big.NewInt(0)) == 0 {
+		return big.NewInt(0), nil
 	}
 
-	return pool.GetAgentInterestOwed(&bind.CallOpts{Context: ctx, BlockNumber: blockNumber}, id)
+	if blockNumber == nil || blockNumber.Cmp(big.NewInt(0)) == 0 {
+		chainHead, err := ethClient.BlockNumber(ctx)
+		if err != nil {
+			return nil, err
+		}
+		blockNumber = big.NewInt(int64(chainHead))
+	}
+
+	if account.EpochsPaid.Cmp(blockNumber) >= 0 {
+		return big.NewInt(0), nil
+	}
+
+	perEpochRate := new(big.Int).Div(
+		new(big.Int).Mul(INF_POOL_APR, constants.WAD),
+		big.NewInt(constants.EpochsInYear),
+	)
+	interestPerEpoch := new(big.Int).Mul(perEpochRate, account.Principal)
+	epochsOwed := new(big.Int).Sub(blockNumber, account.EpochsPaid)
+	interestOwed := new(big.Int).Mul(epochsOwed, interestPerEpoch)
+
+	// div out the extra precision (add 1 to round up)
+	interestOwed.Div(interestOwed, constants.WAD)
+	interestOwed.Div(interestOwed, constants.WAD)
+
+	return interestOwed, nil
 }
 
 func (q *fevmQueries) AgentDebt(ctx context.Context, agentAddr common.Address, blockNumber *big.Int) (*big.Int, error) {

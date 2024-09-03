@@ -12,6 +12,7 @@ var t_dialAddr = "https://api.calibration.node.glif.io/rpc/v1"
 
 var MainnetEventsURL = "https://events.glif.link"
 var CalibnetEventsURL = "https://events-calibration.glif.link"
+var StagingEventsURL = "https://events-staging.glif.link"
 
 var Extern = types.Extern{
 	AdoAddr:       "https://ado.glif.link/rpc/v1",

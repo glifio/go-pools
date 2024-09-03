@@ -14,9 +14,9 @@ import (
 	"github.com/filecoin-project/go-bitfield"
 	"github.com/filecoin-project/go-state-types/abi"
 	"github.com/filecoin-project/lotus/chain/types"
+	"github.com/glifio/go-pools/constants"
 	"github.com/glifio/go-pools/terminate"
 	"github.com/glifio/go-pools/util"
-	"github.com/glifio/go-pools/constants"
 )
 
 // this test compares N random miner termination penalties computed in the most precise (time intensive) way against the quick, less precise sampling method used in the ADO
@@ -44,7 +44,7 @@ var tests = []struct {
 	{"miner", "f01847751", 4157809, 1000, "10305264645060108083102"},
 	{"miner", "f01315096", 4157809, 1000, "25865743620631274061184"},
 	{"miner", "f02177086", 4158864, 1000, "206662397221857395692"},
-	{"miner", "f01889668", 4157809, 1000, "25205954710368106840743"},	
+	{"miner", "f01889668", 4157809, 1000, "25205954710368106840743"},
 }
 
 func TestTerminationOffChainFullMiner(t *testing.T) {
@@ -437,7 +437,7 @@ func TestMinerFi(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
-			
+
 			minerFi := MinerFi{BaseFi: *ret.ToBaseFi()}
 			lv := minerFi.LiquidationValue()
 
@@ -505,13 +505,13 @@ var agentTests = []struct {
 				Interest:  bigFromStr("0"),
 			},
 		},
-		maxBorrowAndSeal:     bigFromStr("5648313602306603954444565"),
-		maxBorrowAndWithdraw: bigFromStr("1412078400576650988611142"),
+		maxBorrowAndSeal:     bigFromStr("2404308374838024502536372"),
+		maxBorrowAndWithdraw: bigFromStr("330743324753791171308411"),
 		liquidationValue:     bigFromStr("1882771200768867984814855"),
-		borrowLimit:          bigFromStr("4567058602303521762663742"),
-		withdrawLimit:        bigFromStr("441097867431425062440425"),
-		marginCall:           bigFromStr("1272064705885979049153909"),
-		leverageRatio:        0.5742891114764925,
+		borrowLimit:          bigFromStr("1322973299015164685233641"),
+		withdrawLimit:        bigFromStr("8911457546764252091903"),
+		marginCall:           bigFromStr("1272158912732776255650271"),
+		leverageRatio:        0.5743316423053819,
 	}},
 	// agent 27
 	{"agent no miners", "0xDBa96B0FDbc87C7eEb641Ee37EAFC55B355079E4", agentFiTest{
@@ -543,13 +543,13 @@ var agentTests = []struct {
 				Interest:  bigFromStr("0"),
 			},
 		},
-		maxBorrowAndSeal:     bigFromStr("361258756990414938951"),
-		maxBorrowAndWithdraw: bigFromStr("90314689247603734738"),
+		maxBorrowAndSeal:     bigFromStr("355241600312332747173"),
+		maxBorrowAndWithdraw: bigFromStr("88308970354909670812"),
 		liquidationValue:     bigFromStr("120419585663471646317"),
-		borrowLimit:          bigFromStr("359258756990414938951"),
-		withdrawLimit:        bigFromStr("117752918996804979651"),
-		marginCall:           bigFromStr("2352941176470588235"),
-		leverageRatio:        0.0166085939341235,
+		borrowLimit:          bigFromStr("353235881419638683247"),
+		withdrawLimit:        bigFromStr("57665444302030819344"),
+		marginCall:           bigFromStr("2359669285522428148"),
+		leverageRatio:        0.016656085317377764,
 	}},
 	// agent 91
 	{"agent miner with fee debt", "0xFF65F5f3D309fEA7aA2d4cB2727E918FAb0aE7F7", agentFiTest{

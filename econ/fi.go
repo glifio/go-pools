@@ -148,6 +148,7 @@ func EmptyAgentFi() *AgentFi {
 			Principal: big.NewInt(0),
 			Interest:  big.NewInt(0),
 		},
+		SpendableBalance: big.NewInt(0),
 	}
 }
 

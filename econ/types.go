@@ -2,6 +2,8 @@ package econ
 
 import (
 	"math/big"
+
+	"github.com/filecoin-project/go-address"
 )
 
 type BaseFi struct {
@@ -54,4 +56,48 @@ type TerminateSectorResult struct {
 	SampledSectors uint64
 	LiveSectors    uint64
 	FaultySectors  uint64
+}
+
+type AgentMarginJSON struct {
+	AgentId                uint64  `json:"agentId"`
+	Balance                string  `json:"balance"`
+	SpendableBalance       string  `json:"spendableBalance"`
+	AvailableBalance       string  `json:"availableBalance"`
+	LockedRewards          string  `json:"lockedRewards"`
+	FeeDebt                string  `json:"feeDebt"`
+	InitialPledge          string  `json:"initialPledge"`
+	TerminationFee         string  `json:"terminationFee"`
+	LiquidationValue       string  `json:"liquidationValue"`
+	Margin                 string  `json:"margin"`
+	MarginCall             string  `json:"marginCall"`
+	Principal              string  `json:"principal"`
+	Interest               string  `json:"interest"`
+	DTL                    float64 `json:"dtl"`
+	LeverageRatio          float64 `json:"leverageRatio"`
+	BorrowLimit            string  `json:"borrowLimit"`
+	BorrowAndWithdrawLimit string  `json:"borrowAndWithdrawLimit"`
+	WithdrawLimit          string  `json:"withdrawLimit"`
+	LiveSectors            string  `json:"liveSectors"`
+	FaultySectors          string  `json:"faultySectors"`
+}
+
+type MinerDetailsJSON struct {
+	Miner                  uint64          `json:"miner"`
+	AgentId                uint64          `json:"agentId"`
+	Actions                uint16          `json:"actions"`
+	MinerAddr              address.Address `json:"minerAddr"`
+	AvailableBalance       string          `json:"availableBalance"`
+	InitialPledge          string          `json:"initialPledge"`
+	LockedRewards          string          `json:"lockedRewards"`
+	FeeDebt                string          `json:"feeDebt"`
+	Balance                string          `json:"balance"`
+	EstimatedWeeklyRewards string          `json:"estimatedWeeklyRewards"`
+	QAP                    string          `json:"qap"`
+	RBP                    string          `json:"rbp"`
+	LiveSectors            string          `json:"liveSectors"`
+	FaultySectors          string          `json:"faultySectors"`
+	RecoveringSectors      string          `json:"recoveringSectors"`
+	Ratio                  string          `json:"ratio"`
+	TerminationFee         string          `json:"terminationFee"`
+	LiquidationValue       string          `json:"liquidationValue"`
 }
