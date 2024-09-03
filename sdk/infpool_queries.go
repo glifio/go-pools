@@ -11,6 +11,8 @@ import (
 	"github.com/glifio/go-pools/util"
 )
 
+var INF_POOL_APR = big.NewInt(15e16)
+
 func (q *fevmQueries) InfPoolGetAccount(ctx context.Context, agentAddr common.Address, blockNumber *big.Int) (abigen.Account, error) {
 	return q.AgentAccount(ctx, agentAddr, constants.INFINITY_POOL_ID, blockNumber)
 }
