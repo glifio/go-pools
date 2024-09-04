@@ -1,10 +1,10 @@
 package econ
 
 import (
-	"math"
 	"math/big"
 
 	"github.com/glifio/go-pools/constants"
+	"github.com/glifio/go-pools/util"
 )
 
 func NewBaseFi(
@@ -200,16 +200,12 @@ func (bfi *BaseFi) LiquidationValue() *big.Int {
 	return new(big.Int).Sub(bfi.Balance, bfi.TerminationFee)
 }
 
-func (bfi *BaseFi) RecoveryRate() float64 {
+func (bfi *BaseFi) RecoveryRate() *big.Float {
 	if bfi.Balance.Cmp(big.NewInt(0)) == 0 {
-		return 0
+		return big.NewFloat(0)
 	}
 
-	rr, _ := new(big.Float).Quo(
-		new(big.Float).SetInt(bfi.LiquidationValue()),
-		new(big.Float).SetInt(bfi.Balance)).Float64()
-
-	return rr
+	return computePerc(bfi.LiquidationValue(), bfi.Balance)
 }
 
 // MaxBorrowAndSeal = margin / (1 - max borrow DTL) - margin
@@ -294,30 +290,32 @@ func (afi *AgentFi) LeverageRatio() *big.Float {
 		return new(big.Float).SetInf(true)
 	}
 
-	return new(big.Float).Quo(
-		new(big.Float).SetInt(afi.LiquidationValue()),
-		new(big.Float).SetInt(afi.Margin()))
+	return computePerc(afi.LiquidationValue(), afi.Margin())
 }
 
-func (afi *AgentFi) DTL() float64 {
+func (afi *AgentFi) DTL() *big.Float {
 	// if debt is zero then DTL is 0
 	if afi.Debt().Cmp(big.NewInt(0)) == 0 {
-		return 0
+		return big.NewFloat(0)
 	}
 	lv := afi.LiquidationValue()
 	// if liquidation value is zero and debt is non zero then DTL is infinite
 	if lv.Cmp(big.NewInt(0)) == 0 {
 		// return positive infinite float
-		return math.Inf(1)
+		return new(big.Float).SetInf(true)
 	}
-	dtl, _ := new(big.Float).Quo(
-		new(big.Float).SetInt(afi.Debt()),
-		new(big.Float).SetInt(afi.LiquidationValue()),
-	).Float64()
 
-	return dtl
+	return computePerc(afi.Debt(), afi.LiquidationValue())
 }
 
 func (l *Liability) Debt() *big.Int {
 	return new(big.Int).Add(l.Principal, l.Interest)
+}
+
+func computePerc(numerator, denominator *big.Int) *big.Float {
+	if denominator.Cmp(big.NewInt(0)) == 0 {
+		return new(big.Float).SetInf(true)
+	}
+
+	return util.ToFIL(util.DivWad(numerator, denominator))
 }
