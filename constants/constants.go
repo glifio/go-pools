@@ -39,6 +39,7 @@ var (
 	MethodPushFunds    Method = "pushFunds"
 	MethodPullFunds    Method = "pullFunds"
 	MethodSetRecovered Method = "setRecovered"
+	MethodDefaultDTL   Method = "setAgentDefaultDTL"
 )
 
 type Route string
@@ -52,12 +53,8 @@ var (
 	RouteVCIssuer      Route = "ROUTER_VC_ISSUER"
 	RouteCredParser    Route = "ROUTER_CRED_PARSER"
 	RouteAgentDeployer Route = "ROUTER_AGENT_DEPLOYER"
+	RouteInfinityPool  Route = "ROUTER_INFINITY_POOL"
 )
-
-var dialAddr = "https://api.node.glif.io/rpc/v1"
-var t_dialAddr = "https://api.calibration.node.glif.io/rpc/v1"
-
-var EventsURL = "https://events.glif.link"
 
 var MAX_UINT256 = new(big.Int).Sub(new(big.Int).Exp(big.NewInt(2), big.NewInt(256), nil), big.NewInt(1))
 var WAD = big.NewInt(1e18)
@@ -70,7 +67,5 @@ var CHUNKSIZE = big.NewInt(EpochsInDay)
 
 var FAULTY_SECTOR_TOLERANCE = big.NewFloat(0.001)
 
-// NOTE these should be generated in the future from the live values in the contracts
-var MAX_DTE = big.NewInt(2e18)
-var MAX_LTV = big.NewInt(8e17)
-var MAX_DTI = big.NewInt(25e16)
+var MAX_BORROW_DTL = big.NewInt(75e16)
+var LIQUIDATION_DTL = big.NewInt(85e16)

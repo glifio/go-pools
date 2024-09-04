@@ -210,3 +210,71 @@ func Digest(
 
 	return crypto.Keccak256Hash([]byte(rawData)), nil
 }
+
+func DecodeVCClaims(vcred *abigen.VerifiableCredential) (*AgentData, error) {
+	var claimData AgentData
+	uint256Ty, _ := abi.NewType("uint256", "", nil)
+	// create an ABI argument list for AgentData struct
+	arguments := abi.Arguments{
+		abi.Argument{
+			Type: uint256Ty,
+			Name: "AgentValue",
+		},
+		abi.Argument{
+			Type: uint256Ty,
+			Name: "CollateralValue",
+		},
+		abi.Argument{
+			Type: uint256Ty,
+			Name: "ExpectedDailyFaultPenalties",
+		},
+		abi.Argument{
+			Type: uint256Ty,
+			Name: "ExpectedDailyRewards",
+		},
+		abi.Argument{
+			Type: uint256Ty,
+			Name: "Gcred",
+		},
+		abi.Argument{
+			Type: uint256Ty,
+			Name: "QaPower",
+		},
+		abi.Argument{
+			Type: uint256Ty,
+			Name: "Principal",
+		},
+		abi.Argument{
+			Type: uint256Ty,
+			Name: "FaultySectors",
+		},
+		abi.Argument{
+			Type: uint256Ty,
+			Name: "LiveSectors",
+		},
+		abi.Argument{
+			Type: uint256Ty,
+			Name: "GreenScore",
+		},
+	}
+
+	// unpack the claim field
+	claimValues, err := arguments.Unpack(vcred.Claim)
+	if err != nil {
+		return nil, err
+	}
+
+	// map the claim values to their respective fields in the AgentData struct
+	claimData.AgentValue = claimValues[0].(*big.Int)
+	claimData.CollateralValue = claimValues[1].(*big.Int)
+	claimData.ExpectedDailyFaultPenalties = claimValues[2].(*big.Int)
+	claimData.ExpectedDailyRewards = claimValues[3].(*big.Int)
+	claimData.Gcred = claimValues[4].(*big.Int)
+	claimData.QaPower = claimValues[5].(*big.Int)
+	claimData.Principal = claimValues[6].(*big.Int)
+	claimData.FaultySectors = claimValues[7].(*big.Int)
+	claimData.LiveSectors = claimValues[8].(*big.Int)
+	claimData.GreenScore = claimValues[9].(*big.Int)
+
+	return &claimData, nil
+}

@@ -1,6 +1,3 @@
-// Package terminate implements routines for previewing the costs of terminating
-// the sectors on the miners owned by an agent
-//
 // It is possible to preview the cost of terminating a single sector, or all
 // the sectors on a miner.“
 //
