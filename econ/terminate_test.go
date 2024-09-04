@@ -480,6 +480,7 @@ type agentFiTest struct {
 	withdrawLimit        *big.Int
 	marginCall           *big.Int
 	leverageRatio        float64
+	dtl                  float64
 }
 
 var agentTests = []struct {
@@ -513,6 +514,7 @@ var agentTests = []struct {
 		withdrawLimit:        bigFromStr("8911457546764252091903"),
 		marginCall:           bigFromStr("1272158912732776255650271"),
 		leverageRatio:        0.5743316423053819,
+		dtl:                  0.574289111476492565,
 	}},
 	// agent 27
 	{"agent no miners", "0xDBa96B0FDbc87C7eEb641Ee37EAFC55B355079E4", BLOCK_HEIGHT, agentFiTest{
@@ -525,6 +527,7 @@ var agentTests = []struct {
 		withdrawLimit:        big.NewInt(0),
 		marginCall:           big.NewInt(0),
 		leverageRatio:        0,
+		dtl:                  0,
 	}},
 	// agent 2
 	{"agent single miner", "0xf0F1ceCCF78D411EeD9Ca190ca7F157140cCB2d3", BLOCK_HEIGHT, agentFiTest{
@@ -551,6 +554,7 @@ var agentTests = []struct {
 		withdrawLimit:        bigFromStr("57665444302030819344"),
 		marginCall:           bigFromStr("2359669285522428148"),
 		leverageRatio:        0.016656085317377764,
+		dtl:                  0.016608593934123496,
 	}},
 	// agent 91
 	{"agent miner with fee debt", "0xFF65F5f3D309fEA7aA2d4cB2727E918FAb0aE7F7", BLOCK_HEIGHT, agentFiTest{
@@ -577,6 +581,7 @@ var agentTests = []struct {
 		withdrawLimit:        bigFromStr("0"),
 		marginCall:           bigFromStr("0"),
 		leverageRatio:        0,
+		dtl:                  0,
 	}},
 	{"agent with balance no miners", "0xf0F1ceCCF78D411EeD9Ca190ca7F157140cCB2d3", big.NewInt(4238800), agentFiTest{
 		AgentFi: &AgentFi{
@@ -602,6 +607,7 @@ var agentTests = []struct {
 		withdrawLimit:        bigFromStr("3454284493328524959"),
 		marginCall:           bigFromStr("0"),
 		leverageRatio:        0,
+		dtl:                  0,
 	}},
 	{"agent with balance no miners with principal", "0xf0F1ceCCF78D411EeD9Ca190ca7F157140cCB2d3", big.NewInt(4238810), agentFiTest{
 		AgentFi: &AgentFi{
@@ -627,6 +633,7 @@ var agentTests = []struct {
 		withdrawLimit:        bigFromStr("3120950589218935919"),
 		marginCall:           bigFromStr("1176471091861402094"),
 		leverageRatio:        0.22450304410954403,
+		dtl:                  0.224502948003829978,
 	}},
 }
 
@@ -659,6 +666,18 @@ func TestEstimateTermationFeeAgent(t *testing.T) {
 
 			assertAgentFiEqual(t, &tt.want, agentFi)
 		})
+	}
+}
+
+func TestComputePerc(t *testing.T) {
+	lv := bigFromStr("871702482492442116952350")
+	p := bigFromStr("343733044178305628615912")
+	i := bigFromStr("28202982363374106229")
+
+	perc := computePerc(new(big.Int).Add(p, i), lv)
+	exp := big.NewFloat(0.394356164017979036)
+	if perc.Cmp(exp) != 0 {
+		t.Fatalf("Expected perc: %v, actual: %v", exp, perc)
 	}
 }
 
@@ -709,8 +728,9 @@ func assertAgentFiEqual(t *testing.T, expected *agentFiTest, actual *AgentFi) {
 	if expected.marginCall.Cmp(actual.MarginCall()) != 0 {
 		t.Fatalf("Expected margin call: %v, actual: %v", expected.marginCall, actual.MarginCall())
 	}
-	if expected.leverageRatio != actual.DTL() {
-		t.Fatalf("Expected leverage ratio: %v, actual: %v", expected.leverageRatio, actual.DTL())
+	dtl, _ := actual.DTL().Float64()
+	if expected.leverageRatio != dtl {
+		t.Fatalf("Expected leverage ratio: %v, actual: %v", expected.leverageRatio, dtl)
 	}
 }
 
