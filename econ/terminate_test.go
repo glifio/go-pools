@@ -331,7 +331,7 @@ func TestEstimateTerminationPenalty2(t *testing.T) {
 	}
 }
 
-var BLOCK_HEIGHT = abi.ChainEpoch(4198539)
+var BLOCK_HEIGHT = big.NewInt(4198539)
 
 type baseFiTest struct {
 	*BaseFi
@@ -420,7 +420,7 @@ func TestMinerFi(t *testing.T) {
 	}
 	defer closer()
 
-	ts, err := lapi.ChainGetTipSetByHeight(context.Background(), BLOCK_HEIGHT, types.EmptyTSK)
+	ts, err := lapi.ChainGetTipSetByHeight(context.Background(), abi.ChainEpoch(BLOCK_HEIGHT.Int64()), types.EmptyTSK)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -485,10 +485,11 @@ type agentFiTest struct {
 var agentTests = []struct {
 	name  string
 	agent string
+	block *big.Int
 	want  agentFiTest
 }{
 	// agent 59
-	{"agent many miners", "0x64Ea1aD49A78B6A6878c4975566b8953b1Ef1e79", agentFiTest{
+	{"agent many miners", "0x64Ea1aD49A78B6A6878c4975566b8953b1Ef1e79", BLOCK_HEIGHT, agentFiTest{
 		AgentFi: &AgentFi{
 			BaseFi: BaseFi{
 				Balance:          bigFromStr("2090733730144435384596917"),
@@ -514,7 +515,7 @@ var agentTests = []struct {
 		leverageRatio:        0.5743316423053819,
 	}},
 	// agent 27
-	{"agent no miners", "0xDBa96B0FDbc87C7eEb641Ee37EAFC55B355079E4", agentFiTest{
+	{"agent no miners", "0xDBa96B0FDbc87C7eEb641Ee37EAFC55B355079E4", BLOCK_HEIGHT, agentFiTest{
 		AgentFi:              EmptyAgentFi(),
 		balance:              big.NewInt(0),
 		maxBorrowAndSeal:     big.NewInt(0),
@@ -526,7 +527,7 @@ var agentTests = []struct {
 		leverageRatio:        0,
 	}},
 	// agent 2
-	{"agent single miner", "0xf0F1ceCCF78D411EeD9Ca190ca7F157140cCB2d3", agentFiTest{
+	{"agent single miner", "0xf0F1ceCCF78D411EeD9Ca190ca7F157140cCB2d3", BLOCK_HEIGHT, agentFiTest{
 		AgentFi: &AgentFi{
 			BaseFi: BaseFi{
 				Balance:          bigFromStr("133252309755096579751"),
@@ -552,7 +553,7 @@ var agentTests = []struct {
 		leverageRatio:        0.016656085317377764,
 	}},
 	// agent 91
-	{"agent miner with fee debt", "0xFF65F5f3D309fEA7aA2d4cB2727E918FAb0aE7F7", agentFiTest{
+	{"agent miner with fee debt", "0xFF65F5f3D309fEA7aA2d4cB2727E918FAb0aE7F7", BLOCK_HEIGHT, agentFiTest{
 		AgentFi: &AgentFi{
 			BaseFi: BaseFi{
 				Balance:          bigFromStr("0"),
@@ -577,6 +578,56 @@ var agentTests = []struct {
 		marginCall:           bigFromStr("0"),
 		leverageRatio:        0,
 	}},
+	{"agent with balance no miners", "0xf0F1ceCCF78D411EeD9Ca190ca7F157140cCB2d3", big.NewInt(4238800), agentFiTest{
+		AgentFi: &AgentFi{
+			BaseFi: BaseFi{
+				Balance:          bigFromStr("3454284493328524959"),
+				AvailableBalance: bigFromStr("3454284493328524959"),
+				LockedRewards:    bigFromStr("0"),
+				InitialPledge:    bigFromStr("0"),
+				FeeDebt:          bigFromStr("0"),
+				TerminationFee:   bigFromStr("0"),
+				LiveSectors:      big.NewInt(0),
+				FaultySectors:    big.NewInt(0),
+			},
+			Liability: Liability{
+				Principal: bigFromStr("0"),
+				Interest:  bigFromStr("0"),
+			},
+		},
+		maxBorrowAndSeal:     bigFromStr("10362853479985574877"),
+		maxBorrowAndWithdraw: bigFromStr("2590713369996393720"),
+		liquidationValue:     bigFromStr("3454284493328524959"),
+		borrowLimit:          bigFromStr("10362853479985574877"),
+		withdrawLimit:        bigFromStr("3454284493328524959"),
+		marginCall:           bigFromStr("0"),
+		leverageRatio:        0,
+	}},
+	{"agent with balance no miners with principal", "0xf0F1ceCCF78D411EeD9Ca190ca7F157140cCB2d3", big.NewInt(4238810), agentFiTest{
+		AgentFi: &AgentFi{
+			BaseFi: BaseFi{
+				Balance:          bigFromStr("4454284493328524959"),
+				AvailableBalance: bigFromStr("4454284493328524959"),
+				LockedRewards:    bigFromStr("0"),
+				InitialPledge:    bigFromStr("0"),
+				FeeDebt:          bigFromStr("0"),
+				TerminationFee:   bigFromStr("0"),
+				LiveSectors:      big.NewInt(0),
+				FaultySectors:    big.NewInt(0),
+			},
+			Liability: Liability{
+				Principal: bigFromStr("1000000000000000000"),
+				Interest:  bigFromStr("0"),
+			},
+		},
+		maxBorrowAndSeal:     bigFromStr("10362852195738999537"),
+		maxBorrowAndWithdraw: bigFromStr("2340712941914201940"),
+		liquidationValue:     bigFromStr("4454284493328524959"),
+		borrowLimit:          bigFromStr("9362851767656807757"),
+		withdrawLimit:        bigFromStr("3120950589218935919"),
+		marginCall:           bigFromStr("1176471091861402094"),
+		leverageRatio:        0.22450304410954403,
+	}},
 }
 
 func TestEstimateTermationFeeAgent(t *testing.T) {
@@ -591,14 +642,13 @@ func TestEstimateTermationFeeAgent(t *testing.T) {
 	}
 	defer closer()
 
-	ts, err := lapi.ChainGetTipSetByHeight(context.Background(), BLOCK_HEIGHT, types.EmptyTSK)
-	if err != nil {
-		t.Fatal(err)
-	}
-
 	for _, tt := range agentTests {
 		testname := fmt.Sprintf("%s:%s", tt.name, tt.agent)
 		t.Run(testname, func(t *testing.T) {
+			ts, err := lapi.ChainGetTipSetByHeight(context.Background(), abi.ChainEpoch(tt.block.Uint64()), types.EmptyTSK)
+			if err != nil {
+				t.Fatal(err)
+			}
 
 			agent := common.HexToAddress(tt.agent)
 
@@ -632,7 +682,7 @@ func assertAgentFiEqual(t *testing.T, expected *agentFiTest, actual *AgentFi) {
 		t.Fatalf("Expected principal: %v, actual: %v", expected.Principal, actual.Principal)
 	}
 	if expected.Balance.Cmp(actual.Balance) != 0 {
-		t.Fatalf("Expected balance: %v, actual: %v", expected.balance, actual.Balance)
+		t.Fatalf("Expected balance: %v, actual: %v", expected.Balance, actual.Balance)
 	}
 	if expected.FaultySectors.Cmp(actual.FaultySectors) != 0 {
 		t.Fatalf("Expected faulty sectors: %v, actual: %v", expected.FaultySectors, actual.FaultySectors)
