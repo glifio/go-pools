@@ -112,10 +112,8 @@ type FEVMActions interface {
 
 	// infinity pool actions
 	InfPoolDepositFIL(ctx context.Context, auth *bind.TransactOpts, agentAddr common.Address, amount *big.Int) (*types.Transaction, error)
-
-	// ramp actions
-	RampWithdraw(ctx context.Context, auth *bind.TransactOpts, assets *big.Int, sender common.Address, receiver common.Address) (*types.Transaction, error)
-	RampRedeem(ctx context.Context, auth *bind.TransactOpts, shares *big.Int, sender common.Address, receiver common.Address) (*types.Transaction, error)
+	InfPoolWithdraw(ctx context.Context, auth *bind.TransactOpts, assets *big.Int, sender common.Address, receiver common.Address) (*types.Transaction, error)
+	InfPoolRedeem(ctx context.Context, auth *bind.TransactOpts, shares *big.Int, sender common.Address, receiver common.Address) (*types.Transaction, error)
 
 	// iFIL actions
 	IFILTransfer(ctx context.Context, auth *bind.TransactOpts, receiver common.Address, amount *big.Int) (*types.Transaction, error)
