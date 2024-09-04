@@ -66,6 +66,6 @@ func (c *fevmExtern) ConnectAdoClient(ctx context.Context) (jsonrpc.ClientCloser
 	return rpc.NewADOClient(ctx, c.adoAddr, c.adoNamespace)
 }
 
-func (c *fevmExtern) GetEventsAPI() string {
+func (c *fevmExtern) GetEventsURL() string {
 	return c.eventsURL
 }
