@@ -331,7 +331,7 @@ func TestEstimateTerminationPenalty2(t *testing.T) {
 	}
 }
 
-var BLOCK_HEIGHT = big.NewInt(4198539)
+var BASE_BLOCK_HEIGHT = big.NewInt(4198539)
 
 type baseFiTest struct {
 	*BaseFi
@@ -339,6 +339,7 @@ type baseFiTest struct {
 	maxBorrowAndSeal     *big.Int
 	maxBorrowAndWithdraw *big.Int
 	liquidationValue     *big.Int
+	height               *big.Int
 }
 
 var baseFiTests = []struct {
@@ -360,6 +361,7 @@ var baseFiTests = []struct {
 		maxBorrowAndSeal:     bigFromStr("50375782116425480034999"),
 		maxBorrowAndWithdraw: bigFromStr("12593945529106370008750"),
 		liquidationValue:     bigFromStr("16791927372141826678333"),
+		height:               BASE_BLOCK_HEIGHT,
 	}},
 	{"miner with fee debt", "f01836766", baseFiTest{
 		BaseFi: &BaseFi{
@@ -375,6 +377,7 @@ var baseFiTests = []struct {
 		maxBorrowAndSeal:     big.NewInt(0),
 		maxBorrowAndWithdraw: big.NewInt(0),
 		liquidationValue:     big.NewInt(0),
+		height:               BASE_BLOCK_HEIGHT,
 	}},
 	{"inactive miner (all 0s)", "f01156", baseFiTest{
 		BaseFi: &BaseFi{
@@ -390,6 +393,7 @@ var baseFiTests = []struct {
 		maxBorrowAndSeal:     big.NewInt(0),
 		maxBorrowAndWithdraw: big.NewInt(0),
 		liquidationValue:     big.NewInt(0),
+		height:               BASE_BLOCK_HEIGHT,
 	}},
 	{"normal miner", "f01344987", baseFiTest{
 		BaseFi: &BaseFi{
@@ -405,6 +409,23 @@ var baseFiTests = []struct {
 		maxBorrowAndSeal:     bigFromStr("492527766798191726655114"),
 		maxBorrowAndWithdraw: bigFromStr("123131941699547931663779"),
 		liquidationValue:     bigFromStr("164175922266063908885038"),
+		height:               BASE_BLOCK_HEIGHT,
+	}},
+	{"miner with fee debt and positive balance", "f01931245", baseFiTest{
+		BaseFi: &BaseFi{
+			Balance:          bigFromStr("65041872611791874551"),
+			AvailableBalance: bigFromStr("0"),
+			LockedRewards:    bigFromStr("137666159110180561"),
+			InitialPledge:    bigFromStr("64904206452681693990"),
+			FeeDebt:          bigFromStr("957933257513729319"),
+			TerminationFee:   bigFromStr("12832724091624933434"),
+			LiveSectors:      big.NewInt(323),
+			FaultySectors:    big.NewInt(323),
+		},
+		maxBorrowAndSeal:     bigFromStr("156627445560500823351"),
+		maxBorrowAndWithdraw: bigFromStr("39156861390125205838"),
+		liquidationValue:     bigFromStr("52209148520166941117"),
+		height:               big.NewInt(4299545),
 	}},
 }
 
@@ -420,14 +441,13 @@ func TestMinerFi(t *testing.T) {
 	}
 	defer closer()
 
-	ts, err := lapi.ChainGetTipSetByHeight(context.Background(), abi.ChainEpoch(BLOCK_HEIGHT.Int64()), types.EmptyTSK)
-	if err != nil {
-		t.Fatal(err)
-	}
-
 	for _, tt := range baseFiTests {
 		testname := fmt.Sprintf("%s:%s", tt.name, tt.miner)
 		t.Run(testname, func(t *testing.T) {
+			ts, err := lapi.ChainGetTipSetByHeight(context.Background(), abi.ChainEpoch(tt.want.height.Int64()), types.EmptyTSK)
+			if err != nil {
+				t.Fatal(err)
+			}
 			minerAddr, err := address.NewFromString(tt.miner)
 			if err != nil {
 				t.Fatal(err)
@@ -490,7 +510,7 @@ var agentTests = []struct {
 	want  agentFiTest
 }{
 	// agent 59
-	{"agent many miners", "0x64Ea1aD49A78B6A6878c4975566b8953b1Ef1e79", BLOCK_HEIGHT, agentFiTest{
+	{"agent many miners", "0x64Ea1aD49A78B6A6878c4975566b8953b1Ef1e79", BASE_BLOCK_HEIGHT, agentFiTest{
 		AgentFi: &AgentFi{
 			BaseFi: BaseFi{
 				Balance:          bigFromStr("2090733730144435384596917"),
@@ -517,7 +537,7 @@ var agentTests = []struct {
 		dtl:                  0.574289111476492565,
 	}},
 	// agent 27
-	{"agent no miners", "0xDBa96B0FDbc87C7eEb641Ee37EAFC55B355079E4", BLOCK_HEIGHT, agentFiTest{
+	{"agent no miners", "0xDBa96B0FDbc87C7eEb641Ee37EAFC55B355079E4", BASE_BLOCK_HEIGHT, agentFiTest{
 		AgentFi:              EmptyAgentFi(),
 		balance:              big.NewInt(0),
 		maxBorrowAndSeal:     big.NewInt(0),
@@ -530,7 +550,7 @@ var agentTests = []struct {
 		dtl:                  0,
 	}},
 	// agent 2
-	{"agent single miner", "0xf0F1ceCCF78D411EeD9Ca190ca7F157140cCB2d3", BLOCK_HEIGHT, agentFiTest{
+	{"agent single miner", "0xf0F1ceCCF78D411EeD9Ca190ca7F157140cCB2d3", BASE_BLOCK_HEIGHT, agentFiTest{
 		AgentFi: &AgentFi{
 			BaseFi: BaseFi{
 				Balance:          bigFromStr("133252309755096579751"),
@@ -557,7 +577,7 @@ var agentTests = []struct {
 		dtl:                  0.016608593934123496,
 	}},
 	// agent 91
-	{"agent miner with fee debt", "0xFF65F5f3D309fEA7aA2d4cB2727E918FAb0aE7F7", BLOCK_HEIGHT, agentFiTest{
+	{"agent miner with fee debt", "0xFF65F5f3D309fEA7aA2d4cB2727E918FAb0aE7F7", BASE_BLOCK_HEIGHT, agentFiTest{
 		AgentFi: &AgentFi{
 			BaseFi: BaseFi{
 				Balance:          bigFromStr("0"),
