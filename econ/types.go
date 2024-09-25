@@ -101,3 +101,37 @@ type MinerDetailsJSON struct {
 	TerminationFee         string          `json:"terminationFee"`
 	LiquidationValue       string          `json:"liquidationValue"`
 }
+
+type PoolMetrics struct {
+	Height                    uint64
+	Timestamp                 uint64
+	PoolTotalAssets           *big.Int
+	PoolTotalBorrowed         *big.Int
+	PoolTotalBorrowableAssets *big.Int
+	PoolExitReserve           *big.Int
+	TotalAgentCount           uint64
+	TotalMinerCollaterals     *big.Int
+	TotalMinersCount          uint64
+	TotalValueLocked          *big.Int
+	TotalMinersSectors        *big.Int
+	TotalMinerQAP             *big.Int
+	TotalMinerRBP             *big.Int
+	TotalMinerEDR             *big.Int
+}
+
+type PoolsMetricsJSON struct {
+	Height                    uint64 `json:"height"`
+	Timestamp                 uint64 `json:"timestamp"`
+	PoolTotalAssets           string `json:"poolTotalAssets"`
+	PoolTotalBorrowed         string `json:"poolTotalBorrowed"`
+	PoolTotalBorrowableAssets string `json:"poolTotalBorrowableAssets"`
+	PoolExitReserve           string `json:"poolExitReserve"`
+	TotalAgentCount           uint64 `json:"totalAgentCount"`
+	TotalMinerCollaterals     string `json:"totalMinerCollaterals"`
+	TotalMinersCount          uint64 `json:"totalMinersCount"`
+	TotalValueLocked          string `json:"totalValueLocked"`
+	TotalMinersSectors        string `json:"totalMinersSectors"`
+	TotalMinerQAP             string `json:"totalMinerQAP"`
+	TotalMinerRBP             string `json:"totalMinerRBP"`
+	TotalMinerEDR             string `json:"totalMinerEDR"`
+}

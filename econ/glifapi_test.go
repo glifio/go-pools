@@ -138,3 +138,9 @@ func TestFetchBaseFis(t *testing.T) {
 		})
 	}
 }
+
+func TestGetPoolMetricsFromAPI(t *testing.T) {
+	metrics, err := GetPoolMetricsFromAPI(deploy.StagingEventsURL)
+	assert.NoError(t, err)
+	assert.NotNil(t, metrics)
+}

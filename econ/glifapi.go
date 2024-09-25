@@ -217,3 +217,72 @@ func GetBaseFisFromAPI(agentAddr common.Address, eventsURL string) (miners []add
 
 	return miners, baseFis, nil
 }
+
+func GetPoolMetricsFromAPI(eventsURL string) (*PoolMetrics, error) {
+	url := fmt.Sprintf("%s/metrics", eventsURL)
+
+	resp, err := http.Get(url)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		// if the server can't find the agent we're asking for, it will return a 404
+		// we treat it as 0 baseFis
+		if resp.StatusCode == http.StatusNotFound {
+			return nil, nil
+		}
+
+		return nil, fmt.Errorf("error fetching collateral stats. Status code: %d", resp.StatusCode)
+	}
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	var response PoolsMetricsJSON
+	if err := json.Unmarshal(body, &response); err != nil {
+		return nil, err
+	}
+
+	poolTotalAssets := big.NewInt(0)
+	poolTotalAssets.SetString(response.PoolTotalAssets, 10)
+	poolTotalBorrowed := big.NewInt(0)
+	poolTotalBorrowed.SetString(response.PoolTotalBorrowed, 10)
+	poolTotalBorrowableAssets := big.NewInt(0)
+	poolTotalBorrowableAssets.SetString(response.PoolTotalBorrowableAssets, 10)
+	poolExitReserve := big.NewInt(0)
+	poolExitReserve.SetString(response.PoolExitReserve, 10)
+	totalMinerCollaterals := big.NewInt(0)
+	totalMinerCollaterals.SetString(response.TotalMinerCollaterals, 10)
+	totalValueLocked := big.NewInt(0)
+	totalValueLocked.SetString(response.TotalValueLocked, 10)
+	totalMinersSectors := big.NewInt(0)
+	totalMinersSectors.SetString(response.TotalMinersSectors, 10)
+	totalMinerQAP := big.NewInt(0)
+	totalMinerQAP.SetString(response.TotalMinerQAP, 10)
+	totalMinerRBP := big.NewInt(0)
+	totalMinerRBP.SetString(response.TotalMinerRBP, 10)
+	totalMinerEDR := big.NewInt(0)
+	totalMinerEDR.SetString(response.TotalMinerEDR, 10)
+
+	result := PoolMetrics{
+		Height:                    response.Height,
+		Timestamp:                 response.Timestamp,
+		PoolTotalAssets:           poolTotalAssets,
+		PoolTotalBorrowed:         poolTotalBorrowed,
+		PoolTotalBorrowableAssets: poolTotalBorrowableAssets,
+		PoolExitReserve:           poolExitReserve,
+		TotalAgentCount:           response.TotalAgentCount,
+		TotalMinerCollaterals:     totalMinerCollaterals,
+		TotalMinersCount:          response.TotalMinersCount,
+		TotalValueLocked:          totalValueLocked,
+		TotalMinersSectors:        totalMinersSectors,
+		TotalMinerQAP:             totalMinerQAP,
+		TotalMinerRBP:             totalMinerRBP,
+		TotalMinerEDR:             totalMinerEDR,
+	}
+	return &result, nil
+}
