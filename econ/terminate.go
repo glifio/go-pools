@@ -157,7 +157,7 @@ func SampleSectors(sectors []uint64, samples int) []uint64 {
 	if sectorCount <= samples {
 		return sectors
 	}
-	
+
 	// Compute the step size for evenly spaced sampling
 	step := float64(sectorCount-1) / float64(samples-1)
 
@@ -306,10 +306,10 @@ func TerminateSectors(ctx context.Context, api *lotusapi.FullNodeStruct, minerAd
 
 // Assumptions:
 // 1. there cannot be negative fee debt
-// 2. there cannot be positive fee debt with a positive balance
+// 2. there cannot be positive fee debt with a positive balance - BROKEN ASSUMPTION
 // 3. there cannot be positive fee debt with a positive available balance
-// 4. there cannot be a positive fee debt with a positive initial pledge
-// 5. there cannot be a positive fee debt with a positive vesting funds
+// 4. there cannot be a positive fee debt with a positive initial pledge - BROKEN ASSUMPTION
+// 5. there cannot be a positive fee debt with a positive vesting funds - BROKEN ASSUMPTION
 // 6. there cannot be a negative termination fee
 // 7. there cannot be a negative initial pledge
 // 8. with no fee debt, available balance should always be positive (or 0)
@@ -328,21 +328,9 @@ func failOnBrokenAssumptions(minerAddr address.Address, result *TerminateSectorR
 
 	// fee debt exists
 	if result.FeeDebt.Cmp(big.NewInt(0)) > 0 {
-		// 2.there cannot be positive fee debt with a positive balance
-		if result.TotalBalance.Cmp(big.NewInt(0)) > 0 {
-			return xerrors.Errorf("miner %s: positive fee debt with positive balance: %v", minerAddr, result.FeeDebt)
-		}
 		// 3. there cannot be positive fee debt with a positive available balance
 		if result.AvailableBalance.Cmp(big.NewInt(0)) > 0 {
 			return xerrors.Errorf("miner %s: positive fee debt with positive available balance: %v", minerAddr, result.FeeDebt)
-		}
-		// 4. there cannot be a positive fee debt with a positive initial pledge
-		if result.InitialPledge.Cmp(big.NewInt(0)) > 0 {
-			return xerrors.Errorf("miner %s: positive fee debt with positive initial pledge: %v", minerAddr, result.FeeDebt)
-		}
-		// 5. there cannot be a positive fee debt with a positive vesting funds
-		if result.VestingFunds.Cmp(big.NewInt(0)) > 0 {
-			return xerrors.Errorf("miner %s: positive fee debt with positive vesting funds: %v", minerAddr, result.FeeDebt)
 		}
 	} else if result.FeeDebt.Cmp(big.NewInt(0)) == 0 {
 		// no fee debt
