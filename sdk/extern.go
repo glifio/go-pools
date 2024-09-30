@@ -2,6 +2,7 @@ package sdk
 
 import (
 	"context"
+	"log"
 	"net/http"
 
 	"github.com/ethereum/go-ethereum/ethclient"
@@ -9,13 +10,14 @@ import (
 	"github.com/filecoin-project/go-jsonrpc"
 	lotusapi "github.com/filecoin-project/lotus/api"
 	"github.com/glifio/go-pools/rpc"
+	"github.com/gorilla/websocket"
 )
 
 func (c *fevmExtern) ConnectEthClient() (*ethclient.Client, error) {
-	return connectEthClient(c.dialAddr, c.token)
+	return ConnectEthClient(c.dialAddr, c.token)
 }
 
-func connectEthClient(dialAddr string, token string) (*ethclient.Client, error) {
+func ConnectEthClient(dialAddr string, token string) (*ethclient.Client, error) {
 	if token == "" {
 		return ethclient.Dial(dialAddr)
 	}
@@ -34,11 +36,25 @@ func connectEthClient(dialAddr string, token string) (*ethclient.Client, error) 
 	return ethclient.NewClient(client), nil
 }
 
-func (c *fevmExtern) ConnectLotusClient() (*lotusapi.FullNodeStruct, jsonrpc.ClientCloser, error) {
-	return connectLotusClient(c.dialAddr, c.token)
+func ConnectEthClientWS(dialAddr string, token string) (*ethclient.Client, error) {
+
+	tokenHeader := ethrpc.WithHeader("Authorization", "Bearer "+token)
+	httpClient := ethrpc.WithWebsocketDialer(websocket.Dialer{})
+
+	client, err := ethrpc.DialOptions(context.Background(), dialAddr, httpClient, tokenHeader)
+	if err != nil {
+		log.Println("error dialing eth client", err)
+		return nil, err
+	}
+
+	return ethclient.NewClient(client), nil
 }
 
-func connectLotusClient(lotusDialAddr string, lotusToken string) (*lotusapi.FullNodeStruct, jsonrpc.ClientCloser, error) {
+func (c *fevmExtern) ConnectLotusClient() (*lotusapi.FullNodeStruct, jsonrpc.ClientCloser, error) {
+	return ConnectLotusClient(c.dialAddr, c.token)
+}
+
+func ConnectLotusClient(lotusDialAddr string, lotusToken string) (*lotusapi.FullNodeStruct, jsonrpc.ClientCloser, error) {
 	head := http.Header{}
 
 	if lotusToken != "" {

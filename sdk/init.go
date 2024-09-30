@@ -184,7 +184,7 @@ func New(
 	extern types.Extern,
 ) (types.PoolsSDK, error) {
 	var sdk types.PoolsSDK
-	ethClient, err := connectEthClient(extern.LotusDialAddr, extern.LotusToken)
+	ethClient, err := ConnectEthClient(extern.LotusDialAddr, extern.LotusToken)
 	if err != nil {
 		return nil, err
 	}
@@ -248,7 +248,7 @@ func Init(
 	token string,
 	eventsURL string,
 ) error {
-	client, err := connectEthClient(dialAddr, token)
+	client, err := ConnectEthClient(dialAddr, token)
 	if err != nil {
 		return err
 	}
