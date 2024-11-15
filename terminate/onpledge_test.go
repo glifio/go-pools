@@ -26,7 +26,10 @@ func TestTermPenaltyOnPledge(t *testing.T) {
 	filToPledge := new(big.Int).Mul(big.NewInt(1000), constants.WAD)
 	var sectorSize uint64 = 34359738368
 	var ratioVerified float64 = 1.0
-	cost, penalty, err := TermPenaltyOnPledge(ctx, lapi, ts, filToPledge, sectorSize, ratioVerified)
+	activation := abi.ChainEpoch(4071894)
+	expiration := abi.ChainEpoch(5619449)
+	cost, penalty, _, _, err := TermPenaltyOnPledge(ctx, lapi, ts, filToPledge, sectorSize,
+		activation, expiration, ratioVerified)
 	if err != nil {
 		t.Fatal(err)
 	}

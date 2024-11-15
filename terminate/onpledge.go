@@ -20,21 +20,21 @@ func TermPenaltyOnPledge(
 	ts *types.TipSet,
 	filToPledge *big.Int,
 	sectorSize uint64,
+	activation abi.ChainEpoch,
+	expiration abi.ChainEpoch,
 	ratioVerified float64,
-) (cost *big.Int, penalty *big.Int, err error) {
+) (cost *big.Int, penalty *big.Int, sectors uint64, pledge *big.Int, err error) {
 	smoothedPow, err := util.TotalPowerSmoothed(ctx, api, ts)
 	if err != nil {
-		return nil, nil, err
+		return nil, nil, 0, nil, err
 	}
 
 	smoothedRew, err := util.ThisEpochRewardsSmoothed(ctx, api, ts)
 	if err != nil {
-		return nil, nil, err
+		return nil, nil, 0, nil, err
 	}
 
 	height := ts.Height()
-	activation := 4071894
-	expiration := 5619449
 	duration := abi.ChainEpoch(expiration - activation)
 	powerBaseEpoch := activation
 	replacedDayReward := big.NewInt(0)
@@ -91,19 +91,19 @@ func TermPenaltyOnPledge(
 		s.PowerBaseEpoch-s.Activation,
 	)
 
-	// Pledge for full duration
-	pledge := miner.ExpectedRewardForPower(
-		util.ConvertSmoothing(smoothedRew),
-		util.ConvertSmoothing(smoothedPow),
-		pwr,
-		duration,
-	)
+	pledgeFil, err := api.StateMinerInitialPledgeForSector(ctx, duration, abi.SectorSize(sectorSize),
+		uint64(scaledSectorSize), ts.Key())
+	if err != nil {
+		return nil, nil, 0, nil, err
+	}
+	pledge = pledgeFil.Int
 
 	// Calculate number of sectors
-	sectors := new(big.Int).Quo(filToPledge, pledge.Int)
+	sectorsBig := new(big.Int).Quo(filToPledge, pledge)
+	sectors = sectorsBig.Uint64()
 
-	cost = new(big.Int).Mul(pledge.Int, sectors)
-	penalty = new(big.Int).Mul(termFee.Int, sectors)
+	cost = new(big.Int).Mul(pledge, sectorsBig)
+	penalty = new(big.Int).Mul(termFee.Int, sectorsBig)
 
-	return cost, penalty, nil
+	return cost, penalty, sectors, pledge, nil
 }
