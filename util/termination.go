@@ -2,7 +2,6 @@ package util
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/filecoin-project/go-state-types/builtin/v14/miner"
 	smoothing14 "github.com/filecoin-project/go-state-types/builtin/v14/util/smoothing"
