@@ -2,9 +2,10 @@ package util
 
 import (
 	"context"
+	"fmt"
 
-	"github.com/filecoin-project/go-state-types/builtin/v13/miner"
-	smoothing13 "github.com/filecoin-project/go-state-types/builtin/v13/util/smoothing"
+	"github.com/filecoin-project/go-state-types/builtin/v14/miner"
+	smoothing14 "github.com/filecoin-project/go-state-types/builtin/v14/util/smoothing"
 	lotusapi "github.com/filecoin-project/lotus/api"
 	"github.com/filecoin-project/lotus/blockstore"
 	"github.com/filecoin-project/lotus/chain/actors/adt"
@@ -35,8 +36,8 @@ func ConvertSectorType(sector *miner.SectorOnChainInfo) *miner8.SectorOnChainInf
 	}
 }
 
-func ConvertSmoothing(fe smoothing.FilterEstimate) smoothing13.FilterEstimate {
-	return smoothing13.FilterEstimate{
+func ConvertSmoothing(fe smoothing.FilterEstimate) smoothing14.FilterEstimate {
+	return smoothing14.FilterEstimate{
 		PositionEstimate: fe.PositionEstimate,
 		VelocityEstimate: fe.VelocityEstimate,
 	}
