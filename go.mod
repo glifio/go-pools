@@ -1,8 +1,6 @@
 module github.com/glifio/go-pools
 
-go 1.22
-
-toolchain go1.22.7
+go 1.21
 
 require (
 	github.com/ethereum/go-ethereum v1.12.0
