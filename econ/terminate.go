@@ -18,7 +18,7 @@ import (
 )
 
 var MAX_SAMPLED_SECTORS = 1000
-var INITIAL_PLEDGE_INTERPOLATION_REL_DIFF = big.NewFloat(3.00) // 3%
+var INITIAL_PLEDGE_INTERPOLATION_REL_DIFF = big.NewFloat(4.00) // 4%
 
 func EstimateTerminationFeeAgent(
 	ctx context.Context,
