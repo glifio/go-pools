@@ -10,7 +10,7 @@ import (
 	"github.com/glifio/go-pools/util"
 )
 
-func (q *fevmQueries) WFILBalanceOf(ctx context.Context, address common.Address) (*big.Float, error) {
+func (q *fevmQueries) WFILBalanceOf(ctx context.Context, address common.Address, blockNumber *big.Int) (*big.Float, error) {
 	client, err := q.extern.ConnectEthClient()
 	if err != nil {
 		return nil, err
@@ -22,14 +22,14 @@ func (q *fevmQueries) WFILBalanceOf(ctx context.Context, address common.Address)
 		return nil, err
 	}
 
-	bal, err := wFILCaller.BalanceOf(&bind.CallOpts{Context: ctx}, address)
+	bal, err := wFILCaller.BalanceOf(&bind.CallOpts{Context: ctx, BlockNumber: blockNumber}, address)
 	if err != nil {
 		return nil, err
 	}
 	return util.ToFIL(bal), nil
 }
 
-func (q *fevmQueries) WFILAllowance(ctx context.Context, owner common.Address, spender common.Address) (*big.Float, error) {
+func (q *fevmQueries) WFILAllowance(ctx context.Context, owner common.Address, spender common.Address, blockNumber *big.Int) (*big.Float, error) {
 	client, err := q.extern.ConnectEthClient()
 	if err != nil {
 		return nil, err
@@ -41,7 +41,7 @@ func (q *fevmQueries) WFILAllowance(ctx context.Context, owner common.Address, s
 		return nil, err
 	}
 
-	allowance, err := wFILCaller.Allowance(&bind.CallOpts{Context: ctx}, owner, spender)
+	allowance, err := wFILCaller.Allowance(&bind.CallOpts{Context: ctx, BlockNumber: blockNumber}, owner, spender)
 	if err != nil {
 		return nil, err
 	}
