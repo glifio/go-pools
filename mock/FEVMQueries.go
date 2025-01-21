@@ -2113,6 +2113,61 @@ func (_c *FEVMQueries_InfPoolGetRate_Call) RunAndReturn(run func(context.Context
 	return _c
 }
 
+// InfPoolLockedAssets provides a mock function with given fields: ctx, blockNumber
+func (_m *FEVMQueries) InfPoolLockedAssets(ctx context.Context, blockNumber *big.Int) (*big.Float, error) {
+	ret := _m.Called(ctx, blockNumber)
+
+	var r0 *big.Float
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, *big.Int) (*big.Float, error)); ok {
+		return rf(ctx, blockNumber)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, *big.Int) *big.Float); ok {
+		r0 = rf(ctx, blockNumber)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*big.Float)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, *big.Int) error); ok {
+		r1 = rf(ctx, blockNumber)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// FEVMQueries_InfPoolLockedAssets_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'InfPoolLockedAssets'
+type FEVMQueries_InfPoolLockedAssets_Call struct {
+	*mock.Call
+}
+
+// InfPoolLockedAssets is a helper method to define mock.On call
+//   - ctx context.Context
+//   - blockNumber *big.Int
+func (_e *FEVMQueries_Expecter) InfPoolLockedAssets(ctx interface{}, blockNumber interface{}) *FEVMQueries_InfPoolLockedAssets_Call {
+	return &FEVMQueries_InfPoolLockedAssets_Call{Call: _e.mock.On("InfPoolLockedAssets", ctx, blockNumber)}
+}
+
+func (_c *FEVMQueries_InfPoolLockedAssets_Call) Run(run func(ctx context.Context, blockNumber *big.Int)) *FEVMQueries_InfPoolLockedAssets_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(*big.Int))
+	})
+	return _c
+}
+
+func (_c *FEVMQueries_InfPoolLockedAssets_Call) Return(_a0 *big.Float, _a1 error) *FEVMQueries_InfPoolLockedAssets_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *FEVMQueries_InfPoolLockedAssets_Call) RunAndReturn(run func(context.Context, *big.Int) (*big.Float, error)) *FEVMQueries_InfPoolLockedAssets_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // InfPoolTotalAssets provides a mock function with given fields: ctx, blockNumber
 func (_m *FEVMQueries) InfPoolTotalAssets(ctx context.Context, blockNumber *big.Int) (*big.Float, error) {
 	ret := _m.Called(ctx, blockNumber)
@@ -2858,25 +2913,25 @@ func (_c *FEVMQueries_WFIL_Call) RunAndReturn(run func() common.Address) *FEVMQu
 	return _c
 }
 
-// WFILAllowance provides a mock function with given fields: ctx, hodler, spender
-func (_m *FEVMQueries) WFILAllowance(ctx context.Context, hodler common.Address, spender common.Address) (*big.Float, error) {
-	ret := _m.Called(ctx, hodler, spender)
+// WFILAllowance provides a mock function with given fields: ctx, hodler, spender, blockNumber
+func (_m *FEVMQueries) WFILAllowance(ctx context.Context, hodler common.Address, spender common.Address, blockNumber *big.Int) (*big.Float, error) {
+	ret := _m.Called(ctx, hodler, spender, blockNumber)
 
 	var r0 *big.Float
 	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context, common.Address, common.Address) (*big.Float, error)); ok {
-		return rf(ctx, hodler, spender)
+	if rf, ok := ret.Get(0).(func(context.Context, common.Address, common.Address, *big.Int) (*big.Float, error)); ok {
+		return rf(ctx, hodler, spender, blockNumber)
 	}
-	if rf, ok := ret.Get(0).(func(context.Context, common.Address, common.Address) *big.Float); ok {
-		r0 = rf(ctx, hodler, spender)
+	if rf, ok := ret.Get(0).(func(context.Context, common.Address, common.Address, *big.Int) *big.Float); ok {
+		r0 = rf(ctx, hodler, spender, blockNumber)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*big.Float)
 		}
 	}
 
-	if rf, ok := ret.Get(1).(func(context.Context, common.Address, common.Address) error); ok {
-		r1 = rf(ctx, hodler, spender)
+	if rf, ok := ret.Get(1).(func(context.Context, common.Address, common.Address, *big.Int) error); ok {
+		r1 = rf(ctx, hodler, spender, blockNumber)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -2893,13 +2948,14 @@ type FEVMQueries_WFILAllowance_Call struct {
 //   - ctx context.Context
 //   - hodler common.Address
 //   - spender common.Address
-func (_e *FEVMQueries_Expecter) WFILAllowance(ctx interface{}, hodler interface{}, spender interface{}) *FEVMQueries_WFILAllowance_Call {
-	return &FEVMQueries_WFILAllowance_Call{Call: _e.mock.On("WFILAllowance", ctx, hodler, spender)}
+//   - blockNumber *big.Int
+func (_e *FEVMQueries_Expecter) WFILAllowance(ctx interface{}, hodler interface{}, spender interface{}, blockNumber interface{}) *FEVMQueries_WFILAllowance_Call {
+	return &FEVMQueries_WFILAllowance_Call{Call: _e.mock.On("WFILAllowance", ctx, hodler, spender, blockNumber)}
 }
 
-func (_c *FEVMQueries_WFILAllowance_Call) Run(run func(ctx context.Context, hodler common.Address, spender common.Address)) *FEVMQueries_WFILAllowance_Call {
+func (_c *FEVMQueries_WFILAllowance_Call) Run(run func(ctx context.Context, hodler common.Address, spender common.Address, blockNumber *big.Int)) *FEVMQueries_WFILAllowance_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(common.Address), args[2].(common.Address))
+		run(args[0].(context.Context), args[1].(common.Address), args[2].(common.Address), args[3].(*big.Int))
 	})
 	return _c
 }
@@ -2909,30 +2965,30 @@ func (_c *FEVMQueries_WFILAllowance_Call) Return(_a0 *big.Float, _a1 error) *FEV
 	return _c
 }
 
-func (_c *FEVMQueries_WFILAllowance_Call) RunAndReturn(run func(context.Context, common.Address, common.Address) (*big.Float, error)) *FEVMQueries_WFILAllowance_Call {
+func (_c *FEVMQueries_WFILAllowance_Call) RunAndReturn(run func(context.Context, common.Address, common.Address, *big.Int) (*big.Float, error)) *FEVMQueries_WFILAllowance_Call {
 	_c.Call.Return(run)
 	return _c
 }
 
-// WFILBalanceOf provides a mock function with given fields: ctx, hodler
-func (_m *FEVMQueries) WFILBalanceOf(ctx context.Context, hodler common.Address) (*big.Float, error) {
-	ret := _m.Called(ctx, hodler)
+// WFILBalanceOf provides a mock function with given fields: ctx, hodler, blockNumber
+func (_m *FEVMQueries) WFILBalanceOf(ctx context.Context, hodler common.Address, blockNumber *big.Int) (*big.Float, error) {
+	ret := _m.Called(ctx, hodler, blockNumber)
 
 	var r0 *big.Float
 	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context, common.Address) (*big.Float, error)); ok {
-		return rf(ctx, hodler)
+	if rf, ok := ret.Get(0).(func(context.Context, common.Address, *big.Int) (*big.Float, error)); ok {
+		return rf(ctx, hodler, blockNumber)
 	}
-	if rf, ok := ret.Get(0).(func(context.Context, common.Address) *big.Float); ok {
-		r0 = rf(ctx, hodler)
+	if rf, ok := ret.Get(0).(func(context.Context, common.Address, *big.Int) *big.Float); ok {
+		r0 = rf(ctx, hodler, blockNumber)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*big.Float)
 		}
 	}
 
-	if rf, ok := ret.Get(1).(func(context.Context, common.Address) error); ok {
-		r1 = rf(ctx, hodler)
+	if rf, ok := ret.Get(1).(func(context.Context, common.Address, *big.Int) error); ok {
+		r1 = rf(ctx, hodler, blockNumber)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -2948,13 +3004,14 @@ type FEVMQueries_WFILBalanceOf_Call struct {
 // WFILBalanceOf is a helper method to define mock.On call
 //   - ctx context.Context
 //   - hodler common.Address
-func (_e *FEVMQueries_Expecter) WFILBalanceOf(ctx interface{}, hodler interface{}) *FEVMQueries_WFILBalanceOf_Call {
-	return &FEVMQueries_WFILBalanceOf_Call{Call: _e.mock.On("WFILBalanceOf", ctx, hodler)}
+//   - blockNumber *big.Int
+func (_e *FEVMQueries_Expecter) WFILBalanceOf(ctx interface{}, hodler interface{}, blockNumber interface{}) *FEVMQueries_WFILBalanceOf_Call {
+	return &FEVMQueries_WFILBalanceOf_Call{Call: _e.mock.On("WFILBalanceOf", ctx, hodler, blockNumber)}
 }
 
-func (_c *FEVMQueries_WFILBalanceOf_Call) Run(run func(ctx context.Context, hodler common.Address)) *FEVMQueries_WFILBalanceOf_Call {
+func (_c *FEVMQueries_WFILBalanceOf_Call) Run(run func(ctx context.Context, hodler common.Address, blockNumber *big.Int)) *FEVMQueries_WFILBalanceOf_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(common.Address))
+		run(args[0].(context.Context), args[1].(common.Address), args[2].(*big.Int))
 	})
 	return _c
 }
@@ -2964,7 +3021,7 @@ func (_c *FEVMQueries_WFILBalanceOf_Call) Return(_a0 *big.Float, _a1 error) *FEV
 	return _c
 }
 
-func (_c *FEVMQueries_WFILBalanceOf_Call) RunAndReturn(run func(context.Context, common.Address) (*big.Float, error)) *FEVMQueries_WFILBalanceOf_Call {
+func (_c *FEVMQueries_WFILBalanceOf_Call) RunAndReturn(run func(context.Context, common.Address, *big.Int) (*big.Float, error)) *FEVMQueries_WFILBalanceOf_Call {
 	_c.Call.Return(run)
 	return _c
 }

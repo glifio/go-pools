@@ -196,6 +196,47 @@ func (_c *FEVMExtern_ConnectLotusClient_Call) RunAndReturn(run func() (*api.Full
 	return _c
 }
 
+// GetEventsURL provides a mock function with given fields:
+func (_m *FEVMExtern) GetEventsURL() string {
+	ret := _m.Called()
+
+	var r0 string
+	if rf, ok := ret.Get(0).(func() string); ok {
+		r0 = rf()
+	} else {
+		r0 = ret.Get(0).(string)
+	}
+
+	return r0
+}
+
+// FEVMExtern_GetEventsURL_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetEventsURL'
+type FEVMExtern_GetEventsURL_Call struct {
+	*mock.Call
+}
+
+// GetEventsURL is a helper method to define mock.On call
+func (_e *FEVMExtern_Expecter) GetEventsURL() *FEVMExtern_GetEventsURL_Call {
+	return &FEVMExtern_GetEventsURL_Call{Call: _e.mock.On("GetEventsURL")}
+}
+
+func (_c *FEVMExtern_GetEventsURL_Call) Run(run func()) *FEVMExtern_GetEventsURL_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run()
+	})
+	return _c
+}
+
+func (_c *FEVMExtern_GetEventsURL_Call) Return(_a0 string) *FEVMExtern_GetEventsURL_Call {
+	_c.Call.Return(_a0)
+	return _c
+}
+
+func (_c *FEVMExtern_GetEventsURL_Call) RunAndReturn(run func() string) *FEVMExtern_GetEventsURL_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 type mockConstructorTestingTNewFEVMExtern interface {
 	mock.TestingT
 	Cleanup(func())
