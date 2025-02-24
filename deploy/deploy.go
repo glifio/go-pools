@@ -42,7 +42,7 @@ var ProtoMeta = types.ProtocolMeta{
 	MinerRegistry:            common.HexToAddress("0xF246acF2b24316fE108ff906f6e90833a14e9263"),
 	Router:                   common.HexToAddress("0xe6e6e71E747EeD9fe45F0ff63E1B3E4a7c1199bF"),
 	WFIL:                     common.HexToAddress("0x60E1773636CF5E4A227d9AC24F20fEca034ee25A"),
-	GLF:                      common.HexToAddress("0x2a0aaf86b2FA64E88D3739091e7773106F3ebCF5"),
+	GLF:                      common.HexToAddress(""),
 	Governor:                 common.HexToAddress(""),
 	TokenNFTWrapper:          common.HexToAddress("0xe33C5b9868bA7813Feb0b95e5274963c6E488C1a"),
 	DelegatedClaimsCampaigns: common.HexToAddress("0x60F608947ab5c9A703cdC50973bCB6756082a652"),
