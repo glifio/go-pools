@@ -3,16 +3,18 @@ package token
 import (
 	"embed"
 	"encoding/json"
+	"math/big"
 
 	smt "github.com/FantasyJony/openzeppelin-merkle-tree-go/standard_merkle_tree"
 	"github.com/ethereum/go-ethereum/common"
+	"github.com/google/uuid"
 )
 
 //go:embed data/*
 var files embed.FS
 
 type MerkleTree struct {
-	id string
+	id [16]byte
 	smt.StandardTree
 }
 
@@ -30,7 +32,7 @@ type OZMerkleJSON struct {
 	Id           string            `json:"id"`
 }
 
-func (mt *MerkleTree) ID() string {
+func (mt *MerkleTree) ID() [16]byte {
 	return mt.id
 }
 
@@ -56,8 +58,13 @@ func MerkleTreeFromJSON(jsonBytes []byte) (*MerkleTree, error) {
 		return nil, err
 	}
 
+	idBytes, err := ParseUUIDToBytes(data.Id)
+	if err != nil {
+		return nil, err
+	}
+
 	mt := &MerkleTree{
-		id:           data.Id,
+		id:           idBytes,
 		StandardTree: *tree,
 	}
 
@@ -86,7 +93,19 @@ func (mt *MerkleTree) GetIdxForAddr(address common.Address) (int, error) {
 	return -1, nil
 }
 
-func (mt *MerkleTree) GetProofForAddr(address common.Address) ([][]byte, error) {
+func (mt *MerkleTree) GetLeafValueForAddr(address common.Address) (*big.Int, error) {
+	entries := mt.Entries()
+	for _, entry := range entries {
+		addr := entry.Value[0].(common.Address)
+		if addr.Hex() == address.Hex() {
+			return entry.Value[1].(*big.Int), nil
+		}
+	}
+
+	return nil, nil
+}
+
+func (mt *MerkleTree) GetProofForAddr(address common.Address) ([][32]byte, error) {
 	idx, err := mt.GetIdxForAddr(address)
 	if err != nil {
 		return nil, err
@@ -97,5 +116,22 @@ func (mt *MerkleTree) GetProofForAddr(address common.Address) ([][]byte, error) 
 		return nil, err
 	}
 
-	return proof, nil
+	var proofArray [][32]byte
+	for _, p := range proof {
+		var pArray [32]byte
+		copy(pArray[:], p)
+		proofArray = append(proofArray, pArray)
+	}
+
+	return proofArray, nil
+}
+
+func ParseUUIDToBytes(uuidStr string) ([16]byte, error) {
+	var byteArray [16]byte
+	parsedUUID, err := uuid.Parse(uuidStr)
+	if err != nil {
+		return byteArray, err
+	}
+	copy(byteArray[:], parsedUUID[:])
+	return byteArray, nil
 }
