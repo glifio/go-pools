@@ -114,7 +114,9 @@ func createInMemoryJSON() string {
 func TestGetMerkleID(t *testing.T) {
 	mt, err := MerkleTreeFromJSON([]byte(createInMemoryJSON()))
 	assert.NilError(t, err)
-	assert.Equal(t, mt.ID(), "dd946a64-e1d2-4a59-aa0d-1d1174ee71c8")
+	id, err := ParseUUIDToBytes("dd946a64-e1d2-4a59-aa0d-1d1174ee71c8")
+	assert.NilError(t, err)
+	assert.Equal(t, mt.ID(), id)
 }
 
 func TestGetRoot(t *testing.T) {
@@ -156,8 +158,14 @@ func TestGetProofForAddr(t *testing.T) {
 	entries := mt.Entries()
 	leaf := entries[idx].Value
 
+	// Convert proof to [][]byte
+	proofBytes := make([][]byte, len(proof))
+	for i, proofItem := range proof {
+		proofBytes[i] = proofItem[:]
+	}
+
 	// Verify the proof
-	valid, err := mt.Verify(proof, leaf)
+	valid, err := mt.Verify(proofBytes, leaf)
 	assert.NilError(t, err)
 	assert.Assert(t, valid)
 }
