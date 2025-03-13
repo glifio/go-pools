@@ -2,14 +2,21 @@ package token
 
 import (
 	"encoding/json"
+	"fmt"
 	"math/big"
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/glifio/go-pools/util"
 )
 
-func ReadAgentOwnerMap() (map[common.Address]common.Address, error) {
-	agentOwnerMap, err := files.ReadFile("data/agent-to-owner.json")
+func ReadAgentOwnerMap(testDrop bool) (map[common.Address]common.Address, error) {
+	network := "mainnet"
+	if testDrop {
+		network = "calibnet"
+	}
+
+	agentOwnerMapPath := fmt.Sprintf("data/%s/agent-to-owner.json", network)
+	agentOwnerMap, err := files.ReadFile(agentOwnerMapPath)
 	if err != nil {
 		return nil, err
 	}
@@ -23,15 +30,15 @@ func ReadAgentOwnerMap() (map[common.Address]common.Address, error) {
 	return data, nil
 }
 
-func CheckAirdropEligibility(address common.Address) (eligibleAmount *big.Float, claimer common.Address, err error) {
+func CheckAirdropEligibility(address common.Address, testDrop bool) (eligibleAmount *big.Float, claimer common.Address, err error) {
 	// first we check if this address is in the merkle tree
 	mt := &MerkleTree{}
-	mt, err = mt.ReadFromJSON()
+	mt, err = mt.ReadFromJSON(testDrop)
 	if err != nil {
 		return nil, address, err
 	}
 
-	agentOwnerMap, err := ReadAgentOwnerMap()
+	agentOwnerMap, err := ReadAgentOwnerMap(testDrop)
 	if err != nil {
 		return nil, address, err
 	}

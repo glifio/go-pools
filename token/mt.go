@@ -3,6 +3,7 @@ package token
 import (
 	"embed"
 	"encoding/json"
+	"fmt"
 	"math/big"
 
 	smt "github.com/FantasyJony/openzeppelin-merkle-tree-go/standard_merkle_tree"
@@ -71,8 +72,13 @@ func MerkleTreeFromJSON(jsonBytes []byte) (*MerkleTree, error) {
 	return mt, nil
 }
 
-func (mt *MerkleTree) ReadFromJSON() (*MerkleTree, error) {
-	merkleTree, err := files.ReadFile("data/merkle-tree.json")
+func (mt *MerkleTree) ReadFromJSON(testDrop bool) (*MerkleTree, error) {
+	network := "mainnet"
+	if testDrop {
+		network = "calibnet"
+	}
+
+	merkleTree, err := files.ReadFile(fmt.Sprintf("data/%s/merkle-tree.json", network))
 	if err != nil {
 		return nil, err
 	}
@@ -109,6 +115,10 @@ func (mt *MerkleTree) GetProofForAddr(address common.Address) ([][32]byte, error
 	idx, err := mt.GetIdxForAddr(address)
 	if err != nil {
 		return nil, err
+	}
+
+	if idx == -1 {
+		return nil, fmt.Errorf("address not found in merkle tree")
 	}
 
 	proof, err := mt.GetProofWithIndex(idx)

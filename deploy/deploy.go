@@ -42,10 +42,10 @@ var ProtoMeta = types.ProtocolMeta{
 	MinerRegistry:            common.HexToAddress("0xF246acF2b24316fE108ff906f6e90833a14e9263"),
 	Router:                   common.HexToAddress("0xe6e6e71E747EeD9fe45F0ff63E1B3E4a7c1199bF"),
 	WFIL:                     common.HexToAddress("0x60E1773636CF5E4A227d9AC24F20fEca034ee25A"),
-	GLF:                      common.HexToAddress(""),
+	GLF:                      common.HexToAddress("0x2a0aaf86b2FA64E88D3739091e7773106F3ebCF5"),
 	Governor:                 common.HexToAddress(""),
 	TokenNFTWrapper:          common.HexToAddress("0xe33C5b9868bA7813Feb0b95e5274963c6E488C1a"),
-	DelegatedClaimsCampaigns: common.HexToAddress("0x60F608947ab5c9A703cdC50973bCB6756082a652"),
+	DelegatedClaimsCampaigns: common.HexToAddress("0xdbE04BE0401DDd890Ff678c00E4E6a08D496aB87"),
 	ChainID:                  big.NewInt(314),
 }
 
@@ -65,8 +65,8 @@ var TestProtoMeta = types.ProtocolMeta{
 	WFIL:                     common.HexToAddress("0xaC26a4Ab9cF2A8c5DBaB6fb4351ec0F4b07356c4"),
 	GLF:                      common.HexToAddress("0x7989a6Ad291216d1B359339Fe06719EB31461325"),
 	Governor:                 common.HexToAddress("0x556C778CaC49eC8d67fe91AF379c5b8e37aED7de"),
-	TokenNFTWrapper:          common.HexToAddress("0xe33C5b9868bA7813Feb0b95e5274963c6E488C1a"),
-	DelegatedClaimsCampaigns: common.HexToAddress("0x60F608947ab5c9A703cdC50973bCB6756082a652"),
+	TokenNFTWrapper:          common.HexToAddress("0x655E30E52b4ae511971991ff30a9e5c1f433Cd8B"),
+	DelegatedClaimsCampaigns: common.HexToAddress("0xdbE04BE0401DDd890Ff678c00E4E6a08D496aB87"),
 	ChainID:                  big.NewInt(314159),
 }
 

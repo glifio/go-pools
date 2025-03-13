@@ -121,7 +121,7 @@ func TestGetMerkleID(t *testing.T) {
 
 func TestGetRoot(t *testing.T) {
 	mt := &MerkleTree{}
-	mt, err := mt.ReadFromJSON()
+	mt, err := mt.ReadFromJSON(false)
 	assert.NilError(t, err)
 
 	expectedRoot := "0xd2ae47fa0478bf090a77f735c182039d9ffcb05fb58a97e182b22f22b5975ccc"
@@ -132,7 +132,7 @@ func TestGetRoot(t *testing.T) {
 
 func TestGetIdxForAddr(t *testing.T) {
 	mt := &MerkleTree{}
-	mt, err := mt.ReadFromJSON()
+	mt, err := mt.ReadFromJSON(false)
 	assert.NilError(t, err)
 
 	address := common.HexToAddress("0xA6f573F96A4B9037Ee9057B22678F9093aB2b2D8")
@@ -145,7 +145,7 @@ func TestGetIdxForAddr(t *testing.T) {
 
 func TestGetProofForAddr(t *testing.T) {
 	mt := &MerkleTree{}
-	mt, err := mt.ReadFromJSON()
+	mt, err := mt.ReadFromJSON(false)
 	assert.NilError(t, err)
 
 	address := common.HexToAddress("0xA6f573F96A4B9037Ee9057B22678F9093aB2b2D8")
