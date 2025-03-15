@@ -76,6 +76,10 @@ var (
 )
 
 var (
+	SushiGLFWFILPool = common.HexToAddress("0x0000000000000000000000000000000000000000")
+)
+
+var (
 	ProtocolDeployEpoch  = big.NewInt(2890957)
 	TProtocolDeployEpoch = big.NewInt(559673)
 )
