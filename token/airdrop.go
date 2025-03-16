@@ -60,5 +60,5 @@ func CheckAirdropEligibility(address common.Address, testDrop bool) (eligibleAmo
 		}
 	}
 
-	return nil, claimer, nil
+	return big.NewFloat(0), claimer, nil
 }
