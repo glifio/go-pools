@@ -77,6 +77,7 @@ var (
 
 var (
 	SushiGLFWFILPool = common.HexToAddress("0x0000000000000000000000000000000000000000")
+	SushiQuoterV2    = common.HexToAddress("0x9B3fF703FA9C8B467F5886d7b61E61ba07a9b51c")
 )
 
 var (
