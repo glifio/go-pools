@@ -29,11 +29,11 @@ func ComputePrice(price *big.Int) *big.Float {
 	return result
 }
 
-func GLFToFIL(sqrtPriceX96 *big.Int) *big.Float {
+func FILToGLF(sqrtPriceX96 *big.Int) *big.Float {
 	// return 1/Price(Token1/Token0) to get the price of Token0 in Token1
 	return new(big.Float).Quo(big.NewFloat(1), ComputePrice(sqrtPriceX96))
 }
 
-func FILToGLF(sqrtPriceX96 *big.Int) *big.Float {
+func GLFToFIL(sqrtPriceX96 *big.Int) *big.Float {
 	return ComputePrice(sqrtPriceX96)
 }
