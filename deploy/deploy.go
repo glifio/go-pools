@@ -42,7 +42,7 @@ var ProtoMeta = types.ProtocolMeta{
 	MinerRegistry:            common.HexToAddress("0xF246acF2b24316fE108ff906f6e90833a14e9263"),
 	Router:                   common.HexToAddress("0xe6e6e71E747EeD9fe45F0ff63E1B3E4a7c1199bF"),
 	WFIL:                     common.HexToAddress("0x60E1773636CF5E4A227d9AC24F20fEca034ee25A"),
-	GLF:                      common.HexToAddress(""),
+	GLF:                      common.HexToAddress("0x2a0aaf86b2FA64E88D3739091e7773106F3ebCF5"),
 	Governor:                 common.HexToAddress(""),
 	TokenNFTWrapper:          common.HexToAddress("0xe33C5b9868bA7813Feb0b95e5274963c6E488C1a"),
 	DelegatedClaimsCampaigns: common.HexToAddress("0xdbE04BE0401DDd890Ff678c00E4E6a08D496aB87"),
@@ -76,7 +76,7 @@ var (
 )
 
 var (
-	SushiGLFWFILPool = common.HexToAddress("0x0000000000000000000000000000000000000000")
+	SushiGLFWFILPool = common.HexToAddress("0xeBD6f8952e18fA6d5E92059bD88aC3F911C57EAF")
 	SushiQuoterV2    = common.HexToAddress("0x9B3fF703FA9C8B467F5886d7b61E61ba07a9b51c")
 )
 
