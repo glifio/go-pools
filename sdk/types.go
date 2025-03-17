@@ -24,16 +24,20 @@ type fevmExtern struct {
 }
 
 type fevmQueries struct {
-	extern        types.FEVMExtern
-	agentPolice   common.Address
-	minerRegistry common.Address
-	router        common.Address
-	poolRegistry  common.Address
-	agentFactory  common.Address
-	iFIL          common.Address
-	infinityPool  common.Address
-	wFIL          common.Address
-	chainID       *big.Int
+	extern                   types.FEVMExtern
+	agentPolice              common.Address
+	minerRegistry            common.Address
+	router                   common.Address
+	poolRegistry             common.Address
+	agentFactory             common.Address
+	iFIL                     common.Address
+	glf                      common.Address
+	infinityPool             common.Address
+	wFIL                     common.Address
+	tokenNFTWrapper          common.Address
+	delegatedClaimsCampaigns common.Address
+	governor                 common.Address
+	chainID                  *big.Int
 	types.FEVMQueries
 }
 

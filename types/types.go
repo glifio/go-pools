@@ -86,7 +86,13 @@ type FEVMQueries interface {
 	AgentFactory() common.Address
 	IFIL() common.Address
 	WFIL() common.Address
+	GLF() common.Address
 	InfinityPool() common.Address
+
+	// token related addresses
+	TokenNFTWrapper() common.Address
+	DelegatedClaimsCampaigns() common.Address
+	Governor() common.Address
 }
 
 //go:generate mockery --name FEVMActions
@@ -136,14 +142,18 @@ type PoolsSDK interface {
 }
 
 type ProtocolMeta struct {
-	AgentPolice   common.Address `json:"agentPolice"`
-	MinerRegistry common.Address `json:"minerRegistry"`
-	Router        common.Address `json:"router"`
-	AgentFactory  common.Address `json:"agentFactory"`
-	IFIL          common.Address `json:"ifil"`
-	WFIL          common.Address `json:"wfil"`
-	InfinityPool  common.Address `json:"infinityPool"`
-	ChainID       *big.Int       `json:"chainID"`
+	AgentPolice              common.Address `json:"agentPolice"`
+	MinerRegistry            common.Address `json:"minerRegistry"`
+	Router                   common.Address `json:"router"`
+	AgentFactory             common.Address `json:"agentFactory"`
+	IFIL                     common.Address `json:"ifil"`
+	WFIL                     common.Address `json:"wfil"`
+	GLF                      common.Address `json:"glf"`
+	InfinityPool             common.Address `json:"infinityPool"`
+	Governor                 common.Address `json:"governor"`
+	TokenNFTWrapper          common.Address `json:"tokenNFTWrapper"`
+	DelegatedClaimsCampaigns common.Address `json:"delegatedClaimsCampaigns"`
+	ChainID                  *big.Int       `json:"chainID"`
 }
 
 type Extern struct {

@@ -1186,8 +1186,8 @@ func (_c *FEVMActions_InfPoolDepositFIL_Call) RunAndReturn(run func(context.Cont
 	return _c
 }
 
-// RampRedeem provides a mock function with given fields: ctx, auth, shares, sender, receiver
-func (_m *FEVMActions) RampRedeem(ctx context.Context, auth *bind.TransactOpts, shares *big.Int, sender common.Address, receiver common.Address) (*types.Transaction, error) {
+// InfPoolRedeem provides a mock function with given fields: ctx, auth, shares, sender, receiver
+func (_m *FEVMActions) InfPoolRedeem(ctx context.Context, auth *bind.TransactOpts, shares *big.Int, sender common.Address, receiver common.Address) (*types.Transaction, error) {
 	ret := _m.Called(ctx, auth, shares, sender, receiver)
 
 	var r0 *types.Transaction
@@ -1212,40 +1212,40 @@ func (_m *FEVMActions) RampRedeem(ctx context.Context, auth *bind.TransactOpts, 
 	return r0, r1
 }
 
-// FEVMActions_RampRedeem_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'RampRedeem'
-type FEVMActions_RampRedeem_Call struct {
+// FEVMActions_InfPoolRedeem_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'InfPoolRedeem'
+type FEVMActions_InfPoolRedeem_Call struct {
 	*mock.Call
 }
 
-// RampRedeem is a helper method to define mock.On call
+// InfPoolRedeem is a helper method to define mock.On call
 //   - ctx context.Context
 //   - auth *bind.TransactOpts
 //   - shares *big.Int
 //   - sender common.Address
 //   - receiver common.Address
-func (_e *FEVMActions_Expecter) RampRedeem(ctx interface{}, auth interface{}, shares interface{}, sender interface{}, receiver interface{}) *FEVMActions_RampRedeem_Call {
-	return &FEVMActions_RampRedeem_Call{Call: _e.mock.On("RampRedeem", ctx, auth, shares, sender, receiver)}
+func (_e *FEVMActions_Expecter) InfPoolRedeem(ctx interface{}, auth interface{}, shares interface{}, sender interface{}, receiver interface{}) *FEVMActions_InfPoolRedeem_Call {
+	return &FEVMActions_InfPoolRedeem_Call{Call: _e.mock.On("InfPoolRedeem", ctx, auth, shares, sender, receiver)}
 }
 
-func (_c *FEVMActions_RampRedeem_Call) Run(run func(ctx context.Context, auth *bind.TransactOpts, shares *big.Int, sender common.Address, receiver common.Address)) *FEVMActions_RampRedeem_Call {
+func (_c *FEVMActions_InfPoolRedeem_Call) Run(run func(ctx context.Context, auth *bind.TransactOpts, shares *big.Int, sender common.Address, receiver common.Address)) *FEVMActions_InfPoolRedeem_Call {
 	_c.Call.Run(func(args mock.Arguments) {
 		run(args[0].(context.Context), args[1].(*bind.TransactOpts), args[2].(*big.Int), args[3].(common.Address), args[4].(common.Address))
 	})
 	return _c
 }
 
-func (_c *FEVMActions_RampRedeem_Call) Return(_a0 *types.Transaction, _a1 error) *FEVMActions_RampRedeem_Call {
+func (_c *FEVMActions_InfPoolRedeem_Call) Return(_a0 *types.Transaction, _a1 error) *FEVMActions_InfPoolRedeem_Call {
 	_c.Call.Return(_a0, _a1)
 	return _c
 }
 
-func (_c *FEVMActions_RampRedeem_Call) RunAndReturn(run func(context.Context, *bind.TransactOpts, *big.Int, common.Address, common.Address) (*types.Transaction, error)) *FEVMActions_RampRedeem_Call {
+func (_c *FEVMActions_InfPoolRedeem_Call) RunAndReturn(run func(context.Context, *bind.TransactOpts, *big.Int, common.Address, common.Address) (*types.Transaction, error)) *FEVMActions_InfPoolRedeem_Call {
 	_c.Call.Return(run)
 	return _c
 }
 
-// RampWithdraw provides a mock function with given fields: ctx, auth, assets, sender, receiver
-func (_m *FEVMActions) RampWithdraw(ctx context.Context, auth *bind.TransactOpts, assets *big.Int, sender common.Address, receiver common.Address) (*types.Transaction, error) {
+// InfPoolWithdraw provides a mock function with given fields: ctx, auth, assets, sender, receiver
+func (_m *FEVMActions) InfPoolWithdraw(ctx context.Context, auth *bind.TransactOpts, assets *big.Int, sender common.Address, receiver common.Address) (*types.Transaction, error) {
 	ret := _m.Called(ctx, auth, assets, sender, receiver)
 
 	var r0 *types.Transaction
@@ -1270,34 +1270,34 @@ func (_m *FEVMActions) RampWithdraw(ctx context.Context, auth *bind.TransactOpts
 	return r0, r1
 }
 
-// FEVMActions_RampWithdraw_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'RampWithdraw'
-type FEVMActions_RampWithdraw_Call struct {
+// FEVMActions_InfPoolWithdraw_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'InfPoolWithdraw'
+type FEVMActions_InfPoolWithdraw_Call struct {
 	*mock.Call
 }
 
-// RampWithdraw is a helper method to define mock.On call
+// InfPoolWithdraw is a helper method to define mock.On call
 //   - ctx context.Context
 //   - auth *bind.TransactOpts
 //   - assets *big.Int
 //   - sender common.Address
 //   - receiver common.Address
-func (_e *FEVMActions_Expecter) RampWithdraw(ctx interface{}, auth interface{}, assets interface{}, sender interface{}, receiver interface{}) *FEVMActions_RampWithdraw_Call {
-	return &FEVMActions_RampWithdraw_Call{Call: _e.mock.On("RampWithdraw", ctx, auth, assets, sender, receiver)}
+func (_e *FEVMActions_Expecter) InfPoolWithdraw(ctx interface{}, auth interface{}, assets interface{}, sender interface{}, receiver interface{}) *FEVMActions_InfPoolWithdraw_Call {
+	return &FEVMActions_InfPoolWithdraw_Call{Call: _e.mock.On("InfPoolWithdraw", ctx, auth, assets, sender, receiver)}
 }
 
-func (_c *FEVMActions_RampWithdraw_Call) Run(run func(ctx context.Context, auth *bind.TransactOpts, assets *big.Int, sender common.Address, receiver common.Address)) *FEVMActions_RampWithdraw_Call {
+func (_c *FEVMActions_InfPoolWithdraw_Call) Run(run func(ctx context.Context, auth *bind.TransactOpts, assets *big.Int, sender common.Address, receiver common.Address)) *FEVMActions_InfPoolWithdraw_Call {
 	_c.Call.Run(func(args mock.Arguments) {
 		run(args[0].(context.Context), args[1].(*bind.TransactOpts), args[2].(*big.Int), args[3].(common.Address), args[4].(common.Address))
 	})
 	return _c
 }
 
-func (_c *FEVMActions_RampWithdraw_Call) Return(_a0 *types.Transaction, _a1 error) *FEVMActions_RampWithdraw_Call {
+func (_c *FEVMActions_InfPoolWithdraw_Call) Return(_a0 *types.Transaction, _a1 error) *FEVMActions_InfPoolWithdraw_Call {
 	_c.Call.Return(_a0, _a1)
 	return _c
 }
 
-func (_c *FEVMActions_RampWithdraw_Call) RunAndReturn(run func(context.Context, *bind.TransactOpts, *big.Int, common.Address, common.Address) (*types.Transaction, error)) *FEVMActions_RampWithdraw_Call {
+func (_c *FEVMActions_InfPoolWithdraw_Call) RunAndReturn(run func(context.Context, *bind.TransactOpts, *big.Int, common.Address, common.Address) (*types.Transaction, error)) *FEVMActions_InfPoolWithdraw_Call {
 	_c.Call.Return(run)
 	return _c
 }

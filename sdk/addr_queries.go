@@ -35,3 +35,19 @@ func (q *fevmQueries) WFIL() common.Address {
 func (q *fevmQueries) InfinityPool() common.Address {
 	return q.infinityPool
 }
+
+func (q *fevmQueries) GLF() common.Address {
+	return q.glf
+}
+
+func (q *fevmQueries) Governor() common.Address {
+	return q.governor
+}
+
+func (q *fevmQueries) TokenNFTWrapper() common.Address {
+	return q.tokenNFTWrapper
+}
+
+func (q *fevmQueries) DelegatedClaimsCampaigns() common.Address {
+	return q.delegatedClaimsCampaigns
+}

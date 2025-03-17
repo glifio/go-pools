@@ -1342,6 +1342,135 @@ func (_c *FEVMQueries_CredentialValidityPeriod_Call) RunAndReturn(run func(conte
 	return _c
 }
 
+// DelegatedClaimsCampaigns provides a mock function with given fields:
+func (_m *FEVMQueries) DelegatedClaimsCampaigns() common.Address {
+	ret := _m.Called()
+
+	var r0 common.Address
+	if rf, ok := ret.Get(0).(func() common.Address); ok {
+		r0 = rf()
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(common.Address)
+		}
+	}
+
+	return r0
+}
+
+// FEVMQueries_DelegatedClaimsCampaigns_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'DelegatedClaimsCampaigns'
+type FEVMQueries_DelegatedClaimsCampaigns_Call struct {
+	*mock.Call
+}
+
+// DelegatedClaimsCampaigns is a helper method to define mock.On call
+func (_e *FEVMQueries_Expecter) DelegatedClaimsCampaigns() *FEVMQueries_DelegatedClaimsCampaigns_Call {
+	return &FEVMQueries_DelegatedClaimsCampaigns_Call{Call: _e.mock.On("DelegatedClaimsCampaigns")}
+}
+
+func (_c *FEVMQueries_DelegatedClaimsCampaigns_Call) Run(run func()) *FEVMQueries_DelegatedClaimsCampaigns_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run()
+	})
+	return _c
+}
+
+func (_c *FEVMQueries_DelegatedClaimsCampaigns_Call) Return(_a0 common.Address) *FEVMQueries_DelegatedClaimsCampaigns_Call {
+	_c.Call.Return(_a0)
+	return _c
+}
+
+func (_c *FEVMQueries_DelegatedClaimsCampaigns_Call) RunAndReturn(run func() common.Address) *FEVMQueries_DelegatedClaimsCampaigns_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// GLF provides a mock function with given fields:
+func (_m *FEVMQueries) GLF() common.Address {
+	ret := _m.Called()
+
+	var r0 common.Address
+	if rf, ok := ret.Get(0).(func() common.Address); ok {
+		r0 = rf()
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(common.Address)
+		}
+	}
+
+	return r0
+}
+
+// FEVMQueries_GLF_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GLF'
+type FEVMQueries_GLF_Call struct {
+	*mock.Call
+}
+
+// GLF is a helper method to define mock.On call
+func (_e *FEVMQueries_Expecter) GLF() *FEVMQueries_GLF_Call {
+	return &FEVMQueries_GLF_Call{Call: _e.mock.On("GLF")}
+}
+
+func (_c *FEVMQueries_GLF_Call) Run(run func()) *FEVMQueries_GLF_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run()
+	})
+	return _c
+}
+
+func (_c *FEVMQueries_GLF_Call) Return(_a0 common.Address) *FEVMQueries_GLF_Call {
+	_c.Call.Return(_a0)
+	return _c
+}
+
+func (_c *FEVMQueries_GLF_Call) RunAndReturn(run func() common.Address) *FEVMQueries_GLF_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// Governor provides a mock function with given fields:
+func (_m *FEVMQueries) Governor() common.Address {
+	ret := _m.Called()
+
+	var r0 common.Address
+	if rf, ok := ret.Get(0).(func() common.Address); ok {
+		r0 = rf()
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(common.Address)
+		}
+	}
+
+	return r0
+}
+
+// FEVMQueries_Governor_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'Governor'
+type FEVMQueries_Governor_Call struct {
+	*mock.Call
+}
+
+// Governor is a helper method to define mock.On call
+func (_e *FEVMQueries_Expecter) Governor() *FEVMQueries_Governor_Call {
+	return &FEVMQueries_Governor_Call{Call: _e.mock.On("Governor")}
+}
+
+func (_c *FEVMQueries_Governor_Call) Run(run func()) *FEVMQueries_Governor_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run()
+	})
+	return _c
+}
+
+func (_c *FEVMQueries_Governor_Call) Return(_a0 common.Address) *FEVMQueries_Governor_Call {
+	_c.Call.Return(_a0)
+	return _c
+}
+
+func (_c *FEVMQueries_Governor_Call) RunAndReturn(run func() common.Address) *FEVMQueries_Governor_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // IFIL provides a mock function with given fields:
 func (_m *FEVMQueries) IFIL() common.Address {
 	ret := _m.Called()
@@ -2756,6 +2885,49 @@ func (_c *FEVMQueries_StateWaitTx_Call) Return() *FEVMQueries_StateWaitTx_Call {
 }
 
 func (_c *FEVMQueries_StateWaitTx_Call) RunAndReturn(run func(context.Context, common.Hash, chan *coretypes.Receipt)) *FEVMQueries_StateWaitTx_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// TokenNFTWrapper provides a mock function with given fields:
+func (_m *FEVMQueries) TokenNFTWrapper() common.Address {
+	ret := _m.Called()
+
+	var r0 common.Address
+	if rf, ok := ret.Get(0).(func() common.Address); ok {
+		r0 = rf()
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(common.Address)
+		}
+	}
+
+	return r0
+}
+
+// FEVMQueries_TokenNFTWrapper_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'TokenNFTWrapper'
+type FEVMQueries_TokenNFTWrapper_Call struct {
+	*mock.Call
+}
+
+// TokenNFTWrapper is a helper method to define mock.On call
+func (_e *FEVMQueries_Expecter) TokenNFTWrapper() *FEVMQueries_TokenNFTWrapper_Call {
+	return &FEVMQueries_TokenNFTWrapper_Call{Call: _e.mock.On("TokenNFTWrapper")}
+}
+
+func (_c *FEVMQueries_TokenNFTWrapper_Call) Run(run func()) *FEVMQueries_TokenNFTWrapper_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run()
+	})
+	return _c
+}
+
+func (_c *FEVMQueries_TokenNFTWrapper_Call) Return(_a0 common.Address) *FEVMQueries_TokenNFTWrapper_Call {
+	_c.Call.Return(_a0)
+	return _c
+}
+
+func (_c *FEVMQueries_TokenNFTWrapper_Call) RunAndReturn(run func() common.Address) *FEVMQueries_TokenNFTWrapper_Call {
 	_c.Call.Return(run)
 	return _c
 }

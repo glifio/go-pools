@@ -22,7 +22,11 @@ func InitFEVMConnection(
 	agentFactory common.Address,
 	iFIL common.Address,
 	wFIL common.Address,
+	glf common.Address,
 	infinityPool common.Address,
+	tokenNFTWrapper common.Address,
+	delegatedClaimsCampaigns common.Address,
+	governor common.Address,
 	adoAddr string,
 	adoNamespace string,
 	dialAddr string,
@@ -39,15 +43,19 @@ func InitFEVMConnection(
 	}
 
 	fevmQueries := &fevmQueries{
-		router:        router,
-		iFIL:          iFIL,
-		wFIL:          wFIL,
-		infinityPool:  infinityPool,
-		agentFactory:  agentFactory,
-		minerRegistry: minerRegistry,
-		agentPolice:   agentPolice,
-		chainID:       chainID,
-		extern:        extern,
+		router:                   router,
+		iFIL:                     iFIL,
+		wFIL:                     wFIL,
+		glf:                      glf,
+		infinityPool:             infinityPool,
+		agentFactory:             agentFactory,
+		minerRegistry:            minerRegistry,
+		agentPolice:              agentPolice,
+		tokenNFTWrapper:          tokenNFTWrapper,
+		delegatedClaimsCampaigns: delegatedClaimsCampaigns,
+		governor:                 governor,
+		chainID:                  chainID,
+		extern:                   extern,
 	}
 
 	fevmActions := &fevmActions{extern: extern, queries: fevmQueries}
@@ -159,6 +167,14 @@ func LazyInit(
 		return err
 	}
 
+	// grab the token related contracts off the extern associated with chain id
+	var protoMeta types.ProtocolMeta
+	if chainID.Int64() == constants.MainnetChainID {
+		protoMeta = deploy.ProtoMeta
+	} else {
+		protoMeta = deploy.TestProtoMeta
+	}
+
 	*sdk = InitFEVMConnection(
 		routes[constants.RouteAgentPolice],
 		routes[constants.RouteMinerRegistry],
@@ -166,7 +182,11 @@ func LazyInit(
 		routes[constants.RouteAgentFactory],
 		iFIL,
 		routes[constants.RouteWFIL],
+		protoMeta.GLF,
 		infpool,
+		protoMeta.TokenNFTWrapper,
+		protoMeta.DelegatedClaimsCampaigns,
+		protoMeta.Governor,
 		adoAddr,
 		adoNamespace,
 		dialAddr,
@@ -218,7 +238,11 @@ func New(
 		protoMeta.AgentFactory,
 		protoMeta.IFIL,
 		protoMeta.WFIL,
+		protoMeta.GLF,
 		protoMeta.InfinityPool,
+		protoMeta.TokenNFTWrapper,
+		protoMeta.DelegatedClaimsCampaigns,
+		protoMeta.Governor,
 		extern.AdoAddr,
 		"ADO",
 		extern.LotusDialAddr,
@@ -240,8 +264,11 @@ func Init(
 	agentFactory common.Address,
 	iFIL common.Address,
 	wFIL common.Address,
+	glf common.Address,
 	infinityPool common.Address,
-	simpleRamp common.Address,
+	tokenNFTWrapper common.Address,
+	delegatedClaimsCampaigns common.Address,
+	governor common.Address,
 	adoAddr string,
 	adoNamespace string,
 	dialAddr string,
@@ -266,7 +293,11 @@ func Init(
 		agentFactory,
 		iFIL,
 		wFIL,
+		glf,
 		infinityPool,
+		tokenNFTWrapper,
+		delegatedClaimsCampaigns,
+		governor,
 		adoAddr,
 		adoNamespace,
 		dialAddr,

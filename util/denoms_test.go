@@ -1,7 +1,6 @@
 package util
 
 import (
-	"errors"
 	"log"
 	"math/big"
 	"testing"
@@ -33,10 +32,13 @@ func TestToAttoFILFromString(t *testing.T) {
 		{"10", mustNewBigInt("10000000000000000000")},
 		{"2", mustNewBigInt("2000000000000000000")},
 		{"1.1009", mustNewBigInt("1100900000000000000")},
+		{"33740384.60", mustNewBigInt("33740384600000000000000000")},
+		{"1.0", WAD},
+		{"0.000000000000000001", mustNewBigInt("1")},
 	}
 
 	for _, test := range tests {
-		attoFIL, err := parseFILAmount(test.bal)
+		attoFIL, err := ParseFILStrToAtto(test.bal)
 		if err != nil {
 			t.Errorf("parseFILAmount(%s) failed: %s", test.bal, err)
 		}
@@ -45,15 +47,6 @@ func TestToAttoFILFromString(t *testing.T) {
 			t.Errorf("ToFIL(%s) expected %d, got %d", test.bal, test.attofil, attoFIL)
 		}
 	}
-}
-
-func parseFILAmount(amount string) (*big.Int, error) {
-	amt, ok := new(big.Float).SetString(amount)
-	if !ok {
-		return nil, errors.New("invalid amount")
-	}
-
-	return ToAtto(amt), nil
 }
 
 func mustNewBigInt(val string) *big.Int {
