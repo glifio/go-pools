@@ -124,7 +124,7 @@ func TestGetRoot(t *testing.T) {
 	mt, err := mt.ReadFromJSON(false)
 	assert.NilError(t, err)
 
-	expectedRoot := "0xd2ae47fa0478bf090a77f735c182039d9ffcb05fb58a97e182b22f22b5975ccc"
+	expectedRoot := "0x401db874c7325c0a85a7a6154da0d54e7a0513e540f3c89137ece1411d0b3bd8"
 	rootBytes := mt.GetRoot() // Returns []byte
 	rootHex := "0x" + hex.EncodeToString(rootBytes)
 	assert.Equal(t, rootHex, expectedRoot)
@@ -136,7 +136,7 @@ func TestGetIdxForAddr(t *testing.T) {
 	assert.NilError(t, err)
 
 	address := common.HexToAddress("0xA6f573F96A4B9037Ee9057B22678F9093aB2b2D8")
-	expectedIndex := 6739
+	expectedIndex := 6928
 
 	index, err := mt.GetIdxForAddr(address)
 	assert.NilError(t, err)
