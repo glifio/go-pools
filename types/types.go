@@ -44,6 +44,7 @@ type FEVMQueries interface {
 	InfPoolGetAccount(ctx context.Context, agentAddr common.Address, blockNumber *big.Int) (abigen.Account, error)
 	InfPoolBorrowableLiquidity(ctx context.Context, blockNumber *big.Int) (*big.Float, error)
 	InfPoolTotalAssets(ctx context.Context, blockNumber *big.Int) (*big.Float, error)
+	InfPoolLockedAssets(ctx context.Context, blockNumber *big.Int) (*big.Float, error)
 	InfPoolTotalBorrowed(ctx context.Context, blockNumber *big.Int) (*big.Float, error)
 	InfPoolExitReserve(ctx context.Context, blockNumber *big.Int) (*big.Int, *big.Int, error)
 	InfPoolAgentMaxBorrow(ctx context.Context, agentAddr common.Address, agentData *vc.AgentData) (*big.Int, error)
@@ -58,8 +59,8 @@ type FEVMQueries interface {
 	IFILMinter(ctx context.Context) (common.Address, error)
 	IFILBurner(ctx context.Context) (common.Address, error)
 	// wfil methods
-	WFILBalanceOf(ctx context.Context, hodler common.Address) (*big.Float, error)
-	WFILAllowance(ctx context.Context, hodler common.Address, spender common.Address) (*big.Float, error)
+	WFILBalanceOf(ctx context.Context, hodler common.Address, blockNumber *big.Int) (*big.Float, error)
+	WFILAllowance(ctx context.Context, hodler common.Address, spender common.Address, blockNumber *big.Int) (*big.Float, error)
 	// policing methods
 	CredentialUsedEpoch(ctx context.Context, vc abigen.VerifiableCredential, blockNumber *big.Int) (*big.Int, error)
 	CredentialValidityPeriod(ctx context.Context) (*big.Int, *big.Int, error)

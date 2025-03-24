@@ -84,6 +84,28 @@ func (q *fevmQueries) InfPoolTotalAssets(ctx context.Context, blockNumber *big.I
 	return util.ToFIL(assets), nil
 }
 
+func (q *fevmQueries) InfPoolLockedAssets(ctx context.Context, blockNumber *big.Int) (*big.Float, error) {
+	client, err := q.extern.ConnectEthClient()
+	if err != nil {
+		return nil, err
+	}
+	defer client.Close()
+
+	totalBorrowed, err := q.InfPoolTotalBorrowed(ctx, blockNumber)
+	if err != nil {
+		return nil, err
+	}
+
+	wFILBalance, err := q.WFILBalanceOf(ctx, q.infinityPool, blockNumber)
+	if err != nil {
+		return nil, err
+	}
+
+	lockedAssets := totalBorrowed.Add(totalBorrowed, wFILBalance)
+
+	return lockedAssets, nil
+}
+
 func (q *fevmQueries) InfPoolBorrowableLiquidity(ctx context.Context, blockNumber *big.Int) (*big.Float, error) {
 	client, err := q.extern.ConnectEthClient()
 	if err != nil {
