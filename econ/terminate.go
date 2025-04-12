@@ -156,26 +156,6 @@ func ComputeMaxTerminationFee(ctx context.Context, api *lotusapi.FullNodeStruct,
 		return nil, err
 	}
 
-	epochRewardSmoothed, err := util.ThisEpochRewardsSmoothed(ctx, api, ts)
-	if err != nil {
-		return nil, err
-	}
-
-	epochQaPowerSmoothed, err := util.TotalPowerSmoothed(ctx, api, ts)
-	if err != nil {
-		return nil, err
-	}
-
-	nv, err := api.StateNetworkVersion(ctx, ts.Key())
-	if err != nil {
-		return nil, err
-	}
-
-	p, err := api.StateMinerPower(ctx, minerAddr, ts.Key())
-	if err != nil {
-		return nil, err
-	}
-
 	lf, err := mstate.LockedFunds()
 	if err != nil {
 		return nil, err
@@ -204,6 +184,26 @@ func ComputeMaxTerminationFee(ctx context.Context, api *lotusapi.FullNodeStruct,
 	} else {
 		// otherwise no fee debt, go on normally
 		result.AvailableBalance = avail.Int
+	}
+
+	epochRewardSmoothed, err := util.ThisEpochRewardsSmoothed(ctx, api, ts)
+	if err != nil {
+		return nil, err
+	}
+
+	epochQaPowerSmoothed, err := util.TotalPowerSmoothed(ctx, api, ts)
+	if err != nil {
+		return nil, err
+	}
+
+	nv, err := api.StateNetworkVersion(ctx, ts.Key())
+	if err != nil {
+		return nil, err
+	}
+
+	p, err := api.StateMinerPower(ctx, minerAddr, ts.Key())
+	if err != nil {
+		return nil, err
 	}
 
 	sectorCount, err := api.StateMinerSectorCount(context.Background(), minerAddr, ts.Key())
