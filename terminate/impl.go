@@ -47,6 +47,10 @@ func runTerminationsInBatches(
 	defer func() {
 		close(statsCh)
 	}()
+	if offchain {
+		errorCh <- xerrors.Errorf("offchain termination is not supported")
+		return
+	}
 	pending := make([]terminationTask, 0, maxPartitionsPerTx)
 	flush := func() {
 		err := runPendingTerminations(ctx, api, minerAddr, minerInfo, gasLimit, pending, offchain, statsCh)
@@ -83,6 +87,9 @@ func runPendingTerminations(
 	offchain bool,
 	statsCh chan *SectorStats,
 ) error {
+	if offchain {
+		return xerrors.Errorf("offchain termination is not supported")
+	}
 	if len(tasks) > 0 {
 		// fmt.Printf("Terminating: %+v\n", len(tasks))
 		height := tasks[0].deadlineHeight
