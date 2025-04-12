@@ -219,6 +219,9 @@ func ComputeMaxTerminationFee(ctx context.Context, api *lotusapi.FullNodeStruct,
 		epochQaPowerSmoothed,
 		p.MinerPower.QualityAdjPower,
 	)
+	if err != nil {
+		return nil, err
+	}
 
 	penalty, err := minertypes.PledgePenaltyForTermination(
 		nv,
