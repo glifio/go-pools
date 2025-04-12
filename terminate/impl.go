@@ -156,14 +156,25 @@ func terminateSectors(
 			sectorPower := miner8.QAPowerForSector(minerInfo.SectorSize, util.ConvertSectorType(s))
 
 			// the termination penalty calculation
+			var expectedDayReward, expectedStoragePledge, replacedDayReward abi.TokenAmount
+			if s.ExpectedDayReward != nil {
+				expectedDayReward = *s.ExpectedDayReward
+			}
+			if s.ExpectedStoragePledge != nil {
+				expectedStoragePledge = *s.ExpectedStoragePledge
+			}
+			if s.ReplacedDayReward != nil {
+				replacedDayReward = *s.ReplacedDayReward
+			}
+
 			termFee := miner8.PledgePenaltyForTermination(
-				*s.ExpectedDayReward,
+				expectedDayReward,
 				height-s.PowerBaseEpoch,
-				*s.ExpectedStoragePledge,
+				expectedStoragePledge,
 				powFilterEstimate,
 				sectorPower,
 				rewFilterEstimate,
-				*s.ReplacedDayReward,
+				replacedDayReward,
 				s.PowerBaseEpoch-s.Activation,
 			)
 

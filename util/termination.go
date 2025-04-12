@@ -17,6 +17,18 @@ import (
 
 // the SimpleQAPower bool is missing here on the conversion
 func ConvertSectorType(sector *miner.SectorOnChainInfo) *miner8.SectorOnChainInfo {
+	var expectedDayReward, expectedStoragePledge, replacedDayReward abi.TokenAmount
+
+	if sector.ExpectedDayReward != nil {
+		expectedDayReward = *sector.ExpectedDayReward
+	}
+	if sector.ExpectedStoragePledge != nil {
+		expectedStoragePledge = *sector.ExpectedStoragePledge
+	}
+	if sector.ReplacedDayReward != nil {
+		replacedDayReward = *sector.ReplacedDayReward
+	}
+
 	return &miner8.SectorOnChainInfo{
 		SectorNumber:          sector.SectorNumber,
 		SealProof:             sector.SealProof,
@@ -27,9 +39,9 @@ func ConvertSectorType(sector *miner.SectorOnChainInfo) *miner8.SectorOnChainInf
 		DealWeight:            sector.DealWeight,
 		VerifiedDealWeight:    sector.VerifiedDealWeight,
 		InitialPledge:         sector.InitialPledge,
-		ExpectedDayReward:     *sector.ExpectedDayReward,
-		ExpectedStoragePledge: *sector.ExpectedStoragePledge,
-		ReplacedDayReward:     *sector.ReplacedDayReward,
+		ExpectedDayReward:     expectedDayReward,
+		ExpectedStoragePledge: expectedStoragePledge,
+		ReplacedDayReward:     replacedDayReward,
 		SectorKeyCID:          sector.SectorKeyCID,
 	}
 }
