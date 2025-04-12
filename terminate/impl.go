@@ -16,6 +16,7 @@ import (
 	minertypes "github.com/filecoin-project/go-state-types/builtin/v9/miner"
 	lotusapi "github.com/filecoin-project/lotus/api"
 	"github.com/filecoin-project/lotus/chain/types"
+	"github.com/filecoin-project/specs-actors/v6/actors/util/smoothing"
 	miner8 "github.com/filecoin-project/specs-actors/v8/actors/builtin/miner"
 	"github.com/glifio/go-pools/util"
 	cbor "github.com/ipfs/go-ipld-cbor"
@@ -128,10 +129,14 @@ func terminateSectors(
 			return nil, err
 		}
 
+		powFilterEstimate := smoothing.NewEstimate(smoothedPow.PositionEstimate, smoothedPow.VelocityEstimate)
+
 		smoothedRew, err := util.ThisEpochRewardsSmoothed(ctx, api, ts)
 		if err != nil {
 			return nil, err
 		}
+
+		rewFilterEstimate := smoothing.NewEstimate(smoothedRew.PositionEstimate, smoothedRew.VelocityEstimate)
 
 		allTermSectors := make([]bitfield.BitField, 0)
 		for _, term := range params.Terminations {
@@ -152,13 +157,13 @@ func terminateSectors(
 
 			// the termination penalty calculation
 			termFee := miner8.PledgePenaltyForTermination(
-				s.ExpectedDayReward,
+				*s.ExpectedDayReward,
 				height-s.PowerBaseEpoch,
-				s.ExpectedStoragePledge,
-				smoothedPow,
+				*s.ExpectedStoragePledge,
+				powFilterEstimate,
 				sectorPower,
-				smoothedRew,
-				s.ReplacedDayReward,
+				rewFilterEstimate,
+				*s.ReplacedDayReward,
 				s.PowerBaseEpoch-s.Activation,
 			)
 
@@ -168,7 +173,7 @@ func terminateSectors(
 			}
 
 			// the daily sector fee calculation
-			sectorFee := miner8.PledgePenaltyForContinuedFault(smoothedRew, smoothedPow, sectorPower)
+			sectorFee := miner8.PledgePenaltyForContinuedFault(rewFilterEstimate, powFilterEstimate, sectorPower)
 
 			// incur the sector fee of Min(41 days, remaining days b4 sector expiry)
 			epochsUntilTerm := s.Expiration - height
