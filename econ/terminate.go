@@ -8,10 +8,11 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/filecoin-project/go-address"
 	"github.com/filecoin-project/go-bitfield"
-	"github.com/filecoin-project/go-state-types/builtin/v16/miner"
+	"github.com/filecoin-project/go-state-types/builtin"
 	lotusapi "github.com/filecoin-project/lotus/api"
 	minertypes "github.com/filecoin-project/lotus/chain/actors/builtin/miner"
 	"github.com/filecoin-project/lotus/chain/types"
+	"github.com/filecoin-project/specs-actors/v8/actors/builtin/miner"
 
 	poolstypes "github.com/glifio/go-pools/types"
 	"github.com/glifio/go-pools/util"
@@ -226,7 +227,8 @@ func ComputeMaxTerminationFee(ctx context.Context, api *lotusapi.FullNodeStruct,
 	penalty, err := minertypes.PledgePenaltyForTermination(
 		nv,
 		lf.InitialPledgeRequirement,
-		miner.TerminationLifetimeCap,
+		// something bigger than 140 days of epochs since we aren't computing on a per sector basis
+		miner.TerminationLifetimeCap*builtin.EpochsInDay,
 		faultFee,
 	)
 	if err != nil {
