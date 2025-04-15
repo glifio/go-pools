@@ -120,8 +120,6 @@ func XTestTerminationPrecision(t *testing.T) {
 	// TODO: test the 10 random miners instead of just 1
 }
 
-var BASE_BLOCK_HEIGHT = big.NewInt(4878892)
-
 type baseFiTest struct {
 	*BaseFi
 

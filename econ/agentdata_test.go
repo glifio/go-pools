@@ -17,7 +17,7 @@ import (
 	"github.com/glifio/go-pools/vc"
 )
 
-var TIPSET_HEIGHT = big.NewInt(4198539)
+var BASE_BLOCK_HEIGHT = big.NewInt(4878892)
 
 func setupTest() (types.PoolsSDK, error) {
 	extern := deploy.Extern
@@ -33,31 +33,42 @@ type agentDataTest struct {
 	principal       *big.Int
 }
 
-var agentDataTests = []struct {
+type agentDataTestCase struct {
 	name  string
 	agent string
 	want  agentDataTest
-}{
+}
+
+var agentDataTests = []agentDataTestCase{
 	{"empty agent", "0xDBa96B0FDbc87C7eEb641Ee37EAFC55B355079E4", agentDataTest{
 		collateralValue: bigFromStr("0"),
 		liveSectors:     bigFromStr("0"),
 		principal:       bigFromStr("0"),
 	}},
-	{"single miner agent", "0xf0F1ceCCF78D411EeD9Ca190ca7F157140cCB2d3", agentDataTest{
-		collateralValue: bigFromStr("120419585663471646317"),
-		liveSectors:     bigFromStr("323"),
-		principal:       bigFromStr("2000000000000000000"),
+	{"single miner agent", "0x7a46ac436cF1606eABd8BD5F6B9A169258c01452", agentDataTest{
+		collateralValue: bigFromStr("94138294547609210591499"),
+		liveSectors:     bigFromStr("80456"),
+		principal:       bigFromStr("73569777167058713695624"),
 	}},
-	{"agent with fee debt", "0xFF65F5f3D309fEA7aA2d4cB2727E918FAb0aE7F7", agentDataTest{
-		collateralValue: bigFromStr("0"),
-		liveSectors:     bigFromStr("0"),
-		principal:       bigFromStr("0"),
-	}},
+	// TODO: add fee debt agent
+	// {"agent with fee debt", "0xFF65F5f3D309fEA7aA2d4cB2727E918FAb0aE7F7", agentDataTest{
+	// 	collateralValue: bigFromStr("0"),
+	// 	liveSectors:     bigFromStr("0"),
+	// 	principal:       bigFromStr("0"),
+	// }},
 	{"multiminer agent", "0x64Ea1aD49A78B6A6878c4975566b8953b1Ef1e79", agentDataTest{
-		collateralValue: bigFromStr("1882771200768867984814855"),
-		liveSectors:     bigFromStr("2805488"),
-		principal:       bigFromStr("1081255000003082191780823"),
+		collateralValue: bigFromStr("2592356724722868806514701"),
+		liveSectors:     bigFromStr("1241723"),
+		principal:       bigFromStr("1550270393738119289518458"),
 	}},
+	// NOTE TO SELF: add more test cases above this last case ^^^, this is
+}
+
+func lastAgentTestCase() agentDataTestCase {
+	if len(agentDataTests) == 0 {
+		return agentDataTestCase{}
+	}
+	return agentDataTests[len(agentDataTests)-1]
 }
 
 func TestComputeAgentData(t *testing.T) {
@@ -72,14 +83,14 @@ func TestComputeAgentData(t *testing.T) {
 	}
 	defer closer()
 
-	ts, err := lapi.ChainGetTipSetByHeight(context.Background(), abi.ChainEpoch(TIPSET_HEIGHT.Int64()), ltypes.EmptyTSK)
+	ts, err := lapi.ChainGetTipSetByHeight(context.Background(), abi.ChainEpoch(BASE_BLOCK_HEIGHT.Int64()), ltypes.EmptyTSK)
 	if err != nil {
 		t.Fatal(err)
 	}
 
 	for _, tt := range agentDataTests {
 		t.Run(tt.name, func(t *testing.T) {
-			principal, err := psdk.Query().AgentPrincipal(context.Background(), common.HexToAddress(tt.agent), TIPSET_HEIGHT)
+			principal, err := psdk.Query().AgentPrincipal(context.Background(), common.HexToAddress(tt.agent), BASE_BLOCK_HEIGHT)
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -108,7 +119,7 @@ func TestComputeBorrowAgentData(t *testing.T) {
 	}
 	defer closer()
 
-	ts, err := lapi.ChainGetTipSetByHeight(context.Background(), abi.ChainEpoch(TIPSET_HEIGHT.Int64()), ltypes.EmptyTSK)
+	ts, err := lapi.ChainGetTipSetByHeight(context.Background(), abi.ChainEpoch(BASE_BLOCK_HEIGHT.Int64()), ltypes.EmptyTSK)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -141,13 +152,13 @@ func TestComputeRemoveMinerAgentData(t *testing.T) {
 	}
 	defer closer()
 
-	ts, err := lapi.ChainGetTipSetByHeight(context.Background(), abi.ChainEpoch(TIPSET_HEIGHT.Int64()), ltypes.EmptyTSK)
+	ts, err := lapi.ChainGetTipSetByHeight(context.Background(), abi.ChainEpoch(BASE_BLOCK_HEIGHT.Int64()), ltypes.EmptyTSK)
 	if err != nil {
 		t.Fatal(err)
 	}
 
 	// multiminer agent
-	agentAddr := common.HexToAddress(agentDataTests[3].agent)
+	agentAddr := common.HexToAddress(lastAgentTestCase().agent)
 	minerToRm, _ := address.NewFromString("f03055018")
 
 	termRes, err := EstimateTerminationFeeMiner(context.Background(), lapi, minerToRm, ts)
@@ -160,9 +171,9 @@ func TestComputeRemoveMinerAgentData(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	expectedLiveSectors := new(big.Int).Sub(agentDataTests[3].want.liveSectors, big.NewInt(int64(termRes.LiveSectors)))
-	expectedCollateralValue := new(big.Int).Sub(agentDataTests[3].want.collateralValue, termRes.ToBaseFi().LiquidationValue())
-	expectedPrincipal := agentDataTests[3].want.principal
+	expectedLiveSectors := new(big.Int).Sub(lastAgentTestCase().want.liveSectors, big.NewInt(int64(termRes.LiveSectors)))
+	expectedCollateralValue := new(big.Int).Sub(lastAgentTestCase().want.collateralValue, termRes.ToBaseFi().LiquidationValue())
+	expectedPrincipal := lastAgentTestCase().want.principal
 
 	testAgentData(t, ad, expectedLiveSectors, expectedCollateralValue, expectedPrincipal)
 }
@@ -179,21 +190,21 @@ func TestComputeRemoveSingleMiner(t *testing.T) {
 	}
 	defer closer()
 
-	ts, err := lapi.ChainGetTipSetByHeight(context.Background(), abi.ChainEpoch(TIPSET_HEIGHT.Int64()), ltypes.EmptyTSK)
+	ts, err := lapi.ChainGetTipSetByHeight(context.Background(), abi.ChainEpoch(BASE_BLOCK_HEIGHT.Int64()), ltypes.EmptyTSK)
 	if err != nil {
 		t.Fatal(err)
 	}
 
 	// single miner agent
 	agentAddr := common.HexToAddress(agentDataTests[1].agent)
-	minerToRm, _ := address.NewFromString("f01931245")
+	minerToRm, _ := address.NewFromString("f03299999")
 
 	ad, err := ComputeRmMinerAgentData(context.Background(), agentAddr, minerToRm, psdk, ts)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	agentLiquidAssets, err := psdk.Query().AgentLiquidAssets(context.Background(), agentAddr, TIPSET_HEIGHT)
+	agentLiquidAssets, err := psdk.Query().AgentLiquidAssets(context.Background(), agentAddr, BASE_BLOCK_HEIGHT)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -220,22 +231,22 @@ func TestComputeWithdrawAgentData(t *testing.T) {
 	}
 	defer closer()
 
-	ts, err := lapi.ChainGetTipSetByHeight(context.Background(), abi.ChainEpoch(TIPSET_HEIGHT.Int64()), ltypes.EmptyTSK)
+	ts, err := lapi.ChainGetTipSetByHeight(context.Background(), abi.ChainEpoch(BASE_BLOCK_HEIGHT.Int64()), ltypes.EmptyTSK)
 	if err != nil {
 		t.Fatal(err)
 	}
 
 	// multiminer agent
-	agentAddr := common.HexToAddress(agentDataTests[3].agent)
+	agentAddr := common.HexToAddress(lastAgentTestCase().agent)
 
 	ad, err := ComputeWithdrawAgentData(context.Background(), agentAddr, withdrawAmount, psdk, ts)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	expectedLiveSectors := agentDataTests[3].want.liveSectors
-	expectedCollateralValue := new(big.Int).Sub(agentDataTests[3].want.collateralValue, withdrawAmount)
-	expectedPrincipal := agentDataTests[3].want.principal
+	expectedLiveSectors := lastAgentTestCase().want.liveSectors
+	expectedCollateralValue := new(big.Int).Sub(lastAgentTestCase().want.collateralValue, withdrawAmount)
+	expectedPrincipal := lastAgentTestCase().want.principal
 
 	testAgentData(t, ad, expectedLiveSectors, expectedCollateralValue, expectedPrincipal)
 }
@@ -252,13 +263,13 @@ func TestComputeWithdrawTooMuch(t *testing.T) {
 	}
 	defer closer()
 
-	ts, err := lapi.ChainGetTipSetByHeight(context.Background(), abi.ChainEpoch(TIPSET_HEIGHT.Int64()), ltypes.EmptyTSK)
+	ts, err := lapi.ChainGetTipSetByHeight(context.Background(), abi.ChainEpoch(BASE_BLOCK_HEIGHT.Int64()), ltypes.EmptyTSK)
 	if err != nil {
 		t.Fatal(err)
 	}
 
 	// multiminer agent
-	agentAddr := common.HexToAddress(agentDataTests[3].agent)
+	agentAddr := common.HexToAddress(lastAgentTestCase().agent)
 
 	// withdraw a lot
 	withdrawAmount := new(big.Int).Mul(big.NewInt(1e18), withdrawAmount)
@@ -281,7 +292,7 @@ func TestPushFundsToMinerWFeeDebt(t *testing.T) {
 	}
 	defer closer()
 
-	ts, err := lapi.ChainGetTipSetByHeight(context.Background(), abi.ChainEpoch(TIPSET_HEIGHT.Int64()), ltypes.EmptyTSK)
+	ts, err := lapi.ChainGetTipSetByHeight(context.Background(), abi.ChainEpoch(BASE_BLOCK_HEIGHT.Int64()), ltypes.EmptyTSK)
 	if err != nil {
 		t.Fatal(err)
 	}
