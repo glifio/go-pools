@@ -2,12 +2,10 @@ package econ
 
 import (
 	"context"
-	"math"
 	"math/big"
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/filecoin-project/go-address"
-	"github.com/filecoin-project/go-bitfield"
 	"github.com/filecoin-project/go-state-types/builtin"
 	lotusapi "github.com/filecoin-project/lotus/api"
 	minertypes "github.com/filecoin-project/lotus/chain/actors/builtin/miner"
@@ -18,9 +16,6 @@ import (
 	"github.com/glifio/go-pools/util"
 	"golang.org/x/xerrors"
 )
-
-var MAX_SAMPLED_SECTORS = 1000
-var INITIAL_PLEDGE_INTERPOLATION_REL_DIFF = big.NewFloat(10.00) // 10%
 
 func EstimateTerminationFeeAgent(
 	ctx context.Context,
@@ -111,31 +106,6 @@ func EstimateTerminationFeeMiner(ctx context.Context, api *lotusapi.FullNodeStru
 	}
 
 	return res, nil
-}
-
-func AllSectors(ctx context.Context, api *lotusapi.FullNodeStruct, minerAddr address.Address, ts *types.TipSet) ([]uint64, error) {
-	allLiveSectors := make([]bitfield.BitField, 0)
-
-	for dlIdx := uint64(0); dlIdx < 48; dlIdx++ {
-		// 48 calls to the internet
-		partitions, err := api.StateMinerPartitions(ctx, minerAddr, uint64(dlIdx), ts.Key())
-		// if this error occurs, the miner hasn't been around long enough to process the deadlineTs, so we just skip it
-		if err != nil {
-			continue
-		}
-
-		for _, partition := range partitions {
-			allLiveSectors = append(allLiveSectors, partition.LiveSectors)
-		}
-	}
-
-	// one bitfield with all the sectors
-	allSectors, err := bitfield.MultiMerge(allLiveSectors...)
-	if err != nil {
-		return nil, err
-	}
-	// sectors => all sectors as an array of uint64 sector IDs
-	return allSectors.All(math.MaxUint64)
 }
 
 func ComputeMaxTerminationFee(ctx context.Context, api *lotusapi.FullNodeStruct, minerAddr address.Address, ts *types.TipSet) (*TerminateSectorResult, error) {

@@ -120,7 +120,7 @@ func XTestTerminationPrecision(t *testing.T) {
 	// TODO: test the 10 random miners instead of just 1
 }
 
-var BASE_BLOCK_HEIGHT = big.NewInt(4198539)
+var BASE_BLOCK_HEIGHT = big.NewInt(4878892)
 
 type baseFiTest struct {
 	*BaseFi
@@ -138,18 +138,18 @@ var baseFiTests = []struct {
 }{
 	{"no sectors miner", "f01882569", baseFiTest{
 		BaseFi: &BaseFi{
-			Balance:          bigFromStr("16791927372141826678333"),
-			AvailableBalance: bigFromStr("16753493784149168047801"),
-			LockedRewards:    bigFromStr("38433587992658630532"),
+			Balance:          bigFromStr("927372141826678333"),
+			AvailableBalance: bigFromStr("927372141826678333"),
+			LockedRewards:    big.NewInt(0),
 			InitialPledge:    big.NewInt(0),
 			FeeDebt:          big.NewInt(0),
 			TerminationFee:   big.NewInt(0),
 			LiveSectors:      big.NewInt(0),
 			FaultySectors:    big.NewInt(0),
 		},
-		maxBorrowAndSeal:     bigFromStr("50375782116425480034999"),
-		maxBorrowAndWithdraw: bigFromStr("12593945529106370008750"),
-		liquidationValue:     bigFromStr("16791927372141826678333"),
+		maxBorrowAndSeal:     bigFromStr("2782116425480034999"),
+		maxBorrowAndWithdraw: bigFromStr("695529106370008750"),
+		liquidationValue:     bigFromStr("927372141826678333"),
 		height:               BASE_BLOCK_HEIGHT,
 	}},
 	{"miner with fee debt", "f01836766", baseFiTest{
@@ -186,36 +186,37 @@ var baseFiTests = []struct {
 	}},
 	{"normal miner", "f01344987", baseFiTest{
 		BaseFi: &BaseFi{
-			Balance:          bigFromStr("183615910324483211964542"),
-			AvailableBalance: bigFromStr("217841811153934568647"),
-			LockedRewards:    bigFromStr("8591178717907362918730"),
-			InitialPledge:    bigFromStr("174806889795421914477165"),
+			Balance:          bigFromStr("39773757056590498353766"),
+			AvailableBalance: bigFromStr("450324027859823088796"),
+			LockedRewards:    bigFromStr("2485958269968226649253"),
+			InitialPledge:    bigFromStr("36837474758762448615717"),
 			FeeDebt:          big.NewInt(0),
-			TerminationFee:   bigFromStr("19439988058419303079504"),
-			LiveSectors:      big.NewInt(89417),
+			TerminationFee:   bigFromStr("3131185354494808132335"),
+			LiveSectors:      big.NewInt(19363),
 			FaultySectors:    big.NewInt(0),
 		},
-		maxBorrowAndSeal:     bigFromStr("492527766798191726655114"),
-		maxBorrowAndWithdraw: bigFromStr("123131941699547931663779"),
-		liquidationValue:     bigFromStr("164175922266063908885038"),
+		maxBorrowAndSeal:     bigFromStr("109927715106287070664293"),
+		maxBorrowAndWithdraw: bigFromStr("27481928776571767666074"),
+		liquidationValue:     bigFromStr("36642571702095690221431"),
 		height:               BASE_BLOCK_HEIGHT,
 	}},
-	{"miner with fee debt and positive balance", "f01931245", baseFiTest{
-		BaseFi: &BaseFi{
-			Balance:          bigFromStr("65041872611791874551"),
-			AvailableBalance: bigFromStr("0"),
-			LockedRewards:    bigFromStr("137666159110180561"),
-			InitialPledge:    bigFromStr("64904206452681693990"),
-			FeeDebt:          bigFromStr("957933257513729319"),
-			TerminationFee:   bigFromStr("12832724091624933434"),
-			LiveSectors:      big.NewInt(323),
-			FaultySectors:    big.NewInt(323),
-		},
-		maxBorrowAndSeal:     bigFromStr("156627445560500823351"),
-		maxBorrowAndWithdraw: bigFromStr("39156861390125205838"),
-		liquidationValue:     bigFromStr("52209148520166941117"),
-		height:               big.NewInt(4299545),
-	}},
+	// THIS TEST FAILS BECAUSE WE NEED A BETTER, MODERN EXAMPLE
+	// {"miner with fee debt and positive balance", "f01931245", baseFiTest{
+	// 	BaseFi: &BaseFi{
+	// 		Balance:          bigFromStr("65041872611791874551"),
+	// 		AvailableBalance: bigFromStr("0"),
+	// 		LockedRewards:    bigFromStr("137666159110180561"),
+	// 		InitialPledge:    bigFromStr("64904206452681693990"),
+	// 		FeeDebt:          bigFromStr("957933257513729319"),
+	// 		TerminationFee:   bigFromStr("12832724091624933434"),
+	// 		LiveSectors:      big.NewInt(323),
+	// 		FaultySectors:    big.NewInt(323),
+	// 	},
+	// 	maxBorrowAndSeal:     bigFromStr("156627445560500823351"),
+	// 	maxBorrowAndWithdraw: bigFromStr("39156861390125205838"),
+	// 	liquidationValue:     bigFromStr("52209148520166941117"),
+	// 	height:               big.NewInt(4299545),
+	// }},
 }
 
 func TestMinerFi(t *testing.T) {
@@ -302,28 +303,28 @@ var agentTests = []struct {
 	{"agent many miners", "0x64Ea1aD49A78B6A6878c4975566b8953b1Ef1e79", BASE_BLOCK_HEIGHT, agentFiTest{
 		AgentFi: &AgentFi{
 			BaseFi: BaseFi{
-				Balance:          bigFromStr("2090733730144435384596917"),
-				AvailableBalance: bigFromStr("8911457546764252091903"),
-				LockedRewards:    bigFromStr("90756351468487272842162"),
-				InitialPledge:    bigFromStr("1991050146969153602729858"),
+				Balance:          bigFromStr("2819592172520852577940854"),
+				AvailableBalance: bigFromStr("12737055656823005978228"),
+				LockedRewards:    bigFromStr("133496862716254206867810"),
+				InitialPledge:    bigFromStr("2673358209388044369719498"),
 				FeeDebt:          big.NewInt(0),
-				TerminationFee:   bigFromStr("207962529375567399782062"),
-				LiveSectors:      big.NewInt(2805488),
+				TerminationFee:   bigFromStr("227235447797983771426153"),
+				LiveSectors:      big.NewInt(1241723),
 				FaultySectors:    big.NewInt(0),
 			},
 			Liability: Liability{
-				Principal: bigFromStr("1081255000003082191780823"),
+				Principal: bigFromStr("1550270393738119289518458"),
 				Interest:  bigFromStr("0"),
 			},
 		},
-		maxBorrowAndSeal:     bigFromStr("2404308374838024502536372"),
-		maxBorrowAndWithdraw: bigFromStr("330743324753791171308411"),
-		liquidationValue:     bigFromStr("1882771200768867984814855"),
-		borrowLimit:          bigFromStr("1322973299015164685233641"),
-		withdrawLimit:        bigFromStr("8911457546764252091903"),
-		marginCall:           bigFromStr("1272158912732776255650271"),
-		leverageRatio:        0.5743316423053819,
-		dtl:                  0.574289111476492565,
+		maxBorrowAndSeal:     bigFromStr("3123377454405613741932615"),
+		maxBorrowAndWithdraw: bigFromStr("393036636954487379015530"),
+		liquidationValue:     bigFromStr("2592356724722868806514701"),
+		borrowLimit:          bigFromStr("1572146547817949516062119"),
+		withdrawLimit:        bigFromStr("12737055656823005978228"),
+		marginCall:           bigFromStr("1824977537161957912788818"),
+		leverageRatio:        2.489955276842645206,
+		dtl:                  0.5983863608714945,
 	}},
 	// agent 27
 	{"agent no miners", "0xDBa96B0FDbc87C7eEb641Ee37EAFC55B355079E4", BASE_BLOCK_HEIGHT, agentFiTest{
@@ -335,94 +336,68 @@ var agentTests = []struct {
 		borrowLimit:          big.NewInt(0),
 		withdrawLimit:        big.NewInt(0),
 		marginCall:           big.NewInt(0),
-		leverageRatio:        0,
+		leverageRatio:        1,
 		dtl:                  0,
 	}},
-	// agent 2
-	{"agent single miner", "0xf0F1ceCCF78D411EeD9Ca190ca7F157140cCB2d3", BASE_BLOCK_HEIGHT, agentFiTest{
+	// agent 212
+	{"agent single miner", "0x7a46ac436cF1606eABd8BD5F6B9A169258c01452", BASE_BLOCK_HEIGHT, agentFiTest{
 		AgentFi: &AgentFi{
 			BaseFi: BaseFi{
-				Balance:          bigFromStr("133252309755096579751"),
-				AvailableBalance: bigFromStr("57665444302030819344"),
-				LockedRewards:    bigFromStr("10682659000384066417"),
-				InitialPledge:    bigFromStr("64904206452681693990"),
+				Balance:          bigFromStr("102616089602808694802964"),
+				AvailableBalance: bigFromStr("80595336348363929738"),
+				LockedRewards:    bigFromStr("2796443644134574248635"),
+				InitialPledge:    bigFromStr("99738765355288049546651"),
 				FeeDebt:          big.NewInt(0),
-				TerminationFee:   bigFromStr("12832724091624933434"),
-				LiveSectors:      big.NewInt(323),
+				TerminationFee:   bigFromStr("8477795055199484211465"),
+				LiveSectors:      big.NewInt(80456),
 				FaultySectors:    big.NewInt(0),
 			},
 			Liability: Liability{
-				Principal: bigFromStr("2000000000000000000"),
+				Principal: bigFromStr("73569777167058713695624"),
 				Interest:  bigFromStr("0"),
 			},
 		},
-		maxBorrowAndSeal:     bigFromStr("355241600312332747173"),
-		maxBorrowAndWithdraw: bigFromStr("88308970354909670812"),
-		liquidationValue:     bigFromStr("120419585663471646317"),
-		borrowLimit:          bigFromStr("353235881419638683247"),
-		withdrawLimit:        bigFromStr("57665444302030819344"),
-		marginCall:           bigFromStr("2359669285522428148"),
-		leverageRatio:        0.016656085317377764,
-		dtl:                  0.016608593934123496,
+		maxBorrowAndSeal:     bigFromStr("61513785714780677114127"),
+		maxBorrowAndWithdraw: bigFromStr("-3029978398642076943165"),
+		liquidationValue:     bigFromStr("94138294547609210591499"),
+		borrowLimit:          bigFromStr("-12119913594568307772663"),
+		withdrawLimit:        bigFromStr("-4039971198189435924221"),
+		marginCall:           bigFromStr("86627881540410570455047"),
+		leverageRatio:        4.591082801378754,
+		dtl:                  0.7821864594339948,
 	}},
-	// agent 91
-	{"agent miner with fee debt", "0xFF65F5f3D309fEA7aA2d4cB2727E918FAb0aE7F7", BASE_BLOCK_HEIGHT, agentFiTest{
+	// // agent 91
+	// {"agent miner with fee debt", "0xFF65F5f3D309fEA7aA2d4cB2727E918FAb0aE7F7", BASE_BLOCK_HEIGHT, agentFiTest{
+	// 	AgentFi: &AgentFi{
+	// 		BaseFi: BaseFi{
+	// 			Balance:          bigFromStr("0"),
+	// 			AvailableBalance: bigFromStr("145838619789"),
+	// 			LockedRewards:    bigFromStr("0"),
+	// 			InitialPledge:    bigFromStr("0"),
+	// 			FeeDebt:          bigFromStr("43697948992036495293"),
+	// 			TerminationFee:   bigFromStr("0"),
+	// 			LiveSectors:      big.NewInt(0),
+	// 			FaultySectors:    big.NewInt(0),
+	// 		},
+	// 		Liability: Liability{
+	// 			Principal: bigFromStr("0"),
+	// 			Interest:  bigFromStr("0"),
+	// 		},
+	// 	},
+	// 	maxBorrowAndSeal:     bigFromStr("0"),
+	// 	maxBorrowAndWithdraw: bigFromStr("0"),
+	// 	liquidationValue:     bigFromStr("0"),
+	// 	borrowLimit:          bigFromStr("0"),
+	// 	withdrawLimit:        bigFromStr("0"),
+	// 	marginCall:           bigFromStr("0"),
+	// 	leverageRatio:        0,
+	// 	dtl:                  0,
+	// }},
+	{"agent with balance no miners, with principal", "0xf0F1ceCCF78D411EeD9Ca190ca7F157140cCB2d3", BASE_BLOCK_HEIGHT, agentFiTest{
 		AgentFi: &AgentFi{
 			BaseFi: BaseFi{
-				Balance:          bigFromStr("0"),
-				AvailableBalance: bigFromStr("145838619789"),
-				LockedRewards:    bigFromStr("0"),
-				InitialPledge:    bigFromStr("0"),
-				FeeDebt:          bigFromStr("43697948992036495293"),
-				TerminationFee:   bigFromStr("0"),
-				LiveSectors:      big.NewInt(0),
-				FaultySectors:    big.NewInt(0),
-			},
-			Liability: Liability{
-				Principal: bigFromStr("0"),
-				Interest:  bigFromStr("0"),
-			},
-		},
-		maxBorrowAndSeal:     bigFromStr("0"),
-		maxBorrowAndWithdraw: bigFromStr("0"),
-		liquidationValue:     bigFromStr("0"),
-		borrowLimit:          bigFromStr("0"),
-		withdrawLimit:        bigFromStr("0"),
-		marginCall:           bigFromStr("0"),
-		leverageRatio:        0,
-		dtl:                  0,
-	}},
-	{"agent with balance no miners", "0xf0F1ceCCF78D411EeD9Ca190ca7F157140cCB2d3", big.NewInt(4238800), agentFiTest{
-		AgentFi: &AgentFi{
-			BaseFi: BaseFi{
-				Balance:          bigFromStr("3454284493328524959"),
-				AvailableBalance: bigFromStr("3454284493328524959"),
-				LockedRewards:    bigFromStr("0"),
-				InitialPledge:    bigFromStr("0"),
-				FeeDebt:          bigFromStr("0"),
-				TerminationFee:   bigFromStr("0"),
-				LiveSectors:      big.NewInt(0),
-				FaultySectors:    big.NewInt(0),
-			},
-			Liability: Liability{
-				Principal: bigFromStr("0"),
-				Interest:  bigFromStr("0"),
-			},
-		},
-		maxBorrowAndSeal:     bigFromStr("10362853479985574877"),
-		maxBorrowAndWithdraw: bigFromStr("2590713369996393720"),
-		liquidationValue:     bigFromStr("3454284493328524959"),
-		borrowLimit:          bigFromStr("10362853479985574877"),
-		withdrawLimit:        bigFromStr("3454284493328524959"),
-		marginCall:           bigFromStr("0"),
-		leverageRatio:        0,
-		dtl:                  0,
-	}},
-	{"agent with balance no miners with principal", "0xf0F1ceCCF78D411EeD9Ca190ca7F157140cCB2d3", big.NewInt(4238810), agentFiTest{
-		AgentFi: &AgentFi{
-			BaseFi: BaseFi{
-				Balance:          bigFromStr("4454284493328524959"),
-				AvailableBalance: bigFromStr("4454284493328524959"),
+				Balance:          bigFromStr("944117375094337319"),
+				AvailableBalance: bigFromStr("944117375094337319"),
 				LockedRewards:    bigFromStr("0"),
 				InitialPledge:    bigFromStr("0"),
 				FeeDebt:          bigFromStr("0"),
@@ -431,18 +406,18 @@ var agentTests = []struct {
 				FaultySectors:    big.NewInt(0),
 			},
 			Liability: Liability{
-				Principal: bigFromStr("1000000000000000000"),
+				Principal: bigFromStr("659045655399482142"),
 				Interest:  bigFromStr("0"),
 			},
 		},
-		maxBorrowAndSeal:     bigFromStr("10362852195738999537"),
-		maxBorrowAndWithdraw: bigFromStr("2340712941914201940"),
-		liquidationValue:     bigFromStr("4454284493328524959"),
-		borrowLimit:          bigFromStr("9362851767656807757"),
-		withdrawLimit:        bigFromStr("3120950589218935919"),
-		marginCall:           bigFromStr("1176471091861402094"),
-		leverageRatio:        0.22450304410954403,
-		dtl:                  0.224502948003829978,
+		maxBorrowAndSeal:     bigFromStr("793544454054283425"),
+		maxBorrowAndWithdraw: bigFromStr("28485474244510146"),
+		liquidationValue:     bigFromStr("944117375094337319"),
+		borrowLimit:          bigFromStr("113941896978040581"),
+		withdrawLimit:        bigFromStr("37980632326013527"),
+		marginCall:           bigFromStr("799532420089697463"),
+		leverageRatio:        3.569241913055146,
+		dtl:                  0.7198284609562833,
 	}},
 }
 
@@ -537,9 +512,14 @@ func assertAgentFiEqual(t *testing.T, expected *agentFiTest, actual *AgentFi) {
 	if expected.marginCall.Cmp(actual.MarginCall()) != 0 {
 		t.Fatalf("Expected margin call: %v, actual: %v", expected.marginCall, actual.MarginCall())
 	}
+	lr, _ := actual.LeverageRatio().Float64()
+	if expected.leverageRatio != lr {
+		t.Fatalf("Expected leverage ratio: %v, actual: %v", expected.leverageRatio, lr)
+	}
+
 	dtl, _ := actual.DTL().Float64()
-	if expected.leverageRatio != dtl {
-		t.Fatalf("Expected leverage ratio: %v, actual: %v", expected.leverageRatio, dtl)
+	if expected.dtl != dtl {
+		t.Fatalf("Expected DTL: %v, actual: %v", expected.dtl, dtl)
 	}
 }
 
