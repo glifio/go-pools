@@ -12,7 +12,7 @@ import (
 	cbor "github.com/ipfs/go-ipld-cbor"
 )
 
-func LoadMinerActor(ctx context.Context, api *api.FullNodeStruct, minerAddr address.Address, ts *types.TipSet) (*types.ActorV5, miner.State, error) {
+func LoadMinerActor(ctx context.Context, api *api.FullNodeStruct, minerAddr address.Address, ts *types.TipSet) (*types.Actor, miner.State, error) {
 	mact, err := api.StateGetActor(ctx, minerAddr, ts.Key())
 	if err != nil {
 		return nil, nil, err

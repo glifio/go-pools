@@ -16,6 +16,7 @@ import (
 	minertypes "github.com/filecoin-project/go-state-types/builtin/v9/miner"
 	lotusapi "github.com/filecoin-project/lotus/api"
 	"github.com/filecoin-project/lotus/chain/types"
+	"github.com/filecoin-project/specs-actors/v6/actors/util/smoothing"
 	miner8 "github.com/filecoin-project/specs-actors/v8/actors/builtin/miner"
 	"github.com/glifio/go-pools/util"
 	cbor "github.com/ipfs/go-ipld-cbor"
@@ -46,6 +47,10 @@ func runTerminationsInBatches(
 	defer func() {
 		close(statsCh)
 	}()
+	if offchain {
+		errorCh <- xerrors.Errorf("offchain termination is not supported")
+		return
+	}
 	pending := make([]terminationTask, 0, maxPartitionsPerTx)
 	flush := func() {
 		err := runPendingTerminations(ctx, api, minerAddr, minerInfo, gasLimit, pending, offchain, statsCh)
@@ -82,6 +87,9 @@ func runPendingTerminations(
 	offchain bool,
 	statsCh chan *SectorStats,
 ) error {
+	if offchain {
+		return xerrors.Errorf("offchain termination is not supported")
+	}
 	if len(tasks) > 0 {
 		// fmt.Printf("Terminating: %+v\n", len(tasks))
 		height := tasks[0].deadlineHeight
@@ -128,10 +136,14 @@ func terminateSectors(
 			return nil, err
 		}
 
+		powFilterEstimate := smoothing.NewEstimate(smoothedPow.PositionEstimate, smoothedPow.VelocityEstimate)
+
 		smoothedRew, err := util.ThisEpochRewardsSmoothed(ctx, api, ts)
 		if err != nil {
 			return nil, err
 		}
+
+		rewFilterEstimate := smoothing.NewEstimate(smoothedRew.PositionEstimate, smoothedRew.VelocityEstimate)
 
 		allTermSectors := make([]bitfield.BitField, 0)
 		for _, term := range params.Terminations {
@@ -151,14 +163,25 @@ func terminateSectors(
 			sectorPower := miner8.QAPowerForSector(minerInfo.SectorSize, util.ConvertSectorType(s))
 
 			// the termination penalty calculation
+			var expectedDayReward, expectedStoragePledge, replacedDayReward abi.TokenAmount
+			if s.ExpectedDayReward != nil {
+				expectedDayReward = *s.ExpectedDayReward
+			}
+			if s.ExpectedStoragePledge != nil {
+				expectedStoragePledge = *s.ExpectedStoragePledge
+			}
+			if s.ReplacedDayReward != nil {
+				replacedDayReward = *s.ReplacedDayReward
+			}
+
 			termFee := miner8.PledgePenaltyForTermination(
-				s.ExpectedDayReward,
+				expectedDayReward,
 				height-s.PowerBaseEpoch,
-				s.ExpectedStoragePledge,
-				smoothedPow,
+				expectedStoragePledge,
+				powFilterEstimate,
 				sectorPower,
-				smoothedRew,
-				s.ReplacedDayReward,
+				rewFilterEstimate,
+				replacedDayReward,
 				s.PowerBaseEpoch-s.Activation,
 			)
 
@@ -168,7 +191,7 @@ func terminateSectors(
 			}
 
 			// the daily sector fee calculation
-			sectorFee := miner8.PledgePenaltyForContinuedFault(smoothedRew, smoothedPow, sectorPower)
+			sectorFee := miner8.PledgePenaltyForContinuedFault(rewFilterEstimate, powFilterEstimate, sectorPower)
 
 			// incur the sector fee of Min(41 days, remaining days b4 sector expiry)
 			epochsUntilTerm := s.Expiration - height

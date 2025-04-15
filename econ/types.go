@@ -45,17 +45,10 @@ type TerminateSectorResult struct {
 	InitialPledge    *big.Int
 	FeeDebt          *big.Int
 
-	EstimatedInitialPledge    *big.Int
-	InitialPledgeFromSample   *big.Int
-	AvgInitialPledgePerSector *big.Int
+	EstimatedTerminationFee *big.Int
 
-	EstimatedTerminationFee    *big.Int
-	TerminationFeeFromSample   *big.Int
-	AvgTerminationFeePerPledge *big.Int
-
-	SampledSectors uint64
-	LiveSectors    uint64
-	FaultySectors  uint64
+	LiveSectors   uint64
+	FaultySectors uint64
 }
 
 type AgentMarginJSON struct {
