@@ -87,6 +87,7 @@ type FEVMQueries interface {
 	IFIL() common.Address
 	WFIL() common.Address
 	GLF() common.Address
+	Plus() common.Address
 	InfinityPool() common.Address
 
 	// token related addresses
@@ -124,6 +125,9 @@ type FEVMActions interface {
 	// iFIL actions
 	IFILTransfer(ctx context.Context, auth *bind.TransactOpts, receiver common.Address, amount *big.Int) (*types.Transaction, error)
 	IFILApprove(ctx context.Context, auth *bind.TransactOpts, spender common.Address, allowance *big.Int) (*types.Transaction, error)
+
+	// plus actions
+	PlusMint(ctx context.Context, auth *bind.TransactOpts) (*types.Transaction, error)
 }
 
 //go:generate mockery --name FEVMExtern
@@ -149,6 +153,7 @@ type ProtocolMeta struct {
 	IFIL                     common.Address `json:"ifil"`
 	WFIL                     common.Address `json:"wfil"`
 	GLF                      common.Address `json:"glf"`
+	Plus                     common.Address `json:"plus"`
 	InfinityPool             common.Address `json:"infinityPool"`
 	Governor                 common.Address `json:"governor"`
 	TokenNFTWrapper          common.Address `json:"tokenNFTWrapper"`
