@@ -226,13 +226,18 @@ func New(
 	case constants.CalibnetChainID:
 		protoMeta = deploy.TestProtoMeta
 		eventsURL = deploy.Extern.EventsURL
+	case constants.AnvilChainID:
+		protoMeta = deploy.ProtoMeta
+		eventsURL = deploy.Extern.EventsURL
 	default:
 		return nil, fmt.Errorf("unsupported chain id: %d", id.Int64())
 	}
 
-	if protoMeta.ChainID.Cmp(chainID) != 0 {
-		return nil, fmt.Errorf("chain id mismatch: %d != %d", protoMeta.ChainID, chainID)
-	}
+	/*
+		if protoMeta.ChainID.Cmp(chainID) != 0 {
+			return nil, fmt.Errorf("chain id mismatch: %d != %d", protoMeta.ChainID, chainID)
+		}
+	*/
 
 	sdk = InitFEVMConnection(
 		protoMeta.AgentPolice,
@@ -290,6 +295,7 @@ func Init(
 	if err != nil {
 		return err
 	}
+	fmt.Printf("Jim2 chainID %v\n", chainID)
 
 	*sdk = InitFEVMConnection(
 		agentPolice,

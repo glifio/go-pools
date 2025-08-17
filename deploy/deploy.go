@@ -35,15 +35,16 @@ var AgentPoliceV0 = common.HexToAddress("0x1403D2163B4beA09F1b26cA4479FFc60Ca2E4
 var AgentPoliceV2 = common.HexToAddress("0xE87f7d4C9f9BD235CB1b15b88Ed5E9a844726947")
 
 var ProtoMeta = types.ProtocolMeta{
-	AgentFactory:             common.HexToAddress("0x526Ab27Af261d28c2aC1fD24f63CcB3bd44D50e0"),
-	AgentPolice:              AgentPoliceV2,
-	IFIL:                     common.HexToAddress("0x690908f7fa93afC040CFbD9fE1dDd2C2668Aa0e0"),
-	InfinityPool:             InfinityPoolV2,
-	MinerRegistry:            common.HexToAddress("0xF246acF2b24316fE108ff906f6e90833a14e9263"),
-	Router:                   common.HexToAddress("0xe6e6e71E747EeD9fe45F0ff63E1B3E4a7c1199bF"),
-	WFIL:                     common.HexToAddress("0x60E1773636CF5E4A227d9AC24F20fEca034ee25A"),
-	GLF:                      common.HexToAddress("0xe00F3f579E6e981a74eFcF95294558dbf80130E5"), // JimGLF
-	Plus:                     common.HexToAddress("0xbF2064fCd990C6A8af6015229580B67e9514115f"),
+	AgentFactory:  common.HexToAddress("0x526Ab27Af261d28c2aC1fD24f63CcB3bd44D50e0"),
+	AgentPolice:   AgentPoliceV2,
+	IFIL:          common.HexToAddress("0x690908f7fa93afC040CFbD9fE1dDd2C2668Aa0e0"),
+	InfinityPool:  InfinityPoolV2,
+	MinerRegistry: common.HexToAddress("0xF246acF2b24316fE108ff906f6e90833a14e9263"),
+	Router:        common.HexToAddress("0xe6e6e71E747EeD9fe45F0ff63E1B3E4a7c1199bF"),
+	WFIL:          common.HexToAddress("0x60E1773636CF5E4A227d9AC24F20fEca034ee25A"),
+	GLF:           common.HexToAddress("0xe00F3f579E6e981a74eFcF95294558dbf80130E5"), // JimGLF
+	// Plus:                     common.HexToAddress("0xbF2064fCd990C6A8af6015229580B67e9514115f"), // Filecoin Mainnet
+	Plus:                     common.HexToAddress("0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512"), // Anvil
 	Governor:                 common.HexToAddress("0x271Ae6CF68D29c74A0aFF42BE9Dc1AE27b13656E"),
 	TokenNFTWrapper:          common.HexToAddress("0xe33C5b9868bA7813Feb0b95e5274963c6E488C1a"),
 	DelegatedClaimsCampaigns: common.HexToAddress("0xdbE04BE0401DDd890Ff678c00E4E6a08D496aB87"),
