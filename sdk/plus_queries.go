@@ -34,16 +34,14 @@ func (q *fevmQueries) PlusTokenIDFromRcpt(ctx context.Context, receipt *types.Re
 		if err != nil {
 			return nil, err
 		}
-		if event.Name == "Transfer" {
+		if event.Name == "Transfer" && len(l.Topics) == 4 {
+			// Check length to match NFT Transfer event, not ERC20
 			transferEvent, err := plusFilterer.ParseTransfer(*l)
 			if err != nil {
-				// This will match on the GLF transfer with
-				// "topic/field count mismatch", skip it and
-				// match the NFT transfer instead
-				// return nil, err
-				continue
+				return nil, err
 			}
 			tokenID = transferEvent.TokenId
+			break
 		}
 	}
 
