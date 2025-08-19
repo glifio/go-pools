@@ -127,7 +127,8 @@ type FEVMActions interface {
 	IFILApprove(ctx context.Context, auth *bind.TransactOpts, spender common.Address, allowance *big.Int) (*types.Transaction, error)
 
 	// plus actions
-	PlusMint(ctx context.Context, auth *bind.TransactOpts) (*types.Transaction, error)
+	PlusMint(ctx context.Context, auth *bind.TransactOpts, personalCashBackPercent *big.Int) (*types.Transaction, error)
+	PlusMintAndActivate(ctx context.Context, auth *bind.TransactOpts, personalCashBackPercent *big.Int, beneficiary common.Address, tier uint8) (*types.Transaction, error)
 }
 
 //go:generate mockery --name FEVMExtern
