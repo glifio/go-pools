@@ -94,6 +94,9 @@ type FEVMQueries interface {
 	TokenNFTWrapper() common.Address
 	DelegatedClaimsCampaigns() common.Address
 	Governor() common.Address
+
+	// plus methods
+	PlusTokenIDFromRcpt(ctx context.Context, receipt *types.Receipt) (*big.Int, error)
 }
 
 //go:generate mockery --name FEVMActions
