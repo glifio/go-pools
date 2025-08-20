@@ -97,6 +97,7 @@ type FEVMQueries interface {
 
 	// plus methods
 	PlusTokenIDFromRcpt(ctx context.Context, receipt *types.Receipt) (*big.Int, error)
+	PlusInfo(ctx context.Context, tokenID *big.Int) (*PlusInfo, error)
 }
 
 //go:generate mockery --name FEVMActions
@@ -171,4 +172,13 @@ type Extern struct {
 	LotusDialAddr string `json:"lotusDialAddr"`
 	LotusToken    string `json:"lotusToken"`
 	EventsURL     string `json:"eventsURL"`
+}
+
+type PlusInfo struct {
+	AgentID                 *big.Int
+	FilCashbackEarned       *big.Int
+	GLFVaultBalance         *big.Int
+	LastTierSwitchTimestamp *big.Int
+	PersonalCashBackPercent *big.Int
+	Tier                    uint8
 }

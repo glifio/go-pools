@@ -6,6 +6,7 @@ import (
 
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/glifio/go-pools/abigen"
+	poolstypes "github.com/glifio/go-pools/types"
 )
 
 func (q *fevmQueries) PlusTokenIDFromRcpt(ctx context.Context, receipt *types.Receipt) (*big.Int, error) {
@@ -43,4 +44,56 @@ func (q *fevmQueries) PlusTokenIDFromRcpt(ctx context.Context, receipt *types.Re
 	}
 
 	return tokenID, nil
+}
+
+func (q *fevmQueries) PlusInfo(ctx context.Context, tokenID *big.Int) (*poolstypes.PlusInfo, error) {
+	client, err := q.extern.ConnectEthClient()
+	if err != nil {
+		return nil, err
+	}
+	defer client.Close()
+
+	plus, err := abigen.NewPlusCaller(q.plus, client)
+	if err != nil {
+		return nil, err
+	}
+
+	agentID, err := plus.TokenIdToAgentId(nil, tokenID)
+	if err != nil {
+		return nil, err
+	}
+
+	filCashbackEarned, err := plus.TokenIdToFilCashbackEarned(nil, tokenID)
+	if err != nil {
+		return nil, err
+	}
+
+	glfVaultBalance, err := plus.TokenIdToGlfVaultBalance(nil, tokenID)
+	if err != nil {
+		return nil, err
+	}
+
+	lastTierSwitchTimestamp, err := plus.TokenIdToLastTierSwitchTimestamp(nil, tokenID)
+	if err != nil {
+		return nil, err
+	}
+
+	personalCashBackPercent, err := plus.TokenIdToPersonalCashBackPercent(nil, tokenID)
+	if err != nil {
+		return nil, err
+	}
+
+	tier, err := plus.TokenIdToTier(nil, tokenID)
+	if err != nil {
+		return nil, err
+	}
+
+	return &poolstypes.PlusInfo{
+		AgentID:                 agentID,
+		FilCashbackEarned:       filCashbackEarned,
+		GLFVaultBalance:         glfVaultBalance,
+		LastTierSwitchTimestamp: lastTierSwitchTimestamp,
+		PersonalCashBackPercent: personalCashBackPercent,
+		Tier:                    tier,
+	}, nil
 }
