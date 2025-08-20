@@ -27,20 +27,17 @@ func (q *fevmQueries) PlusTokenIDFromRcpt(ctx context.Context, receipt *types.Re
 
 	var tokenID *big.Int
 
-	topicHash := plusABI.Events["Transfer"].ID
-
 	for _, l := range receipt.Logs {
-		event, err := plusABI.EventByID(topicHash)
+		event, err := plusABI.EventByID(l.Topics[0])
 		if err != nil {
 			return nil, err
 		}
-		if event.Name == "Transfer" && len(l.Topics) == 4 {
-			// Check length to match NFT Transfer event, not ERC20
-			transferEvent, err := plusFilterer.ParseTransfer(*l)
+		if event.Name == "CardMinted" {
+			cardMintedEvent, err := plusFilterer.ParseCardMinted(*l)
 			if err != nil {
 				return nil, err
 			}
-			tokenID = transferEvent.TokenId
+			tokenID = cardMintedEvent.TokenId
 			break
 		}
 	}

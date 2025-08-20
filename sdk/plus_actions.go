@@ -2,7 +2,6 @@ package sdk
 
 import (
 	"context"
-	"math/big"
 
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
@@ -11,7 +10,7 @@ import (
 	"github.com/glifio/go-pools/util"
 )
 
-func (a *fevmActions) PlusMint(ctx context.Context, auth *bind.TransactOpts, personalCashBackPercent *big.Int) (*types.Transaction, error) {
+func (a *fevmActions) PlusMint(ctx context.Context, auth *bind.TransactOpts) (*types.Transaction, error) {
 	client, err := a.extern.ConnectEthClient()
 	if err != nil {
 		return nil, err
@@ -23,12 +22,12 @@ func (a *fevmActions) PlusMint(ctx context.Context, auth *bind.TransactOpts, per
 		return nil, err
 	}
 
-	tx, err := plus.Mint(auth, auth.From, personalCashBackPercent)
+	tx, err := plus.Mint(auth, auth.From)
 
 	return util.TxPostProcess(tx, err)
 }
 
-func (a *fevmActions) PlusMintAndActivate(ctx context.Context, auth *bind.TransactOpts, personalCashBackPercent *big.Int, beneficiary common.Address, tier uint8) (*types.Transaction, error) {
+func (a *fevmActions) PlusMintAndActivate(ctx context.Context, auth *bind.TransactOpts, beneficiary common.Address, tier uint8) (*types.Transaction, error) {
 	client, err := a.extern.ConnectEthClient()
 	if err != nil {
 		return nil, err
@@ -40,7 +39,7 @@ func (a *fevmActions) PlusMintAndActivate(ctx context.Context, auth *bind.Transa
 		return nil, err
 	}
 
-	tx, err := plus.MintAndActivate(auth, auth.From, personalCashBackPercent, beneficiary, tier)
+	tx, err := plus.MintAndActivate(auth, auth.From, beneficiary, tier)
 
 	return util.TxPostProcess(tx, err)
 }
