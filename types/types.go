@@ -134,6 +134,7 @@ type FEVMActions interface {
 	PlusMint(ctx context.Context, auth *bind.TransactOpts) (*types.Transaction, error)
 	PlusMintAndActivate(ctx context.Context, auth *bind.TransactOpts, beneficiary common.Address, tier uint8) (*types.Transaction, error)
 	PlusActivate(ctx context.Context, auth *bind.TransactOpts, beneficiary common.Address, tokenID *big.Int, tier uint8) (*types.Transaction, error)
+	PlusSetPersonalCashBackPercent(ctx context.Context, auth *bind.TransactOpts, tokenID *big.Int, cashBackPercent *big.Int) (*types.Transaction, error)
 }
 
 //go:generate mockery --name FEVMExtern

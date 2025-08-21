@@ -61,3 +61,20 @@ func (a *fevmActions) PlusActivate(ctx context.Context, auth *bind.TransactOpts,
 
 	return util.TxPostProcess(tx, err)
 }
+
+func (a *fevmActions) PlusSetPersonalCashBackPercent(ctx context.Context, auth *bind.TransactOpts, tokenID *big.Int, cashBackPercent *big.Int) (*types.Transaction, error) {
+	client, err := a.extern.ConnectEthClient()
+	if err != nil {
+		return nil, err
+	}
+	defer client.Close()
+
+	plus, err := abigen.NewPlusTransactor(a.queries.Plus(), client)
+	if err != nil {
+		return nil, err
+	}
+
+	tx, err := plus.SetPersonalCashBackPercent(auth, tokenID, cashBackPercent)
+
+	return util.TxPostProcess(tx, err)
+}
