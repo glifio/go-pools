@@ -95,3 +95,20 @@ func (a *fevmActions) PlusFundGLFVault(ctx context.Context, auth *bind.TransactO
 
 	return util.TxPostProcess(tx, err)
 }
+
+func (a *fevmActions) PlusClaimCashBack(ctx context.Context, auth *bind.TransactOpts, tokenID *big.Int, receiver common.Address) (*types.Transaction, error) {
+	client, err := a.extern.ConnectEthClient()
+	if err != nil {
+		return nil, err
+	}
+	defer client.Close()
+
+	plus, err := abigen.NewPlusTransactor(a.queries.Plus(), client)
+	if err != nil {
+		return nil, err
+	}
+
+	tx, err := plus.ClaimCashBack(auth, tokenID, receiver)
+
+	return util.TxPostProcess(tx, err)
+}
