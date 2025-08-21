@@ -78,3 +78,20 @@ func (a *fevmActions) PlusSetPersonalCashBackPercent(ctx context.Context, auth *
 
 	return util.TxPostProcess(tx, err)
 }
+
+func (a *fevmActions) PlusFundGLFVault(ctx context.Context, auth *bind.TransactOpts, tokenID *big.Int, amount *big.Int) (*types.Transaction, error) {
+	client, err := a.extern.ConnectEthClient()
+	if err != nil {
+		return nil, err
+	}
+	defer client.Close()
+
+	plus, err := abigen.NewPlusTransactor(a.queries.Plus(), client)
+	if err != nil {
+		return nil, err
+	}
+
+	tx, err := plus.FundGlfVault(auth, tokenID, amount)
+
+	return util.TxPostProcess(tx, err)
+}
