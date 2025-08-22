@@ -2,12 +2,17 @@ package sdk
 
 import (
 	"context"
+	"crypto/ecdsa"
 	"math/big"
 
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
+	"github.com/filecoin-project/go-address"
 	"github.com/glifio/go-pools/abigen"
+	"github.com/glifio/go-pools/constants"
+	token "github.com/glifio/go-pools/jws"
+	"github.com/glifio/go-pools/rpc"
 	"github.com/glifio/go-pools/util"
 )
 
@@ -126,6 +131,40 @@ func (a *fevmActions) PlusUpgrade(ctx context.Context, auth *bind.TransactOpts, 
 	}
 
 	tx, err := plus.Upgrade(auth, tokenID, tier)
+
+	return util.TxPostProcess(tx, err)
+}
+
+func (a *fevmActions) PlusDowngrade(ctx context.Context, auth *bind.TransactOpts, tokenID *big.Int, tier uint8, agentAddr common.Address, requesterKey *ecdsa.PrivateKey) (*types.Transaction, error) {
+	client, err := a.extern.ConnectEthClient()
+	if err != nil {
+		return nil, err
+	}
+	defer client.Close()
+
+	closer, err := a.extern.ConnectAdoClient(ctx)
+	if err != nil {
+		return nil, err
+	}
+	defer closer()
+
+	// FIXME: Use downgrade method on ADO
+	jws, err := token.SignJWS(ctx, agentAddr, address.Undef, big.NewInt(0), constants.MethodBorrow, requesterKey, a.queries)
+	if err != nil {
+		return nil, err
+	}
+
+	sc, err := rpc.ADOClient.SignCredential(ctx, jws)
+	if err != nil {
+		return nil, err
+	}
+
+	plus, err := abigen.NewPlusTransactor(a.queries.Plus(), client)
+	if err != nil {
+		return nil, err
+	}
+
+	tx, err := plus.Downgrade(auth, tokenID, tier, sc)
 
 	return util.TxPostProcess(tx, err)
 }
