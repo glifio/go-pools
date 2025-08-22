@@ -3,6 +3,7 @@ package util
 import (
 	"encoding/hex"
 	"fmt"
+	"os"
 	"regexp"
 	"strings"
 
@@ -39,13 +40,15 @@ func HumanReadableRevert(errMsg error) error {
 			data, _ := hex.DecodeString(matches[1])
 			if len(data) >= 4 {
 				identifier := data[:4]
-				abi, _ := abigen.TokenMetaData.GetAbi()
-				abiError, _ := abi.ErrorByID([4]byte(identifier))
-				if abiError != nil {
-					fmt.Printf("Error: %+v\n", abiError)
-					errorData, err := abiError.Unpack(data)
-					if err == nil {
-						fmt.Printf("Error data: %+v\n", errorData)
+				abis, _ := gatherABIS()
+				for _, abi := range abis {
+					abiError, _ := abi.ErrorByID([4]byte(identifier))
+					if abiError != nil {
+						fmt.Fprintf(os.Stderr, "Error: %+v\n", abiError)
+						errorData, err := abiError.Unpack(data)
+						if err == nil {
+							fmt.Fprintf(os.Stderr, "Error data: %+v\n", errorData)
+						}
 					}
 				}
 			}
@@ -177,6 +180,12 @@ func gatherABIS() ([]*abi.ABI, error) {
 		return nil, nil
 	}
 	abis = append(abis, policeV2Abi)
+
+	tokenAbi, err := abigen.TokenMetaData.GetAbi()
+	if err != nil {
+		return nil, nil
+	}
+	abis = append(abis, tokenAbi)
 
 	return abis, nil
 }
