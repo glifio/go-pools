@@ -3,6 +3,7 @@ package util
 import (
 	"encoding/hex"
 	"fmt"
+	"regexp"
 	"strings"
 
 	"github.com/ethereum/go-ethereum/accounts/abi"
@@ -32,6 +33,25 @@ func HumanReadableRevert(errMsg error) error {
 
 	// Check if "revert reason: " exists in the errMsg
 	if !strings.Contains(errStr, "revert reason: ") {
+
+		r, _ := regexp.Compile(`vm error=\[0x([0-90-f]+)\]`)
+		matches := r.FindStringSubmatch(errStr)
+		if len(matches) == 2 {
+			data, _ := hex.DecodeString(matches[1])
+			if len(data) >= 4 {
+				identifier := data[:4]
+				abi, _ := abigen.TokenMetaData.GetAbi()
+				abiError, _ := abi.ErrorByID([4]byte(identifier))
+				if abiError != nil {
+					fmt.Printf("Error: %+v\n", abiError)
+					errorData, _ := abiError.Unpack(data)
+					if errorData != nil {
+						fmt.Printf("Error data: %+v\n", errorData)
+					}
+				}
+			}
+		}
+
 		return fmt.Errorf("error message does not contain a revert reason %s", errStr)
 	}
 
