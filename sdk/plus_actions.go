@@ -186,8 +186,6 @@ func (a *fevmActions) PlusDowngrade(ctx context.Context, auth *bind.TransactOpts
 	return util.TxPostProcess(tx, err)
 }
 
-/*
-FIXME: Uncomment when abigen is updated
 func (a *fevmActions) PlusWithdrawExtraLockedFunds(ctx context.Context, auth *bind.TransactOpts, tokenID *big.Int) (*types.Transaction, error) {
 	client, err := a.extern.ConnectEthClient()
 	if err != nil {
@@ -204,4 +202,3 @@ func (a *fevmActions) PlusWithdrawExtraLockedFunds(ctx context.Context, auth *bi
 
 	return util.TxPostProcess(tx, err)
 }
-*/
