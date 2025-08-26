@@ -185,3 +185,23 @@ func (a *fevmActions) PlusDowngrade(ctx context.Context, auth *bind.TransactOpts
 
 	return util.TxPostProcess(tx, err)
 }
+
+/*
+FIXME: Uncomment when abigen is updated
+func (a *fevmActions) PlusWithdrawExtraLockedFunds(ctx context.Context, auth *bind.TransactOpts, tokenID *big.Int) (*types.Transaction, error) {
+	client, err := a.extern.ConnectEthClient()
+	if err != nil {
+		return nil, err
+	}
+	defer client.Close()
+
+	plus, err := abigen.NewPlusTransactor(a.queries.Plus(), client)
+	if err != nil {
+		return nil, err
+	}
+
+	tx, err := plus.WithdrawExtraLockedFunds(auth, tokenID)
+
+	return util.TxPostProcess(tx, err)
+}
+*/
