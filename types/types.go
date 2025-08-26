@@ -139,6 +139,7 @@ type FEVMActions interface {
 	PlusClaimCashBack(ctx context.Context, auth *bind.TransactOpts, tokenID *big.Int, receiver common.Address) (*types.Transaction, error)
 	PlusUpgrade(ctx context.Context, auth *bind.TransactOpts, tokenID *big.Int, tier uint8) (*types.Transaction, error)
 	PlusDowngrade(ctx context.Context, auth *bind.TransactOpts, tokenID *big.Int, tier uint8, agentAddr common.Address, requesterKey *ecdsa.PrivateKey) (*types.Transaction, error)
+	ChangeOwnerForAgent(ctx context.Context, auth *bind.TransactOpts, agentAddr common.Address) (*types.Transaction, error)
 }
 
 //go:generate mockery --name FEVMExtern
