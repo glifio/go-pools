@@ -40,7 +40,7 @@ var (
 	MethodPullFunds     Method = "pullFunds"
 	MethodSetRecovered  Method = "setRecovered"
 	MethodDefaultDTL    Method = "setAgentDefaultDTL"
-	MethodDowngradePlus Method = "downgradePlus"
+	MethodPlusDowngrade Method = "plusDowngrade"
 )
 
 type Route string
