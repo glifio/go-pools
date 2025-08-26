@@ -3,7 +3,6 @@ package util
 import (
 	"encoding/hex"
 	"fmt"
-	"os"
 	"regexp"
 	"strings"
 
@@ -44,10 +43,11 @@ func HumanReadableRevert(errMsg error) error {
 				for _, abi := range abis {
 					abiError, _ := abi.ErrorByID([4]byte(identifier))
 					if abiError != nil {
-						fmt.Fprintf(os.Stderr, "Error: %+v\n", abiError)
 						errorData, err := abiError.Unpack(data)
 						if err == nil {
-							fmt.Fprintf(os.Stderr, "Error data: %+v\n", errorData)
+							return fmt.Errorf("vm error: %v %+v", abiError, errorData)
+						} else {
+							return fmt.Errorf("vm error: %v", abiError)
 						}
 					}
 				}
