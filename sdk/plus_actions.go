@@ -165,7 +165,7 @@ func (a *fevmActions) PlusDowngrade(ctx context.Context, auth *bind.TransactOpts
 	}
 	defer closer()
 
-	jws, err := token.SignJWS(ctx, agentAddr, address.Undef, big.NewInt(0), constants.MethodDowngradePlus, requesterKey, a.queries)
+	jws, err := token.SignJWS(ctx, agentAddr, address.Undef, big.NewInt(0), constants.MethodPlusDowngrade, requesterKey, a.queries)
 	if err != nil {
 		return nil, err
 	}
