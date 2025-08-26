@@ -97,7 +97,7 @@ type FEVMQueries interface {
 
 	// plus methods
 	PlusTokenIDFromRcpt(ctx context.Context, receipt *types.Receipt) (*big.Int, error)
-	PlusInfo(ctx context.Context, tokenID *big.Int) (*PlusInfo, error)
+	PlusInfo(ctx context.Context, tokenID *big.Int, blockNumber *big.Int) (*PlusInfo, error)
 }
 
 //go:generate mockery --name FEVMActions
