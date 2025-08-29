@@ -19,19 +19,23 @@ func (q *fevmQueries) CredentialValidityPeriod(ctx context.Context) (*big.Int, *
 	return epochIssued, epochValidUntil, nil
 }
 
-func (q *fevmQueries) CredentialUsedEpoch(ctx context.Context, vc abigen.VerifiableCredential, blockNumber *big.Int) (*big.Int, error) {
+func (q *fevmQueries) CredentialUsed(ctx context.Context, vc abigen.VerifiableCredential, blockNumber *big.Int) (bool, error) {
 	client, err := q.extern.ConnectEthClient()
 	if err != nil {
-		return nil, err
+		return false, err
 	}
 	defer client.Close()
 
 	policeCaller, err := abigen.NewAgentPoliceV2Caller(q.agentPolice, client)
 	if err != nil {
-		return nil, err
+		return false, err
 	}
 
-	return policeCaller.CredentialUsed(&bind.CallOpts{Context: ctx, BlockNumber: blockNumber}, vc)
+	usedEpoch, err := policeCaller.CredentialUsed(&bind.CallOpts{Context: ctx, BlockNumber: blockNumber}, vc)
+	if err != nil {
+		return false, err
+	}
+	return usedEpoch.Sign() > 0, nil
 }
 
 func (q *fevmQueries) SectorFaultyTolerance(ctx context.Context) (*big.Int, error) {
