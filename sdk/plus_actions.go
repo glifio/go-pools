@@ -3,6 +3,7 @@ package sdk
 import (
 	"context"
 	"crypto/ecdsa"
+	"fmt"
 	"math/big"
 
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
@@ -180,6 +181,7 @@ func (a *fevmActions) PlusDowngrade(ctx context.Context, auth *bind.TransactOpts
 		return nil, err
 	}
 
+	fmt.Printf("Jim sc: %+v\n", sc)
 	tx, err := plus.Downgrade(auth, tokenID, tier, sc)
 
 	return util.TxPostProcess(tx, err)
