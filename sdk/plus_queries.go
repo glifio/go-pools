@@ -2,9 +2,11 @@ package sdk
 
 import (
 	"context"
+	"fmt"
 	"math/big"
 
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
+	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/glifio/go-pools/abigen"
 	"github.com/glifio/go-pools/constants"
@@ -127,4 +129,44 @@ func (q *fevmQueries) PlusTierInfo(ctx context.Context, blockNumber *big.Int) ([
 	}
 
 	return tiers, nil
+}
+
+func (q *fevmQueries) PlusTierFromAgentAddress(ctx context.Context, agentAddr common.Address, blockNumber *big.Int) (uint8, error) {
+	client, err := q.extern.ConnectEthClient()
+	if err != nil {
+		return 0, err
+	}
+	defer client.Close()
+
+	agentFactory, err := abigen.NewAgentFactoryCaller(q.agentFactory, client)
+	if err != nil {
+		return 0, err
+	}
+
+	plus, err := abigen.NewPlusCaller(q.plus, client)
+	if err != nil {
+		return 0, err
+	}
+
+	opts := &bind.CallOpts{Context: ctx, BlockNumber: blockNumber}
+
+	agentID, err := agentFactory.Agents(opts, agentAddr)
+	if err != nil {
+		return 0, err
+	}
+
+	if agentID == nil || agentID.Uint64() == 0 {
+		return 0, fmt.Errorf("agent id not found")
+	}
+
+	tokenID, err := plus.AgentIdToTokenId(opts, agentID)
+	if err != nil {
+		return 0, err
+	}
+	// FIXME: Is this correct?
+	if tokenID == nil || tokenID.Uint64() == 0 {
+		return 0, nil // Default to INACTIVE tier
+	}
+
+	return plus.TokenIdToTier(opts, tokenID)
 }
