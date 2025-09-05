@@ -70,3 +70,5 @@ var FAULTY_SECTOR_TOLERANCE = big.NewFloat(0.001)
 
 var MAX_BORROW_DTL = big.NewInt(75e16)
 var LIQUIDATION_DTL = big.NewInt(85e16)
+
+var PLUS_TIERS = uint8(4)
