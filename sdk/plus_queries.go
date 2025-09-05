@@ -7,6 +7,7 @@ import (
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/glifio/go-pools/abigen"
+	"github.com/glifio/go-pools/constants"
 	poolstypes "github.com/glifio/go-pools/types"
 )
 
@@ -99,4 +100,31 @@ func (q *fevmQueries) PlusInfo(ctx context.Context, tokenID *big.Int, blockNumbe
 		PersonalCashBackPercent: personalCashBackPercent,
 		Tier:                    tier,
 	}, nil
+}
+
+func (q *fevmQueries) PlusTierInfo(ctx context.Context, blockNumber *big.Int) ([]abigen.TierInfo, error) {
+	tiers := make([]abigen.TierInfo, 0, constants.PLUS_TIERS)
+
+	client, err := q.extern.ConnectEthClient()
+	if err != nil {
+		return tiers, err
+	}
+	defer client.Close()
+
+	plus, err := abigen.NewPlusCaller(q.plus, client)
+	if err != nil {
+		return tiers, err
+	}
+
+	opts := &bind.CallOpts{Context: ctx, BlockNumber: blockNumber}
+
+	for tier := uint8(0); tier < constants.PLUS_TIERS; tier++ {
+		tierInfo, err := plus.TierToTierInfo(opts, tier)
+		if err != nil {
+			return nil, err
+		}
+		tiers = append(tiers, tierInfo)
+	}
+
+	return tiers, nil
 }
