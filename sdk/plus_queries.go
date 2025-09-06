@@ -163,7 +163,6 @@ func (q *fevmQueries) PlusTierFromAgentAddress(ctx context.Context, agentAddr co
 	if err != nil {
 		return 0, err
 	}
-	// FIXME: Is this correct?
 	if tokenID == nil || tokenID.Uint64() == 0 {
 		return 0, nil // Default to INACTIVE tier
 	}
