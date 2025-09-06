@@ -131,13 +131,13 @@ func parseClaimsStrVal(jws string) (*RequestClaims, *jwt.Token, *ecdsa.PublicKey
 func VerifyJWS(ctx context.Context, jws string, query types.FEVMQueries, useStrVal bool) (*RequestClaims, error) {
 	var claims *RequestClaims
 	var token *jwt.Token
-	var jwsIssuerPubkey *ecdsa.PublicKey
+	// var jwsIssuerPubkey *ecdsa.PublicKey
 	var err error
 
 	if useStrVal {
-		claims, token, jwsIssuerPubkey, err = parseClaimsStrVal(jws)
+		claims, token, _, err = parseClaimsStrVal(jws)
 	} else {
-		claims, token, jwsIssuerPubkey, err = parseClaims(jws)
+		claims, token, _, err = parseClaims(jws)
 	}
 
 	if err != nil {
@@ -152,16 +152,18 @@ func VerifyJWS(ctx context.Context, jws string, query types.FEVMQueries, useStrV
 		return &RequestClaims{}, InvalidAgentAddrErr
 	}
 
-	requesterFromClaims := crypto.PubkeyToAddress(*jwsIssuerPubkey)
+	/*
+		requesterFromClaims := crypto.PubkeyToAddress(*jwsIssuerPubkey)
 
-	requester, err := query.AgentRequester(ctx, claims.AgentAddr)
-	if err != nil {
-		return &RequestClaims{}, err
-	}
+		requester, err := query.AgentRequester(ctx, claims.AgentAddr)
+		if err != nil {
+			return &RequestClaims{}, err
+		}
 
-	if requester != ZERO_ADDR && requester != requesterFromClaims {
-		return &RequestClaims{}, InvalidRequesterErr
-	}
+		if requester != ZERO_ADDR && requester != requesterFromClaims {
+			return &RequestClaims{}, InvalidRequesterErr
+		}
+	*/
 
 	chainHeight, err := query.ChainHeight(ctx)
 	if err != nil {

@@ -1,6 +1,7 @@
 package econ
 
 import (
+	"fmt"
 	"math/big"
 
 	"github.com/glifio/go-pools/constants"
@@ -294,6 +295,7 @@ func (afi *AgentFi) LeverageRatio() *big.Float {
 }
 
 func (afi *AgentFi) DTL() *big.Float {
+	fmt.Printf("Jim agentFi: %+v\n", afi)
 	// if debt is zero then DTL is 0
 	if afi.Debt().Cmp(big.NewInt(0)) == 0 {
 		return big.NewFloat(0)
@@ -304,6 +306,8 @@ func (afi *AgentFi) DTL() *big.Float {
 		// return positive infinite float
 		return new(big.Float).SetInf(true)
 	}
+	fmt.Printf("Jim debt: %+v\n", afi.Debt())
+	fmt.Printf("Jim liquidationValue: %+v\n", afi.LiquidationValue())
 
 	return computePerc(afi.Debt(), afi.LiquidationValue())
 }
