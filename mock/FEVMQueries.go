@@ -2847,6 +2847,123 @@ func (_c *FEVMQueries_PlusInfo_Call) RunAndReturn(run func(context.Context, *big
 	return _c
 }
 
+// PlusTierFromAgentAddress provides a mock function with given fields: ctx, agentAddr, blockNumber
+func (_m *FEVMQueries) PlusTierFromAgentAddress(ctx context.Context, agentAddr common.Address, blockNumber *big.Int) (uint8, error) {
+	ret := _m.Called(ctx, agentAddr, blockNumber)
+
+	if len(ret) == 0 {
+		panic("no return value specified for PlusTierFromAgentAddress")
+	}
+
+	var r0 uint8
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, common.Address, *big.Int) (uint8, error)); ok {
+		return rf(ctx, agentAddr, blockNumber)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, common.Address, *big.Int) uint8); ok {
+		r0 = rf(ctx, agentAddr, blockNumber)
+	} else {
+		r0 = ret.Get(0).(uint8)
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, common.Address, *big.Int) error); ok {
+		r1 = rf(ctx, agentAddr, blockNumber)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// FEVMQueries_PlusTierFromAgentAddress_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'PlusTierFromAgentAddress'
+type FEVMQueries_PlusTierFromAgentAddress_Call struct {
+	*mock.Call
+}
+
+// PlusTierFromAgentAddress is a helper method to define mock.On call
+//   - ctx context.Context
+//   - agentAddr common.Address
+//   - blockNumber *big.Int
+func (_e *FEVMQueries_Expecter) PlusTierFromAgentAddress(ctx interface{}, agentAddr interface{}, blockNumber interface{}) *FEVMQueries_PlusTierFromAgentAddress_Call {
+	return &FEVMQueries_PlusTierFromAgentAddress_Call{Call: _e.mock.On("PlusTierFromAgentAddress", ctx, agentAddr, blockNumber)}
+}
+
+func (_c *FEVMQueries_PlusTierFromAgentAddress_Call) Run(run func(ctx context.Context, agentAddr common.Address, blockNumber *big.Int)) *FEVMQueries_PlusTierFromAgentAddress_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(common.Address), args[2].(*big.Int))
+	})
+	return _c
+}
+
+func (_c *FEVMQueries_PlusTierFromAgentAddress_Call) Return(_a0 uint8, _a1 error) *FEVMQueries_PlusTierFromAgentAddress_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *FEVMQueries_PlusTierFromAgentAddress_Call) RunAndReturn(run func(context.Context, common.Address, *big.Int) (uint8, error)) *FEVMQueries_PlusTierFromAgentAddress_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// PlusTierInfo provides a mock function with given fields: ctx, blockNumber
+func (_m *FEVMQueries) PlusTierInfo(ctx context.Context, blockNumber *big.Int) ([]abigen.TierInfo, error) {
+	ret := _m.Called(ctx, blockNumber)
+
+	if len(ret) == 0 {
+		panic("no return value specified for PlusTierInfo")
+	}
+
+	var r0 []abigen.TierInfo
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, *big.Int) ([]abigen.TierInfo, error)); ok {
+		return rf(ctx, blockNumber)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, *big.Int) []abigen.TierInfo); ok {
+		r0 = rf(ctx, blockNumber)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]abigen.TierInfo)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, *big.Int) error); ok {
+		r1 = rf(ctx, blockNumber)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// FEVMQueries_PlusTierInfo_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'PlusTierInfo'
+type FEVMQueries_PlusTierInfo_Call struct {
+	*mock.Call
+}
+
+// PlusTierInfo is a helper method to define mock.On call
+//   - ctx context.Context
+//   - blockNumber *big.Int
+func (_e *FEVMQueries_Expecter) PlusTierInfo(ctx interface{}, blockNumber interface{}) *FEVMQueries_PlusTierInfo_Call {
+	return &FEVMQueries_PlusTierInfo_Call{Call: _e.mock.On("PlusTierInfo", ctx, blockNumber)}
+}
+
+func (_c *FEVMQueries_PlusTierInfo_Call) Run(run func(ctx context.Context, blockNumber *big.Int)) *FEVMQueries_PlusTierInfo_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(*big.Int))
+	})
+	return _c
+}
+
+func (_c *FEVMQueries_PlusTierInfo_Call) Return(_a0 []abigen.TierInfo, _a1 error) *FEVMQueries_PlusTierInfo_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *FEVMQueries_PlusTierInfo_Call) RunAndReturn(run func(context.Context, *big.Int) ([]abigen.TierInfo, error)) *FEVMQueries_PlusTierInfo_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // PlusTokenIDFromRcpt provides a mock function with given fields: ctx, receipt
 func (_m *FEVMQueries) PlusTokenIDFromRcpt(ctx context.Context, receipt *coretypes.Receipt) (*big.Int, error) {
 	ret := _m.Called(ctx, receipt)
