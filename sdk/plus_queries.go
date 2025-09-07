@@ -170,3 +170,20 @@ func (q *fevmQueries) PlusTierFromAgentAddress(ctx context.Context, agentAddr co
 
 	return plus.TokenIdToTier(opts, tokenID)
 }
+
+func (q *fevmQueries) PlusMintPrice(ctx context.Context, blockNumber *big.Int) (*big.Int, error) {
+	client, err := q.extern.ConnectEthClient()
+	if err != nil {
+		return nil, err
+	}
+	defer client.Close()
+
+	plus, err := abigen.NewPlusCaller(q.plus, client)
+	if err != nil {
+		return nil, err
+	}
+
+	opts := &bind.CallOpts{Context: ctx, BlockNumber: blockNumber}
+
+	return plus.MintPrice(opts)
+}
