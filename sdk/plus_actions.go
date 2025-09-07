@@ -181,7 +181,6 @@ func (a *fevmActions) PlusDowngrade(ctx context.Context, auth *bind.TransactOpts
 		return nil, err
 	}
 
-	fmt.Printf("Jim sc: %+v\n", sc)
 	tx, err := plus.Downgrade(auth, tokenID, tier, sc)
 
 	return util.TxPostProcess(tx, err)
