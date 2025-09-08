@@ -101,6 +101,7 @@ type FEVMQueries interface {
 	PlusTierInfo(ctx context.Context, blockNumber *big.Int) ([]abigen.TierInfo, error)
 	PlusTierFromAgentAddress(ctx context.Context, agentAddr common.Address, blockNumber *big.Int) (uint8, error)
 	PlusMintPrice(ctx context.Context, blockNumber *big.Int) (*big.Int, error)
+	PlusTierSwitchPenaltyInfo(ctx context.Context, blockNumber *big.Int) (penaltyWindow *big.Int, penaltyFee *big.Int, err error)
 }
 
 //go:generate mockery --name FEVMActions
@@ -185,10 +186,12 @@ type Extern struct {
 }
 
 type PlusInfo struct {
-	AgentID                 *big.Int
-	FilCashbackEarned       *big.Int
-	GLFVaultBalance         *big.Int
-	LastTierSwitchTimestamp *big.Int
-	PersonalCashBackPercent *big.Int
-	Tier                    uint8
+	AgentID                      *big.Int
+	FilCashbackEarned            *big.Int
+	GLFVaultBalance              *big.Int
+	LastTierSwitchTimestamp      *big.Int
+	PersonalCashBackPercent      *big.Int
+	TierLockAmount               *big.Int
+	WithdrawableExtraLockedFunds *big.Int
+	Tier                         uint8
 }
