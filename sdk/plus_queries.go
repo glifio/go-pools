@@ -89,18 +89,30 @@ func (q *fevmQueries) PlusInfo(ctx context.Context, tokenID *big.Int, blockNumbe
 		return nil, err
 	}
 
+	tierLockAmount, err := plus.TokenIdToTierLockAmount(opts, tokenID)
+	if err != nil {
+		return nil, err
+	}
+
+	withdrawableExtraLockedFunds, err := plus.TierInfoToWithdrawableExtraLockedFunds(opts, tokenID)
+	if err != nil {
+		return nil, err
+	}
+
 	tier, err := plus.TokenIdToTier(opts, tokenID)
 	if err != nil {
 		return nil, err
 	}
 
 	return &poolstypes.PlusInfo{
-		AgentID:                 agentID,
-		FilCashbackEarned:       filCashbackEarned,
-		GLFVaultBalance:         glfVaultBalance,
-		LastTierSwitchTimestamp: lastTierSwitchTimestamp,
-		PersonalCashBackPercent: personalCashBackPercent,
-		Tier:                    tier,
+		AgentID:                      agentID,
+		FilCashbackEarned:            filCashbackEarned,
+		GLFVaultBalance:              glfVaultBalance,
+		LastTierSwitchTimestamp:      lastTierSwitchTimestamp,
+		PersonalCashBackPercent:      personalCashBackPercent,
+		TierLockAmount:               tierLockAmount,
+		WithdrawableExtraLockedFunds: withdrawableExtraLockedFunds,
+		Tier:                         tier,
 	}, nil
 }
 
@@ -186,4 +198,31 @@ func (q *fevmQueries) PlusMintPrice(ctx context.Context, blockNumber *big.Int) (
 	opts := &bind.CallOpts{Context: ctx, BlockNumber: blockNumber}
 
 	return plus.MintPrice(opts)
+}
+
+func (q *fevmQueries) PlusTierSwitchPenaltyInfo(ctx context.Context, blockNumber *big.Int) (penaltyWindow *big.Int, penaltyFee *big.Int, err error) {
+	client, err := q.extern.ConnectEthClient()
+	if err != nil {
+		return nil, nil, err
+	}
+	defer client.Close()
+
+	plus, err := abigen.NewPlusCaller(q.plus, client)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	opts := &bind.CallOpts{Context: ctx, BlockNumber: blockNumber}
+
+	penaltyWindow, err = plus.TierSwitchPenaltyWindow(opts)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	penaltyFee, err = plus.TierSwitchPenaltyFee(opts)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	return penaltyWindow, penaltyFee, nil
 }
