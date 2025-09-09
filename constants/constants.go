@@ -71,4 +71,19 @@ var FAULTY_SECTOR_TOLERANCE = big.NewFloat(0.001)
 var MAX_BORROW_DTL = big.NewInt(75e16)
 var LIQUIDATION_DTL = big.NewInt(85e16)
 
+const (
+	InactiveTier = iota
+	BronzeTier
+	SilverTier
+	GoldTier
+)
+
+// Tier DTL mapping for dynamic borrowing limits
+var TierDTL = map[uint8]*big.Int{
+	InactiveTier: big.NewInt(75e16),  // 75%
+	BronzeTier:   big.NewInt(80e16),  // 80%
+	SilverTier:   big.NewInt(857e15), // 85.7%
+	GoldTier:     big.NewInt(90e16),  // 90%
+}
+
 var PLUS_TIERS = uint8(4)
