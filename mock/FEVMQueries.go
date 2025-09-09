@@ -1313,23 +1313,25 @@ func (_c *FEVMQueries_ChainID_Call) RunAndReturn(run func() *big.Int) *FEVMQueri
 	return _c
 }
 
-// CredentialUsed provides a mock function with given fields: ctx, _a1, blockNumber
-func (_m *FEVMQueries) CredentialUsed(ctx context.Context, _a1 abigen.VerifiableCredential, blockNumber *big.Int) (bool, error) {
+// CredentialUsedEpoch provides a mock function with given fields: ctx, _a1, blockNumber
+func (_m *FEVMQueries) CredentialUsedEpoch(ctx context.Context, _a1 abigen.VerifiableCredential, blockNumber *big.Int) (*big.Int, error) {
 	ret := _m.Called(ctx, _a1, blockNumber)
 
 	if len(ret) == 0 {
-		panic("no return value specified for CredentialUsed")
+		panic("no return value specified for CredentialUsedEpoch")
 	}
 
-	var r0 bool
+	var r0 *big.Int
 	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context, abigen.VerifiableCredential, *big.Int) (bool, error)); ok {
+	if rf, ok := ret.Get(0).(func(context.Context, abigen.VerifiableCredential, *big.Int) (*big.Int, error)); ok {
 		return rf(ctx, _a1, blockNumber)
 	}
-	if rf, ok := ret.Get(0).(func(context.Context, abigen.VerifiableCredential, *big.Int) bool); ok {
+	if rf, ok := ret.Get(0).(func(context.Context, abigen.VerifiableCredential, *big.Int) *big.Int); ok {
 		r0 = rf(ctx, _a1, blockNumber)
 	} else {
-		r0 = ret.Get(0).(bool)
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*big.Int)
+		}
 	}
 
 	if rf, ok := ret.Get(1).(func(context.Context, abigen.VerifiableCredential, *big.Int) error); ok {
@@ -1341,32 +1343,32 @@ func (_m *FEVMQueries) CredentialUsed(ctx context.Context, _a1 abigen.Verifiable
 	return r0, r1
 }
 
-// FEVMQueries_CredentialUsed_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'CredentialUsed'
-type FEVMQueries_CredentialUsed_Call struct {
+// FEVMQueries_CredentialUsedEpoch_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'CredentialUsedEpoch'
+type FEVMQueries_CredentialUsedEpoch_Call struct {
 	*mock.Call
 }
 
-// CredentialUsed is a helper method to define mock.On call
+// CredentialUsedEpoch is a helper method to define mock.On call
 //   - ctx context.Context
 //   - _a1 abigen.VerifiableCredential
 //   - blockNumber *big.Int
-func (_e *FEVMQueries_Expecter) CredentialUsed(ctx interface{}, _a1 interface{}, blockNumber interface{}) *FEVMQueries_CredentialUsed_Call {
-	return &FEVMQueries_CredentialUsed_Call{Call: _e.mock.On("CredentialUsed", ctx, _a1, blockNumber)}
+func (_e *FEVMQueries_Expecter) CredentialUsedEpoch(ctx interface{}, _a1 interface{}, blockNumber interface{}) *FEVMQueries_CredentialUsedEpoch_Call {
+	return &FEVMQueries_CredentialUsedEpoch_Call{Call: _e.mock.On("CredentialUsedEpoch", ctx, _a1, blockNumber)}
 }
 
-func (_c *FEVMQueries_CredentialUsed_Call) Run(run func(ctx context.Context, _a1 abigen.VerifiableCredential, blockNumber *big.Int)) *FEVMQueries_CredentialUsed_Call {
+func (_c *FEVMQueries_CredentialUsedEpoch_Call) Run(run func(ctx context.Context, _a1 abigen.VerifiableCredential, blockNumber *big.Int)) *FEVMQueries_CredentialUsedEpoch_Call {
 	_c.Call.Run(func(args mock.Arguments) {
 		run(args[0].(context.Context), args[1].(abigen.VerifiableCredential), args[2].(*big.Int))
 	})
 	return _c
 }
 
-func (_c *FEVMQueries_CredentialUsed_Call) Return(_a0 bool, _a1 error) *FEVMQueries_CredentialUsed_Call {
+func (_c *FEVMQueries_CredentialUsedEpoch_Call) Return(_a0 *big.Int, _a1 error) *FEVMQueries_CredentialUsedEpoch_Call {
 	_c.Call.Return(_a0, _a1)
 	return _c
 }
 
-func (_c *FEVMQueries_CredentialUsed_Call) RunAndReturn(run func(context.Context, abigen.VerifiableCredential, *big.Int) (bool, error)) *FEVMQueries_CredentialUsed_Call {
+func (_c *FEVMQueries_CredentialUsedEpoch_Call) RunAndReturn(run func(context.Context, abigen.VerifiableCredential, *big.Int) (*big.Int, error)) *FEVMQueries_CredentialUsedEpoch_Call {
 	_c.Call.Return(run)
 	return _c
 }
@@ -2845,65 +2847,6 @@ func (_c *FEVMQueries_PlusInfo_Call) RunAndReturn(run func(context.Context, *big
 	return _c
 }
 
-// PlusMintPrice provides a mock function with given fields: ctx, blockNumber
-func (_m *FEVMQueries) PlusMintPrice(ctx context.Context, blockNumber *big.Int) (*big.Int, error) {
-	ret := _m.Called(ctx, blockNumber)
-
-	if len(ret) == 0 {
-		panic("no return value specified for PlusMintPrice")
-	}
-
-	var r0 *big.Int
-	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context, *big.Int) (*big.Int, error)); ok {
-		return rf(ctx, blockNumber)
-	}
-	if rf, ok := ret.Get(0).(func(context.Context, *big.Int) *big.Int); ok {
-		r0 = rf(ctx, blockNumber)
-	} else {
-		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*big.Int)
-		}
-	}
-
-	if rf, ok := ret.Get(1).(func(context.Context, *big.Int) error); ok {
-		r1 = rf(ctx, blockNumber)
-	} else {
-		r1 = ret.Error(1)
-	}
-
-	return r0, r1
-}
-
-// FEVMQueries_PlusMintPrice_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'PlusMintPrice'
-type FEVMQueries_PlusMintPrice_Call struct {
-	*mock.Call
-}
-
-// PlusMintPrice is a helper method to define mock.On call
-//   - ctx context.Context
-//   - blockNumber *big.Int
-func (_e *FEVMQueries_Expecter) PlusMintPrice(ctx interface{}, blockNumber interface{}) *FEVMQueries_PlusMintPrice_Call {
-	return &FEVMQueries_PlusMintPrice_Call{Call: _e.mock.On("PlusMintPrice", ctx, blockNumber)}
-}
-
-func (_c *FEVMQueries_PlusMintPrice_Call) Run(run func(ctx context.Context, blockNumber *big.Int)) *FEVMQueries_PlusMintPrice_Call {
-	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(*big.Int))
-	})
-	return _c
-}
-
-func (_c *FEVMQueries_PlusMintPrice_Call) Return(_a0 *big.Int, _a1 error) *FEVMQueries_PlusMintPrice_Call {
-	_c.Call.Return(_a0, _a1)
-	return _c
-}
-
-func (_c *FEVMQueries_PlusMintPrice_Call) RunAndReturn(run func(context.Context, *big.Int) (*big.Int, error)) *FEVMQueries_PlusMintPrice_Call {
-	_c.Call.Return(run)
-	return _c
-}
-
 // PlusTierFromAgentAddress provides a mock function with given fields: ctx, agentAddr, blockNumber
 func (_m *FEVMQueries) PlusTierFromAgentAddress(ctx context.Context, agentAddr common.Address, blockNumber *big.Int) (uint8, error) {
 	ret := _m.Called(ctx, agentAddr, blockNumber)
@@ -3017,74 +2960,6 @@ func (_c *FEVMQueries_PlusTierInfo_Call) Return(_a0 []abigen.TierInfo, _a1 error
 }
 
 func (_c *FEVMQueries_PlusTierInfo_Call) RunAndReturn(run func(context.Context, *big.Int) ([]abigen.TierInfo, error)) *FEVMQueries_PlusTierInfo_Call {
-	_c.Call.Return(run)
-	return _c
-}
-
-// PlusTierSwitchPenaltyInfo provides a mock function with given fields: ctx, blockNumber
-func (_m *FEVMQueries) PlusTierSwitchPenaltyInfo(ctx context.Context, blockNumber *big.Int) (*big.Int, *big.Int, error) {
-	ret := _m.Called(ctx, blockNumber)
-
-	if len(ret) == 0 {
-		panic("no return value specified for PlusTierSwitchPenaltyInfo")
-	}
-
-	var r0 *big.Int
-	var r1 *big.Int
-	var r2 error
-	if rf, ok := ret.Get(0).(func(context.Context, *big.Int) (*big.Int, *big.Int, error)); ok {
-		return rf(ctx, blockNumber)
-	}
-	if rf, ok := ret.Get(0).(func(context.Context, *big.Int) *big.Int); ok {
-		r0 = rf(ctx, blockNumber)
-	} else {
-		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*big.Int)
-		}
-	}
-
-	if rf, ok := ret.Get(1).(func(context.Context, *big.Int) *big.Int); ok {
-		r1 = rf(ctx, blockNumber)
-	} else {
-		if ret.Get(1) != nil {
-			r1 = ret.Get(1).(*big.Int)
-		}
-	}
-
-	if rf, ok := ret.Get(2).(func(context.Context, *big.Int) error); ok {
-		r2 = rf(ctx, blockNumber)
-	} else {
-		r2 = ret.Error(2)
-	}
-
-	return r0, r1, r2
-}
-
-// FEVMQueries_PlusTierSwitchPenaltyInfo_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'PlusTierSwitchPenaltyInfo'
-type FEVMQueries_PlusTierSwitchPenaltyInfo_Call struct {
-	*mock.Call
-}
-
-// PlusTierSwitchPenaltyInfo is a helper method to define mock.On call
-//   - ctx context.Context
-//   - blockNumber *big.Int
-func (_e *FEVMQueries_Expecter) PlusTierSwitchPenaltyInfo(ctx interface{}, blockNumber interface{}) *FEVMQueries_PlusTierSwitchPenaltyInfo_Call {
-	return &FEVMQueries_PlusTierSwitchPenaltyInfo_Call{Call: _e.mock.On("PlusTierSwitchPenaltyInfo", ctx, blockNumber)}
-}
-
-func (_c *FEVMQueries_PlusTierSwitchPenaltyInfo_Call) Run(run func(ctx context.Context, blockNumber *big.Int)) *FEVMQueries_PlusTierSwitchPenaltyInfo_Call {
-	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(*big.Int))
-	})
-	return _c
-}
-
-func (_c *FEVMQueries_PlusTierSwitchPenaltyInfo_Call) Return(penaltyWindow *big.Int, penaltyFee *big.Int, err error) *FEVMQueries_PlusTierSwitchPenaltyInfo_Call {
-	_c.Call.Return(penaltyWindow, penaltyFee, err)
-	return _c
-}
-
-func (_c *FEVMQueries_PlusTierSwitchPenaltyInfo_Call) RunAndReturn(run func(context.Context, *big.Int) (*big.Int, *big.Int, error)) *FEVMQueries_PlusTierSwitchPenaltyInfo_Call {
 	_c.Call.Return(run)
 	return _c
 }
