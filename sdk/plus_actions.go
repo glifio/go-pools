@@ -45,7 +45,7 @@ func (a *fevmActions) PlusMintAndActivate(ctx context.Context, auth *bind.Transa
 		return nil, err
 	}
 
-	tx, err := plus.MintAndActivate(auth, auth.From, beneficiary, tier)
+	tx, err := plus.MintAndActivate(auth, beneficiary, tier)
 
 	return util.TxPostProcess(tx, err)
 }
@@ -79,7 +79,7 @@ func (a *fevmActions) PlusMintActivateAndFund(ctx context.Context, auth *bind.Tr
 		return nil, err
 	}
 
-	tx, err := plus.MintActivateAndFund(auth, auth.From, cashBackPercent, beneficiary, tier, amount)
+	tx, err := plus.MintActivateAndFund(auth, cashBackPercent, beneficiary, tier, amount)
 
 	return util.TxPostProcess(tx, err)
 }
