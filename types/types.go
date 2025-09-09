@@ -61,7 +61,7 @@ type FEVMQueries interface {
 	WFILBalanceOf(ctx context.Context, hodler common.Address) (*big.Float, error)
 	WFILAllowance(ctx context.Context, hodler common.Address, spender common.Address) (*big.Float, error)
 	// policing methods
-	CredentialUsedEpoch(ctx context.Context, vc abigen.VerifiableCredential, blockNumber *big.Int) (*big.Int, error)
+	CredentialUsed(ctx context.Context, vc abigen.VerifiableCredential, blockNumber *big.Int) (bool, error)
 	CredentialValidityPeriod(ctx context.Context) (*big.Int, *big.Int, error)
 	SectorFaultyTolerance(ctx context.Context) (*big.Int, error)
 	// miner registry methods
