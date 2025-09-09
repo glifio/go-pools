@@ -9,7 +9,6 @@ import (
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/filecoin-project/go-address"
-	"github.com/glifio/go-pools/constants"
 )
 
 func GetAgentFiFromAPI(agentAddr common.Address, eventsURL string) (*AgentFi, error) {
@@ -96,12 +95,6 @@ func GetAgentFiFromAPI(agentAddr common.Address, eventsURL string) (*AgentFi, er
 		return nil, fmt.Errorf("error converting interest to big.Int")
 	}
 
-	maxDTL, exists := constants.TierDTL[response.Tier]
-	if !exists {
-		// Default to MAX_BORROW_DTL if tier is not recognized
-		maxDTL = constants.MAX_BORROW_DTL
-	}
-
 	afi := &AgentFi{
 		BaseFi: BaseFi{
 			Balance:          balance,
@@ -118,7 +111,6 @@ func GetAgentFiFromAPI(agentAddr common.Address, eventsURL string) (*AgentFi, er
 			Interest:  interest,
 		},
 		SpendableBalance: spendableBalance,
-		MaxDTL:           maxDTL,
 	}
 	return afi, nil
 }

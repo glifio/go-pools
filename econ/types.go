@@ -34,8 +34,6 @@ type AgentFi struct {
 	Liability
 	// represents the amount of FIL and WFIL that is held by the Agent's smart contract
 	SpendableBalance *big.Int `json:"spendableBalance"`
-	// MaxDTL represents the maximum debt-to-liquidation ratio for this agent
-	MaxDTL *big.Int `json:"maxDTL"`
 }
 
 // note that in feeDebt, AvailableBalance will be kept at 0, and feeDebt will be a positive number
