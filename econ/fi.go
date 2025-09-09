@@ -71,6 +71,7 @@ func NewAgentFi(
 	agentAvailableBalance *big.Int,
 	liability Liability,
 	minerFis []*BaseFi,
+	maxDTL *big.Int,
 ) *AgentFi {
 	// loop through all the BaseFi and create 1 consolidated BaseFi
 	balance := big.NewInt(0)
@@ -119,6 +120,7 @@ func NewAgentFi(
 		},
 		Liability:        liability,
 		SpendableBalance: agentAvailableBalance,
+		MaxDTL:           maxDTL,
 	}
 }
 
@@ -149,6 +151,7 @@ func EmptyAgentFi() *AgentFi {
 			Interest:  big.NewInt(0),
 		},
 		SpendableBalance: big.NewInt(0),
+		MaxDTL:           constants.MAX_BORROW_DTL, // Default to MAX_BORROW_DTL
 	}
 }
 
@@ -219,7 +222,7 @@ func (afi *AgentFi) MaxBorrowAndSeal() *big.Int {
 	maxBorrowAndSeal := big.NewInt(0).Sub(
 		big.NewInt(0).Div(
 			big.NewInt(0).Mul(margin, big.NewInt(1e18)),
-			big.NewInt(0).Sub(constants.WAD, constants.MAX_BORROW_DTL),
+			big.NewInt(0).Sub(constants.WAD, afi.MaxDTL),
 		),
 		margin,
 	)
@@ -240,7 +243,7 @@ func (afi *AgentFi) MaxBorrowAndWithdraw() *big.Int {
 		big.NewInt(0).Div(
 			big.NewInt(0).Mul(
 				afi.LiquidationValue(),
-				big.NewInt(0).Sub(constants.WAD, constants.MAX_BORROW_DTL),
+				big.NewInt(0).Sub(constants.WAD, afi.MaxDTL),
 			),
 			big.NewInt(1e18), // div wad
 		),
@@ -258,7 +261,7 @@ func (afi *AgentFi) WithdrawLimit() *big.Int {
 		afi.LiquidationValue(),
 		big.NewInt(0).Div(
 			big.NewInt(0).Mul(afi.Debt(), big.NewInt(1e18)),
-			constants.MAX_BORROW_DTL,
+			afi.MaxDTL,
 		),
 	)
 

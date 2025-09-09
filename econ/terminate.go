@@ -12,6 +12,7 @@ import (
 	"github.com/filecoin-project/lotus/chain/types"
 	"github.com/filecoin-project/specs-actors/v8/actors/builtin/miner"
 
+	"github.com/glifio/go-pools/constants"
 	poolstypes "github.com/glifio/go-pools/types"
 	"github.com/glifio/go-pools/util"
 	"golang.org/x/xerrors"
@@ -92,7 +93,18 @@ func EstimateTerminationFeeAgent(
 		Interest:  interest,
 	}
 
-	return NewAgentFi(agentAvail, l, baseFis), nil
+	tier, err := psdk.Query().PlusTierFromAgentAddress(ctx, agentAddr, height)
+	if err != nil {
+		return nil, err
+	}
+
+	maxDTL, exists := constants.TierDTL[tier]
+	if !exists {
+		// Default to MAX_BORROW_DTL if tier is not recognized
+		maxDTL = constants.MAX_BORROW_DTL
+	}
+
+	return NewAgentFi(agentAvail, l, baseFis, maxDTL), nil
 }
 
 func EstimateTerminationFeeMiner(ctx context.Context, api *lotusapi.FullNodeStruct, minerAddr address.Address, ts *types.TipSet) (*TerminateSectorResult, error) {
