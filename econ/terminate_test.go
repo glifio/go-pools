@@ -456,7 +456,7 @@ func TestComputePerc(t *testing.T) {
 	p := bigFromStr("343733044178305628615912")
 	i := bigFromStr("28202982363374106229")
 
-	perc := computePerc(new(big.Int).Add(p, i), lv)
+	perc := ComputePerc(new(big.Int).Add(p, i), lv)
 	exp, _ := new(big.Float).SetString("0.394356164017979036")
 	if perc.String() != exp.String() {
 		t.Fatalf("Expected perc: %v, actual: %v", exp, perc)

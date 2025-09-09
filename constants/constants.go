@@ -31,15 +31,16 @@ type Method string
 
 // these method names must match the names in the Agent contract in order to get the right function signature
 var (
-	MethodBorrow       Method = "borrow"
-	MethodPay          Method = "pay"
-	MethodAddMiner     Method = "addMiner"
-	MethodRemoveMiner  Method = "removeMiner"
-	MethodWithdraw     Method = "withdraw"
-	MethodPushFunds    Method = "pushFunds"
-	MethodPullFunds    Method = "pullFunds"
-	MethodSetRecovered Method = "setRecovered"
-	MethodDefaultDTL   Method = "setAgentDefaultDTL"
+	MethodBorrow        Method = "borrow"
+	MethodPay           Method = "pay"
+	MethodAddMiner      Method = "addMiner"
+	MethodRemoveMiner   Method = "removeMiner"
+	MethodWithdraw      Method = "withdraw"
+	MethodPushFunds     Method = "pushFunds"
+	MethodPullFunds     Method = "pullFunds"
+	MethodSetRecovered  Method = "setRecovered"
+	MethodDefaultDTL    Method = "setAgentDefaultDTL"
+	MethodPlusDowngrade Method = "downgrade"
 )
 
 type Route string
@@ -69,3 +70,5 @@ var FAULTY_SECTOR_TOLERANCE = big.NewFloat(0.001)
 
 var MAX_BORROW_DTL = big.NewInt(75e16)
 var LIQUIDATION_DTL = big.NewInt(85e16)
+
+var PLUS_TIERS = uint8(4)

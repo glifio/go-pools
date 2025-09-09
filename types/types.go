@@ -61,7 +61,7 @@ type FEVMQueries interface {
 	WFILBalanceOf(ctx context.Context, hodler common.Address) (*big.Float, error)
 	WFILAllowance(ctx context.Context, hodler common.Address, spender common.Address) (*big.Float, error)
 	// policing methods
-	CredentialUsedEpoch(ctx context.Context, vc abigen.VerifiableCredential, blockNumber *big.Int) (*big.Int, error)
+	CredentialUsed(ctx context.Context, vc abigen.VerifiableCredential, blockNumber *big.Int) (bool, error)
 	CredentialValidityPeriod(ctx context.Context) (*big.Int, *big.Int, error)
 	SectorFaultyTolerance(ctx context.Context) (*big.Int, error)
 	// miner registry methods
@@ -87,12 +87,21 @@ type FEVMQueries interface {
 	IFIL() common.Address
 	WFIL() common.Address
 	GLF() common.Address
+	Plus() common.Address
 	InfinityPool() common.Address
 
 	// token related addresses
 	TokenNFTWrapper() common.Address
 	DelegatedClaimsCampaigns() common.Address
 	Governor() common.Address
+
+	// plus methods
+	PlusTokenIDFromRcpt(ctx context.Context, receipt *types.Receipt) (*big.Int, error)
+	PlusInfo(ctx context.Context, tokenID *big.Int, blockNumber *big.Int) (*PlusInfo, error)
+	PlusTierInfo(ctx context.Context, blockNumber *big.Int) ([]abigen.TierInfo, error)
+	PlusTierFromAgentAddress(ctx context.Context, agentAddr common.Address, blockNumber *big.Int) (uint8, error)
+	PlusMintPrice(ctx context.Context, blockNumber *big.Int) (*big.Int, error)
+	PlusTierSwitchPenaltyInfo(ctx context.Context, blockNumber *big.Int) (penaltyWindow *big.Int, penaltyFee *big.Int, err error)
 }
 
 //go:generate mockery --name FEVMActions
@@ -124,6 +133,18 @@ type FEVMActions interface {
 	// iFIL actions
 	IFILTransfer(ctx context.Context, auth *bind.TransactOpts, receiver common.Address, amount *big.Int) (*types.Transaction, error)
 	IFILApprove(ctx context.Context, auth *bind.TransactOpts, spender common.Address, allowance *big.Int) (*types.Transaction, error)
+
+	// plus actions
+	PlusMint(ctx context.Context, auth *bind.TransactOpts) (*types.Transaction, error)
+	PlusMintAndActivate(ctx context.Context, auth *bind.TransactOpts, beneficiary common.Address, tier uint8) (*types.Transaction, error)
+	PlusMintActivateAndFund(ctx context.Context, auth *bind.TransactOpts, cashBackPercent *big.Int, beneficiary common.Address, tier uint8, amount *big.Int) (*types.Transaction, error)
+	PlusActivate(ctx context.Context, auth *bind.TransactOpts, beneficiary common.Address, tokenID *big.Int, tier uint8) (*types.Transaction, error)
+	PlusSetPersonalCashBackPercent(ctx context.Context, auth *bind.TransactOpts, tokenID *big.Int, cashBackPercent *big.Int) (*types.Transaction, error)
+	PlusFundGLFVault(ctx context.Context, auth *bind.TransactOpts, tokenID *big.Int, amount *big.Int) (*types.Transaction, error)
+	PlusClaimCashBack(ctx context.Context, auth *bind.TransactOpts, tokenID *big.Int, receiver common.Address) (*types.Transaction, error)
+	PlusUpgrade(ctx context.Context, auth *bind.TransactOpts, tokenID *big.Int, tier uint8) (*types.Transaction, error)
+	PlusDowngrade(ctx context.Context, auth *bind.TransactOpts, tokenID *big.Int, tier uint8, agentAddr common.Address, requesterKey *ecdsa.PrivateKey) (*types.Transaction, error)
+	PlusWithdrawExtraLockedFunds(ctx context.Context, auth *bind.TransactOpts, tokenID *big.Int) (*types.Transaction, error)
 }
 
 //go:generate mockery --name FEVMExtern
@@ -149,6 +170,7 @@ type ProtocolMeta struct {
 	IFIL                     common.Address `json:"ifil"`
 	WFIL                     common.Address `json:"wfil"`
 	GLF                      common.Address `json:"glf"`
+	Plus                     common.Address `json:"plus"`
 	InfinityPool             common.Address `json:"infinityPool"`
 	Governor                 common.Address `json:"governor"`
 	TokenNFTWrapper          common.Address `json:"tokenNFTWrapper"`
@@ -161,4 +183,15 @@ type Extern struct {
 	LotusDialAddr string `json:"lotusDialAddr"`
 	LotusToken    string `json:"lotusToken"`
 	EventsURL     string `json:"eventsURL"`
+}
+
+type PlusInfo struct {
+	AgentID                      *big.Int
+	FilCashbackEarned            *big.Int
+	GLFVaultBalance              *big.Int
+	LastTierSwitchTimestamp      *big.Int
+	PersonalCashBackPercent      *big.Int
+	TierLockAmount               *big.Int
+	WithdrawableExtraLockedFunds *big.Int
+	Tier                         uint8
 }

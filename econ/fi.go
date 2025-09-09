@@ -205,7 +205,7 @@ func (bfi *BaseFi) RecoveryRate() *big.Float {
 		return big.NewFloat(0)
 	}
 
-	return computePerc(bfi.LiquidationValue(), bfi.Balance)
+	return ComputePerc(bfi.LiquidationValue(), bfi.Balance)
 }
 
 // MaxBorrowAndSeal = margin / (1 - max borrow DTL) - margin
@@ -290,7 +290,7 @@ func (afi *AgentFi) LeverageRatio() *big.Float {
 		return new(big.Float).SetInf(true)
 	}
 
-	return computePerc(afi.LiquidationValue(), afi.Margin())
+	return ComputePerc(afi.LiquidationValue(), afi.Margin())
 }
 
 func (afi *AgentFi) DTL() *big.Float {
@@ -305,14 +305,14 @@ func (afi *AgentFi) DTL() *big.Float {
 		return new(big.Float).SetInf(true)
 	}
 
-	return computePerc(afi.Debt(), afi.LiquidationValue())
+	return ComputePerc(afi.Debt(), afi.LiquidationValue())
 }
 
 func (l *Liability) Debt() *big.Int {
 	return new(big.Int).Add(l.Principal, l.Interest)
 }
 
-func computePerc(numerator, denominator *big.Int) *big.Float {
+func ComputePerc(numerator, denominator *big.Int) *big.Float {
 	if denominator.Cmp(big.NewInt(0)) == 0 {
 		return new(big.Float).SetInf(true)
 	}

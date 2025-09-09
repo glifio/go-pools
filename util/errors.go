@@ -3,6 +3,7 @@ package util
 import (
 	"encoding/hex"
 	"fmt"
+	"regexp"
 	"strings"
 
 	"github.com/ethereum/go-ethereum/accounts/abi"
@@ -32,6 +33,26 @@ func HumanReadableRevert(errMsg error) error {
 
 	// Check if "revert reason: " exists in the errMsg
 	if !strings.Contains(errStr, "revert reason: ") {
+		r, _ := regexp.Compile(`vm error=\[0x([0-9A-Fa-f]+)\]`)
+		matches := r.FindStringSubmatch(errStr)
+		if len(matches) == 2 {
+			data, _ := hex.DecodeString(matches[1])
+			if len(data) >= 4 {
+				identifier := data[:4]
+				abis, _ := gatherABIS()
+				for _, abi := range abis {
+					abiError, _ := abi.ErrorByID([4]byte(identifier))
+					if abiError != nil {
+						errorData, err := abiError.Unpack(data)
+						if err == nil {
+							return fmt.Errorf("vm error: %v %+v", abiError, errorData)
+						} else {
+							return fmt.Errorf("vm error: %v", abiError)
+						}
+					}
+				}
+			}
+		}
 		return fmt.Errorf("error message does not contain a revert reason %s", errStr)
 	}
 
@@ -108,57 +129,63 @@ func gatherABIS() ([]*abi.ABI, error) {
 
 	agentAbi, err := abigen.AgentMetaData.GetAbi()
 	if err != nil {
-		return nil, nil
+		return []*abi.ABI{}, nil
 	}
 	abis = append(abis, agentAbi)
 
 	agentFactoryAbi, err := abigen.AgentFactoryMetaData.GetAbi()
 	if err != nil {
-		return nil, nil
+		return []*abi.ABI{}, nil
 	}
 	abis = append(abis, agentFactoryAbi)
 
 	credParserAbi, err := abigen.CredParserMetaData.GetAbi()
 	if err != nil {
-		return nil, nil
+		return []*abi.ABI{}, nil
 	}
 	abis = append(abis, credParserAbi)
 
 	minerRegistryAbi, err := abigen.MinerRegistryMetaData.GetAbi()
 	if err != nil {
-		return nil, nil
+		return []*abi.ABI{}, nil
 	}
 	abis = append(abis, minerRegistryAbi)
 
 	poolTokenAbi, err := abigen.PoolTokenMetaData.GetAbi()
 	if err != nil {
-		return nil, nil
+		return []*abi.ABI{}, nil
 	}
 	abis = append(abis, poolTokenAbi)
 
 	routerAbi, err := abigen.RouterMetaData.GetAbi()
 	if err != nil {
-		return nil, nil
+		return []*abi.ABI{}, nil
 	}
 	abis = append(abis, routerAbi)
 
 	wrappedFILAbi, err := abigen.WFILMetaData.GetAbi()
 	if err != nil {
-		return nil, nil
+		return []*abi.ABI{}, nil
 	}
 	abis = append(abis, wrappedFILAbi)
 
 	poolV2Abi, err := abigen.InfinityPoolV2MetaData.GetAbi()
 	if err != nil {
-		return nil, nil
+		return []*abi.ABI{}, nil
 	}
 	abis = append(abis, poolV2Abi)
 
 	policeV2Abi, err := abigen.AgentPoliceV2MetaData.GetAbi()
 	if err != nil {
-		return nil, nil
+		return []*abi.ABI{}, nil
 	}
 	abis = append(abis, policeV2Abi)
+
+	tokenAbi, err := abigen.TokenMetaData.GetAbi()
+	if err != nil {
+		return []*abi.ABI{}, nil
+	}
+	abis = append(abis, tokenAbi)
 
 	return abis, nil
 }
