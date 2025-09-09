@@ -99,6 +99,11 @@ func (q *fevmQueries) PlusInfo(ctx context.Context, tokenID *big.Int, blockNumbe
 		return nil, err
 	}
 
+	baseConversionRateFILtoGLF, err := plus.BaseConversionRateFILtoGLF(opts)
+	if err != nil {
+		return nil, err
+	}
+
 	tier, err := plus.TokenIdToTier(opts, tokenID)
 	if err != nil {
 		return nil, err
@@ -112,6 +117,7 @@ func (q *fevmQueries) PlusInfo(ctx context.Context, tokenID *big.Int, blockNumbe
 		PersonalCashBackPercent:      personalCashBackPercent,
 		TierLockAmount:               tierLockAmount,
 		WithdrawableExtraLockedFunds: withdrawableExtraLockedFunds,
+		BaseConversionRateFILtoGLF:   baseConversionRateFILtoGLF,
 		Tier:                         tier,
 	}, nil
 }

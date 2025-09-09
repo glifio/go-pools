@@ -193,5 +193,6 @@ type PlusInfo struct {
 	PersonalCashBackPercent      *big.Int
 	TierLockAmount               *big.Int
 	WithdrawableExtraLockedFunds *big.Int
+	BaseConversionRateFILtoGLF   *big.Int
 	Tier                         uint8
 }
