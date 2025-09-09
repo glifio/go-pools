@@ -33,7 +33,7 @@ func HumanReadableRevert(errMsg error) error {
 
 	// Check if "revert reason: " exists in the errMsg
 	if !strings.Contains(errStr, "revert reason: ") {
-		r, _ := regexp.Compile(`vm error=\[0x([0-90-f]+)\]`)
+		r, _ := regexp.Compile(`vm error=\[0x([0-9A-Fa-f]+)\]`)
 		matches := r.FindStringSubmatch(errStr)
 		if len(matches) == 2 {
 			data, _ := hex.DecodeString(matches[1])
