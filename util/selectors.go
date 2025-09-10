@@ -10,7 +10,7 @@ import (
 
 func MethodStrToBytes(methodStr constants.Method) ([4]byte, error) {
 	abiAgent, _ := abigen.AgentMetaData.GetAbi()
-	abiPlus, _ := abigen.PlusMetaData.GetAbi()
+	abiPlus, _ := abigen.SPPlusMetaData.GetAbi()
 	abis := []*abi.ABI{
 		abiAgent,
 		abiPlus,

@@ -96,12 +96,12 @@ type FEVMQueries interface {
 	Governor() common.Address
 
 	// plus methods
-	PlusTokenIDFromRcpt(ctx context.Context, receipt *types.Receipt) (*big.Int, error)
-	PlusInfo(ctx context.Context, tokenID *big.Int, blockNumber *big.Int) (*PlusInfo, error)
-	PlusTierInfo(ctx context.Context, blockNumber *big.Int) ([]abigen.TierInfo, error)
-	PlusTierFromAgentAddress(ctx context.Context, agentAddr common.Address, blockNumber *big.Int) (uint8, error)
-	PlusMintPrice(ctx context.Context, blockNumber *big.Int) (*big.Int, error)
-	PlusTierSwitchPenaltyInfo(ctx context.Context, blockNumber *big.Int) (penaltyWindow *big.Int, penaltyFee *big.Int, err error)
+	SPPlusTokenIDFromRcpt(ctx context.Context, receipt *types.Receipt) (*big.Int, error)
+	SPPlusInfo(ctx context.Context, tokenID *big.Int, blockNumber *big.Int) (*SPPlusInfo, error)
+	SPPlusTierInfo(ctx context.Context, blockNumber *big.Int) ([]abigen.TierInfo, error)
+	SPPlusTierFromAgentAddress(ctx context.Context, agentAddr common.Address, blockNumber *big.Int) (uint8, error)
+	SPPlusMintPrice(ctx context.Context, blockNumber *big.Int) (*big.Int, error)
+	SPPlusTierSwitchPenaltyInfo(ctx context.Context, blockNumber *big.Int) (penaltyWindow *big.Int, penaltyFee *big.Int, err error)
 }
 
 //go:generate mockery --name FEVMActions
@@ -135,16 +135,16 @@ type FEVMActions interface {
 	IFILApprove(ctx context.Context, auth *bind.TransactOpts, spender common.Address, allowance *big.Int) (*types.Transaction, error)
 
 	// plus actions
-	PlusMint(ctx context.Context, auth *bind.TransactOpts) (*types.Transaction, error)
-	PlusMintAndActivate(ctx context.Context, auth *bind.TransactOpts, beneficiary common.Address, tier uint8) (*types.Transaction, error)
-	PlusMintActivateAndFund(ctx context.Context, auth *bind.TransactOpts, cashBackPercent *big.Int, beneficiary common.Address, tier uint8, amount *big.Int) (*types.Transaction, error)
-	PlusActivate(ctx context.Context, auth *bind.TransactOpts, beneficiary common.Address, tokenID *big.Int, tier uint8) (*types.Transaction, error)
-	PlusSetPersonalCashBackPercent(ctx context.Context, auth *bind.TransactOpts, tokenID *big.Int, cashBackPercent *big.Int) (*types.Transaction, error)
-	PlusFundGLFVault(ctx context.Context, auth *bind.TransactOpts, tokenID *big.Int, amount *big.Int) (*types.Transaction, error)
-	PlusClaimCashBack(ctx context.Context, auth *bind.TransactOpts, tokenID *big.Int, receiver common.Address) (*types.Transaction, error)
-	PlusUpgrade(ctx context.Context, auth *bind.TransactOpts, tokenID *big.Int, tier uint8) (*types.Transaction, error)
-	PlusDowngrade(ctx context.Context, auth *bind.TransactOpts, tokenID *big.Int, tier uint8, agentAddr common.Address, requesterKey *ecdsa.PrivateKey) (*types.Transaction, error)
-	PlusWithdrawExtraLockedFunds(ctx context.Context, auth *bind.TransactOpts, tokenID *big.Int) (*types.Transaction, error)
+	SPPlusMint(ctx context.Context, auth *bind.TransactOpts) (*types.Transaction, error)
+	SPPlusMintAndActivate(ctx context.Context, auth *bind.TransactOpts, beneficiary common.Address, tier uint8) (*types.Transaction, error)
+	SPPlusMintActivateAndFund(ctx context.Context, auth *bind.TransactOpts, cashBackPercent *big.Int, beneficiary common.Address, tier uint8, amount *big.Int) (*types.Transaction, error)
+	SPPlusActivate(ctx context.Context, auth *bind.TransactOpts, beneficiary common.Address, tokenID *big.Int, tier uint8) (*types.Transaction, error)
+	SPPlusSetPersonalCashBackPercent(ctx context.Context, auth *bind.TransactOpts, tokenID *big.Int, cashBackPercent *big.Int) (*types.Transaction, error)
+	SPPlusFundGLFVault(ctx context.Context, auth *bind.TransactOpts, tokenID *big.Int, amount *big.Int) (*types.Transaction, error)
+	SPPlusClaimCashBack(ctx context.Context, auth *bind.TransactOpts, tokenID *big.Int, receiver common.Address) (*types.Transaction, error)
+	SPPlusUpgrade(ctx context.Context, auth *bind.TransactOpts, tokenID *big.Int, tier uint8) (*types.Transaction, error)
+	SPPlusDowngrade(ctx context.Context, auth *bind.TransactOpts, tokenID *big.Int, tier uint8, agentAddr common.Address, requesterKey *ecdsa.PrivateKey) (*types.Transaction, error)
+	SPPlusWithdrawExtraLockedFunds(ctx context.Context, auth *bind.TransactOpts, tokenID *big.Int) (*types.Transaction, error)
 }
 
 //go:generate mockery --name FEVMExtern
@@ -185,7 +185,7 @@ type Extern struct {
 	EventsURL     string `json:"eventsURL"`
 }
 
-type PlusInfo struct {
+type SPPlusInfo struct {
 	AgentID                      *big.Int
 	FilCashbackEarned            *big.Int
 	GLFVaultBalance              *big.Int

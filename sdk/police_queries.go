@@ -34,7 +34,7 @@ func (q *fevmQueries) CredentialUsed(ctx context.Context, vc abigen.VerifiableCr
 	}
 
 	if vc.Action == downgradeMethodID {
-		plusCaller, err := abigen.NewPlusCaller(q.agentPolice, client)
+		plusCaller, err := abigen.NewSPPlusCaller(q.agentPolice, client)
 		if err != nil {
 			return false, err
 		}

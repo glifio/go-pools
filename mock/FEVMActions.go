@@ -1390,12 +1390,12 @@ func (_c *FEVMActions_InfPoolWithdraw_Call) RunAndReturn(run func(context.Contex
 	return _c
 }
 
-// PlusActivate provides a mock function with given fields: ctx, auth, beneficiary, tokenID, tier
-func (_m *FEVMActions) PlusActivate(ctx context.Context, auth *bind.TransactOpts, beneficiary common.Address, tokenID *big.Int, tier uint8) (*types.Transaction, error) {
+// SPPlusActivate provides a mock function with given fields: ctx, auth, beneficiary, tokenID, tier
+func (_m *FEVMActions) SPPlusActivate(ctx context.Context, auth *bind.TransactOpts, beneficiary common.Address, tokenID *big.Int, tier uint8) (*types.Transaction, error) {
 	ret := _m.Called(ctx, auth, beneficiary, tokenID, tier)
 
 	if len(ret) == 0 {
-		panic("no return value specified for PlusActivate")
+		panic("no return value specified for SPPlusActivate")
 	}
 
 	var r0 *types.Transaction
@@ -1420,44 +1420,44 @@ func (_m *FEVMActions) PlusActivate(ctx context.Context, auth *bind.TransactOpts
 	return r0, r1
 }
 
-// FEVMActions_PlusActivate_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'PlusActivate'
-type FEVMActions_PlusActivate_Call struct {
+// FEVMActions_SPPlusActivate_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'SPPlusActivate'
+type FEVMActions_SPPlusActivate_Call struct {
 	*mock.Call
 }
 
-// PlusActivate is a helper method to define mock.On call
+// SPPlusActivate is a helper method to define mock.On call
 //   - ctx context.Context
 //   - auth *bind.TransactOpts
 //   - beneficiary common.Address
 //   - tokenID *big.Int
 //   - tier uint8
-func (_e *FEVMActions_Expecter) PlusActivate(ctx interface{}, auth interface{}, beneficiary interface{}, tokenID interface{}, tier interface{}) *FEVMActions_PlusActivate_Call {
-	return &FEVMActions_PlusActivate_Call{Call: _e.mock.On("PlusActivate", ctx, auth, beneficiary, tokenID, tier)}
+func (_e *FEVMActions_Expecter) SPPlusActivate(ctx interface{}, auth interface{}, beneficiary interface{}, tokenID interface{}, tier interface{}) *FEVMActions_SPPlusActivate_Call {
+	return &FEVMActions_SPPlusActivate_Call{Call: _e.mock.On("SPPlusActivate", ctx, auth, beneficiary, tokenID, tier)}
 }
 
-func (_c *FEVMActions_PlusActivate_Call) Run(run func(ctx context.Context, auth *bind.TransactOpts, beneficiary common.Address, tokenID *big.Int, tier uint8)) *FEVMActions_PlusActivate_Call {
+func (_c *FEVMActions_SPPlusActivate_Call) Run(run func(ctx context.Context, auth *bind.TransactOpts, beneficiary common.Address, tokenID *big.Int, tier uint8)) *FEVMActions_SPPlusActivate_Call {
 	_c.Call.Run(func(args mock.Arguments) {
 		run(args[0].(context.Context), args[1].(*bind.TransactOpts), args[2].(common.Address), args[3].(*big.Int), args[4].(uint8))
 	})
 	return _c
 }
 
-func (_c *FEVMActions_PlusActivate_Call) Return(_a0 *types.Transaction, _a1 error) *FEVMActions_PlusActivate_Call {
+func (_c *FEVMActions_SPPlusActivate_Call) Return(_a0 *types.Transaction, _a1 error) *FEVMActions_SPPlusActivate_Call {
 	_c.Call.Return(_a0, _a1)
 	return _c
 }
 
-func (_c *FEVMActions_PlusActivate_Call) RunAndReturn(run func(context.Context, *bind.TransactOpts, common.Address, *big.Int, uint8) (*types.Transaction, error)) *FEVMActions_PlusActivate_Call {
+func (_c *FEVMActions_SPPlusActivate_Call) RunAndReturn(run func(context.Context, *bind.TransactOpts, common.Address, *big.Int, uint8) (*types.Transaction, error)) *FEVMActions_SPPlusActivate_Call {
 	_c.Call.Return(run)
 	return _c
 }
 
-// PlusClaimCashBack provides a mock function with given fields: ctx, auth, tokenID, receiver
-func (_m *FEVMActions) PlusClaimCashBack(ctx context.Context, auth *bind.TransactOpts, tokenID *big.Int, receiver common.Address) (*types.Transaction, error) {
+// SPPlusClaimCashBack provides a mock function with given fields: ctx, auth, tokenID, receiver
+func (_m *FEVMActions) SPPlusClaimCashBack(ctx context.Context, auth *bind.TransactOpts, tokenID *big.Int, receiver common.Address) (*types.Transaction, error) {
 	ret := _m.Called(ctx, auth, tokenID, receiver)
 
 	if len(ret) == 0 {
-		panic("no return value specified for PlusClaimCashBack")
+		panic("no return value specified for SPPlusClaimCashBack")
 	}
 
 	var r0 *types.Transaction
@@ -1482,43 +1482,43 @@ func (_m *FEVMActions) PlusClaimCashBack(ctx context.Context, auth *bind.Transac
 	return r0, r1
 }
 
-// FEVMActions_PlusClaimCashBack_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'PlusClaimCashBack'
-type FEVMActions_PlusClaimCashBack_Call struct {
+// FEVMActions_SPPlusClaimCashBack_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'SPPlusClaimCashBack'
+type FEVMActions_SPPlusClaimCashBack_Call struct {
 	*mock.Call
 }
 
-// PlusClaimCashBack is a helper method to define mock.On call
+// SPPlusClaimCashBack is a helper method to define mock.On call
 //   - ctx context.Context
 //   - auth *bind.TransactOpts
 //   - tokenID *big.Int
 //   - receiver common.Address
-func (_e *FEVMActions_Expecter) PlusClaimCashBack(ctx interface{}, auth interface{}, tokenID interface{}, receiver interface{}) *FEVMActions_PlusClaimCashBack_Call {
-	return &FEVMActions_PlusClaimCashBack_Call{Call: _e.mock.On("PlusClaimCashBack", ctx, auth, tokenID, receiver)}
+func (_e *FEVMActions_Expecter) SPPlusClaimCashBack(ctx interface{}, auth interface{}, tokenID interface{}, receiver interface{}) *FEVMActions_SPPlusClaimCashBack_Call {
+	return &FEVMActions_SPPlusClaimCashBack_Call{Call: _e.mock.On("SPPlusClaimCashBack", ctx, auth, tokenID, receiver)}
 }
 
-func (_c *FEVMActions_PlusClaimCashBack_Call) Run(run func(ctx context.Context, auth *bind.TransactOpts, tokenID *big.Int, receiver common.Address)) *FEVMActions_PlusClaimCashBack_Call {
+func (_c *FEVMActions_SPPlusClaimCashBack_Call) Run(run func(ctx context.Context, auth *bind.TransactOpts, tokenID *big.Int, receiver common.Address)) *FEVMActions_SPPlusClaimCashBack_Call {
 	_c.Call.Run(func(args mock.Arguments) {
 		run(args[0].(context.Context), args[1].(*bind.TransactOpts), args[2].(*big.Int), args[3].(common.Address))
 	})
 	return _c
 }
 
-func (_c *FEVMActions_PlusClaimCashBack_Call) Return(_a0 *types.Transaction, _a1 error) *FEVMActions_PlusClaimCashBack_Call {
+func (_c *FEVMActions_SPPlusClaimCashBack_Call) Return(_a0 *types.Transaction, _a1 error) *FEVMActions_SPPlusClaimCashBack_Call {
 	_c.Call.Return(_a0, _a1)
 	return _c
 }
 
-func (_c *FEVMActions_PlusClaimCashBack_Call) RunAndReturn(run func(context.Context, *bind.TransactOpts, *big.Int, common.Address) (*types.Transaction, error)) *FEVMActions_PlusClaimCashBack_Call {
+func (_c *FEVMActions_SPPlusClaimCashBack_Call) RunAndReturn(run func(context.Context, *bind.TransactOpts, *big.Int, common.Address) (*types.Transaction, error)) *FEVMActions_SPPlusClaimCashBack_Call {
 	_c.Call.Return(run)
 	return _c
 }
 
-// PlusDowngrade provides a mock function with given fields: ctx, auth, tokenID, tier, agentAddr, requesterKey
-func (_m *FEVMActions) PlusDowngrade(ctx context.Context, auth *bind.TransactOpts, tokenID *big.Int, tier uint8, agentAddr common.Address, requesterKey *ecdsa.PrivateKey) (*types.Transaction, error) {
+// SPPlusDowngrade provides a mock function with given fields: ctx, auth, tokenID, tier, agentAddr, requesterKey
+func (_m *FEVMActions) SPPlusDowngrade(ctx context.Context, auth *bind.TransactOpts, tokenID *big.Int, tier uint8, agentAddr common.Address, requesterKey *ecdsa.PrivateKey) (*types.Transaction, error) {
 	ret := _m.Called(ctx, auth, tokenID, tier, agentAddr, requesterKey)
 
 	if len(ret) == 0 {
-		panic("no return value specified for PlusDowngrade")
+		panic("no return value specified for SPPlusDowngrade")
 	}
 
 	var r0 *types.Transaction
@@ -1543,45 +1543,45 @@ func (_m *FEVMActions) PlusDowngrade(ctx context.Context, auth *bind.TransactOpt
 	return r0, r1
 }
 
-// FEVMActions_PlusDowngrade_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'PlusDowngrade'
-type FEVMActions_PlusDowngrade_Call struct {
+// FEVMActions_SPPlusDowngrade_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'SPPlusDowngrade'
+type FEVMActions_SPPlusDowngrade_Call struct {
 	*mock.Call
 }
 
-// PlusDowngrade is a helper method to define mock.On call
+// SPPlusDowngrade is a helper method to define mock.On call
 //   - ctx context.Context
 //   - auth *bind.TransactOpts
 //   - tokenID *big.Int
 //   - tier uint8
 //   - agentAddr common.Address
 //   - requesterKey *ecdsa.PrivateKey
-func (_e *FEVMActions_Expecter) PlusDowngrade(ctx interface{}, auth interface{}, tokenID interface{}, tier interface{}, agentAddr interface{}, requesterKey interface{}) *FEVMActions_PlusDowngrade_Call {
-	return &FEVMActions_PlusDowngrade_Call{Call: _e.mock.On("PlusDowngrade", ctx, auth, tokenID, tier, agentAddr, requesterKey)}
+func (_e *FEVMActions_Expecter) SPPlusDowngrade(ctx interface{}, auth interface{}, tokenID interface{}, tier interface{}, agentAddr interface{}, requesterKey interface{}) *FEVMActions_SPPlusDowngrade_Call {
+	return &FEVMActions_SPPlusDowngrade_Call{Call: _e.mock.On("SPPlusDowngrade", ctx, auth, tokenID, tier, agentAddr, requesterKey)}
 }
 
-func (_c *FEVMActions_PlusDowngrade_Call) Run(run func(ctx context.Context, auth *bind.TransactOpts, tokenID *big.Int, tier uint8, agentAddr common.Address, requesterKey *ecdsa.PrivateKey)) *FEVMActions_PlusDowngrade_Call {
+func (_c *FEVMActions_SPPlusDowngrade_Call) Run(run func(ctx context.Context, auth *bind.TransactOpts, tokenID *big.Int, tier uint8, agentAddr common.Address, requesterKey *ecdsa.PrivateKey)) *FEVMActions_SPPlusDowngrade_Call {
 	_c.Call.Run(func(args mock.Arguments) {
 		run(args[0].(context.Context), args[1].(*bind.TransactOpts), args[2].(*big.Int), args[3].(uint8), args[4].(common.Address), args[5].(*ecdsa.PrivateKey))
 	})
 	return _c
 }
 
-func (_c *FEVMActions_PlusDowngrade_Call) Return(_a0 *types.Transaction, _a1 error) *FEVMActions_PlusDowngrade_Call {
+func (_c *FEVMActions_SPPlusDowngrade_Call) Return(_a0 *types.Transaction, _a1 error) *FEVMActions_SPPlusDowngrade_Call {
 	_c.Call.Return(_a0, _a1)
 	return _c
 }
 
-func (_c *FEVMActions_PlusDowngrade_Call) RunAndReturn(run func(context.Context, *bind.TransactOpts, *big.Int, uint8, common.Address, *ecdsa.PrivateKey) (*types.Transaction, error)) *FEVMActions_PlusDowngrade_Call {
+func (_c *FEVMActions_SPPlusDowngrade_Call) RunAndReturn(run func(context.Context, *bind.TransactOpts, *big.Int, uint8, common.Address, *ecdsa.PrivateKey) (*types.Transaction, error)) *FEVMActions_SPPlusDowngrade_Call {
 	_c.Call.Return(run)
 	return _c
 }
 
-// PlusFundGLFVault provides a mock function with given fields: ctx, auth, tokenID, amount
-func (_m *FEVMActions) PlusFundGLFVault(ctx context.Context, auth *bind.TransactOpts, tokenID *big.Int, amount *big.Int) (*types.Transaction, error) {
+// SPPlusFundGLFVault provides a mock function with given fields: ctx, auth, tokenID, amount
+func (_m *FEVMActions) SPPlusFundGLFVault(ctx context.Context, auth *bind.TransactOpts, tokenID *big.Int, amount *big.Int) (*types.Transaction, error) {
 	ret := _m.Called(ctx, auth, tokenID, amount)
 
 	if len(ret) == 0 {
-		panic("no return value specified for PlusFundGLFVault")
+		panic("no return value specified for SPPlusFundGLFVault")
 	}
 
 	var r0 *types.Transaction
@@ -1606,43 +1606,43 @@ func (_m *FEVMActions) PlusFundGLFVault(ctx context.Context, auth *bind.Transact
 	return r0, r1
 }
 
-// FEVMActions_PlusFundGLFVault_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'PlusFundGLFVault'
-type FEVMActions_PlusFundGLFVault_Call struct {
+// FEVMActions_SPPlusFundGLFVault_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'SPPlusFundGLFVault'
+type FEVMActions_SPPlusFundGLFVault_Call struct {
 	*mock.Call
 }
 
-// PlusFundGLFVault is a helper method to define mock.On call
+// SPPlusFundGLFVault is a helper method to define mock.On call
 //   - ctx context.Context
 //   - auth *bind.TransactOpts
 //   - tokenID *big.Int
 //   - amount *big.Int
-func (_e *FEVMActions_Expecter) PlusFundGLFVault(ctx interface{}, auth interface{}, tokenID interface{}, amount interface{}) *FEVMActions_PlusFundGLFVault_Call {
-	return &FEVMActions_PlusFundGLFVault_Call{Call: _e.mock.On("PlusFundGLFVault", ctx, auth, tokenID, amount)}
+func (_e *FEVMActions_Expecter) SPPlusFundGLFVault(ctx interface{}, auth interface{}, tokenID interface{}, amount interface{}) *FEVMActions_SPPlusFundGLFVault_Call {
+	return &FEVMActions_SPPlusFundGLFVault_Call{Call: _e.mock.On("SPPlusFundGLFVault", ctx, auth, tokenID, amount)}
 }
 
-func (_c *FEVMActions_PlusFundGLFVault_Call) Run(run func(ctx context.Context, auth *bind.TransactOpts, tokenID *big.Int, amount *big.Int)) *FEVMActions_PlusFundGLFVault_Call {
+func (_c *FEVMActions_SPPlusFundGLFVault_Call) Run(run func(ctx context.Context, auth *bind.TransactOpts, tokenID *big.Int, amount *big.Int)) *FEVMActions_SPPlusFundGLFVault_Call {
 	_c.Call.Run(func(args mock.Arguments) {
 		run(args[0].(context.Context), args[1].(*bind.TransactOpts), args[2].(*big.Int), args[3].(*big.Int))
 	})
 	return _c
 }
 
-func (_c *FEVMActions_PlusFundGLFVault_Call) Return(_a0 *types.Transaction, _a1 error) *FEVMActions_PlusFundGLFVault_Call {
+func (_c *FEVMActions_SPPlusFundGLFVault_Call) Return(_a0 *types.Transaction, _a1 error) *FEVMActions_SPPlusFundGLFVault_Call {
 	_c.Call.Return(_a0, _a1)
 	return _c
 }
 
-func (_c *FEVMActions_PlusFundGLFVault_Call) RunAndReturn(run func(context.Context, *bind.TransactOpts, *big.Int, *big.Int) (*types.Transaction, error)) *FEVMActions_PlusFundGLFVault_Call {
+func (_c *FEVMActions_SPPlusFundGLFVault_Call) RunAndReturn(run func(context.Context, *bind.TransactOpts, *big.Int, *big.Int) (*types.Transaction, error)) *FEVMActions_SPPlusFundGLFVault_Call {
 	_c.Call.Return(run)
 	return _c
 }
 
-// PlusMint provides a mock function with given fields: ctx, auth
-func (_m *FEVMActions) PlusMint(ctx context.Context, auth *bind.TransactOpts) (*types.Transaction, error) {
+// SPPlusMint provides a mock function with given fields: ctx, auth
+func (_m *FEVMActions) SPPlusMint(ctx context.Context, auth *bind.TransactOpts) (*types.Transaction, error) {
 	ret := _m.Called(ctx, auth)
 
 	if len(ret) == 0 {
-		panic("no return value specified for PlusMint")
+		panic("no return value specified for SPPlusMint")
 	}
 
 	var r0 *types.Transaction
@@ -1667,41 +1667,41 @@ func (_m *FEVMActions) PlusMint(ctx context.Context, auth *bind.TransactOpts) (*
 	return r0, r1
 }
 
-// FEVMActions_PlusMint_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'PlusMint'
-type FEVMActions_PlusMint_Call struct {
+// FEVMActions_SPPlusMint_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'SPPlusMint'
+type FEVMActions_SPPlusMint_Call struct {
 	*mock.Call
 }
 
-// PlusMint is a helper method to define mock.On call
+// SPPlusMint is a helper method to define mock.On call
 //   - ctx context.Context
 //   - auth *bind.TransactOpts
-func (_e *FEVMActions_Expecter) PlusMint(ctx interface{}, auth interface{}) *FEVMActions_PlusMint_Call {
-	return &FEVMActions_PlusMint_Call{Call: _e.mock.On("PlusMint", ctx, auth)}
+func (_e *FEVMActions_Expecter) SPPlusMint(ctx interface{}, auth interface{}) *FEVMActions_SPPlusMint_Call {
+	return &FEVMActions_SPPlusMint_Call{Call: _e.mock.On("SPPlusMint", ctx, auth)}
 }
 
-func (_c *FEVMActions_PlusMint_Call) Run(run func(ctx context.Context, auth *bind.TransactOpts)) *FEVMActions_PlusMint_Call {
+func (_c *FEVMActions_SPPlusMint_Call) Run(run func(ctx context.Context, auth *bind.TransactOpts)) *FEVMActions_SPPlusMint_Call {
 	_c.Call.Run(func(args mock.Arguments) {
 		run(args[0].(context.Context), args[1].(*bind.TransactOpts))
 	})
 	return _c
 }
 
-func (_c *FEVMActions_PlusMint_Call) Return(_a0 *types.Transaction, _a1 error) *FEVMActions_PlusMint_Call {
+func (_c *FEVMActions_SPPlusMint_Call) Return(_a0 *types.Transaction, _a1 error) *FEVMActions_SPPlusMint_Call {
 	_c.Call.Return(_a0, _a1)
 	return _c
 }
 
-func (_c *FEVMActions_PlusMint_Call) RunAndReturn(run func(context.Context, *bind.TransactOpts) (*types.Transaction, error)) *FEVMActions_PlusMint_Call {
+func (_c *FEVMActions_SPPlusMint_Call) RunAndReturn(run func(context.Context, *bind.TransactOpts) (*types.Transaction, error)) *FEVMActions_SPPlusMint_Call {
 	_c.Call.Return(run)
 	return _c
 }
 
-// PlusMintActivateAndFund provides a mock function with given fields: ctx, auth, cashBackPercent, beneficiary, tier, amount
-func (_m *FEVMActions) PlusMintActivateAndFund(ctx context.Context, auth *bind.TransactOpts, cashBackPercent *big.Int, beneficiary common.Address, tier uint8, amount *big.Int) (*types.Transaction, error) {
+// SPPlusMintActivateAndFund provides a mock function with given fields: ctx, auth, cashBackPercent, beneficiary, tier, amount
+func (_m *FEVMActions) SPPlusMintActivateAndFund(ctx context.Context, auth *bind.TransactOpts, cashBackPercent *big.Int, beneficiary common.Address, tier uint8, amount *big.Int) (*types.Transaction, error) {
 	ret := _m.Called(ctx, auth, cashBackPercent, beneficiary, tier, amount)
 
 	if len(ret) == 0 {
-		panic("no return value specified for PlusMintActivateAndFund")
+		panic("no return value specified for SPPlusMintActivateAndFund")
 	}
 
 	var r0 *types.Transaction
@@ -1726,45 +1726,45 @@ func (_m *FEVMActions) PlusMintActivateAndFund(ctx context.Context, auth *bind.T
 	return r0, r1
 }
 
-// FEVMActions_PlusMintActivateAndFund_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'PlusMintActivateAndFund'
-type FEVMActions_PlusMintActivateAndFund_Call struct {
+// FEVMActions_SPPlusMintActivateAndFund_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'SPPlusMintActivateAndFund'
+type FEVMActions_SPPlusMintActivateAndFund_Call struct {
 	*mock.Call
 }
 
-// PlusMintActivateAndFund is a helper method to define mock.On call
+// SPPlusMintActivateAndFund is a helper method to define mock.On call
 //   - ctx context.Context
 //   - auth *bind.TransactOpts
 //   - cashBackPercent *big.Int
 //   - beneficiary common.Address
 //   - tier uint8
 //   - amount *big.Int
-func (_e *FEVMActions_Expecter) PlusMintActivateAndFund(ctx interface{}, auth interface{}, cashBackPercent interface{}, beneficiary interface{}, tier interface{}, amount interface{}) *FEVMActions_PlusMintActivateAndFund_Call {
-	return &FEVMActions_PlusMintActivateAndFund_Call{Call: _e.mock.On("PlusMintActivateAndFund", ctx, auth, cashBackPercent, beneficiary, tier, amount)}
+func (_e *FEVMActions_Expecter) SPPlusMintActivateAndFund(ctx interface{}, auth interface{}, cashBackPercent interface{}, beneficiary interface{}, tier interface{}, amount interface{}) *FEVMActions_SPPlusMintActivateAndFund_Call {
+	return &FEVMActions_SPPlusMintActivateAndFund_Call{Call: _e.mock.On("SPPlusMintActivateAndFund", ctx, auth, cashBackPercent, beneficiary, tier, amount)}
 }
 
-func (_c *FEVMActions_PlusMintActivateAndFund_Call) Run(run func(ctx context.Context, auth *bind.TransactOpts, cashBackPercent *big.Int, beneficiary common.Address, tier uint8, amount *big.Int)) *FEVMActions_PlusMintActivateAndFund_Call {
+func (_c *FEVMActions_SPPlusMintActivateAndFund_Call) Run(run func(ctx context.Context, auth *bind.TransactOpts, cashBackPercent *big.Int, beneficiary common.Address, tier uint8, amount *big.Int)) *FEVMActions_SPPlusMintActivateAndFund_Call {
 	_c.Call.Run(func(args mock.Arguments) {
 		run(args[0].(context.Context), args[1].(*bind.TransactOpts), args[2].(*big.Int), args[3].(common.Address), args[4].(uint8), args[5].(*big.Int))
 	})
 	return _c
 }
 
-func (_c *FEVMActions_PlusMintActivateAndFund_Call) Return(_a0 *types.Transaction, _a1 error) *FEVMActions_PlusMintActivateAndFund_Call {
+func (_c *FEVMActions_SPPlusMintActivateAndFund_Call) Return(_a0 *types.Transaction, _a1 error) *FEVMActions_SPPlusMintActivateAndFund_Call {
 	_c.Call.Return(_a0, _a1)
 	return _c
 }
 
-func (_c *FEVMActions_PlusMintActivateAndFund_Call) RunAndReturn(run func(context.Context, *bind.TransactOpts, *big.Int, common.Address, uint8, *big.Int) (*types.Transaction, error)) *FEVMActions_PlusMintActivateAndFund_Call {
+func (_c *FEVMActions_SPPlusMintActivateAndFund_Call) RunAndReturn(run func(context.Context, *bind.TransactOpts, *big.Int, common.Address, uint8, *big.Int) (*types.Transaction, error)) *FEVMActions_SPPlusMintActivateAndFund_Call {
 	_c.Call.Return(run)
 	return _c
 }
 
-// PlusMintAndActivate provides a mock function with given fields: ctx, auth, beneficiary, tier
-func (_m *FEVMActions) PlusMintAndActivate(ctx context.Context, auth *bind.TransactOpts, beneficiary common.Address, tier uint8) (*types.Transaction, error) {
+// SPPlusMintAndActivate provides a mock function with given fields: ctx, auth, beneficiary, tier
+func (_m *FEVMActions) SPPlusMintAndActivate(ctx context.Context, auth *bind.TransactOpts, beneficiary common.Address, tier uint8) (*types.Transaction, error) {
 	ret := _m.Called(ctx, auth, beneficiary, tier)
 
 	if len(ret) == 0 {
-		panic("no return value specified for PlusMintAndActivate")
+		panic("no return value specified for SPPlusMintAndActivate")
 	}
 
 	var r0 *types.Transaction
@@ -1789,43 +1789,43 @@ func (_m *FEVMActions) PlusMintAndActivate(ctx context.Context, auth *bind.Trans
 	return r0, r1
 }
 
-// FEVMActions_PlusMintAndActivate_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'PlusMintAndActivate'
-type FEVMActions_PlusMintAndActivate_Call struct {
+// FEVMActions_SPPlusMintAndActivate_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'SPPlusMintAndActivate'
+type FEVMActions_SPPlusMintAndActivate_Call struct {
 	*mock.Call
 }
 
-// PlusMintAndActivate is a helper method to define mock.On call
+// SPPlusMintAndActivate is a helper method to define mock.On call
 //   - ctx context.Context
 //   - auth *bind.TransactOpts
 //   - beneficiary common.Address
 //   - tier uint8
-func (_e *FEVMActions_Expecter) PlusMintAndActivate(ctx interface{}, auth interface{}, beneficiary interface{}, tier interface{}) *FEVMActions_PlusMintAndActivate_Call {
-	return &FEVMActions_PlusMintAndActivate_Call{Call: _e.mock.On("PlusMintAndActivate", ctx, auth, beneficiary, tier)}
+func (_e *FEVMActions_Expecter) SPPlusMintAndActivate(ctx interface{}, auth interface{}, beneficiary interface{}, tier interface{}) *FEVMActions_SPPlusMintAndActivate_Call {
+	return &FEVMActions_SPPlusMintAndActivate_Call{Call: _e.mock.On("SPPlusMintAndActivate", ctx, auth, beneficiary, tier)}
 }
 
-func (_c *FEVMActions_PlusMintAndActivate_Call) Run(run func(ctx context.Context, auth *bind.TransactOpts, beneficiary common.Address, tier uint8)) *FEVMActions_PlusMintAndActivate_Call {
+func (_c *FEVMActions_SPPlusMintAndActivate_Call) Run(run func(ctx context.Context, auth *bind.TransactOpts, beneficiary common.Address, tier uint8)) *FEVMActions_SPPlusMintAndActivate_Call {
 	_c.Call.Run(func(args mock.Arguments) {
 		run(args[0].(context.Context), args[1].(*bind.TransactOpts), args[2].(common.Address), args[3].(uint8))
 	})
 	return _c
 }
 
-func (_c *FEVMActions_PlusMintAndActivate_Call) Return(_a0 *types.Transaction, _a1 error) *FEVMActions_PlusMintAndActivate_Call {
+func (_c *FEVMActions_SPPlusMintAndActivate_Call) Return(_a0 *types.Transaction, _a1 error) *FEVMActions_SPPlusMintAndActivate_Call {
 	_c.Call.Return(_a0, _a1)
 	return _c
 }
 
-func (_c *FEVMActions_PlusMintAndActivate_Call) RunAndReturn(run func(context.Context, *bind.TransactOpts, common.Address, uint8) (*types.Transaction, error)) *FEVMActions_PlusMintAndActivate_Call {
+func (_c *FEVMActions_SPPlusMintAndActivate_Call) RunAndReturn(run func(context.Context, *bind.TransactOpts, common.Address, uint8) (*types.Transaction, error)) *FEVMActions_SPPlusMintAndActivate_Call {
 	_c.Call.Return(run)
 	return _c
 }
 
-// PlusSetPersonalCashBackPercent provides a mock function with given fields: ctx, auth, tokenID, cashBackPercent
-func (_m *FEVMActions) PlusSetPersonalCashBackPercent(ctx context.Context, auth *bind.TransactOpts, tokenID *big.Int, cashBackPercent *big.Int) (*types.Transaction, error) {
+// SPPlusSetPersonalCashBackPercent provides a mock function with given fields: ctx, auth, tokenID, cashBackPercent
+func (_m *FEVMActions) SPPlusSetPersonalCashBackPercent(ctx context.Context, auth *bind.TransactOpts, tokenID *big.Int, cashBackPercent *big.Int) (*types.Transaction, error) {
 	ret := _m.Called(ctx, auth, tokenID, cashBackPercent)
 
 	if len(ret) == 0 {
-		panic("no return value specified for PlusSetPersonalCashBackPercent")
+		panic("no return value specified for SPPlusSetPersonalCashBackPercent")
 	}
 
 	var r0 *types.Transaction
@@ -1850,43 +1850,43 @@ func (_m *FEVMActions) PlusSetPersonalCashBackPercent(ctx context.Context, auth 
 	return r0, r1
 }
 
-// FEVMActions_PlusSetPersonalCashBackPercent_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'PlusSetPersonalCashBackPercent'
-type FEVMActions_PlusSetPersonalCashBackPercent_Call struct {
+// FEVMActions_SPPlusSetPersonalCashBackPercent_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'SPPlusSetPersonalCashBackPercent'
+type FEVMActions_SPPlusSetPersonalCashBackPercent_Call struct {
 	*mock.Call
 }
 
-// PlusSetPersonalCashBackPercent is a helper method to define mock.On call
+// SPPlusSetPersonalCashBackPercent is a helper method to define mock.On call
 //   - ctx context.Context
 //   - auth *bind.TransactOpts
 //   - tokenID *big.Int
 //   - cashBackPercent *big.Int
-func (_e *FEVMActions_Expecter) PlusSetPersonalCashBackPercent(ctx interface{}, auth interface{}, tokenID interface{}, cashBackPercent interface{}) *FEVMActions_PlusSetPersonalCashBackPercent_Call {
-	return &FEVMActions_PlusSetPersonalCashBackPercent_Call{Call: _e.mock.On("PlusSetPersonalCashBackPercent", ctx, auth, tokenID, cashBackPercent)}
+func (_e *FEVMActions_Expecter) SPPlusSetPersonalCashBackPercent(ctx interface{}, auth interface{}, tokenID interface{}, cashBackPercent interface{}) *FEVMActions_SPPlusSetPersonalCashBackPercent_Call {
+	return &FEVMActions_SPPlusSetPersonalCashBackPercent_Call{Call: _e.mock.On("SPPlusSetPersonalCashBackPercent", ctx, auth, tokenID, cashBackPercent)}
 }
 
-func (_c *FEVMActions_PlusSetPersonalCashBackPercent_Call) Run(run func(ctx context.Context, auth *bind.TransactOpts, tokenID *big.Int, cashBackPercent *big.Int)) *FEVMActions_PlusSetPersonalCashBackPercent_Call {
+func (_c *FEVMActions_SPPlusSetPersonalCashBackPercent_Call) Run(run func(ctx context.Context, auth *bind.TransactOpts, tokenID *big.Int, cashBackPercent *big.Int)) *FEVMActions_SPPlusSetPersonalCashBackPercent_Call {
 	_c.Call.Run(func(args mock.Arguments) {
 		run(args[0].(context.Context), args[1].(*bind.TransactOpts), args[2].(*big.Int), args[3].(*big.Int))
 	})
 	return _c
 }
 
-func (_c *FEVMActions_PlusSetPersonalCashBackPercent_Call) Return(_a0 *types.Transaction, _a1 error) *FEVMActions_PlusSetPersonalCashBackPercent_Call {
+func (_c *FEVMActions_SPPlusSetPersonalCashBackPercent_Call) Return(_a0 *types.Transaction, _a1 error) *FEVMActions_SPPlusSetPersonalCashBackPercent_Call {
 	_c.Call.Return(_a0, _a1)
 	return _c
 }
 
-func (_c *FEVMActions_PlusSetPersonalCashBackPercent_Call) RunAndReturn(run func(context.Context, *bind.TransactOpts, *big.Int, *big.Int) (*types.Transaction, error)) *FEVMActions_PlusSetPersonalCashBackPercent_Call {
+func (_c *FEVMActions_SPPlusSetPersonalCashBackPercent_Call) RunAndReturn(run func(context.Context, *bind.TransactOpts, *big.Int, *big.Int) (*types.Transaction, error)) *FEVMActions_SPPlusSetPersonalCashBackPercent_Call {
 	_c.Call.Return(run)
 	return _c
 }
 
-// PlusUpgrade provides a mock function with given fields: ctx, auth, tokenID, tier
-func (_m *FEVMActions) PlusUpgrade(ctx context.Context, auth *bind.TransactOpts, tokenID *big.Int, tier uint8) (*types.Transaction, error) {
+// SPPlusUpgrade provides a mock function with given fields: ctx, auth, tokenID, tier
+func (_m *FEVMActions) SPPlusUpgrade(ctx context.Context, auth *bind.TransactOpts, tokenID *big.Int, tier uint8) (*types.Transaction, error) {
 	ret := _m.Called(ctx, auth, tokenID, tier)
 
 	if len(ret) == 0 {
-		panic("no return value specified for PlusUpgrade")
+		panic("no return value specified for SPPlusUpgrade")
 	}
 
 	var r0 *types.Transaction
@@ -1911,43 +1911,43 @@ func (_m *FEVMActions) PlusUpgrade(ctx context.Context, auth *bind.TransactOpts,
 	return r0, r1
 }
 
-// FEVMActions_PlusUpgrade_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'PlusUpgrade'
-type FEVMActions_PlusUpgrade_Call struct {
+// FEVMActions_SPPlusUpgrade_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'SPPlusUpgrade'
+type FEVMActions_SPPlusUpgrade_Call struct {
 	*mock.Call
 }
 
-// PlusUpgrade is a helper method to define mock.On call
+// SPPlusUpgrade is a helper method to define mock.On call
 //   - ctx context.Context
 //   - auth *bind.TransactOpts
 //   - tokenID *big.Int
 //   - tier uint8
-func (_e *FEVMActions_Expecter) PlusUpgrade(ctx interface{}, auth interface{}, tokenID interface{}, tier interface{}) *FEVMActions_PlusUpgrade_Call {
-	return &FEVMActions_PlusUpgrade_Call{Call: _e.mock.On("PlusUpgrade", ctx, auth, tokenID, tier)}
+func (_e *FEVMActions_Expecter) SPPlusUpgrade(ctx interface{}, auth interface{}, tokenID interface{}, tier interface{}) *FEVMActions_SPPlusUpgrade_Call {
+	return &FEVMActions_SPPlusUpgrade_Call{Call: _e.mock.On("SPPlusUpgrade", ctx, auth, tokenID, tier)}
 }
 
-func (_c *FEVMActions_PlusUpgrade_Call) Run(run func(ctx context.Context, auth *bind.TransactOpts, tokenID *big.Int, tier uint8)) *FEVMActions_PlusUpgrade_Call {
+func (_c *FEVMActions_SPPlusUpgrade_Call) Run(run func(ctx context.Context, auth *bind.TransactOpts, tokenID *big.Int, tier uint8)) *FEVMActions_SPPlusUpgrade_Call {
 	_c.Call.Run(func(args mock.Arguments) {
 		run(args[0].(context.Context), args[1].(*bind.TransactOpts), args[2].(*big.Int), args[3].(uint8))
 	})
 	return _c
 }
 
-func (_c *FEVMActions_PlusUpgrade_Call) Return(_a0 *types.Transaction, _a1 error) *FEVMActions_PlusUpgrade_Call {
+func (_c *FEVMActions_SPPlusUpgrade_Call) Return(_a0 *types.Transaction, _a1 error) *FEVMActions_SPPlusUpgrade_Call {
 	_c.Call.Return(_a0, _a1)
 	return _c
 }
 
-func (_c *FEVMActions_PlusUpgrade_Call) RunAndReturn(run func(context.Context, *bind.TransactOpts, *big.Int, uint8) (*types.Transaction, error)) *FEVMActions_PlusUpgrade_Call {
+func (_c *FEVMActions_SPPlusUpgrade_Call) RunAndReturn(run func(context.Context, *bind.TransactOpts, *big.Int, uint8) (*types.Transaction, error)) *FEVMActions_SPPlusUpgrade_Call {
 	_c.Call.Return(run)
 	return _c
 }
 
-// PlusWithdrawExtraLockedFunds provides a mock function with given fields: ctx, auth, tokenID
-func (_m *FEVMActions) PlusWithdrawExtraLockedFunds(ctx context.Context, auth *bind.TransactOpts, tokenID *big.Int) (*types.Transaction, error) {
+// SPPlusWithdrawExtraLockedFunds provides a mock function with given fields: ctx, auth, tokenID
+func (_m *FEVMActions) SPPlusWithdrawExtraLockedFunds(ctx context.Context, auth *bind.TransactOpts, tokenID *big.Int) (*types.Transaction, error) {
 	ret := _m.Called(ctx, auth, tokenID)
 
 	if len(ret) == 0 {
-		panic("no return value specified for PlusWithdrawExtraLockedFunds")
+		panic("no return value specified for SPPlusWithdrawExtraLockedFunds")
 	}
 
 	var r0 *types.Transaction
@@ -1972,32 +1972,32 @@ func (_m *FEVMActions) PlusWithdrawExtraLockedFunds(ctx context.Context, auth *b
 	return r0, r1
 }
 
-// FEVMActions_PlusWithdrawExtraLockedFunds_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'PlusWithdrawExtraLockedFunds'
-type FEVMActions_PlusWithdrawExtraLockedFunds_Call struct {
+// FEVMActions_SPPlusWithdrawExtraLockedFunds_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'SPPlusWithdrawExtraLockedFunds'
+type FEVMActions_SPPlusWithdrawExtraLockedFunds_Call struct {
 	*mock.Call
 }
 
-// PlusWithdrawExtraLockedFunds is a helper method to define mock.On call
+// SPPlusWithdrawExtraLockedFunds is a helper method to define mock.On call
 //   - ctx context.Context
 //   - auth *bind.TransactOpts
 //   - tokenID *big.Int
-func (_e *FEVMActions_Expecter) PlusWithdrawExtraLockedFunds(ctx interface{}, auth interface{}, tokenID interface{}) *FEVMActions_PlusWithdrawExtraLockedFunds_Call {
-	return &FEVMActions_PlusWithdrawExtraLockedFunds_Call{Call: _e.mock.On("PlusWithdrawExtraLockedFunds", ctx, auth, tokenID)}
+func (_e *FEVMActions_Expecter) SPPlusWithdrawExtraLockedFunds(ctx interface{}, auth interface{}, tokenID interface{}) *FEVMActions_SPPlusWithdrawExtraLockedFunds_Call {
+	return &FEVMActions_SPPlusWithdrawExtraLockedFunds_Call{Call: _e.mock.On("SPPlusWithdrawExtraLockedFunds", ctx, auth, tokenID)}
 }
 
-func (_c *FEVMActions_PlusWithdrawExtraLockedFunds_Call) Run(run func(ctx context.Context, auth *bind.TransactOpts, tokenID *big.Int)) *FEVMActions_PlusWithdrawExtraLockedFunds_Call {
+func (_c *FEVMActions_SPPlusWithdrawExtraLockedFunds_Call) Run(run func(ctx context.Context, auth *bind.TransactOpts, tokenID *big.Int)) *FEVMActions_SPPlusWithdrawExtraLockedFunds_Call {
 	_c.Call.Run(func(args mock.Arguments) {
 		run(args[0].(context.Context), args[1].(*bind.TransactOpts), args[2].(*big.Int))
 	})
 	return _c
 }
 
-func (_c *FEVMActions_PlusWithdrawExtraLockedFunds_Call) Return(_a0 *types.Transaction, _a1 error) *FEVMActions_PlusWithdrawExtraLockedFunds_Call {
+func (_c *FEVMActions_SPPlusWithdrawExtraLockedFunds_Call) Return(_a0 *types.Transaction, _a1 error) *FEVMActions_SPPlusWithdrawExtraLockedFunds_Call {
 	_c.Call.Return(_a0, _a1)
 	return _c
 }
 
-func (_c *FEVMActions_PlusWithdrawExtraLockedFunds_Call) RunAndReturn(run func(context.Context, *bind.TransactOpts, *big.Int) (*types.Transaction, error)) *FEVMActions_PlusWithdrawExtraLockedFunds_Call {
+func (_c *FEVMActions_SPPlusWithdrawExtraLockedFunds_Call) RunAndReturn(run func(context.Context, *bind.TransactOpts, *big.Int) (*types.Transaction, error)) *FEVMActions_SPPlusWithdrawExtraLockedFunds_Call {
 	_c.Call.Return(run)
 	return _c
 }

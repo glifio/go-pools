@@ -20,12 +20,12 @@ func (q *fevmQueries) PlusTokenIDFromRcpt(ctx context.Context, receipt *types.Re
 	}
 	defer client.Close()
 
-	plusABI, err := abigen.PlusMetaData.GetAbi()
+	plusABI, err := abigen.SPPlusMetaData.GetAbi()
 	if err != nil {
 		return nil, err
 	}
 
-	plusFilterer, err := abigen.NewPlusFilterer(q.plus, client)
+	plusFilterer, err := abigen.NewSPPlusFilterer(q.plus, client)
 	if err != nil {
 		return nil, err
 	}
@@ -50,14 +50,14 @@ func (q *fevmQueries) PlusTokenIDFromRcpt(ctx context.Context, receipt *types.Re
 	return tokenID, nil
 }
 
-func (q *fevmQueries) PlusInfo(ctx context.Context, tokenID *big.Int, blockNumber *big.Int) (*poolstypes.PlusInfo, error) {
+func (q *fevmQueries) PlusInfo(ctx context.Context, tokenID *big.Int, blockNumber *big.Int) (*poolstypes.SPPlusInfo, error) {
 	client, err := q.extern.ConnectEthClient()
 	if err != nil {
 		return nil, err
 	}
 	defer client.Close()
 
-	plus, err := abigen.NewPlusCaller(q.plus, client)
+	plus, err := abigen.NewSPPlusCaller(q.plus, client)
 	if err != nil {
 		return nil, err
 	}
@@ -109,7 +109,7 @@ func (q *fevmQueries) PlusInfo(ctx context.Context, tokenID *big.Int, blockNumbe
 		return nil, err
 	}
 
-	return &poolstypes.PlusInfo{
+	return &poolstypes.SPPlusInfo{
 		AgentID:                      agentID,
 		FilCashbackEarned:            filCashbackEarned,
 		GLFVaultBalance:              glfVaultBalance,
@@ -131,7 +131,7 @@ func (q *fevmQueries) PlusTierInfo(ctx context.Context, blockNumber *big.Int) ([
 	}
 	defer client.Close()
 
-	plus, err := abigen.NewPlusCaller(q.plus, client)
+	plus, err := abigen.NewSPPlusCaller(q.plus, client)
 	if err != nil {
 		return tiers, err
 	}
@@ -161,7 +161,7 @@ func (q *fevmQueries) PlusTierFromAgentAddress(ctx context.Context, agentAddr co
 		return 0, err
 	}
 
-	plus, err := abigen.NewPlusCaller(q.plus, client)
+	plus, err := abigen.NewSPPlusCaller(q.plus, client)
 	if err != nil {
 		return 0, err
 	}
@@ -195,7 +195,7 @@ func (q *fevmQueries) PlusMintPrice(ctx context.Context, blockNumber *big.Int) (
 	}
 	defer client.Close()
 
-	plus, err := abigen.NewPlusCaller(q.plus, client)
+	plus, err := abigen.NewSPPlusCaller(q.plus, client)
 	if err != nil {
 		return nil, err
 	}
@@ -212,7 +212,7 @@ func (q *fevmQueries) PlusTierSwitchPenaltyInfo(ctx context.Context, blockNumber
 	}
 	defer client.Close()
 
-	plus, err := abigen.NewPlusCaller(q.plus, client)
+	plus, err := abigen.NewSPPlusCaller(q.plus, client)
 	if err != nil {
 		return nil, nil, err
 	}
