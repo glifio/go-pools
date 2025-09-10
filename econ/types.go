@@ -66,7 +66,9 @@ type AgentMarginJSON struct {
 	Principal              string  `json:"principal"`
 	Interest               string  `json:"interest"`
 	DTL                    float64 `json:"dtl"`
+	MaxDTL                 float64 `json:"maxDTL"`
 	LeverageRatio          float64 `json:"leverageRatio"`
+	Tier                   uint8   `json:"tier"`
 	BorrowLimit            string  `json:"borrowLimit"`
 	BorrowAndWithdrawLimit string  `json:"borrowAndWithdrawLimit"`
 	WithdrawLimit          string  `json:"withdrawLimit"`

@@ -152,7 +152,7 @@ func EmptyAgentFi() *AgentFi {
 	}
 }
 
-func (mfi *MinerFi) MaxBorrowAndSeal() *big.Int {
+func (mfi *MinerFi) MaxBorrowAndSeal(maxDTL *big.Int) *big.Int {
 	lv := mfi.LiquidationValue()
 
 	if lv.Cmp(big.NewInt(0)) == 0 {
@@ -162,7 +162,7 @@ func (mfi *MinerFi) MaxBorrowAndSeal() *big.Int {
 	maxBorrowAndSeal := big.NewInt(0).Sub(
 		big.NewInt(0).Div(
 			big.NewInt(0).Mul(lv, big.NewInt(1e18)),
-			big.NewInt(0).Sub(constants.WAD, constants.MAX_BORROW_DTL),
+			big.NewInt(0).Sub(constants.WAD, maxDTL),
 		),
 		lv,
 	)
@@ -170,7 +170,7 @@ func (mfi *MinerFi) MaxBorrowAndSeal() *big.Int {
 	return maxBorrowAndSeal
 }
 
-func (mfi *MinerFi) MaxBorrowAndWithdraw() *big.Int {
+func (mfi *MinerFi) MaxBorrowAndWithdraw(maxDTL *big.Int) *big.Int {
 	lv := mfi.LiquidationValue()
 
 	if lv.Cmp(big.NewInt(0)) == 0 {
@@ -182,7 +182,7 @@ func (mfi *MinerFi) MaxBorrowAndWithdraw() *big.Int {
 		big.NewInt(0).Div(
 			big.NewInt(0).Mul(
 				lv,
-				big.NewInt(0).Sub(constants.WAD, constants.MAX_BORROW_DTL),
+				big.NewInt(0).Sub(constants.WAD, maxDTL),
 			),
 			big.NewInt(1e18),
 		),
@@ -209,7 +209,7 @@ func (bfi *BaseFi) RecoveryRate() *big.Float {
 }
 
 // MaxBorrowAndSeal = margin / (1 - max borrow DTL) - margin
-func (afi *AgentFi) MaxBorrowAndSeal() *big.Int {
+func (afi *AgentFi) MaxBorrowAndSeal(maxDTL *big.Int) *big.Int {
 	margin := afi.Margin()
 
 	if margin.Cmp(big.NewInt(0)) == 0 {
@@ -219,7 +219,7 @@ func (afi *AgentFi) MaxBorrowAndSeal() *big.Int {
 	maxBorrowAndSeal := big.NewInt(0).Sub(
 		big.NewInt(0).Div(
 			big.NewInt(0).Mul(margin, big.NewInt(1e18)),
-			big.NewInt(0).Sub(constants.WAD, constants.MAX_BORROW_DTL),
+			big.NewInt(0).Sub(constants.WAD, maxDTL),
 		),
 		margin,
 	)
@@ -228,7 +228,7 @@ func (afi *AgentFi) MaxBorrowAndSeal() *big.Int {
 }
 
 // MaxBorrowAndWithdraw = margin - lv * (1 - max borrow DTL)
-func (afi *AgentFi) MaxBorrowAndWithdraw() *big.Int {
+func (afi *AgentFi) MaxBorrowAndWithdraw(maxDTL *big.Int) *big.Int {
 	margin := afi.Margin()
 
 	if margin.Cmp(big.NewInt(0)) == 0 {
@@ -240,7 +240,7 @@ func (afi *AgentFi) MaxBorrowAndWithdraw() *big.Int {
 		big.NewInt(0).Div(
 			big.NewInt(0).Mul(
 				afi.LiquidationValue(),
-				big.NewInt(0).Sub(constants.WAD, constants.MAX_BORROW_DTL),
+				big.NewInt(0).Sub(constants.WAD, maxDTL),
 			),
 			big.NewInt(1e18), // div wad
 		),
@@ -249,16 +249,16 @@ func (afi *AgentFi) MaxBorrowAndWithdraw() *big.Int {
 	return maxBorrowAndWithdraw
 }
 
-func (afi *AgentFi) BorrowLimit() *big.Int {
-	return new(big.Int).Sub(afi.MaxBorrowAndSeal(), afi.Debt())
+func (afi *AgentFi) BorrowLimit(maxDTL *big.Int) *big.Int {
+	return new(big.Int).Sub(afi.MaxBorrowAndSeal(maxDTL), afi.Debt())
 }
 
-func (afi *AgentFi) WithdrawLimit() *big.Int {
+func (afi *AgentFi) WithdrawLimit(maxDTL *big.Int) *big.Int {
 	withdrawLimit := big.NewInt(0).Sub(
 		afi.LiquidationValue(),
 		big.NewInt(0).Div(
 			big.NewInt(0).Mul(afi.Debt(), big.NewInt(1e18)),
-			constants.MAX_BORROW_DTL,
+			maxDTL,
 		),
 	)
 
