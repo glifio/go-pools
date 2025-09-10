@@ -152,7 +152,7 @@ func EmptyAgentFi() *AgentFi {
 	}
 }
 
-func (mfi *MinerFi) MaxBorrowAndSeal() *big.Int {
+func (mfi *MinerFi) MaxBorrowAndSeal(maxDTL *big.Int) *big.Int {
 	lv := mfi.LiquidationValue()
 
 	if lv.Cmp(big.NewInt(0)) == 0 {
@@ -162,7 +162,7 @@ func (mfi *MinerFi) MaxBorrowAndSeal() *big.Int {
 	maxBorrowAndSeal := big.NewInt(0).Sub(
 		big.NewInt(0).Div(
 			big.NewInt(0).Mul(lv, big.NewInt(1e18)),
-			big.NewInt(0).Sub(constants.WAD, constants.MAX_BORROW_DTL),
+			big.NewInt(0).Sub(constants.WAD, maxDTL),
 		),
 		lv,
 	)
@@ -170,7 +170,7 @@ func (mfi *MinerFi) MaxBorrowAndSeal() *big.Int {
 	return maxBorrowAndSeal
 }
 
-func (mfi *MinerFi) MaxBorrowAndWithdraw() *big.Int {
+func (mfi *MinerFi) MaxBorrowAndWithdraw(maxDTL *big.Int) *big.Int {
 	lv := mfi.LiquidationValue()
 
 	if lv.Cmp(big.NewInt(0)) == 0 {
@@ -182,7 +182,7 @@ func (mfi *MinerFi) MaxBorrowAndWithdraw() *big.Int {
 		big.NewInt(0).Div(
 			big.NewInt(0).Mul(
 				lv,
-				big.NewInt(0).Sub(constants.WAD, constants.MAX_BORROW_DTL),
+				big.NewInt(0).Sub(constants.WAD, maxDTL),
 			),
 			big.NewInt(1e18),
 		),
