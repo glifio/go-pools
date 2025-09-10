@@ -16,7 +16,7 @@ import (
 	"github.com/glifio/go-pools/util"
 )
 
-func (a *fevmActions) PlusMint(ctx context.Context, auth *bind.TransactOpts) (*types.Transaction, error) {
+func (a *fevmActions) SPPlusMint(ctx context.Context, auth *bind.TransactOpts) (*types.Transaction, error) {
 	client, err := a.extern.ConnectEthClient()
 	if err != nil {
 		return nil, err
@@ -33,7 +33,7 @@ func (a *fevmActions) PlusMint(ctx context.Context, auth *bind.TransactOpts) (*t
 	return util.TxPostProcess(tx, err)
 }
 
-func (a *fevmActions) PlusMintAndActivate(ctx context.Context, auth *bind.TransactOpts, beneficiary common.Address, tier uint8) (*types.Transaction, error) {
+func (a *fevmActions) SPPlusMintAndActivate(ctx context.Context, auth *bind.TransactOpts, beneficiary common.Address, tier uint8) (*types.Transaction, error) {
 	client, err := a.extern.ConnectEthClient()
 	if err != nil {
 		return nil, err
@@ -50,7 +50,7 @@ func (a *fevmActions) PlusMintAndActivate(ctx context.Context, auth *bind.Transa
 	return util.TxPostProcess(tx, err)
 }
 
-func (a *fevmActions) PlusActivate(ctx context.Context, auth *bind.TransactOpts, beneficiary common.Address, tokenID *big.Int, tier uint8) (*types.Transaction, error) {
+func (a *fevmActions) SPPlusActivate(ctx context.Context, auth *bind.TransactOpts, beneficiary common.Address, tokenID *big.Int, tier uint8) (*types.Transaction, error) {
 	client, err := a.extern.ConnectEthClient()
 	if err != nil {
 		return nil, err
@@ -67,7 +67,7 @@ func (a *fevmActions) PlusActivate(ctx context.Context, auth *bind.TransactOpts,
 	return util.TxPostProcess(tx, err)
 }
 
-func (a *fevmActions) PlusMintActivateAndFund(ctx context.Context, auth *bind.TransactOpts, cashBackPercent *big.Int, beneficiary common.Address, tier uint8, amount *big.Int) (*types.Transaction, error) {
+func (a *fevmActions) SPPlusMintActivateAndFund(ctx context.Context, auth *bind.TransactOpts, cashBackPercent *big.Int, beneficiary common.Address, tier uint8, amount *big.Int) (*types.Transaction, error) {
 	client, err := a.extern.ConnectEthClient()
 	if err != nil {
 		return nil, err
@@ -84,7 +84,7 @@ func (a *fevmActions) PlusMintActivateAndFund(ctx context.Context, auth *bind.Tr
 	return util.TxPostProcess(tx, err)
 }
 
-func (a *fevmActions) PlusSetPersonalCashBackPercent(ctx context.Context, auth *bind.TransactOpts, tokenID *big.Int, cashBackPercent *big.Int) (*types.Transaction, error) {
+func (a *fevmActions) SPPlusSetPersonalCashBackPercent(ctx context.Context, auth *bind.TransactOpts, tokenID *big.Int, cashBackPercent *big.Int) (*types.Transaction, error) {
 	client, err := a.extern.ConnectEthClient()
 	if err != nil {
 		return nil, err
@@ -101,7 +101,7 @@ func (a *fevmActions) PlusSetPersonalCashBackPercent(ctx context.Context, auth *
 	return util.TxPostProcess(tx, err)
 }
 
-func (a *fevmActions) PlusFundGLFVault(ctx context.Context, auth *bind.TransactOpts, tokenID *big.Int, amount *big.Int) (*types.Transaction, error) {
+func (a *fevmActions) SPPlusFundGLFVault(ctx context.Context, auth *bind.TransactOpts, tokenID *big.Int, amount *big.Int) (*types.Transaction, error) {
 	client, err := a.extern.ConnectEthClient()
 	if err != nil {
 		return nil, err
@@ -118,7 +118,7 @@ func (a *fevmActions) PlusFundGLFVault(ctx context.Context, auth *bind.TransactO
 	return util.TxPostProcess(tx, err)
 }
 
-func (a *fevmActions) PlusClaimCashBack(ctx context.Context, auth *bind.TransactOpts, tokenID *big.Int, receiver common.Address) (*types.Transaction, error) {
+func (a *fevmActions) SPPlusClaimCashBack(ctx context.Context, auth *bind.TransactOpts, tokenID *big.Int, receiver common.Address) (*types.Transaction, error) {
 	client, err := a.extern.ConnectEthClient()
 	if err != nil {
 		return nil, err
@@ -135,7 +135,7 @@ func (a *fevmActions) PlusClaimCashBack(ctx context.Context, auth *bind.Transact
 	return util.TxPostProcess(tx, err)
 }
 
-func (a *fevmActions) PlusUpgrade(ctx context.Context, auth *bind.TransactOpts, tokenID *big.Int, tier uint8) (*types.Transaction, error) {
+func (a *fevmActions) SPPlusUpgrade(ctx context.Context, auth *bind.TransactOpts, tokenID *big.Int, tier uint8) (*types.Transaction, error) {
 	client, err := a.extern.ConnectEthClient()
 	if err != nil {
 		return nil, err
@@ -152,7 +152,7 @@ func (a *fevmActions) PlusUpgrade(ctx context.Context, auth *bind.TransactOpts, 
 	return util.TxPostProcess(tx, err)
 }
 
-func (a *fevmActions) PlusDowngrade(ctx context.Context, auth *bind.TransactOpts, tokenID *big.Int, tier uint8, agentAddr common.Address, requesterKey *ecdsa.PrivateKey) (*types.Transaction, error) {
+func (a *fevmActions) SPPlusDowngrade(ctx context.Context, auth *bind.TransactOpts, tokenID *big.Int, tier uint8, agentAddr common.Address, requesterKey *ecdsa.PrivateKey) (*types.Transaction, error) {
 	client, err := a.extern.ConnectEthClient()
 	if err != nil {
 		return nil, err
@@ -185,7 +185,7 @@ func (a *fevmActions) PlusDowngrade(ctx context.Context, auth *bind.TransactOpts
 	return util.TxPostProcess(tx, err)
 }
 
-func (a *fevmActions) PlusWithdrawExtraLockedFunds(ctx context.Context, auth *bind.TransactOpts, tokenID *big.Int) (*types.Transaction, error) {
+func (a *fevmActions) SPPlusWithdrawExtraLockedFunds(ctx context.Context, auth *bind.TransactOpts, tokenID *big.Int) (*types.Transaction, error) {
 	client, err := a.extern.ConnectEthClient()
 	if err != nil {
 		return nil, err

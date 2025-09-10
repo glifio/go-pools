@@ -13,7 +13,7 @@ import (
 	poolstypes "github.com/glifio/go-pools/types"
 )
 
-func (q *fevmQueries) PlusTokenIDFromRcpt(ctx context.Context, receipt *types.Receipt) (*big.Int, error) {
+func (q *fevmQueries) SPPlusTokenIDFromRcpt(ctx context.Context, receipt *types.Receipt) (*big.Int, error) {
 	client, err := q.extern.ConnectEthClient()
 	if err != nil {
 		return nil, err
@@ -50,7 +50,7 @@ func (q *fevmQueries) PlusTokenIDFromRcpt(ctx context.Context, receipt *types.Re
 	return tokenID, nil
 }
 
-func (q *fevmQueries) PlusInfo(ctx context.Context, tokenID *big.Int, blockNumber *big.Int) (*poolstypes.SPPlusInfo, error) {
+func (q *fevmQueries) SPPlusInfo(ctx context.Context, tokenID *big.Int, blockNumber *big.Int) (*poolstypes.SPPlusInfo, error) {
 	client, err := q.extern.ConnectEthClient()
 	if err != nil {
 		return nil, err
@@ -122,7 +122,7 @@ func (q *fevmQueries) PlusInfo(ctx context.Context, tokenID *big.Int, blockNumbe
 	}, nil
 }
 
-func (q *fevmQueries) PlusTierInfo(ctx context.Context, blockNumber *big.Int) ([]abigen.TierInfo, error) {
+func (q *fevmQueries) SPPlusTierInfo(ctx context.Context, blockNumber *big.Int) ([]abigen.TierInfo, error) {
 	tiers := make([]abigen.TierInfo, 0, constants.SP_PLUS_TIERS)
 
 	client, err := q.extern.ConnectEthClient()
@@ -149,7 +149,7 @@ func (q *fevmQueries) PlusTierInfo(ctx context.Context, blockNumber *big.Int) ([
 	return tiers, nil
 }
 
-func (q *fevmQueries) PlusTierFromAgentAddress(ctx context.Context, agentAddr common.Address, blockNumber *big.Int) (uint8, error) {
+func (q *fevmQueries) SPPlusTierFromAgentAddress(ctx context.Context, agentAddr common.Address, blockNumber *big.Int) (uint8, error) {
 	client, err := q.extern.ConnectEthClient()
 	if err != nil {
 		return 0, err
@@ -188,7 +188,7 @@ func (q *fevmQueries) PlusTierFromAgentAddress(ctx context.Context, agentAddr co
 	return plus.TokenIdToTier(opts, tokenID)
 }
 
-func (q *fevmQueries) PlusMintPrice(ctx context.Context, blockNumber *big.Int) (*big.Int, error) {
+func (q *fevmQueries) SPPlusMintPrice(ctx context.Context, blockNumber *big.Int) (*big.Int, error) {
 	client, err := q.extern.ConnectEthClient()
 	if err != nil {
 		return nil, err
@@ -205,7 +205,7 @@ func (q *fevmQueries) PlusMintPrice(ctx context.Context, blockNumber *big.Int) (
 	return plus.MintPrice(opts)
 }
 
-func (q *fevmQueries) PlusTierSwitchPenaltyInfo(ctx context.Context, blockNumber *big.Int) (penaltyWindow *big.Int, penaltyFee *big.Int, err error) {
+func (q *fevmQueries) SPPlusTierSwitchPenaltyInfo(ctx context.Context, blockNumber *big.Int) (penaltyWindow *big.Int, penaltyFee *big.Int, err error) {
 	client, err := q.extern.ConnectEthClient()
 	if err != nil {
 		return nil, nil, err
