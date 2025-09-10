@@ -23,7 +23,7 @@ func (a *fevmActions) PlusMint(ctx context.Context, auth *bind.TransactOpts) (*t
 	}
 	defer client.Close()
 
-	plus, err := abigen.NewSPPlusTransactor(a.queries.Plus(), client)
+	plus, err := abigen.NewSPPlusTransactor(a.queries.SPPlus(), client)
 	if err != nil {
 		return nil, err
 	}
@@ -40,7 +40,7 @@ func (a *fevmActions) PlusMintAndActivate(ctx context.Context, auth *bind.Transa
 	}
 	defer client.Close()
 
-	plus, err := abigen.NewSPPlusTransactor(a.queries.Plus(), client)
+	plus, err := abigen.NewSPPlusTransactor(a.queries.SPPlus(), client)
 	if err != nil {
 		return nil, err
 	}
@@ -57,7 +57,7 @@ func (a *fevmActions) PlusActivate(ctx context.Context, auth *bind.TransactOpts,
 	}
 	defer client.Close()
 
-	plus, err := abigen.NewSPPlusTransactor(a.queries.Plus(), client)
+	plus, err := abigen.NewSPPlusTransactor(a.queries.SPPlus(), client)
 	if err != nil {
 		return nil, err
 	}
@@ -74,7 +74,7 @@ func (a *fevmActions) PlusMintActivateAndFund(ctx context.Context, auth *bind.Tr
 	}
 	defer client.Close()
 
-	plus, err := abigen.NewSPPlusTransactor(a.queries.Plus(), client)
+	plus, err := abigen.NewSPPlusTransactor(a.queries.SPPlus(), client)
 	if err != nil {
 		return nil, err
 	}
@@ -91,7 +91,7 @@ func (a *fevmActions) PlusSetPersonalCashBackPercent(ctx context.Context, auth *
 	}
 	defer client.Close()
 
-	plus, err := abigen.NewSPPlusTransactor(a.queries.Plus(), client)
+	plus, err := abigen.NewSPPlusTransactor(a.queries.SPPlus(), client)
 	if err != nil {
 		return nil, err
 	}
@@ -108,7 +108,7 @@ func (a *fevmActions) PlusFundGLFVault(ctx context.Context, auth *bind.TransactO
 	}
 	defer client.Close()
 
-	plus, err := abigen.NewSPPlusTransactor(a.queries.Plus(), client)
+	plus, err := abigen.NewSPPlusTransactor(a.queries.SPPlus(), client)
 	if err != nil {
 		return nil, err
 	}
@@ -125,7 +125,7 @@ func (a *fevmActions) PlusClaimCashBack(ctx context.Context, auth *bind.Transact
 	}
 	defer client.Close()
 
-	plus, err := abigen.NewSPPlusTransactor(a.queries.Plus(), client)
+	plus, err := abigen.NewSPPlusTransactor(a.queries.SPPlus(), client)
 	if err != nil {
 		return nil, err
 	}
@@ -142,7 +142,7 @@ func (a *fevmActions) PlusUpgrade(ctx context.Context, auth *bind.TransactOpts, 
 	}
 	defer client.Close()
 
-	plus, err := abigen.NewSPPlusTransactor(a.queries.Plus(), client)
+	plus, err := abigen.NewSPPlusTransactor(a.queries.SPPlus(), client)
 	if err != nil {
 		return nil, err
 	}
@@ -165,7 +165,7 @@ func (a *fevmActions) PlusDowngrade(ctx context.Context, auth *bind.TransactOpts
 	}
 	defer closer()
 
-	jws, err := token.SignJWS(ctx, agentAddr, address.Undef, big.NewInt(0), constants.MethodPlusDowngrade, requesterKey, a.queries)
+	jws, err := token.SignJWS(ctx, agentAddr, address.Undef, big.NewInt(0), constants.MethodSPPlusDowngrade, requesterKey, a.queries)
 	if err != nil {
 		return nil, err
 	}
@@ -175,7 +175,7 @@ func (a *fevmActions) PlusDowngrade(ctx context.Context, auth *bind.TransactOpts
 		return nil, err
 	}
 
-	plus, err := abigen.NewSPPlusTransactor(a.queries.Plus(), client)
+	plus, err := abigen.NewSPPlusTransactor(a.queries.SPPlus(), client)
 	if err != nil {
 		return nil, err
 	}
@@ -192,7 +192,7 @@ func (a *fevmActions) PlusWithdrawExtraLockedFunds(ctx context.Context, auth *bi
 	}
 	defer client.Close()
 
-	plus, err := abigen.NewSPPlusTransactor(a.queries.Plus(), client)
+	plus, err := abigen.NewSPPlusTransactor(a.queries.SPPlus(), client)
 	if err != nil {
 		return nil, err
 	}

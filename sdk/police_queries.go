@@ -28,7 +28,7 @@ func (q *fevmQueries) CredentialUsed(ctx context.Context, vc abigen.VerifiableCr
 	}
 	defer client.Close()
 
-	downgradeMethodID, err := util.MethodStrToBytes(constants.MethodPlusDowngrade)
+	downgradeMethodID, err := util.MethodStrToBytes(constants.MethodSPPlusDowngrade)
 	if err != nil {
 		return false, fmt.Errorf("error converting method string to bytes: %v", err)
 	}

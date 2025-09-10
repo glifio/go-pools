@@ -32,7 +32,7 @@ type fevmQueries struct {
 	agentFactory             common.Address
 	iFIL                     common.Address
 	glf                      common.Address
-	plus                     common.Address
+	spPlus                   common.Address
 	infinityPool             common.Address
 	wFIL                     common.Address
 	tokenNFTWrapper          common.Address

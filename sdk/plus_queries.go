@@ -25,7 +25,7 @@ func (q *fevmQueries) PlusTokenIDFromRcpt(ctx context.Context, receipt *types.Re
 		return nil, err
 	}
 
-	plusFilterer, err := abigen.NewSPPlusFilterer(q.plus, client)
+	plusFilterer, err := abigen.NewSPPlusFilterer(q.spPlus, client)
 	if err != nil {
 		return nil, err
 	}
@@ -57,7 +57,7 @@ func (q *fevmQueries) PlusInfo(ctx context.Context, tokenID *big.Int, blockNumbe
 	}
 	defer client.Close()
 
-	plus, err := abigen.NewSPPlusCaller(q.plus, client)
+	plus, err := abigen.NewSPPlusCaller(q.spPlus, client)
 	if err != nil {
 		return nil, err
 	}
@@ -123,7 +123,7 @@ func (q *fevmQueries) PlusInfo(ctx context.Context, tokenID *big.Int, blockNumbe
 }
 
 func (q *fevmQueries) PlusTierInfo(ctx context.Context, blockNumber *big.Int) ([]abigen.TierInfo, error) {
-	tiers := make([]abigen.TierInfo, 0, constants.PLUS_TIERS)
+	tiers := make([]abigen.TierInfo, 0, constants.SP_PLUS_TIERS)
 
 	client, err := q.extern.ConnectEthClient()
 	if err != nil {
@@ -131,14 +131,14 @@ func (q *fevmQueries) PlusTierInfo(ctx context.Context, blockNumber *big.Int) ([
 	}
 	defer client.Close()
 
-	plus, err := abigen.NewSPPlusCaller(q.plus, client)
+	plus, err := abigen.NewSPPlusCaller(q.spPlus, client)
 	if err != nil {
 		return tiers, err
 	}
 
 	opts := &bind.CallOpts{Context: ctx, BlockNumber: blockNumber}
 
-	for tier := uint8(0); tier < constants.PLUS_TIERS; tier++ {
+	for tier := uint8(0); tier < constants.SP_PLUS_TIERS; tier++ {
 		tierInfo, err := plus.TierToTierInfo(opts, tier)
 		if err != nil {
 			return nil, err
@@ -161,7 +161,7 @@ func (q *fevmQueries) PlusTierFromAgentAddress(ctx context.Context, agentAddr co
 		return 0, err
 	}
 
-	plus, err := abigen.NewSPPlusCaller(q.plus, client)
+	plus, err := abigen.NewSPPlusCaller(q.spPlus, client)
 	if err != nil {
 		return 0, err
 	}
@@ -195,7 +195,7 @@ func (q *fevmQueries) PlusMintPrice(ctx context.Context, blockNumber *big.Int) (
 	}
 	defer client.Close()
 
-	plus, err := abigen.NewSPPlusCaller(q.plus, client)
+	plus, err := abigen.NewSPPlusCaller(q.spPlus, client)
 	if err != nil {
 		return nil, err
 	}
@@ -212,7 +212,7 @@ func (q *fevmQueries) PlusTierSwitchPenaltyInfo(ctx context.Context, blockNumber
 	}
 	defer client.Close()
 
-	plus, err := abigen.NewSPPlusCaller(q.plus, client)
+	plus, err := abigen.NewSPPlusCaller(q.spPlus, client)
 	if err != nil {
 		return nil, nil, err
 	}

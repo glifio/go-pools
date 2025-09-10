@@ -31,16 +31,16 @@ type Method string
 
 // these method names must match the names in the Agent contract in order to get the right function signature
 var (
-	MethodBorrow        Method = "borrow"
-	MethodPay           Method = "pay"
-	MethodAddMiner      Method = "addMiner"
-	MethodRemoveMiner   Method = "removeMiner"
-	MethodWithdraw      Method = "withdraw"
-	MethodPushFunds     Method = "pushFunds"
-	MethodPullFunds     Method = "pullFunds"
-	MethodSetRecovered  Method = "setRecovered"
-	MethodDefaultDTL    Method = "setAgentDefaultDTL"
-	MethodPlusDowngrade Method = "downgrade"
+	MethodBorrow          Method = "borrow"
+	MethodPay             Method = "pay"
+	MethodAddMiner        Method = "addMiner"
+	MethodRemoveMiner     Method = "removeMiner"
+	MethodWithdraw        Method = "withdraw"
+	MethodPushFunds       Method = "pushFunds"
+	MethodPullFunds       Method = "pullFunds"
+	MethodSetRecovered    Method = "setRecovered"
+	MethodDefaultDTL      Method = "setAgentDefaultDTL"
+	MethodSPPlusDowngrade Method = "downgrade"
 )
 
 type Route string
@@ -79,11 +79,11 @@ const (
 )
 
 // Tier DTL mapping for dynamic borrowing limits
-var TierDTL = map[uint8]*big.Int{
+var SPTierDTL = map[uint8]*big.Int{
 	InactiveTier: big.NewInt(75e16),  // 75%
 	BronzeTier:   big.NewInt(80e16),  // 80%
 	SilverTier:   big.NewInt(857e15), // 85.7%
 	GoldTier:     big.NewInt(90e16),  // 90%
 }
 
-var PLUS_TIERS = uint8(4)
+var SP_PLUS_TIERS = uint8(4)
