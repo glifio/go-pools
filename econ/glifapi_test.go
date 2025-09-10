@@ -39,7 +39,7 @@ func TestFetchAgentEcon(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			afi, err := GetAgentFiFromAPI(tc.input, deploy.StagingEventsURL)
+			afi, err := GetAgentFiFromAPI(tc.input, deploy.MainnetEventsURL)
 			if tc.expectError {
 				assert.Error(t, err)
 			} else {
@@ -92,7 +92,7 @@ func TestFetchBaseFis(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			miners, bfis, err := GetBaseFisFromAPI(tc.input, deploy.StagingEventsURL)
+			miners, bfis, err := GetBaseFisFromAPI(tc.input, deploy.MainnetEventsURL)
 			if tc.expectError {
 				assert.Error(t, err)
 			} else {
@@ -102,7 +102,7 @@ func TestFetchBaseFis(t *testing.T) {
 			assert.Equal(t, len(miners), len(bfis))
 
 			// now we get the agentFi for each agent
-			afi, err := GetAgentFiFromAPI(tc.input, deploy.StagingEventsURL)
+			afi, err := GetAgentFiFromAPI(tc.input, deploy.MainnetEventsURL)
 			if err != nil {
 				t.Fatalf("error getting agentFi from API: %v", err)
 			}
@@ -141,7 +141,7 @@ func TestFetchBaseFis(t *testing.T) {
 }
 
 func TestGetPoolMetricsFromAPI(t *testing.T) {
-	metrics, err := GetPoolMetricsFromAPI(deploy.StagingEventsURL)
+	metrics, err := GetPoolMetricsFromAPI(deploy.MainnetEventsURL)
 	assert.NoError(t, err)
 	assert.NotNil(t, metrics)
 }
