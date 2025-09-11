@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/ethereum/go-ethereum/common"
+	"github.com/glifio/go-pools/constants"
 	"github.com/glifio/go-pools/deploy"
 	"github.com/stretchr/testify/assert"
 )
@@ -38,7 +39,7 @@ func TestFetchAgentEcon(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			afi, err := GetAgentFiFromAPI(tc.input, deploy.StagingEventsURL)
+			afi, err := GetAgentFiFromAPI(tc.input, deploy.MainnetEventsURL)
 			if tc.expectError {
 				assert.Error(t, err)
 			} else {
@@ -46,8 +47,8 @@ func TestFetchAgentEcon(t *testing.T) {
 			}
 
 			lv := afi.LiquidationValue()
-			maxBorrow := afi.MaxBorrowAndSeal()
-			maxWithdraw := afi.MaxBorrowAndWithdraw()
+			maxBorrow := afi.MaxBorrowAndSeal(constants.MAX_BORROW_DTL)
+			maxWithdraw := afi.MaxBorrowAndWithdraw(constants.MAX_BORROW_DTL)
 
 			if tc.expectPositiveLV {
 				assert.True(t, lv.Cmp(big.NewInt(0)) == 1)
@@ -91,7 +92,7 @@ func TestFetchBaseFis(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			miners, bfis, err := GetBaseFisFromAPI(tc.input, deploy.StagingEventsURL)
+			miners, bfis, err := GetBaseFisFromAPI(tc.input, deploy.MainnetEventsURL)
 			if tc.expectError {
 				assert.Error(t, err)
 			} else {
@@ -101,7 +102,7 @@ func TestFetchBaseFis(t *testing.T) {
 			assert.Equal(t, len(miners), len(bfis))
 
 			// now we get the agentFi for each agent
-			afi, err := GetAgentFiFromAPI(tc.input, deploy.StagingEventsURL)
+			afi, err := GetAgentFiFromAPI(tc.input, deploy.MainnetEventsURL)
 			if err != nil {
 				t.Fatalf("error getting agentFi from API: %v", err)
 			}
@@ -117,14 +118,14 @@ func TestFetchBaseFis(t *testing.T) {
 			)
 
 			assert.True(t, afi2.LiquidationValue().Cmp(afi.LiquidationValue()) == 0)
-			assert.True(t, afi2.MaxBorrowAndSeal().Cmp(afi.MaxBorrowAndSeal()) == 0)
-			assert.True(t, afi2.MaxBorrowAndWithdraw().Cmp(afi.MaxBorrowAndWithdraw()) == 0)
-			assert.True(t, afi2.BorrowLimit().Cmp(afi.BorrowLimit()) == 0)
-			assert.True(t, afi2.WithdrawLimit().Cmp(afi.WithdrawLimit()) == 0)
+			assert.True(t, afi2.MaxBorrowAndSeal(constants.MAX_BORROW_DTL).Cmp(afi.MaxBorrowAndSeal(constants.MAX_BORROW_DTL)) == 0)
+			assert.True(t, afi2.MaxBorrowAndWithdraw(constants.MAX_BORROW_DTL).Cmp(afi.MaxBorrowAndWithdraw(constants.MAX_BORROW_DTL)) == 0)
+			assert.True(t, afi2.BorrowLimit(constants.MAX_BORROW_DTL).Cmp(afi.BorrowLimit(constants.MAX_BORROW_DTL)) == 0)
+			assert.True(t, afi2.WithdrawLimit(constants.MAX_BORROW_DTL).Cmp(afi.WithdrawLimit(constants.MAX_BORROW_DTL)) == 0)
 
 			lv := afi.LiquidationValue()
-			maxBorrow := afi.MaxBorrowAndSeal()
-			maxWithdraw := afi.MaxBorrowAndWithdraw()
+			maxBorrow := afi.MaxBorrowAndSeal(constants.MAX_BORROW_DTL)
+			maxWithdraw := afi.MaxBorrowAndWithdraw(constants.MAX_BORROW_DTL)
 
 			if tc.expectPositiveLV {
 				assert.True(t, lv.Cmp(big.NewInt(0)) == 1)
@@ -140,7 +141,7 @@ func TestFetchBaseFis(t *testing.T) {
 }
 
 func TestGetPoolMetricsFromAPI(t *testing.T) {
-	metrics, err := GetPoolMetricsFromAPI(deploy.StagingEventsURL)
+	metrics, err := GetPoolMetricsFromAPI(deploy.MainnetEventsURL)
 	assert.NoError(t, err)
 	assert.NotNil(t, metrics)
 }

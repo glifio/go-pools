@@ -40,6 +40,10 @@ func (q *fevmQueries) GLF() common.Address {
 	return q.glf
 }
 
+func (q *fevmQueries) SPPlus() common.Address {
+	return q.spPlus
+}
+
 func (q *fevmQueries) Governor() common.Address {
 	return q.governor
 }

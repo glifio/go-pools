@@ -2,11 +2,13 @@ package sdk
 
 import (
 	"context"
+	"fmt"
 	"math/big"
 
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/glifio/go-pools/abigen"
 	"github.com/glifio/go-pools/constants"
+	"github.com/glifio/go-pools/util"
 )
 
 func (q *fevmQueries) CredentialValidityPeriod(ctx context.Context) (*big.Int, *big.Int, error) {
@@ -19,19 +21,41 @@ func (q *fevmQueries) CredentialValidityPeriod(ctx context.Context) (*big.Int, *
 	return epochIssued, epochValidUntil, nil
 }
 
-func (q *fevmQueries) CredentialUsedEpoch(ctx context.Context, vc abigen.VerifiableCredential, blockNumber *big.Int) (*big.Int, error) {
+func (q *fevmQueries) CredentialUsed(ctx context.Context, vc abigen.VerifiableCredential, blockNumber *big.Int) (bool, error) {
 	client, err := q.extern.ConnectEthClient()
 	if err != nil {
-		return nil, err
+		return false, err
 	}
 	defer client.Close()
 
-	policeCaller, err := abigen.NewAgentPoliceV2Caller(q.agentPolice, client)
+	downgradeMethodID, err := util.MethodStrToBytes(constants.MethodSPPlusDowngrade)
 	if err != nil {
-		return nil, err
+		return false, fmt.Errorf("error converting method string to bytes: %v", err)
 	}
 
-	return policeCaller.CredentialUsed(&bind.CallOpts{Context: ctx, BlockNumber: blockNumber}, vc)
+	if vc.Action == downgradeMethodID {
+		plusCaller, err := abigen.NewSPPlusCaller(q.agentPolice, client)
+		if err != nil {
+			return false, err
+		}
+
+		usedEpoch, err := plusCaller.CredentialUsed(&bind.CallOpts{Context: ctx, BlockNumber: blockNumber}, vc)
+		if err != nil {
+			return false, err
+		}
+		return usedEpoch.Sign() > 0, nil
+	} else {
+		policeCaller, err := abigen.NewAgentPoliceV2Caller(q.agentPolice, client)
+		if err != nil {
+			return false, err
+		}
+
+		usedEpoch, err := policeCaller.CredentialUsed(&bind.CallOpts{Context: ctx, BlockNumber: blockNumber}, vc)
+		if err != nil {
+			return false, err
+		}
+		return usedEpoch.Sign() > 0, nil
+	}
 }
 
 func (q *fevmQueries) SectorFaultyTolerance(ctx context.Context) (*big.Int, error) {
