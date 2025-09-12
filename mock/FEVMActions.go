@@ -2002,6 +2002,68 @@ func (_c *FEVMActions_SPPlusWithdrawExtraLockedFunds_Call) RunAndReturn(run func
 	return _c
 }
 
+// SPPlusWithdrawGlfVault provides a mock function with given fields: ctx, auth, tokenID, amount, receiver
+func (_m *FEVMActions) SPPlusWithdrawGlfVault(ctx context.Context, auth *bind.TransactOpts, tokenID *big.Int, amount *big.Int, receiver common.Address) (*types.Transaction, error) {
+	ret := _m.Called(ctx, auth, tokenID, amount, receiver)
+
+	if len(ret) == 0 {
+		panic("no return value specified for SPPlusWithdrawGlfVault")
+	}
+
+	var r0 *types.Transaction
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, *bind.TransactOpts, *big.Int, *big.Int, common.Address) (*types.Transaction, error)); ok {
+		return rf(ctx, auth, tokenID, amount, receiver)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, *bind.TransactOpts, *big.Int, *big.Int, common.Address) *types.Transaction); ok {
+		r0 = rf(ctx, auth, tokenID, amount, receiver)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*types.Transaction)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, *bind.TransactOpts, *big.Int, *big.Int, common.Address) error); ok {
+		r1 = rf(ctx, auth, tokenID, amount, receiver)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// FEVMActions_SPPlusWithdrawGlfVault_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'SPPlusWithdrawGlfVault'
+type FEVMActions_SPPlusWithdrawGlfVault_Call struct {
+	*mock.Call
+}
+
+// SPPlusWithdrawGlfVault is a helper method to define mock.On call
+//   - ctx context.Context
+//   - auth *bind.TransactOpts
+//   - tokenID *big.Int
+//   - amount *big.Int
+//   - receiver common.Address
+func (_e *FEVMActions_Expecter) SPPlusWithdrawGlfVault(ctx interface{}, auth interface{}, tokenID interface{}, amount interface{}, receiver interface{}) *FEVMActions_SPPlusWithdrawGlfVault_Call {
+	return &FEVMActions_SPPlusWithdrawGlfVault_Call{Call: _e.mock.On("SPPlusWithdrawGlfVault", ctx, auth, tokenID, amount, receiver)}
+}
+
+func (_c *FEVMActions_SPPlusWithdrawGlfVault_Call) Run(run func(ctx context.Context, auth *bind.TransactOpts, tokenID *big.Int, amount *big.Int, receiver common.Address)) *FEVMActions_SPPlusWithdrawGlfVault_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(*bind.TransactOpts), args[2].(*big.Int), args[3].(*big.Int), args[4].(common.Address))
+	})
+	return _c
+}
+
+func (_c *FEVMActions_SPPlusWithdrawGlfVault_Call) Return(_a0 *types.Transaction, _a1 error) *FEVMActions_SPPlusWithdrawGlfVault_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *FEVMActions_SPPlusWithdrawGlfVault_Call) RunAndReturn(run func(context.Context, *bind.TransactOpts, *big.Int, *big.Int, common.Address) (*types.Transaction, error)) *FEVMActions_SPPlusWithdrawGlfVault_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // NewFEVMActions creates a new instance of FEVMActions. It also registers a testing interface on the mock and a cleanup function to assert the mocks expectations.
 // The first argument is typically a *testing.T value.
 func NewFEVMActions(t interface {
