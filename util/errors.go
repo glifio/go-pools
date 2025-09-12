@@ -187,5 +187,11 @@ func gatherABIS() ([]*abi.ABI, error) {
 	}
 	abis = append(abis, tokenAbi)
 
+	plusAbi, err := abigen.SPPlusMetaData.GetAbi()
+	if err != nil {
+		return []*abi.ABI{}, nil
+	}
+	abis = append(abis, plusAbi)
+
 	return abis, nil
 }
