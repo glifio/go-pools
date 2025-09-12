@@ -2949,6 +2949,66 @@ func (_c *FEVMQueries_SPPlus_Call) RunAndReturn(run func() common.Address) *FEVM
 	return _c
 }
 
+// SPPlusAgentIdToTokenId provides a mock function with given fields: ctx, agentID, blockNumber
+func (_m *FEVMQueries) SPPlusAgentIdToTokenId(ctx context.Context, agentID *big.Int, blockNumber *big.Int) (*big.Int, error) {
+	ret := _m.Called(ctx, agentID, blockNumber)
+
+	if len(ret) == 0 {
+		panic("no return value specified for SPPlusAgentIdToTokenId")
+	}
+
+	var r0 *big.Int
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, *big.Int, *big.Int) (*big.Int, error)); ok {
+		return rf(ctx, agentID, blockNumber)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, *big.Int, *big.Int) *big.Int); ok {
+		r0 = rf(ctx, agentID, blockNumber)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*big.Int)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, *big.Int, *big.Int) error); ok {
+		r1 = rf(ctx, agentID, blockNumber)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// FEVMQueries_SPPlusAgentIdToTokenId_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'SPPlusAgentIdToTokenId'
+type FEVMQueries_SPPlusAgentIdToTokenId_Call struct {
+	*mock.Call
+}
+
+// SPPlusAgentIdToTokenId is a helper method to define mock.On call
+//   - ctx context.Context
+//   - agentID *big.Int
+//   - blockNumber *big.Int
+func (_e *FEVMQueries_Expecter) SPPlusAgentIdToTokenId(ctx interface{}, agentID interface{}, blockNumber interface{}) *FEVMQueries_SPPlusAgentIdToTokenId_Call {
+	return &FEVMQueries_SPPlusAgentIdToTokenId_Call{Call: _e.mock.On("SPPlusAgentIdToTokenId", ctx, agentID, blockNumber)}
+}
+
+func (_c *FEVMQueries_SPPlusAgentIdToTokenId_Call) Run(run func(ctx context.Context, agentID *big.Int, blockNumber *big.Int)) *FEVMQueries_SPPlusAgentIdToTokenId_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(*big.Int), args[2].(*big.Int))
+	})
+	return _c
+}
+
+func (_c *FEVMQueries_SPPlusAgentIdToTokenId_Call) Return(_a0 *big.Int, _a1 error) *FEVMQueries_SPPlusAgentIdToTokenId_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *FEVMQueries_SPPlusAgentIdToTokenId_Call) RunAndReturn(run func(context.Context, *big.Int, *big.Int) (*big.Int, error)) *FEVMQueries_SPPlusAgentIdToTokenId_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // SPPlusInfo provides a mock function with given fields: ctx, tokenID, blockNumber
 func (_m *FEVMQueries) SPPlusInfo(ctx context.Context, tokenID *big.Int, blockNumber *big.Int) (*types.SPPlusInfo, error) {
 	ret := _m.Called(ctx, tokenID, blockNumber)

@@ -231,3 +231,25 @@ func (q *fevmQueries) SPPlusTierSwitchPenaltyInfo(ctx context.Context, blockNumb
 
 	return penaltyWindow, penaltyFee, nil
 }
+
+func (q *fevmQueries) SPPlusAgentIdToTokenId(ctx context.Context, agentID *big.Int, blockNumber *big.Int) (*big.Int, error) {
+	client, err := q.extern.ConnectEthClient()
+	if err != nil {
+		return nil, err
+	}
+	defer client.Close()
+
+	plus, err := abigen.NewSPPlusCaller(q.spPlus, client)
+	if err != nil {
+		return nil, err
+	}
+
+	opts := &bind.CallOpts{Context: ctx, BlockNumber: blockNumber}
+
+	tokenID, err := plus.AgentIdToTokenId(opts, agentID)
+	if err != nil {
+		return nil, err
+	}
+
+	return tokenID, nil
+}
