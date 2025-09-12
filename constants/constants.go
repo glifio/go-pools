@@ -69,7 +69,8 @@ var CHUNKSIZE = big.NewInt(EpochsInDay)
 var FAULTY_SECTOR_TOLERANCE = big.NewFloat(0.001)
 
 var MAX_BORROW_DTL = big.NewInt(75e16)
-var LIQUIDATION_DTL = big.NewInt(85e16)
+var MAX_BORROW_DTL_GOLD_TIER = big.NewInt(90e16)
+var LIQUIDATION_DTL = big.NewInt(92e16)
 
 const (
 	InactiveTier = iota
