@@ -43,7 +43,7 @@ var ProtoMeta = types.ProtocolMeta{
 	Router:                   common.HexToAddress("0xe6e6e71E747EeD9fe45F0ff63E1B3E4a7c1199bF"),
 	WFIL:                     common.HexToAddress("0x60E1773636CF5E4A227d9AC24F20fEca034ee25A"),
 	GLF:                      common.HexToAddress("0xe00F3f579E6e981a74eFcF95294558dbf80130E5"), // JimGLF
-	SPPlus:                   common.HexToAddress("0x253b4E4DE070fc87262b93AC483C4D0F36A5e750"), // Jim Mock
+	SPPlus:                   common.HexToAddress("0x14f650E362DaAec1fe1B556Ca929c7633e7c7CD8"), // Jim Mock
 	Governor:                 common.HexToAddress("0x271Ae6CF68D29c74A0aFF42BE9Dc1AE27b13656E"),
 	TokenNFTWrapper:          common.HexToAddress("0xe33C5b9868bA7813Feb0b95e5274963c6E488C1a"),
 	DelegatedClaimsCampaigns: common.HexToAddress("0xdbE04BE0401DDd890Ff678c00E4E6a08D496aB87"),
