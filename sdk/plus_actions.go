@@ -201,3 +201,20 @@ func (a *fevmActions) SPPlusWithdrawExtraLockedFunds(ctx context.Context, auth *
 
 	return util.TxPostProcess(tx, err)
 }
+
+func (a *fevmActions) SPPlusWithdrawGlfVault(ctx context.Context, auth *bind.TransactOpts, tokenID *big.Int, amount *big.Int, receiver common.Address) (*types.Transaction, error) {
+	client, err := a.extern.ConnectEthClient()
+	if err != nil {
+		return nil, err
+	}
+	defer client.Close()
+
+	plus, err := abigen.NewSPPlusTransactor(a.queries.SPPlus(), client)
+	if err != nil {
+		return nil, err
+	}
+
+	tx, err := plus.WithdrawGlfVault(auth, tokenID, amount, receiver)
+
+	return util.TxPostProcess(tx, err)
+}
