@@ -102,6 +102,7 @@ type FEVMQueries interface {
 	SPPlusTierFromAgentAddress(ctx context.Context, agentAddr common.Address, blockNumber *big.Int) (uint8, error)
 	SPPlusMintPrice(ctx context.Context, blockNumber *big.Int) (*big.Int, error)
 	SPPlusTierSwitchPenaltyInfo(ctx context.Context, blockNumber *big.Int) (penaltyWindow *big.Int, penaltyFee *big.Int, err error)
+	SPPlusAgentIdToTokenId(ctx context.Context, agentID *big.Int, blockNumber *big.Int) (*big.Int, error)
 }
 
 //go:generate mockery --name FEVMActions
