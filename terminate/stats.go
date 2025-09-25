@@ -5,7 +5,7 @@ import (
 	"math/big"
 
 	"github.com/filecoin-project/go-state-types/abi"
-	"github.com/filecoin-project/go-state-types/builtin/v16/miner"
+	lotusminer "github.com/filecoin-project/lotus/chain/actors/builtin/miner"
 )
 
 type SectorStats struct {
@@ -59,7 +59,7 @@ func NewSectorStats() *SectorStats {
 }
 
 func (st *SectorStats) AddSector(
-	s *miner.SectorOnChainInfo,
+	s *lotusminer.SectorOnChainInfo,
 	height abi.ChainEpoch,
 	termFee *big.Int,
 	sectorFeePenalty *big.Int,

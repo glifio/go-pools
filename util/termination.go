@@ -4,10 +4,10 @@ import (
 	"context"
 
 	"github.com/filecoin-project/go-state-types/abi"
-	"github.com/filecoin-project/go-state-types/builtin/v16/miner"
 	lotusapi "github.com/filecoin-project/lotus/api"
 	"github.com/filecoin-project/lotus/chain/actors/adt"
 	"github.com/filecoin-project/lotus/chain/actors/builtin"
+	lotusminer "github.com/filecoin-project/lotus/chain/actors/builtin/miner"
 	"github.com/filecoin-project/lotus/chain/actors/builtin/power"
 	"github.com/filecoin-project/lotus/chain/actors/builtin/reward"
 	"github.com/filecoin-project/lotus/chain/types"
@@ -16,7 +16,7 @@ import (
 )
 
 // the SimpleQAPower bool is missing here on the conversion
-func ConvertSectorType(sector *miner.SectorOnChainInfo) *miner8.SectorOnChainInfo {
+func ConvertSectorType(sector *lotusminer.SectorOnChainInfo) *miner8.SectorOnChainInfo {
 	var expectedDayReward, expectedStoragePledge, replacedDayReward abi.TokenAmount
 
 	if sector.ExpectedDayReward != nil {
