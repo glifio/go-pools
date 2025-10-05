@@ -101,19 +101,33 @@ func (a *fevmActions) SPPlusSetPersonalCashBackPercent(ctx context.Context, auth
 	return util.TxPostProcess(tx, err)
 }
 
-func (a *fevmActions) SPPlusFundGLFVault(ctx context.Context, auth *bind.TransactOpts, tokenID *big.Int, amount *big.Int) (*types.Transaction, error) {
+func (a *fevmActions) SPPlusFundGLFVault(ctx context.Context, auth *bind.TransactOpts, tokenID *big.Int, amount *big.Int, cashBackPercent *big.Int) (*types.Transaction, error) {
 	client, err := a.extern.ConnectEthClient()
 	if err != nil {
 		return nil, err
 	}
 	defer client.Close()
 
+	if cashBackPercent == nil {
+		caller, err := abigen.NewSPPlusCaller(a.queries.SPPlus(), client)
+		if err != nil {
+			return nil, err
+		}
+
+		opts := &bind.CallOpts{Context: ctx}
+
+		cashBackPercent, err = caller.MaxCashBackPercent(opts)
+		if err != nil {
+			return nil, err
+		}
+	}
+
 	plus, err := abigen.NewSPPlusTransactor(a.queries.SPPlus(), client)
 	if err != nil {
 		return nil, err
 	}
 
-	tx, err := plus.FundGlfVault(auth, tokenID, amount)
+	tx, err := plus.FundGlfVault0(auth, tokenID, amount, cashBackPercent)
 
 	return util.TxPostProcess(tx, err)
 }

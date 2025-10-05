@@ -141,7 +141,7 @@ type FEVMActions interface {
 	SPPlusMintActivateAndFund(ctx context.Context, auth *bind.TransactOpts, cashBackPercent *big.Int, beneficiary common.Address, tier uint8, amount *big.Int) (*types.Transaction, error)
 	SPPlusActivate(ctx context.Context, auth *bind.TransactOpts, beneficiary common.Address, tokenID *big.Int, tier uint8) (*types.Transaction, error)
 	SPPlusSetPersonalCashBackPercent(ctx context.Context, auth *bind.TransactOpts, tokenID *big.Int, cashBackPercent *big.Int) (*types.Transaction, error)
-	SPPlusFundGLFVault(ctx context.Context, auth *bind.TransactOpts, tokenID *big.Int, amount *big.Int) (*types.Transaction, error)
+	SPPlusFundGLFVault(ctx context.Context, auth *bind.TransactOpts, tokenID *big.Int, amount *big.Int, cashBackPercent *big.Int) (*types.Transaction, error)
 	SPPlusClaimCashBack(ctx context.Context, auth *bind.TransactOpts, tokenID *big.Int, receiver common.Address) (*types.Transaction, error)
 	SPPlusUpgrade(ctx context.Context, auth *bind.TransactOpts, tokenID *big.Int, tier uint8) (*types.Transaction, error)
 	SPPlusDowngrade(ctx context.Context, auth *bind.TransactOpts, tokenID *big.Int, tier uint8, agentAddr common.Address, requesterKey *ecdsa.PrivateKey) (*types.Transaction, error)

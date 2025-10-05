@@ -1576,9 +1576,9 @@ func (_c *FEVMActions_SPPlusDowngrade_Call) RunAndReturn(run func(context.Contex
 	return _c
 }
 
-// SPPlusFundGLFVault provides a mock function with given fields: ctx, auth, tokenID, amount
-func (_m *FEVMActions) SPPlusFundGLFVault(ctx context.Context, auth *bind.TransactOpts, tokenID *big.Int, amount *big.Int) (*types.Transaction, error) {
-	ret := _m.Called(ctx, auth, tokenID, amount)
+// SPPlusFundGLFVault provides a mock function with given fields: ctx, auth, tokenID, amount, cashBackPercent
+func (_m *FEVMActions) SPPlusFundGLFVault(ctx context.Context, auth *bind.TransactOpts, tokenID *big.Int, amount *big.Int, cashBackPercent *big.Int) (*types.Transaction, error) {
+	ret := _m.Called(ctx, auth, tokenID, amount, cashBackPercent)
 
 	if len(ret) == 0 {
 		panic("no return value specified for SPPlusFundGLFVault")
@@ -1586,19 +1586,19 @@ func (_m *FEVMActions) SPPlusFundGLFVault(ctx context.Context, auth *bind.Transa
 
 	var r0 *types.Transaction
 	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context, *bind.TransactOpts, *big.Int, *big.Int) (*types.Transaction, error)); ok {
-		return rf(ctx, auth, tokenID, amount)
+	if rf, ok := ret.Get(0).(func(context.Context, *bind.TransactOpts, *big.Int, *big.Int, *big.Int) (*types.Transaction, error)); ok {
+		return rf(ctx, auth, tokenID, amount, cashBackPercent)
 	}
-	if rf, ok := ret.Get(0).(func(context.Context, *bind.TransactOpts, *big.Int, *big.Int) *types.Transaction); ok {
-		r0 = rf(ctx, auth, tokenID, amount)
+	if rf, ok := ret.Get(0).(func(context.Context, *bind.TransactOpts, *big.Int, *big.Int, *big.Int) *types.Transaction); ok {
+		r0 = rf(ctx, auth, tokenID, amount, cashBackPercent)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*types.Transaction)
 		}
 	}
 
-	if rf, ok := ret.Get(1).(func(context.Context, *bind.TransactOpts, *big.Int, *big.Int) error); ok {
-		r1 = rf(ctx, auth, tokenID, amount)
+	if rf, ok := ret.Get(1).(func(context.Context, *bind.TransactOpts, *big.Int, *big.Int, *big.Int) error); ok {
+		r1 = rf(ctx, auth, tokenID, amount, cashBackPercent)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -1616,13 +1616,14 @@ type FEVMActions_SPPlusFundGLFVault_Call struct {
 //   - auth *bind.TransactOpts
 //   - tokenID *big.Int
 //   - amount *big.Int
-func (_e *FEVMActions_Expecter) SPPlusFundGLFVault(ctx interface{}, auth interface{}, tokenID interface{}, amount interface{}) *FEVMActions_SPPlusFundGLFVault_Call {
-	return &FEVMActions_SPPlusFundGLFVault_Call{Call: _e.mock.On("SPPlusFundGLFVault", ctx, auth, tokenID, amount)}
+//   - cashBackPercent *big.Int
+func (_e *FEVMActions_Expecter) SPPlusFundGLFVault(ctx interface{}, auth interface{}, tokenID interface{}, amount interface{}, cashBackPercent interface{}) *FEVMActions_SPPlusFundGLFVault_Call {
+	return &FEVMActions_SPPlusFundGLFVault_Call{Call: _e.mock.On("SPPlusFundGLFVault", ctx, auth, tokenID, amount, cashBackPercent)}
 }
 
-func (_c *FEVMActions_SPPlusFundGLFVault_Call) Run(run func(ctx context.Context, auth *bind.TransactOpts, tokenID *big.Int, amount *big.Int)) *FEVMActions_SPPlusFundGLFVault_Call {
+func (_c *FEVMActions_SPPlusFundGLFVault_Call) Run(run func(ctx context.Context, auth *bind.TransactOpts, tokenID *big.Int, amount *big.Int, cashBackPercent *big.Int)) *FEVMActions_SPPlusFundGLFVault_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(*bind.TransactOpts), args[2].(*big.Int), args[3].(*big.Int))
+		run(args[0].(context.Context), args[1].(*bind.TransactOpts), args[2].(*big.Int), args[3].(*big.Int), args[4].(*big.Int))
 	})
 	return _c
 }
@@ -1632,7 +1633,7 @@ func (_c *FEVMActions_SPPlusFundGLFVault_Call) Return(_a0 *types.Transaction, _a
 	return _c
 }
 
-func (_c *FEVMActions_SPPlusFundGLFVault_Call) RunAndReturn(run func(context.Context, *bind.TransactOpts, *big.Int, *big.Int) (*types.Transaction, error)) *FEVMActions_SPPlusFundGLFVault_Call {
+func (_c *FEVMActions_SPPlusFundGLFVault_Call) RunAndReturn(run func(context.Context, *bind.TransactOpts, *big.Int, *big.Int, *big.Int) (*types.Transaction, error)) *FEVMActions_SPPlusFundGLFVault_Call {
 	_c.Call.Return(run)
 	return _c
 }
