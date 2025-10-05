@@ -108,6 +108,8 @@ func (a *fevmActions) SPPlusFundGLFVault(ctx context.Context, auth *bind.Transac
 	}
 	defer client.Close()
 
+	// if the cashback percent is not provided, we use the existing cash back percent on the tokenID
+	// if this is the first time funding the GLF  vault (implied by a personal cash back percent of 0), we use the max cash back percent
 	if cashBackPercent == nil {
 		caller, err := abigen.NewSPPlusCaller(a.queries.SPPlus(), client)
 		if err != nil {
@@ -116,9 +118,18 @@ func (a *fevmActions) SPPlusFundGLFVault(ctx context.Context, auth *bind.Transac
 
 		opts := &bind.CallOpts{Context: ctx}
 
-		cashBackPercent, err = caller.MaxCashBackPercent(opts)
+		personalCashBackPercent, err := caller.TokenIdToPersonalCashBackPercent(opts, tokenID)
 		if err != nil {
 			return nil, err
+		}
+
+		if personalCashBackPercent.Cmp(big.NewInt(0)) == 0 {
+			cashBackPercent, err = caller.MaxCashBackPercent(opts)
+			if err != nil {
+				return nil, err
+			}
+		} else {
+			cashBackPercent = personalCashBackPercent
 		}
 	}
 
