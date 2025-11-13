@@ -65,7 +65,7 @@ var TestProtoMeta = types.ProtocolMeta{
 	Router:                   common.HexToAddress("0xa0770911848Bd1A0930Fc6782522381Bb6256617"),
 	WFIL:                     common.HexToAddress("0xaC26a4Ab9cF2A8c5DBaB6fb4351ec0F4b07356c4"),
 	GLF:                      common.HexToAddress("0x7989a6Ad291216d1B359339Fe06719EB31461325"),
-	SPPlus:                   common.HexToAddress("0x1D3482619E91AbaDf77bbF1aB69FFcF008e0E88e"),
+	SPPlus:                   common.HexToAddress("0x812E9c0198425363e88d6302e2767A018FeebeD2"),
 	Governor:                 common.HexToAddress("0x556C778CaC49eC8d67fe91AF379c5b8e37aED7de"),
 	TokenNFTWrapper:          common.HexToAddress("0x655E30E52b4ae511971991ff30a9e5c1f433Cd8B"),
 	DelegatedClaimsCampaigns: common.HexToAddress("0xdbE04BE0401DDd890Ff678c00E4E6a08D496aB87"),
