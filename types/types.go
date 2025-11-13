@@ -88,6 +88,8 @@ type FEVMQueries interface {
 	WFIL() common.Address
 	GLF() common.Address
 	SPPlus() common.Address
+	LPPlus() common.Address
+	RWTFuture() common.Address
 	InfinityPool() common.Address
 
 	// token related addresses
@@ -173,6 +175,8 @@ type ProtocolMeta struct {
 	WFIL                     common.Address `json:"wfil"`
 	GLF                      common.Address `json:"glf"`
 	SPPlus                   common.Address `json:"spPlus"`
+	LPPlus                   common.Address `json:"lpPlus"`
+	RWTFuture                common.Address `json:"rwtFuture"`
 	InfinityPool             common.Address `json:"infinityPool"`
 	Governor                 common.Address `json:"governor"`
 	TokenNFTWrapper          common.Address `json:"tokenNFTWrapper"`

@@ -2571,6 +2571,53 @@ func (_c *FEVMQueries_InfinityPool_Call) RunAndReturn(run func() common.Address)
 	return _c
 }
 
+// LPPlus provides a mock function with no fields
+func (_m *FEVMQueries) LPPlus() common.Address {
+	ret := _m.Called()
+
+	if len(ret) == 0 {
+		panic("no return value specified for LPPlus")
+	}
+
+	var r0 common.Address
+	if rf, ok := ret.Get(0).(func() common.Address); ok {
+		r0 = rf()
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(common.Address)
+		}
+	}
+
+	return r0
+}
+
+// FEVMQueries_LPPlus_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'LPPlus'
+type FEVMQueries_LPPlus_Call struct {
+	*mock.Call
+}
+
+// LPPlus is a helper method to define mock.On call
+func (_e *FEVMQueries_Expecter) LPPlus() *FEVMQueries_LPPlus_Call {
+	return &FEVMQueries_LPPlus_Call{Call: _e.mock.On("LPPlus")}
+}
+
+func (_c *FEVMQueries_LPPlus_Call) Run(run func()) *FEVMQueries_LPPlus_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run()
+	})
+	return _c
+}
+
+func (_c *FEVMQueries_LPPlus_Call) Return(_a0 common.Address) *FEVMQueries_LPPlus_Call {
+	_c.Call.Return(_a0)
+	return _c
+}
+
+func (_c *FEVMQueries_LPPlus_Call) RunAndReturn(run func() common.Address) *FEVMQueries_LPPlus_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // MinerRegistry provides a mock function with no fields
 func (_m *FEVMQueries) MinerRegistry() common.Address {
 	ret := _m.Called()
@@ -2734,6 +2781,53 @@ func (_c *FEVMQueries_MinerRegistryAgentMinersList_Call) Return(_a0 []address.Ad
 }
 
 func (_c *FEVMQueries_MinerRegistryAgentMinersList_Call) RunAndReturn(run func(context.Context, *big.Int, *big.Int) ([]address.Address, error)) *FEVMQueries_MinerRegistryAgentMinersList_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// RWTFuture provides a mock function with no fields
+func (_m *FEVMQueries) RWTFuture() common.Address {
+	ret := _m.Called()
+
+	if len(ret) == 0 {
+		panic("no return value specified for RWTFuture")
+	}
+
+	var r0 common.Address
+	if rf, ok := ret.Get(0).(func() common.Address); ok {
+		r0 = rf()
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(common.Address)
+		}
+	}
+
+	return r0
+}
+
+// FEVMQueries_RWTFuture_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'RWTFuture'
+type FEVMQueries_RWTFuture_Call struct {
+	*mock.Call
+}
+
+// RWTFuture is a helper method to define mock.On call
+func (_e *FEVMQueries_Expecter) RWTFuture() *FEVMQueries_RWTFuture_Call {
+	return &FEVMQueries_RWTFuture_Call{Call: _e.mock.On("RWTFuture")}
+}
+
+func (_c *FEVMQueries_RWTFuture_Call) Run(run func()) *FEVMQueries_RWTFuture_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run()
+	})
+	return _c
+}
+
+func (_c *FEVMQueries_RWTFuture_Call) Return(_a0 common.Address) *FEVMQueries_RWTFuture_Call {
+	_c.Call.Return(_a0)
+	return _c
+}
+
+func (_c *FEVMQueries_RWTFuture_Call) RunAndReturn(run func() common.Address) *FEVMQueries_RWTFuture_Call {
 	_c.Call.Return(run)
 	return _c
 }

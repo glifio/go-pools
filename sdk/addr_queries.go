@@ -55,3 +55,11 @@ func (q *fevmQueries) TokenNFTWrapper() common.Address {
 func (q *fevmQueries) DelegatedClaimsCampaigns() common.Address {
 	return q.delegatedClaimsCampaigns
 }
+
+func (q *fevmQueries) LPPlus() common.Address {
+	return q.lpPlus
+}
+
+func (q *fevmQueries) RWTFuture() common.Address {
+	return q.rwtFuture
+}
