@@ -2618,6 +2618,303 @@ func (_c *FEVMQueries_LPPlus_Call) RunAndReturn(run func() common.Address) *FEVM
 	return _c
 }
 
+// LPPlusFutureValidityDuration provides a mock function with given fields: ctx, blockNumber
+func (_m *FEVMQueries) LPPlusFutureValidityDuration(ctx context.Context, blockNumber *big.Int) (*big.Int, error) {
+	ret := _m.Called(ctx, blockNumber)
+
+	if len(ret) == 0 {
+		panic("no return value specified for LPPlusFutureValidityDuration")
+	}
+
+	var r0 *big.Int
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, *big.Int) (*big.Int, error)); ok {
+		return rf(ctx, blockNumber)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, *big.Int) *big.Int); ok {
+		r0 = rf(ctx, blockNumber)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*big.Int)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, *big.Int) error); ok {
+		r1 = rf(ctx, blockNumber)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// FEVMQueries_LPPlusFutureValidityDuration_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'LPPlusFutureValidityDuration'
+type FEVMQueries_LPPlusFutureValidityDuration_Call struct {
+	*mock.Call
+}
+
+// LPPlusFutureValidityDuration is a helper method to define mock.On call
+//   - ctx context.Context
+//   - blockNumber *big.Int
+func (_e *FEVMQueries_Expecter) LPPlusFutureValidityDuration(ctx interface{}, blockNumber interface{}) *FEVMQueries_LPPlusFutureValidityDuration_Call {
+	return &FEVMQueries_LPPlusFutureValidityDuration_Call{Call: _e.mock.On("LPPlusFutureValidityDuration", ctx, blockNumber)}
+}
+
+func (_c *FEVMQueries_LPPlusFutureValidityDuration_Call) Run(run func(ctx context.Context, blockNumber *big.Int)) *FEVMQueries_LPPlusFutureValidityDuration_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(*big.Int))
+	})
+	return _c
+}
+
+func (_c *FEVMQueries_LPPlusFutureValidityDuration_Call) Return(_a0 *big.Int, _a1 error) *FEVMQueries_LPPlusFutureValidityDuration_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *FEVMQueries_LPPlusFutureValidityDuration_Call) RunAndReturn(run func(context.Context, *big.Int) (*big.Int, error)) *FEVMQueries_LPPlusFutureValidityDuration_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// LPPlusTokenOfOwnerByIndex provides a mock function with given fields: ctx, owner, index, blockNumber
+func (_m *FEVMQueries) LPPlusTokenOfOwnerByIndex(ctx context.Context, owner common.Address, index *big.Int, blockNumber *big.Int) (*big.Int, error) {
+	ret := _m.Called(ctx, owner, index, blockNumber)
+
+	if len(ret) == 0 {
+		panic("no return value specified for LPPlusTokenOfOwnerByIndex")
+	}
+
+	var r0 *big.Int
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, common.Address, *big.Int, *big.Int) (*big.Int, error)); ok {
+		return rf(ctx, owner, index, blockNumber)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, common.Address, *big.Int, *big.Int) *big.Int); ok {
+		r0 = rf(ctx, owner, index, blockNumber)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*big.Int)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, common.Address, *big.Int, *big.Int) error); ok {
+		r1 = rf(ctx, owner, index, blockNumber)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// FEVMQueries_LPPlusTokenOfOwnerByIndex_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'LPPlusTokenOfOwnerByIndex'
+type FEVMQueries_LPPlusTokenOfOwnerByIndex_Call struct {
+	*mock.Call
+}
+
+// LPPlusTokenOfOwnerByIndex is a helper method to define mock.On call
+//   - ctx context.Context
+//   - owner common.Address
+//   - index *big.Int
+//   - blockNumber *big.Int
+func (_e *FEVMQueries_Expecter) LPPlusTokenOfOwnerByIndex(ctx interface{}, owner interface{}, index interface{}, blockNumber interface{}) *FEVMQueries_LPPlusTokenOfOwnerByIndex_Call {
+	return &FEVMQueries_LPPlusTokenOfOwnerByIndex_Call{Call: _e.mock.On("LPPlusTokenOfOwnerByIndex", ctx, owner, index, blockNumber)}
+}
+
+func (_c *FEVMQueries_LPPlusTokenOfOwnerByIndex_Call) Run(run func(ctx context.Context, owner common.Address, index *big.Int, blockNumber *big.Int)) *FEVMQueries_LPPlusTokenOfOwnerByIndex_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(common.Address), args[2].(*big.Int), args[3].(*big.Int))
+	})
+	return _c
+}
+
+func (_c *FEVMQueries_LPPlusTokenOfOwnerByIndex_Call) Return(_a0 *big.Int, _a1 error) *FEVMQueries_LPPlusTokenOfOwnerByIndex_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *FEVMQueries_LPPlusTokenOfOwnerByIndex_Call) RunAndReturn(run func(context.Context, common.Address, *big.Int, *big.Int) (*big.Int, error)) *FEVMQueries_LPPlusTokenOfOwnerByIndex_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// LPPlusWindowId provides a mock function with given fields: ctx, blockNumber
+func (_m *FEVMQueries) LPPlusWindowId(ctx context.Context, blockNumber *big.Int) (*big.Int, error) {
+	ret := _m.Called(ctx, blockNumber)
+
+	if len(ret) == 0 {
+		panic("no return value specified for LPPlusWindowId")
+	}
+
+	var r0 *big.Int
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, *big.Int) (*big.Int, error)); ok {
+		return rf(ctx, blockNumber)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, *big.Int) *big.Int); ok {
+		r0 = rf(ctx, blockNumber)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*big.Int)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, *big.Int) error); ok {
+		r1 = rf(ctx, blockNumber)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// FEVMQueries_LPPlusWindowId_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'LPPlusWindowId'
+type FEVMQueries_LPPlusWindowId_Call struct {
+	*mock.Call
+}
+
+// LPPlusWindowId is a helper method to define mock.On call
+//   - ctx context.Context
+//   - blockNumber *big.Int
+func (_e *FEVMQueries_Expecter) LPPlusWindowId(ctx interface{}, blockNumber interface{}) *FEVMQueries_LPPlusWindowId_Call {
+	return &FEVMQueries_LPPlusWindowId_Call{Call: _e.mock.On("LPPlusWindowId", ctx, blockNumber)}
+}
+
+func (_c *FEVMQueries_LPPlusWindowId_Call) Run(run func(ctx context.Context, blockNumber *big.Int)) *FEVMQueries_LPPlusWindowId_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(*big.Int))
+	})
+	return _c
+}
+
+func (_c *FEVMQueries_LPPlusWindowId_Call) Return(_a0 *big.Int, _a1 error) *FEVMQueries_LPPlusWindowId_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *FEVMQueries_LPPlusWindowId_Call) RunAndReturn(run func(context.Context, *big.Int) (*big.Int, error)) *FEVMQueries_LPPlusWindowId_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// LPPlusWindowIdToMerkleRoot provides a mock function with given fields: ctx, windowId, blockNumber
+func (_m *FEVMQueries) LPPlusWindowIdToMerkleRoot(ctx context.Context, windowId *big.Int, blockNumber *big.Int) ([32]byte, error) {
+	ret := _m.Called(ctx, windowId, blockNumber)
+
+	if len(ret) == 0 {
+		panic("no return value specified for LPPlusWindowIdToMerkleRoot")
+	}
+
+	var r0 [32]byte
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, *big.Int, *big.Int) ([32]byte, error)); ok {
+		return rf(ctx, windowId, blockNumber)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, *big.Int, *big.Int) [32]byte); ok {
+		r0 = rf(ctx, windowId, blockNumber)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([32]byte)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, *big.Int, *big.Int) error); ok {
+		r1 = rf(ctx, windowId, blockNumber)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// FEVMQueries_LPPlusWindowIdToMerkleRoot_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'LPPlusWindowIdToMerkleRoot'
+type FEVMQueries_LPPlusWindowIdToMerkleRoot_Call struct {
+	*mock.Call
+}
+
+// LPPlusWindowIdToMerkleRoot is a helper method to define mock.On call
+//   - ctx context.Context
+//   - windowId *big.Int
+//   - blockNumber *big.Int
+func (_e *FEVMQueries_Expecter) LPPlusWindowIdToMerkleRoot(ctx interface{}, windowId interface{}, blockNumber interface{}) *FEVMQueries_LPPlusWindowIdToMerkleRoot_Call {
+	return &FEVMQueries_LPPlusWindowIdToMerkleRoot_Call{Call: _e.mock.On("LPPlusWindowIdToMerkleRoot", ctx, windowId, blockNumber)}
+}
+
+func (_c *FEVMQueries_LPPlusWindowIdToMerkleRoot_Call) Run(run func(ctx context.Context, windowId *big.Int, blockNumber *big.Int)) *FEVMQueries_LPPlusWindowIdToMerkleRoot_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(*big.Int), args[2].(*big.Int))
+	})
+	return _c
+}
+
+func (_c *FEVMQueries_LPPlusWindowIdToMerkleRoot_Call) Return(_a0 [32]byte, _a1 error) *FEVMQueries_LPPlusWindowIdToMerkleRoot_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *FEVMQueries_LPPlusWindowIdToMerkleRoot_Call) RunAndReturn(run func(context.Context, *big.Int, *big.Int) ([32]byte, error)) *FEVMQueries_LPPlusWindowIdToMerkleRoot_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// LPPlusWindowIdToStakingSnapshot provides a mock function with given fields: ctx, windowId, blockNumber
+func (_m *FEVMQueries) LPPlusWindowIdToStakingSnapshot(ctx context.Context, windowId *big.Int, blockNumber *big.Int) (abigen.StakingSnapshot, error) {
+	ret := _m.Called(ctx, windowId, blockNumber)
+
+	if len(ret) == 0 {
+		panic("no return value specified for LPPlusWindowIdToStakingSnapshot")
+	}
+
+	var r0 abigen.StakingSnapshot
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, *big.Int, *big.Int) (abigen.StakingSnapshot, error)); ok {
+		return rf(ctx, windowId, blockNumber)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, *big.Int, *big.Int) abigen.StakingSnapshot); ok {
+		r0 = rf(ctx, windowId, blockNumber)
+	} else {
+		r0 = ret.Get(0).(abigen.StakingSnapshot)
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, *big.Int, *big.Int) error); ok {
+		r1 = rf(ctx, windowId, blockNumber)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// FEVMQueries_LPPlusWindowIdToStakingSnapshot_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'LPPlusWindowIdToStakingSnapshot'
+type FEVMQueries_LPPlusWindowIdToStakingSnapshot_Call struct {
+	*mock.Call
+}
+
+// LPPlusWindowIdToStakingSnapshot is a helper method to define mock.On call
+//   - ctx context.Context
+//   - windowId *big.Int
+//   - blockNumber *big.Int
+func (_e *FEVMQueries_Expecter) LPPlusWindowIdToStakingSnapshot(ctx interface{}, windowId interface{}, blockNumber interface{}) *FEVMQueries_LPPlusWindowIdToStakingSnapshot_Call {
+	return &FEVMQueries_LPPlusWindowIdToStakingSnapshot_Call{Call: _e.mock.On("LPPlusWindowIdToStakingSnapshot", ctx, windowId, blockNumber)}
+}
+
+func (_c *FEVMQueries_LPPlusWindowIdToStakingSnapshot_Call) Run(run func(ctx context.Context, windowId *big.Int, blockNumber *big.Int)) *FEVMQueries_LPPlusWindowIdToStakingSnapshot_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(*big.Int), args[2].(*big.Int))
+	})
+	return _c
+}
+
+func (_c *FEVMQueries_LPPlusWindowIdToStakingSnapshot_Call) Return(_a0 abigen.StakingSnapshot, _a1 error) *FEVMQueries_LPPlusWindowIdToStakingSnapshot_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *FEVMQueries_LPPlusWindowIdToStakingSnapshot_Call) RunAndReturn(run func(context.Context, *big.Int, *big.Int) (abigen.StakingSnapshot, error)) *FEVMQueries_LPPlusWindowIdToStakingSnapshot_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // MinerRegistry provides a mock function with no fields
 func (_m *FEVMQueries) MinerRegistry() common.Address {
 	ret := _m.Called()

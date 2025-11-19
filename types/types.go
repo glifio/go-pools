@@ -105,6 +105,12 @@ type FEVMQueries interface {
 	SPPlusMintPrice(ctx context.Context, blockNumber *big.Int) (*big.Int, error)
 	SPPlusTierSwitchPenaltyInfo(ctx context.Context, blockNumber *big.Int) (penaltyWindow *big.Int, penaltyFee *big.Int, err error)
 	SPPlusAgentIdToTokenId(ctx context.Context, agentID *big.Int, blockNumber *big.Int) (*big.Int, error)
+	// LP Plus methods
+	LPPlusFutureValidityDuration(ctx context.Context, blockNumber *big.Int) (*big.Int, error)
+	LPPlusWindowId(ctx context.Context, blockNumber *big.Int) (*big.Int, error)
+	LPPlusWindowIdToStakingSnapshot(ctx context.Context, windowId *big.Int, blockNumber *big.Int) (abigen.StakingSnapshot, error)
+	LPPlusWindowIdToMerkleRoot(ctx context.Context, windowId *big.Int, blockNumber *big.Int) ([32]byte, error)
+	LPPlusTokenOfOwnerByIndex(ctx context.Context, owner common.Address, index *big.Int, blockNumber *big.Int) (*big.Int, error)
 }
 
 //go:generate mockery --name FEVMActions
