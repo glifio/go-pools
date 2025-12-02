@@ -1,6 +1,7 @@
 package econ
 
 import (
+	"context"
 	"math/big"
 	"testing"
 
@@ -11,6 +12,11 @@ import (
 )
 
 func TestFetchAgentEcon(t *testing.T) {
+	psdk, err := setupTest()
+	if err != nil {
+		t.Fatalf("error setting up test: %v", err)
+	}
+
 	testCases := []struct {
 		name             string
 		input            common.Address
@@ -46,9 +52,18 @@ func TestFetchAgentEcon(t *testing.T) {
 				assert.NoError(t, err)
 			}
 
+			// get tier info
+			tier, err := psdk.Query().SPPlusTierFromAgentAddress(context.Background(), tc.input, nil)
+			if err != nil && err.Error() != "agent id not found" {
+				t.Fatalf("error getting tier from contracts: %v", err)
+			}
+
+			tierDTL := constants.SPTierDTL[tier]
+			assert.NotNil(t, tierDTL)
+
 			lv := afi.LiquidationValue()
-			maxBorrow := afi.MaxBorrowAndSeal(constants.MAX_BORROW_DTL)
-			maxWithdraw := afi.MaxBorrowAndWithdraw(constants.MAX_BORROW_DTL)
+			maxBorrow := afi.MaxBorrowAndSeal(tierDTL)
+			maxWithdraw := afi.MaxBorrowAndWithdraw(tierDTL)
 
 			if tc.expectPositiveLV {
 				assert.True(t, lv.Cmp(big.NewInt(0)) == 1)
@@ -64,6 +79,11 @@ func TestFetchAgentEcon(t *testing.T) {
 }
 
 func TestFetchBaseFis(t *testing.T) {
+	psdk, err := setupTest()
+	if err != nil {
+		t.Fatalf("error setting up test: %v", err)
+	}
+
 	testCases := []struct {
 		name             string
 		input            common.Address
@@ -101,6 +121,15 @@ func TestFetchBaseFis(t *testing.T) {
 
 			assert.Equal(t, len(miners), len(bfis))
 
+			// get tier info
+			tier, err := psdk.Query().SPPlusTierFromAgentAddress(context.Background(), tc.input, nil)
+			if err != nil && err.Error() != "agent id not found" {
+				t.Fatalf("error getting tier from contracts: %v", err)
+			}
+
+			tierDTL := constants.SPTierDTL[tier]
+			assert.NotNil(t, tierDTL)
+
 			// now we get the agentFi for each agent
 			afi, err := GetAgentFiFromAPI(tc.input, deploy.MainnetEventsURL)
 			if err != nil {
@@ -118,14 +147,15 @@ func TestFetchBaseFis(t *testing.T) {
 			)
 
 			assert.True(t, afi2.LiquidationValue().Cmp(afi.LiquidationValue()) == 0)
-			assert.True(t, afi2.MaxBorrowAndSeal(constants.MAX_BORROW_DTL).Cmp(afi.MaxBorrowAndSeal(constants.MAX_BORROW_DTL)) == 0)
-			assert.True(t, afi2.MaxBorrowAndWithdraw(constants.MAX_BORROW_DTL).Cmp(afi.MaxBorrowAndWithdraw(constants.MAX_BORROW_DTL)) == 0)
-			assert.True(t, afi2.BorrowLimit(constants.MAX_BORROW_DTL).Cmp(afi.BorrowLimit(constants.MAX_BORROW_DTL)) == 0)
-			assert.True(t, afi2.WithdrawLimit(constants.MAX_BORROW_DTL).Cmp(afi.WithdrawLimit(constants.MAX_BORROW_DTL)) == 0)
+			assert.True(t, afi2.MaxBorrowAndSeal(tierDTL).Cmp(afi.MaxBorrowAndSeal(tierDTL)) == 0)
+			assert.True(t, afi2.MaxBorrowAndWithdraw(tierDTL).Cmp(afi.MaxBorrowAndWithdraw(tierDTL)) == 0)
+			assert.True(t, afi2.BorrowLimit(tierDTL).Cmp(afi.BorrowLimit(tierDTL)) == 0)
+			assert.True(t, afi2.WithdrawLimit(tierDTL).Cmp(afi.WithdrawLimit(tierDTL)) == 0)
 
-			lv := afi.LiquidationValue()
-			maxBorrow := afi.MaxBorrowAndSeal(constants.MAX_BORROW_DTL)
-			maxWithdraw := afi.MaxBorrowAndWithdraw(constants.MAX_BORROW_DTL)
+			// test the max borrow and withdraw by simulating a borrow and withdraw
+			lv := afi2.LiquidationValue()
+			maxBorrow := afi2.MaxBorrowAndSeal(tierDTL)
+			maxWithdraw := afi2.MaxBorrowAndWithdraw(tierDTL)
 
 			if tc.expectPositiveLV {
 				assert.True(t, lv.Cmp(big.NewInt(0)) == 1)

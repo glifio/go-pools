@@ -33,6 +33,8 @@ type fevmQueries struct {
 	iFIL                     common.Address
 	glf                      common.Address
 	spPlus                   common.Address
+	lpPlus                   common.Address
+	rwtFuture                common.Address
 	infinityPool             common.Address
 	wFIL                     common.Address
 	tokenNFTWrapper          common.Address

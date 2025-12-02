@@ -88,6 +88,8 @@ type FEVMQueries interface {
 	WFIL() common.Address
 	GLF() common.Address
 	SPPlus() common.Address
+	LPPlus() common.Address
+	RWTFuture() common.Address
 	InfinityPool() common.Address
 
 	// token related addresses
@@ -103,6 +105,12 @@ type FEVMQueries interface {
 	SPPlusMintPrice(ctx context.Context, blockNumber *big.Int) (*big.Int, error)
 	SPPlusTierSwitchPenaltyInfo(ctx context.Context, blockNumber *big.Int) (penaltyWindow *big.Int, penaltyFee *big.Int, err error)
 	SPPlusAgentIdToTokenId(ctx context.Context, agentID *big.Int, blockNumber *big.Int) (*big.Int, error)
+	// LP Plus methods
+	LPPlusFutureValidityDuration(ctx context.Context, blockNumber *big.Int) (*big.Int, error)
+	LPPlusWindowId(ctx context.Context, blockNumber *big.Int) (*big.Int, error)
+	LPPlusWindowIdToStakingSnapshot(ctx context.Context, windowId *big.Int, blockNumber *big.Int) (abigen.StakingSnapshot, error)
+	LPPlusWindowIdToMerkleRoot(ctx context.Context, windowId *big.Int, blockNumber *big.Int) ([32]byte, error)
+	LPPlusTokenOfOwnerByIndex(ctx context.Context, owner common.Address, index *big.Int, blockNumber *big.Int) (*big.Int, error)
 }
 
 //go:generate mockery --name FEVMActions
@@ -173,6 +181,8 @@ type ProtocolMeta struct {
 	WFIL                     common.Address `json:"wfil"`
 	GLF                      common.Address `json:"glf"`
 	SPPlus                   common.Address `json:"spPlus"`
+	LPPlus                   common.Address `json:"lpPlus"`
+	RWTFuture                common.Address `json:"rwtFuture"`
 	InfinityPool             common.Address `json:"infinityPool"`
 	Governor                 common.Address `json:"governor"`
 	TokenNFTWrapper          common.Address `json:"tokenNFTWrapper"`
