@@ -253,3 +253,20 @@ func (q *fevmQueries) SPPlusAgentIdToTokenId(ctx context.Context, agentID *big.I
 
 	return tokenID, nil
 }
+
+func (q *fevmQueries) SPPlusFILVaultBalance(ctx context.Context, blockNumber *big.Int) (*big.Int, error) {
+	client, err := q.extern.ConnectEthClient()
+	if err != nil {
+		return nil, err
+	}
+	defer client.Close()
+
+	plus, err := abigen.NewSPPlusCaller(q.spPlus, client)
+	if err != nil {
+		return nil, err
+	}
+
+	opts := &bind.CallOpts{Context: ctx, BlockNumber: blockNumber}
+
+	return plus.TotalFilCashbackVaultBalance(opts)
+}
