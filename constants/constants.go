@@ -12,6 +12,8 @@ const LocalnetChainID = 31415926
 const AnvilChainID = 31337
 
 const SecondsInMinute = 60
+const MinutesInHour = 60
+const HoursInDay = 24
 const EpochsInMinute = SecondsInMinute / builtin.EpochDurationSeconds
 const EpochsInDay = builtin.EpochsInDay
 const EpochsInWeek = EpochsInDay * 7
@@ -88,3 +90,5 @@ var SPTierDTL = map[uint8]*big.Int{
 }
 
 var SP_PLUS_TIERS = uint8(4)
+
+var LP_PLUS_ISSUANCE_SECONDS = SecondsInMinute * MinutesInHour * HoursInDay * 14 // 14 days
