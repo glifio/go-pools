@@ -3,6 +3,7 @@ package sdk
 import (
 	"context"
 	"crypto/ecdsa"
+	"errors"
 	"math/big"
 
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
@@ -240,6 +241,27 @@ func (a *fevmActions) SPPlusWithdrawGlfVault(ctx context.Context, auth *bind.Tra
 	}
 
 	tx, err := plus.WithdrawGlfVault(auth, tokenID, amount, receiver)
+
+	return util.TxPostProcess(tx, err)
+}
+
+func (a *fevmActions) SPPlusSetBaseConversionRateFILtoGLF(ctx context.Context, auth *bind.TransactOpts, baseConversionRateFILtoGLF *big.Int) (*types.Transaction, error) {
+	if baseConversionRateFILtoGLF.Cmp(big.NewInt(0)) <= 0 {
+		return nil, errors.New("baseConversionRateFILtoGLF must be greater than 0")
+	}
+
+	client, err := a.extern.ConnectEthClient()
+	if err != nil {
+		return nil, err
+	}
+	defer client.Close()
+
+	plus, err := abigen.NewSPPlusTransactor(a.queries.SPPlus(), client)
+	if err != nil {
+		return nil, err
+	}
+
+	tx, err := plus.SetBaseConversionRateFILtoGLF(auth, baseConversionRateFILtoGLF)
 
 	return util.TxPostProcess(tx, err)
 }

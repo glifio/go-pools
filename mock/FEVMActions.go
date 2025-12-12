@@ -1821,6 +1821,66 @@ func (_c *FEVMActions_SPPlusMintAndActivate_Call) RunAndReturn(run func(context.
 	return _c
 }
 
+// SPPlusSetBaseConversionRateFILtoGLF provides a mock function with given fields: ctx, auth, baseConversionRateFILtoGLF
+func (_m *FEVMActions) SPPlusSetBaseConversionRateFILtoGLF(ctx context.Context, auth *bind.TransactOpts, baseConversionRateFILtoGLF *big.Int) (*types.Transaction, error) {
+	ret := _m.Called(ctx, auth, baseConversionRateFILtoGLF)
+
+	if len(ret) == 0 {
+		panic("no return value specified for SPPlusSetBaseConversionRateFILtoGLF")
+	}
+
+	var r0 *types.Transaction
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, *bind.TransactOpts, *big.Int) (*types.Transaction, error)); ok {
+		return rf(ctx, auth, baseConversionRateFILtoGLF)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, *bind.TransactOpts, *big.Int) *types.Transaction); ok {
+		r0 = rf(ctx, auth, baseConversionRateFILtoGLF)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*types.Transaction)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, *bind.TransactOpts, *big.Int) error); ok {
+		r1 = rf(ctx, auth, baseConversionRateFILtoGLF)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// FEVMActions_SPPlusSetBaseConversionRateFILtoGLF_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'SPPlusSetBaseConversionRateFILtoGLF'
+type FEVMActions_SPPlusSetBaseConversionRateFILtoGLF_Call struct {
+	*mock.Call
+}
+
+// SPPlusSetBaseConversionRateFILtoGLF is a helper method to define mock.On call
+//   - ctx context.Context
+//   - auth *bind.TransactOpts
+//   - baseConversionRateFILtoGLF *big.Int
+func (_e *FEVMActions_Expecter) SPPlusSetBaseConversionRateFILtoGLF(ctx interface{}, auth interface{}, baseConversionRateFILtoGLF interface{}) *FEVMActions_SPPlusSetBaseConversionRateFILtoGLF_Call {
+	return &FEVMActions_SPPlusSetBaseConversionRateFILtoGLF_Call{Call: _e.mock.On("SPPlusSetBaseConversionRateFILtoGLF", ctx, auth, baseConversionRateFILtoGLF)}
+}
+
+func (_c *FEVMActions_SPPlusSetBaseConversionRateFILtoGLF_Call) Run(run func(ctx context.Context, auth *bind.TransactOpts, baseConversionRateFILtoGLF *big.Int)) *FEVMActions_SPPlusSetBaseConversionRateFILtoGLF_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(*bind.TransactOpts), args[2].(*big.Int))
+	})
+	return _c
+}
+
+func (_c *FEVMActions_SPPlusSetBaseConversionRateFILtoGLF_Call) Return(_a0 *types.Transaction, _a1 error) *FEVMActions_SPPlusSetBaseConversionRateFILtoGLF_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *FEVMActions_SPPlusSetBaseConversionRateFILtoGLF_Call) RunAndReturn(run func(context.Context, *bind.TransactOpts, *big.Int) (*types.Transaction, error)) *FEVMActions_SPPlusSetBaseConversionRateFILtoGLF_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // SPPlusSetPersonalCashBackPercent provides a mock function with given fields: ctx, auth, tokenID, cashBackPercent
 func (_m *FEVMActions) SPPlusSetPersonalCashBackPercent(ctx context.Context, auth *bind.TransactOpts, tokenID *big.Int, cashBackPercent *big.Int) (*types.Transaction, error) {
 	ret := _m.Called(ctx, auth, tokenID, cashBackPercent)
