@@ -4,6 +4,7 @@ import (
 	"math/big"
 
 	"github.com/ethereum/go-ethereum/common"
+	"github.com/glifio/go-pools/constants"
 	"github.com/glifio/go-pools/types"
 )
 
@@ -102,3 +103,13 @@ var (
 	// no events will occur on these contracts before this epoch
 	ProtocolV2UpgradeEpoch = big.NewInt(0)
 )
+
+// GetLPPlusIssuanceSeconds returns the issuance window in seconds based on the given timestamp.
+// Returns LP_PLUS_ISSUANCE_SECONDS if timestamp is after LP_PLUS_MAINNET_WINDOW_START_TS,
+// otherwise returns LP_PLUS_ISSUANCE_SECONDS_PRE_LAUNCH.
+func GetLPPlusIssuanceSeconds(timestamp int) int {
+	if timestamp >= constants.LP_PLUS_MAINNET_WINDOW_START_TS {
+		return constants.LP_PLUS_ISSUANCE_SECONDS
+	}
+	return constants.LP_PLUS_ISSUANCE_SECONDS_PRE_LAUNCH
+}
