@@ -91,6 +91,6 @@ var SPTierDTL = map[uint8]*big.Int{
 
 var SP_PLUS_TIERS = uint8(4)
 
-var LP_PLUS_ISSUANCE_SECONDS = SecondsInMinute * MinutesInHour * HoursInDay * 14 // 14 days
-var LP_PLUS_ISSUANCE_SECONDS_PRE_LAUNCH = SecondsInMinute * MinutesInHour        // 1 hour
-var LP_PLUS_MAINNET_WINDOW_START_TS int = 1765900800                             // Tue Dec 16 2025 08:00:00 GMT-0800 (PST)
+var LP_PLUS_ISSUANCE_SECONDS = SecondsInMinute * MinutesInHour * HoursInDay * 7 // 7 days
+var LP_PLUS_ISSUANCE_SECONDS_PRE_LAUNCH = SecondsInMinute * MinutesInHour       // 1 hour
+var LP_PLUS_MAINNET_WINDOW_START_TS int = 1765900800                            // Tue Dec 16 2025 08:00:00 GMT-0800 (PST)
