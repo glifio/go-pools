@@ -2,6 +2,7 @@ package token
 
 import (
 	"encoding/hex"
+	"math/big"
 	"testing"
 
 	"github.com/ethereum/go-ethereum/common"
@@ -168,4 +169,166 @@ func TestGetProofForAddr(t *testing.T) {
 	valid, err := mt.Verify(proofBytes, leaf)
 	assert.NilError(t, err)
 	assert.Assert(t, valid)
+}
+
+func TestGetIdxForAddrWithAgent_DuplicateOwner(t *testing.T) {
+	mt := &MerkleTree{}
+	mt, err := mt.ReadFromJSON(false)
+	assert.NilError(t, err)
+
+	// Owner address that appears twice in the merkle tree
+	duplicateOwner := common.HexToAddress("0x3e39a95489a06aeb044c4438790f74cf27a8ca82")
+	agent139 := common.HexToAddress("0x207201C13A0640c99152f9aF05C16f95f27d659F")
+	agent149 := common.HexToAddress("0x992309c1116Bb9DFB52d6793Be258E3eA9F0D76a")
+
+	// Expected amounts from the merkle tree
+	expectedAmount139 := "5903426997075036796116"   // Agent 139's amount
+	expectedAmount149 := "487247735941371334694747" // Agent 149's amount
+
+	// Test with agent 139 context
+	idx139, err := mt.GetIdxForAddrWithAgent(duplicateOwner, &agent139)
+	assert.NilError(t, err)
+	assert.Assert(t, idx139 >= 0, "Index should be valid")
+
+	// Verify the index points to the correct amount for agent 139
+	entries := mt.Entries()
+	value139 := entries[idx139].Value[1].(*big.Int)
+	assert.Equal(t, value139.String(), expectedAmount139)
+
+	// Test with agent 149 context
+	idx149, err := mt.GetIdxForAddrWithAgent(duplicateOwner, &agent149)
+	assert.NilError(t, err)
+	assert.Assert(t, idx149 >= 0, "Index should be valid")
+
+	// Verify the index points to the correct amount for agent 149
+	value149 := entries[idx149].Value[1].(*big.Int)
+	assert.Equal(t, value149.String(), expectedAmount149)
+
+	// The indices should be different for the two agents
+	assert.Assert(t, idx139 != idx149, "Agent 139 and 149 should have different indices")
+
+	// Test without agent context - should get first match
+	idxNoAgent, err := mt.GetIdxForAddrWithAgent(duplicateOwner, nil)
+	assert.NilError(t, err)
+	assert.Assert(t, idxNoAgent >= 0, "Index should be valid")
+	// Should be one of the two indices
+	assert.Assert(t, idxNoAgent == idx139 || idxNoAgent == idx149)
+}
+
+func TestGetLeafValueForAddrWithAgent_DuplicateOwner(t *testing.T) {
+	mt := &MerkleTree{}
+	mt, err := mt.ReadFromJSON(false)
+	assert.NilError(t, err)
+
+	// Owner address that appears twice in the merkle tree
+	duplicateOwner := common.HexToAddress("0x3e39a95489a06aeb044c4438790f74cf27a8ca82")
+	agent139 := common.HexToAddress("0x207201C13A0640c99152f9aF05C16f95f27d659F")
+	agent149 := common.HexToAddress("0x992309c1116Bb9DFB52d6793Be258E3eA9F0D76a")
+
+	// Expected amounts from the merkle tree
+	expectedAmount139 := "5903426997075036796116"   // Agent 139's amount
+	expectedAmount149 := "487247735941371334694747" // Agent 149's amount
+
+	// Test with agent 139 context
+	value139, err := mt.GetLeafValueForAddrWithAgent(duplicateOwner, &agent139)
+	assert.NilError(t, err)
+	assert.Equal(t, value139.String(), expectedAmount139)
+
+	// Test with agent 149 context
+	value149, err := mt.GetLeafValueForAddrWithAgent(duplicateOwner, &agent149)
+	assert.NilError(t, err)
+	assert.Equal(t, value149.String(), expectedAmount149)
+
+	// Verify the amounts are different
+	assert.Assert(t, value139.Cmp(value149) != 0, "Agent 139 and 149 should have different amounts")
+}
+
+func TestGetLeafValueForAddrWithAgent_NonDuplicate(t *testing.T) {
+	mt := &MerkleTree{}
+	mt, err := mt.ReadFromJSON(false)
+	assert.NilError(t, err)
+
+	// Regular address (not a duplicate)
+	address := common.HexToAddress("0xA6f573F96A4B9037Ee9057B22678F9093aB2b2D8")
+
+	// Test with nil agent (should work normally)
+	valueNil, err := mt.GetLeafValueForAddrWithAgent(address, nil)
+	assert.NilError(t, err)
+	assert.Assert(t, valueNil != nil)
+
+	// Test with some agent context (should still return the same value since no duplicate)
+	someAgent := common.HexToAddress("0x0000000000000000000000000000000000000001")
+	valueWithAgent, err := mt.GetLeafValueForAddrWithAgent(address, &someAgent)
+	assert.NilError(t, err)
+	assert.Equal(t, valueNil.String(), valueWithAgent.String())
+}
+
+func TestGetProofForAddrWithAgent_DuplicateOwner(t *testing.T) {
+	mt := &MerkleTree{}
+	mt, err := mt.ReadFromJSON(false)
+	assert.NilError(t, err)
+
+	// Owner address that appears twice in the merkle tree
+	duplicateOwner := common.HexToAddress("0x3e39a95489a06aeb044c4438790f74cf27a8ca82")
+	agent139 := common.HexToAddress("0x207201C13A0640c99152f9aF05C16f95f27d659F")
+	agent149 := common.HexToAddress("0x992309c1116Bb9DFB52d6793Be258E3eA9F0D76a")
+
+	// Get proof and value for agent 139
+	proof139, err := mt.GetProofForAddrWithAgent(duplicateOwner, &agent139)
+	assert.NilError(t, err)
+	value139, err := mt.GetLeafValueForAddrWithAgent(duplicateOwner, &agent139)
+	assert.NilError(t, err)
+
+	// Verify proof for agent 139
+	proofBytes139 := make([][]byte, len(proof139))
+	for i, proofItem := range proof139 {
+		proofBytes139[i] = proofItem[:]
+	}
+	leaf139 := []interface{}{duplicateOwner, value139}
+	valid139, err := mt.Verify(proofBytes139, leaf139)
+	assert.NilError(t, err)
+	assert.Assert(t, valid139, "Proof for agent 139 should be valid")
+
+	// Get proof and value for agent 149
+	proof149, err := mt.GetProofForAddrWithAgent(duplicateOwner, &agent149)
+	assert.NilError(t, err)
+	value149, err := mt.GetLeafValueForAddrWithAgent(duplicateOwner, &agent149)
+	assert.NilError(t, err)
+
+	// Verify proof for agent 149
+	proofBytes149 := make([][]byte, len(proof149))
+	for i, proofItem := range proof149 {
+		proofBytes149[i] = proofItem[:]
+	}
+	leaf149 := []interface{}{duplicateOwner, value149}
+	valid149, err := mt.Verify(proofBytes149, leaf149)
+	assert.NilError(t, err)
+	assert.Assert(t, valid149, "Proof for agent 149 should be valid")
+
+	// The proofs should be different (different tree indices)
+	assert.Assert(t, len(proof139) > 0 && len(proof149) > 0)
+}
+
+func TestGetProofForAddrWithAgent_NonDuplicate(t *testing.T) {
+	mt := &MerkleTree{}
+	mt, err := mt.ReadFromJSON(false)
+	assert.NilError(t, err)
+
+	// Regular address (not a duplicate)
+	address := common.HexToAddress("0xA6f573F96A4B9037Ee9057B22678F9093aB2b2D8")
+
+	// Get proof with nil agent
+	proofNil, err := mt.GetProofForAddrWithAgent(address, nil)
+	assert.NilError(t, err)
+
+	// Get proof with some agent context
+	someAgent := common.HexToAddress("0x0000000000000000000000000000000000000001")
+	proofWithAgent, err := mt.GetProofForAddrWithAgent(address, &someAgent)
+	assert.NilError(t, err)
+
+	// Proofs should be identical for non-duplicate addresses
+	assert.Equal(t, len(proofNil), len(proofWithAgent))
+	for i := range proofNil {
+		assert.Equal(t, proofNil[i], proofWithAgent[i])
+	}
 }

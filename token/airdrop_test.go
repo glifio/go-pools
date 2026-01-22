@@ -63,3 +63,37 @@ func TestCheckAirdropEligibility_DuplicateOwner(t *testing.T) {
 		t.Error("Agent 139 and Agent 149 should have different amounts, but got the same")
 	}
 }
+
+func TestCheckAirdropEligibility_NonAgent(t *testing.T) {
+	// Test a regular owner address (not an agent)
+	// This address is directly in the merkle tree and not in the agent-to-owner map
+	ownerAddr := common.HexToAddress("0xF3a08711c96CBA1729B6262e51319456980A7BeA")
+	expectedAmount := new(big.Float).SetFloat64(83.000695569074012933)
+
+	amount, claimer, err := CheckAirdropEligibility(ownerAddr, false)
+	if err != nil {
+		t.Fatalf("Non-agent eligibility check failed: %v", err)
+	}
+
+	// Check amount is approximately 83.00 FIL (within 0.01 FIL tolerance)
+	diff := new(big.Float).Sub(amount, expectedAmount)
+	diff.Abs(diff)
+	tolerance := new(big.Float).SetFloat64(0.01)
+
+	if diff.Cmp(tolerance) > 0 {
+		t.Errorf("Non-agent amount incorrect: got %s FIL, want ~83.00 FIL", amount.Text('f', 2))
+	}
+
+	// Check claimer is the same as the input address (not an agent, so claims for themselves)
+	if claimer.Hex() != ownerAddr.Hex() {
+		t.Errorf("Non-agent claimer incorrect: got %s, want %s", claimer.Hex(), ownerAddr.Hex())
+	}
+
+	// Verify amount is greater than zero
+	zero := new(big.Float).SetFloat64(0)
+	if amount.Cmp(zero) <= 0 {
+		t.Error("Non-agent should have a positive airdrop amount")
+	}
+
+	t.Logf("✓ Non-agent owner: %s FIL -> claimer %s", amount.Text('f', 2), claimer.Hex())
+}
