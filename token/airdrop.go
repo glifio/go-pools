@@ -9,6 +9,13 @@ import (
 	"github.com/glifio/go-pools/util"
 )
 
+var (
+	// Duplicate owner case: one owner with two agents
+	duplicateOwner = common.HexToAddress("0x3e39a95489a06aeb044c4438790f74cf27a8ca82")
+	agent139       = common.HexToAddress("0x207201C13A0640c99152f9aF05C16f95f27d659F")
+	agent149       = common.HexToAddress("0x992309c1116Bb9DFB52d6793Be258E3eA9F0D76a")
+)
+
 func ReadAgentOwnerMap(testDrop bool) (map[common.Address]common.Address, error) {
 	network := "mainnet"
 	if testDrop {
@@ -48,6 +55,21 @@ func CheckAirdropEligibility(address common.Address, testDrop bool) (eligibleAmo
 	ownerAddress, exists := agentOwnerMap[address]
 	if exists {
 		claimer = ownerAddress
+
+		// Special case: handle duplicate owner with multiple agents
+		// Check if this agent is one of the known duplicates
+		// this is a hacky workaround to handle the single duplicate owner case, otherwise we could do it programmatically, but it's computationally heavy
+		if address.Hex() == agent139.Hex() && claimer.Hex() == duplicateOwner.Hex() {
+			// Agent 139 gets 5,903.43 FIL
+			amount := new(big.Int)
+			amount.SetString("5903426997075036796116", 10)
+			return util.ToFIL(amount), claimer, nil
+		} else if address.Hex() == agent149.Hex() && claimer.Hex() == duplicateOwner.Hex() {
+			// Agent 149 gets 487,247.74 FIL
+			amount := new(big.Int)
+			amount.SetString("487247735941371334694747", 10)
+			return util.ToFIL(amount), claimer, nil
+		}
 	}
 
 	entries := mt.Entries()
