@@ -31,7 +31,6 @@ func ReadAgentOwnerMap(testDrop bool) (map[common.Address]common.Address, error)
 }
 
 func CheckAirdropEligibility(address common.Address, testDrop bool) (eligibleAmount *big.Float, claimer common.Address, err error) {
-	// first we check if this address is in the merkle tree
 	mt := &MerkleTree{}
 	mt, err = mt.ReadFromJSON(testDrop)
 	if err != nil {
@@ -44,21 +43,24 @@ func CheckAirdropEligibility(address common.Address, testDrop bool) (eligibleAmo
 	}
 
 	claimer = address
-	// check to see if this is an agent address
+	var agentAddr *common.Address
+
+	// Check if this is an agent address
 	ownerAddress, exists := agentOwnerMap[address]
 	if exists {
 		claimer = ownerAddress
+		agentAddr = &address // Pass agent address for duplicate resolution
 	}
 
-	entries := mt.Entries()
-
-	for _, entry := range entries {
-		addr := entry.Value[0].(common.Address)
-		if addr.Hex() == claimer.Hex() {
-			amount := entry.Value[1].(*big.Int)
-			return util.ToFIL(amount), claimer, nil
-		}
+	// Use the improved merkle tree method that handles duplicates
+	amount, err := mt.GetLeafValueForAddrWithAgent(claimer, agentAddr)
+	if err != nil {
+		return nil, claimer, err
 	}
 
-	return big.NewFloat(0), claimer, nil
+	if amount == nil {
+		return big.NewFloat(0), claimer, nil
+	}
+
+	return util.ToFIL(amount), claimer, nil
 }
