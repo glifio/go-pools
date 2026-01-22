@@ -1452,6 +1452,66 @@ func (_c *FEVMActions_SPPlusActivate_Call) RunAndReturn(run func(context.Context
 	return _c
 }
 
+// SPPlusChangeOwnerForAgent provides a mock function with given fields: ctx, auth, agentAddr
+func (_m *FEVMActions) SPPlusChangeOwnerForAgent(ctx context.Context, auth *bind.TransactOpts, agentAddr common.Address) (*types.Transaction, error) {
+	ret := _m.Called(ctx, auth, agentAddr)
+
+	if len(ret) == 0 {
+		panic("no return value specified for SPPlusChangeOwnerForAgent")
+	}
+
+	var r0 *types.Transaction
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, *bind.TransactOpts, common.Address) (*types.Transaction, error)); ok {
+		return rf(ctx, auth, agentAddr)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, *bind.TransactOpts, common.Address) *types.Transaction); ok {
+		r0 = rf(ctx, auth, agentAddr)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*types.Transaction)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, *bind.TransactOpts, common.Address) error); ok {
+		r1 = rf(ctx, auth, agentAddr)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// FEVMActions_SPPlusChangeOwnerForAgent_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'SPPlusChangeOwnerForAgent'
+type FEVMActions_SPPlusChangeOwnerForAgent_Call struct {
+	*mock.Call
+}
+
+// SPPlusChangeOwnerForAgent is a helper method to define mock.On call
+//   - ctx context.Context
+//   - auth *bind.TransactOpts
+//   - agentAddr common.Address
+func (_e *FEVMActions_Expecter) SPPlusChangeOwnerForAgent(ctx interface{}, auth interface{}, agentAddr interface{}) *FEVMActions_SPPlusChangeOwnerForAgent_Call {
+	return &FEVMActions_SPPlusChangeOwnerForAgent_Call{Call: _e.mock.On("SPPlusChangeOwnerForAgent", ctx, auth, agentAddr)}
+}
+
+func (_c *FEVMActions_SPPlusChangeOwnerForAgent_Call) Run(run func(ctx context.Context, auth *bind.TransactOpts, agentAddr common.Address)) *FEVMActions_SPPlusChangeOwnerForAgent_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(*bind.TransactOpts), args[2].(common.Address))
+	})
+	return _c
+}
+
+func (_c *FEVMActions_SPPlusChangeOwnerForAgent_Call) Return(_a0 *types.Transaction, _a1 error) *FEVMActions_SPPlusChangeOwnerForAgent_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *FEVMActions_SPPlusChangeOwnerForAgent_Call) RunAndReturn(run func(context.Context, *bind.TransactOpts, common.Address) (*types.Transaction, error)) *FEVMActions_SPPlusChangeOwnerForAgent_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // SPPlusClaimCashBack provides a mock function with given fields: ctx, auth, tokenID, receiver
 func (_m *FEVMActions) SPPlusClaimCashBack(ctx context.Context, auth *bind.TransactOpts, tokenID *big.Int, receiver common.Address) (*types.Transaction, error) {
 	ret := _m.Called(ctx, auth, tokenID, receiver)

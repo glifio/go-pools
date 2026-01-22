@@ -157,6 +157,7 @@ type FEVMActions interface {
 	SPPlusWithdrawExtraLockedFunds(ctx context.Context, auth *bind.TransactOpts, tokenID *big.Int) (*types.Transaction, error)
 	SPPlusWithdrawGlfVault(ctx context.Context, auth *bind.TransactOpts, tokenID *big.Int, amount *big.Int, receiver common.Address) (*types.Transaction, error)
 	SPPlusSetBaseConversionRateFILtoGLF(ctx context.Context, auth *bind.TransactOpts, baseConversionRateFILtoGLF *big.Int) (*types.Transaction, error)
+	SPPlusChangeOwnerForAgent(ctx context.Context, auth *bind.TransactOpts, agentAddr common.Address) (*types.Transaction, error)
 }
 
 //go:generate mockery --name FEVMExtern

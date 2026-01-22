@@ -265,3 +265,20 @@ func (a *fevmActions) SPPlusSetBaseConversionRateFILtoGLF(ctx context.Context, a
 
 	return util.TxPostProcess(tx, err)
 }
+
+func (a *fevmActions) SPPlusChangeOwnerForAgent(ctx context.Context, auth *bind.TransactOpts, agentAddr common.Address) (*types.Transaction, error) {
+	client, err := a.extern.ConnectEthClient()
+	if err != nil {
+		return nil, err
+	}
+	defer client.Close()
+
+	plus, err := abigen.NewSPPlusTransactor(a.queries.SPPlus(), client)
+	if err != nil {
+		return nil, err
+	}
+
+	tx, err := plus.ChangeOwnerForAgent(auth, agentAddr)
+
+	return util.TxPostProcess(tx, err)
+}
