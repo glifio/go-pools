@@ -14,6 +14,21 @@ import (
 //go:embed data/*
 var files embed.FS
 
+var (
+	// Duplicate owner case: one owner with two agents
+	// Map agent addresses to their claim amounts for resolving duplicates
+	agentClaimAmounts = map[common.Address]*big.Int{
+		common.HexToAddress("0x207201C13A0640c99152f9aF05C16f95f27d659F"): mustParseBigInt("5903426997075036796116"),   // Agent 139
+		common.HexToAddress("0x992309c1116Bb9DFB52d6793Be258E3eA9F0D76a"): mustParseBigInt("487247735941371334694747"), // Agent 149
+	}
+)
+
+func mustParseBigInt(s string) *big.Int {
+	i := new(big.Int)
+	i.SetString(s, 10)
+	return i
+}
+
 type MerkleTree struct {
 	id [16]byte
 	smt.StandardTree
@@ -86,33 +101,84 @@ func (mt *MerkleTree) ReadFromJSON(testDrop bool) (*MerkleTree, error) {
 	return MerkleTreeFromJSON(merkleTree)
 }
 
-func (mt *MerkleTree) GetIdxForAddr(address common.Address) (int, error) {
-	// loop through the leafs and get the associated leaf of the address
+// getIdxAndValueForAddr finds the correct merkle tree entry for an address.
+// When there are duplicate owner addresses in the tree and agentAddr is provided,
+// it uses the agent address to determine which specific entry to return.
+// Returns (index, value, found) where index is -1 if not found.
+func (mt *MerkleTree) getIdxAndValueForAddr(ownerAddr common.Address, agentAddr *common.Address) (int, *big.Int, bool) {
 	entries := mt.Entries()
+
+	type match struct {
+		idx   int
+		value *big.Int
+	}
+	var matches []match
+
+	// Find all matching entries
 	for _, entry := range entries {
 		addr := entry.Value[0].(common.Address)
-		if addr.Hex() == address.Hex() {
-			return entry.ValueIndex, nil
+		if addr.Hex() == ownerAddr.Hex() {
+			matches = append(matches, match{
+				idx:   entry.ValueIndex,
+				value: entry.Value[1].(*big.Int),
+			})
 		}
 	}
 
-	return -1, nil
+	if len(matches) == 0 {
+		return -1, nil, false
+	}
+
+	if len(matches) == 1 {
+		return matches[0].idx, matches[0].value, true
+	}
+
+	// Multiple matches - use agent address to determine correct entry
+	if agentAddr != nil {
+		expectedAmount, exists := agentClaimAmounts[*agentAddr]
+		if exists {
+			for _, m := range matches {
+				if m.value.Cmp(expectedAmount) == 0 {
+					return m.idx, m.value, true
+				}
+			}
+		}
+	}
+
+	// Fallback: return first match (maintains backward compatibility)
+	return matches[0].idx, matches[0].value, true
+}
+
+func (mt *MerkleTree) GetIdxForAddr(address common.Address) (int, error) {
+	return mt.GetIdxForAddrWithAgent(address, nil)
+}
+
+func (mt *MerkleTree) GetIdxForAddrWithAgent(ownerAddr common.Address, agentAddr *common.Address) (int, error) {
+	idx, _, found := mt.getIdxAndValueForAddr(ownerAddr, agentAddr)
+	if !found {
+		return -1, nil
+	}
+	return idx, nil
 }
 
 func (mt *MerkleTree) GetLeafValueForAddr(address common.Address) (*big.Int, error) {
-	entries := mt.Entries()
-	for _, entry := range entries {
-		addr := entry.Value[0].(common.Address)
-		if addr.Hex() == address.Hex() {
-			return entry.Value[1].(*big.Int), nil
-		}
-	}
+	return mt.GetLeafValueForAddrWithAgent(address, nil)
+}
 
-	return nil, nil
+func (mt *MerkleTree) GetLeafValueForAddrWithAgent(ownerAddr common.Address, agentAddr *common.Address) (*big.Int, error) {
+	_, value, found := mt.getIdxAndValueForAddr(ownerAddr, agentAddr)
+	if !found {
+		return nil, nil
+	}
+	return value, nil
 }
 
 func (mt *MerkleTree) GetProofForAddr(address common.Address) ([][32]byte, error) {
-	idx, err := mt.GetIdxForAddr(address)
+	return mt.GetProofForAddrWithAgent(address, nil)
+}
+
+func (mt *MerkleTree) GetProofForAddrWithAgent(ownerAddr common.Address, agentAddr *common.Address) ([][32]byte, error) {
+	idx, err := mt.GetIdxForAddrWithAgent(ownerAddr, agentAddr)
 	if err != nil {
 		return nil, err
 	}
